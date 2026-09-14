@@ -1,0 +1,113 @@
+{
+  "lessons": [
+    {
+      "id": "fractions-basics",
+      "title": "Introduzione alle frazioni",
+      "subtitle": "Confrontare e sommare frazioni",
+      "icon": "pie_chart",
+      "level": "middle-school",
+      "animation": "pie",
+      "introduction": "Le frazioni rappresentano parti di un intero. Tocca la torta qui sotto per giocare con la parte colorata, poi rispondi alle domande per procedere.",
+      "completionMessage": "Ottimo! Ora sai confrontare e sommare le frazioni.",
+      "steps": [
+        {
+          "type": "multiple_choice",
+          "prompt": "Quale frazione è maggiore?",
+          "options": [
+            "$$\\frac{3}{4}$$",
+            "$$\\frac{2}{3}$$",
+            "$$\\frac{1}{2}$$",
+            "$$\\frac{5}{8}$$"
+          ],
+          "correctIndex": 0,
+          "explanation": "Portando a denominatore comune 24: 18, 16, 12, 15. La maggiore è 18/24 = 3/4."
+        },
+        {
+          "type": "numeric",
+          "prompt": "Calcola la somma: $$\\frac{1}{2} + \\frac{1}{3}$$",
+          "answers": ["5/6", "0.8333333333"],
+          "explanation": "Denominatore comune 6: 3/6 + 2/6 = 5/6."
+        },
+        {
+          "type": "text",
+          "prompt": "Qual è il reciproco di $$\\frac{3}{4}$$?",
+          "answers": ["4/3"],
+          "explanation": "Il reciproco si ottiene invertendo numeratore e denominatore."
+        }
+      ]
+    },
+    {
+      "id": "linear-equations",
+      "title": "Equazioni di primo grado",
+      "subtitle": "Isolare la variabile",
+      "icon": "functions",
+      "level": "high-school",
+      "animation": "number_line",
+      "introduction": "Risolvere un'equazione significa trovare il valore dell'incognita. Muovi il punto sulla retta per esplorare i valori di x, poi rispondi.",
+      "completionMessage": "Grande! Hai risolto la tua prima equazione passo-passo.",
+      "steps": [
+        {
+          "type": "multiple_choice",
+          "prompt": "Per risolvere $$2x + 5 = 13$$, qual è il primo passaggio corretto?",
+          "options": [
+            "Sommare 5 a entrambi i membri",
+            "Sottrarre 5 a entrambi i membri",
+            "Dividere subito per 2",
+            "Moltiplicare per 2"
+          ],
+          "correctIndex": 1,
+          "explanation": "Per isolare il termine con x, elimina il +5 sottraendo 5 da entrambi i membri."
+        },
+        {
+          "type": "numeric",
+          "prompt": "Continuando: $$2x = 8$$. Quanto vale x?",
+          "answers": ["4"],
+          "explanation": "Dividi entrambi i membri per 2: x = 4."
+        },
+        {
+          "type": "multiple_choice",
+          "prompt": "Verifica sostituendo x = 4 in $$2x + 5$$: quanto ottieni?",
+          "options": ["13", "14", "9", "12"],
+          "correctIndex": 0,
+          "explanation": "2 · 4 + 5 = 8 + 5 = 13: la soluzione è verificata."
+        }
+      ]
+    },
+    {
+      "id": "pythagoras",
+      "title": "Teorema di Pitagora",
+      "subtitle": "Triangoli rettangoli",
+      "icon": "triangle",
+      "level": "middle-school",
+      "animation": "none",
+      "introduction": "In un triangolo rettangolo, il quadrato dell'ipotenusa è uguale alla somma dei quadrati dei cateti.",
+      "completionMessage": "Perfetto! Sai applicare il teorema di Pitagora.",
+      "steps": [
+        {
+          "type": "multiple_choice",
+          "prompt": "Quale formula esprime il teorema di Pitagora?",
+          "options": [
+            "$$c^2 = a^2 - b^2$$",
+            "$$c^2 = a^2 + b^2$$",
+            "$$c = a + b$$",
+            "$$c^2 = a \\cdot b$$"
+          ],
+          "correctIndex": 1,
+          "explanation": "L'ipotenusa c è legata ai cateti da c² = a² + b²."
+        },
+        {
+          "type": "numeric",
+          "prompt": "I cateti misurano 3 e 4. Quanto vale l'ipotenusa?",
+          "answers": ["5"],
+          "explanation": "c = √(9 + 16) = √25 = 5."
+        },
+        {
+          "type": "numeric",
+          "prompt": "Un cateto misura 6 e l'ipotenusa 10. Quanto misura l'altro cateto?",
+          "answers": ["8"],
+          "explanation": "b = √(100 − 36) = √64 = 8."
+        }
+      ]
+    }
+  ]
+}

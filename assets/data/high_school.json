@@ -1,0 +1,318 @@
+{
+  "levelId": "high-school",
+  "courses": [
+    {
+      "id": "year1",
+      "title": "Anno 1",
+      "subtitle": "Fondamenti",
+      "topics": [
+        {
+          "id": "year1-fractions",
+          "title": "Frazioni",
+          "subtitle": "Operazioni e confronti",
+          "icon": "pie_chart",
+          "exercises": [
+            {
+              "id": "frac-easy-1",
+              "title": "Somma di frazioni",
+              "difficulty": "easy",
+              "tags": ["frazioni", "somma"],
+              "problem": "Calcola la seguente somma di frazioni:\n\n$$\\frac{2}{3} + \\frac{1}{6}$$",
+              "formulas": [
+                "$$\\frac{a}{b} + \\frac{c}{d} = \\frac{a \\cdot d + c \\cdot b}{b \\cdot d}$$"
+              ],
+              "hints": [
+                "Come prima cosa porta le frazioni allo stesso denominatore (m.c.m.).",
+                "Il m.c.m. tra 3 e 6 è 6."
+              ],
+              "steps": [
+                "Il denominatore comune tra 3 e 6 è 6.",
+                "Trasforma la prima frazione: $$\\frac{2}{3} = \\frac{2 \\cdot 2}{3 \\cdot 2} = \\frac{4}{6}$$",
+                "Somma i numeratori: $$\\frac{4}{6} + \\frac{1}{6} = \\frac{4 + 1}{6} = \\frac{5}{6}$$",
+                "La frazione $$\\frac{5}{6}$$ è già ridotta ai minimi termini perché 5 e 6 non hanno divisori comuni."
+              ]
+            },
+            {
+              "id": "frac-hard-1",
+              "title": "Espressione con frazioni",
+              "difficulty": "hard",
+              "tags": ["frazioni", "espressioni"],
+              "problem": "Risolvi la seguente espressione:\n\n$$\\left(\\frac{3}{4} + \\frac{1}{2}\\right) \\cdot \\frac{2}{5} - \\frac{1}{10}$$",
+              "formulas": [
+                "$$\\frac{a}{b} \\cdot \\frac{c}{d} = \\frac{a \\cdot c}{b \\cdot d}$$"
+              ],
+              "hints": [
+                "Risolvi prima la parentesi: porta a denominatore comune 3/4 e 1/2.",
+                "Ricorda che la moltiplicazione ha priorità sulla sottrazione."
+              ],
+              "steps": [
+                "Dentro la parentesi: $$\\frac{3}{4} + \\frac{1}{2} = \\frac{3}{4} + \\frac{2}{4} = \\frac{5}{4}$$",
+                "Moltiplica: $$\\frac{5}{4} \\cdot \\frac{2}{5} = \\frac{5 \\cdot 2}{4 \\cdot 5} = \\frac{10}{20} = \\frac{1}{2}$$",
+                "Sottrai: $$\\frac{1}{2} - \\frac{1}{10} = \\frac{5}{10} - \\frac{1}{10} = \\frac{4}{10} = \\frac{2}{5}$$",
+                "Il risultato è $$\\frac{2}{5}$$."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "year1-equations",
+          "title": "Equazioni di primo grado",
+          "subtitle": "Risoluzione e verifica",
+          "icon": "functions",
+          "exercises": [
+            {
+              "id": "eq-medium-1",
+              "title": "Equazione lineare semplice",
+              "difficulty": "medium",
+              "tags": ["equazioni", "primo grado"],
+              "problem": "Risolvi l'equazione:\n\n$$2x + 5 = 13$$",
+              "formulas": [],
+              "hints": [
+                "Isola la variabile x portando i termini noti a destra."
+              ],
+              "steps": [
+                "Porta il termine noto a destra cambiando segno: $$2x = 13 - 5$$",
+                "Calcola: $$2x = 8$$",
+                "Dividi per il coefficiente: $$x = \\frac{8}{2} = 4$$",
+                "Verifica: $$2 \\cdot 4 + 5 = 8 + 5 = 13$$. Corretta."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "year2",
+      "title": "Anno 2",
+      "subtitle": "Algebra e geometria",
+      "topics": [
+        {
+          "id": "year2-quadratic",
+          "title": "Equazioni di secondo grado",
+          "subtitle": "Formula risolutiva",
+          "icon": "tag",
+          "exercises": [
+            {
+              "id": "quad-easy-1",
+              "title": "Equazione quadratica con formula risolutiva",
+              "difficulty": "easy",
+              "tags": ["equazioni", "secondo grado", "quadratiche"],
+              "problem": "Risolvi l'equazione:\n\n$$x^2 - 5x + 6 = 0$$",
+              "formulas": [
+                "$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$",
+                "$$\\Delta = b^2 - 4ac$$"
+              ],
+              "hints": [
+                "Identifica i coefficienti a, b, c: a=1, b=-5, c=6.",
+                "Calcola il discriminante Δ prima di applicare la formula."
+              ],
+              "steps": [
+                "Coefficienti: a=1, b=-5, c=6.",
+                "Discriminante: $$\\Delta = (-5)^2 - 4 \\cdot 1 \\cdot 6 = 25 - 24 = 1$$",
+                "Poiché Δ > 0, l'equazione ha due soluzioni reali distinte.",
+                "Applica la formula: $$x = \\frac{5 \\pm \\sqrt{1}}{2} = \\frac{5 \\pm 1}{2}$$",
+                "Soluzioni: $$x_1 = \\frac{5 + 1}{2} = 3$$, $$x_2 = \\frac{5 - 1}{2} = 2$$"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "year3",
+      "title": "Anno 3",
+      "subtitle": "Analisi del piano",
+      "topics": []
+    },
+    {
+      "id": "year4",
+      "title": "Anno 4",
+      "subtitle": "Esponenziali e logaritmi",
+      "topics": [
+        {
+          "id": "year4-exponential",
+          "title": "Equazioni esponenziali",
+          "subtitle": "Uguaglianza di esponenziali",
+          "icon": "trending_up",
+          "exercises": [
+            {
+              "id": "exp-easy-1",
+              "title": "Equazione esponenziale semplice",
+              "difficulty": "easy",
+              "tags": ["esponenziali", "equazioni"],
+              "problem": "Risolvi l'equazione:\n\n$$2^x = 32$$",
+              "formulas": [
+                "$$a^m = a^n \\iff m = n$$ (con a > 0, a ≠ 1)"
+              ],
+              "hints": [
+                "Riscrivi 32 come potenza di 2.",
+                "Quando le basi sono uguali, uguaglia gli esponenti."
+              ],
+              "steps": [
+                "Riscrivi 32 come potenza di 2: $$32 = 2^5$$",
+                "L'equazione diventa: $$2^x = 2^5$$",
+                "Le basi sono uguali, quindi uguaglia gli esponenti: x = 5."
+              ]
+            },
+            {
+              "id": "exp-medium-1",
+              "title": "Equazione con termine esponente composto",
+              "difficulty": "medium",
+              "tags": ["esponenziali", "equazioni"],
+              "problem": "Risolvi l'equazione:\n\n$$3^{x+1} = 27$$",
+              "formulas": [
+                "$$a^m = a^n \\iff m = n$$ (con a > 0, a ≠ 1)"
+              ],
+              "hints": [
+                "Riscrivi 27 come potenza di 3.",
+                "Uguaglia gli esponenti e risolvi l'equazione di primo grado."
+              ],
+              "steps": [
+                "Riscrivi 27 come potenza di 3: $$27 = 3^3$$",
+                "L'equazione diventa: $$3^{x+1} = 3^3$$",
+                "Uguaglia gli esponenti: x + 1 = 3",
+                "Risolvi: x = 2."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "year4-log",
+          "title": "Logaritmi",
+          "subtitle": "Definizione e proprietà",
+          "icon": "show_chart",
+          "exercises": [
+            {
+              "id": "log-easy-1",
+              "title": "Calcolo di un logaritmo",
+              "difficulty": "easy",
+              "tags": ["logaritmi"],
+              "problem": "Calcola:\n\n$$\\log_2 8$$",
+              "formulas": [
+                "$$\\log_a b = c \\iff a^c = b$$ (con a > 0, a ≠ 1, b > 0)"
+              ],
+              "hints": [
+                "Chiediti a quale esponente elevare 2 per ottenere 8."
+              ],
+              "steps": [
+                "Devi trovare c tale che $$2^c = 8$$.",
+                "Si ha $$8 = 2^3$$.",
+                "Quindi $$\\log_2 8 = 3$$."
+              ]
+            },
+            {
+              "id": "log-medium-1",
+              "title": "Equazione logaritmica",
+              "difficulty": "medium",
+              "tags": ["logaritmi", "equazioni"],
+              "problem": "Risolvi l'equazione:\n\n$$\\log_3 (x+1) = 2$$",
+              "formulas": [
+                "$$\\log_a b = c \\iff a^c = b$$"
+              ],
+              "hints": [
+                "Applica la definizione di logaritmo passando alla forma esponenziale.",
+                "Verifica che il risultato rispetti la condizione di esistenza x + 1 > 0."
+              ],
+              "steps": [
+                "Per definizione di logaritmo: $$x + 1 = 3^2$$",
+                "Calcola: x + 1 = 9",
+                "Risolvi: x = 8.",
+                "Condizione di esistenza: x + 1 = 9 > 0, quindi accettabile."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "year5",
+      "title": "Anno 5",
+      "subtitle": "Limiti, derivate e integrali",
+      "topics": [
+        {
+          "id": "year5-limits",
+          "title": "Limiti",
+          "subtitle": "Forme indeterminate",
+          "icon": "functions",
+          "exercises": [
+            {
+              "id": "lim-medium-1",
+              "title": "Limite con forma indeterminata",
+              "difficulty": "medium",
+              "tags": ["limiti"],
+              "problem": "Calcola il limite:\n\n$$\\lim_{x \\to 1} \\frac{x^2 - 1}{x - 1}$$",
+              "formulas": [
+                "$$a^2 - b^2 = (a - b)(a + b)$$"
+              ],
+              "hints": [
+                "La sostituzione diretta dà la forma indeterminata 0/0.",
+                "Scomponi il numeratore come differenza di quadrati e semplifica."
+              ],
+              "steps": [
+                "Sostituendo x = 1 ottieni la forma indeterminata $$\\frac{0}{0}$$.",
+                "Scomponi il numeratore: $$x^2 - 1 = (x - 1)(x + 1)$$",
+                "Semplifica la frazione (per x ≠ 1): $$\\frac{(x - 1)(x + 1)}{x - 1} = x + 1$$",
+                "Calcola il limite: $$\\lim_{x \\to 1} (x+1) = 2$$"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "year5-derivatives",
+          "title": "Derivate",
+          "subtitle": "Regole di derivazione",
+          "icon": "calculate",
+          "exercises": [
+            {
+              "id": "der-easy-1",
+              "title": "Derivata di un polinomio",
+              "difficulty": "easy",
+              "tags": ["derivate"],
+              "problem": "Calcola la derivata della funzione:\n\n$$f(x) = 3x^2 + 2x$$",
+              "formulas": [
+                "$$\\frac{d}{dx} x^n = n \\cdot x^{n-1}$$",
+                "$$\\frac{d}{dx} [f(x) + g(x)] = f'(x) + g'(x)$$"
+              ],
+              "hints": [
+                "Deriva ogni termine della somma separatamente.",
+                "Abbassa l'esponente come coefficiente e diminuiscilo di 1."
+              ],
+              "steps": [
+                "Derivata di $$3x^2$$: $$3 \\cdot 2x^{2-1} = 6x$$",
+                "Derivata di $$2x$$: $$2$$",
+                "Somma le derivate: $$f'(x) = 6x + 2$$"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "year5-integrals",
+          "title": "Integrali",
+          "subtitle": "Primitive immediate",
+          "icon": "grid_on",
+          "exercises": [
+            {
+              "id": "int-medium-1",
+              "title": "Integrale di un polinomio",
+              "difficulty": "medium",
+              "tags": ["integrali"],
+              "problem": "Calcola l'integrale indefinito:\n\n$$\\int (2x + 3)\\,dx$$",
+              "formulas": [
+                "$$\\int x^n \\,dx = \\frac{x^{n+1}}{n+1} + c$$ (per n ≠ −1)"
+              ],
+              "hints": [
+                "Integra ogni termine separatamente.",
+                "Ricorda di aggiungere la costante di integrazione c."
+              ],
+              "steps": [
+                "Integra $$2x$$: $$\\int 2x \\,dx = \\frac{2x^2}{2} = x^2$$",
+                "Integra $$3$$: $$\\int 3 \\,dx = 3x$$",
+                "Risultato: $$\\int (2x + 3)\\,dx = x^2 + 3x + c$$"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

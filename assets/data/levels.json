@@ -1,0 +1,25 @@
+{
+  "levels": [
+    {
+      "id": "middle-school",
+      "title": "Scuola Media",
+      "subtitle": "Anni 1–3",
+      "icon": "menu_book",
+      "dataFile": "middle_school.json"
+    },
+    {
+      "id": "high-school",
+      "title": "Scuola Superiore",
+      "subtitle": "Anni 1–5",
+      "icon": "school",
+      "dataFile": "high_school.json"
+    },
+    {
+      "id": "university",
+      "title": "Università",
+      "subtitle": "Corsi di base",
+      "icon": "account_balance",
+      "dataFile": "university.json"
+    }
+  ]
+}

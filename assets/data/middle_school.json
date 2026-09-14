@@ -1,0 +1,196 @@
+{
+  "levelId": "middle-school",
+  "courses": [
+    {
+      "id": "ms-year1",
+      "title": "Anno 1",
+      "subtitle": "Fondamenti",
+      "topics": [
+        {
+          "id": "ms1-fractions",
+          "title": "Frazioni",
+          "subtitle": "Confronto e operazioni",
+          "icon": "pie_chart",
+          "exercises": [
+            {
+              "id": "ms-frac-compare-1",
+              "title": "Confronto di frazioni",
+              "difficulty": "easy",
+              "tags": ["frazioni", "confronto"],
+              "problem": "Quale frazione è maggiore: $$\\frac{3}{4}$$ o $$\\frac{2}{3}$$?",
+              "formulas": [
+                "$$\\frac{a}{b} > \\frac{c}{d} \\iff a \\cdot d > c \\cdot b$$"
+              ],
+              "hints": [
+                "Porta le due frazioni allo stesso denominatore, ad esempio 12."
+              ],
+              "steps": [
+                "Denominatore comune: 12 (m.c.m. tra 4 e 3).",
+                "Trasforma: $$\\frac{3}{4} = \\frac{9}{12}$$ e $$\\frac{2}{3} = \\frac{8}{12}$$",
+                "Poiché 9 > 8, si ha $$\\frac{3}{4} > \\frac{2}{3}$$."
+              ]
+            },
+            {
+              "id": "ms-frac-sum-1",
+              "title": "Somma di frazioni diverse",
+              "difficulty": "medium",
+              "tags": ["frazioni", "somma"],
+              "problem": "Calcola la somma:\n\n$$\\frac{1}{2} + \\frac{1}{3}$$",
+              "formulas": [
+                "$$\\frac{a}{b} + \\frac{c}{d} = \\frac{a \\cdot d + c \\cdot b}{b \\cdot d}$$"
+              ],
+              "hints": [
+                "Trova un denominatore comune tra 2 e 3."
+              ],
+              "steps": [
+                "Il denominatore comune è 6.",
+                "Trasforma: $$\\frac{1}{2} = \\frac{3}{6}$$ e $$\\frac{1}{3} = \\frac{2}{6}$$",
+                "Somma: $$\\frac{3}{6} + \\frac{2}{6} = \\frac{5}{6}$$"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ms1-percentage",
+          "title": "Percentuali",
+          "subtitle": "Calcolo di percentuali",
+          "icon": "percent",
+          "exercises": [
+            {
+              "id": "ms-perc-1",
+              "title": "Sconto percentuale",
+              "difficulty": "medium",
+              "tags": ["percentuali", "sconto"],
+              "problem": "Un paio di scarpe costa 80€. Durante i saldi lo sconto è del 25%. Qual è il prezzo scontato?",
+              "formulas": [
+                "$$\\text{sconto} = \\frac{p}{100} \\cdot \\text{prezzo}$$"
+              ],
+              "hints": [
+                "Calcola prima l'importo dello sconto, poi sottrailo dal prezzo originale."
+              ],
+              "steps": [
+                "Sconto: $$\\frac{25}{100} \\cdot 80 = 20$$€",
+                "Prezzo scontato: 80 − 20 = 60€."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ms-year2",
+      "title": "Anno 2",
+      "subtitle": "Proporzioni ed equazioni",
+      "topics": [
+        {
+          "id": "ms2-proportions",
+          "title": "Proporzioni",
+          "subtitle": "Proprietà e applicazioni",
+          "icon": "timeline",
+          "exercises": [
+            {
+              "id": "ms-prop-1",
+              "title": "Termine incognito in una proporzione",
+              "difficulty": "medium",
+              "tags": ["proporzioni"],
+              "problem": "Risolvi la proporzione:\n\n$$6 : 9 = x : 12$$",
+              "formulas": [
+                "$$\\frac{a}{b} = \\frac{c}{d} \\implies a \\cdot d = b \\cdot c$$"
+              ],
+              "hints": [
+                "Applica la proprietà fondamentale: prodotto dei medi = prodotto degli estremi."
+              ],
+              "steps": [
+                "Proprietà fondamentale: $$6 \\cdot 12 = 9 \\cdot x$$",
+                "Calcola: 72 = 9x.",
+                "Dividi per 9: $$x = \\frac{72}{9} = 8$$"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ms2-equations",
+          "title": "Equazioni di primo grado",
+          "subtitle": "Risoluzione semplice",
+          "icon": "functions",
+          "exercises": [
+            {
+              "id": "ms-eq-1",
+              "title": "Equazione lineare semplice",
+              "difficulty": "easy",
+              "tags": ["equazioni", "primo grado"],
+              "problem": "Risolvi l'equazione:\n\n$$3x + 4 = 13$$",
+              "formulas": [],
+              "hints": [
+                "Porta il termine noto a destra cambiando segno."
+              ],
+              "steps": [
+                "Sottrai 4 da entrambi i membri: $$3x = 13 - 4$$",
+                "Calcola: $$3x = 9$$",
+                "Dividi per 3: $$x = 3$$"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ms-year3",
+      "title": "Anno 3",
+      "subtitle": "Geometria e statistica",
+      "topics": [
+        {
+          "id": "ms3-pythagoras",
+          "title": "Teorema di Pitagora",
+          "subtitle": "Triangoli rettangoli",
+          "icon": "triangle",
+          "exercises": [
+            {
+              "id": "ms-pit-1",
+              "title": "Ipotenusa di un triangolo rettangolo",
+              "difficulty": "medium",
+              "tags": ["pitagora", "geometria"],
+              "problem": "In un triangolo rettangolo i cateti misurano 3 e 4. Calcola l'ipotenusa.",
+              "formulas": [
+                "$$c = \\sqrt{a^2 + b^2}$$"
+              ],
+              "hints": [
+                "Applica il teorema di Pitagora: quadrati dei cateti, somma, radice."
+              ],
+              "steps": [
+                "Quadrato dei cateti: $$3^2 = 9$$ e $$4^2 = 16$$",
+                "Somma: 9 + 16 = 25.",
+                "Ipotenusa: $$\\sqrt{25} = 5$$"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ms3-statistics",
+          "title": "Statistica",
+          "subtitle": "Media, mediana e moda",
+          "icon": "bar_chart",
+          "exercises": [
+            {
+              "id": "ms-stats-1",
+              "title": "Media aritmetica",
+              "difficulty": "easy",
+              "tags": ["statistica", "media"],
+              "problem": "Calcola la media aritmetica dei seguenti voti: 6, 7, 8, 5, 9.",
+              "formulas": [
+                "$$\\bar{x} = \\frac{x_1 + x_2 + \\cdots + x_n}{n}$$"
+              ],
+              "hints": [
+                "Somma tutti i valori e dividi per il loro numero (5)."
+              ],
+              "steps": [
+                "Somma: 6 + 7 + 8 + 5 + 9 = 35.",
+                "Dividi per il numero di valori: $$\\frac{35}{5} = 7$$"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
