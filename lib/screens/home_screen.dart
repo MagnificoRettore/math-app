@@ -6,18 +6,14 @@ import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/progress_store.dart';
 import '../data/search_index.dart';
-import '../models/level.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
-import '../widgets/level_card.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/recommended_section.dart';
-import '../widgets/section_header.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
 import 'bookmarks_screen.dart';
-import 'course_screen.dart';
 import 'mission_screen.dart';
 import 'search_results_screen.dart';
 import 'welcome_screen.dart';
@@ -95,16 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
                 const SizedBox(height: 8),
                 const WeakTopicsSection(),
-                const SectionHeader('Livelli'),
-                for (final level in levels)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: LevelCard(
-                      level: level,
-                      onTap: () => _openLevel(level),
-                      progress: _levelProgress(level),
-                    ),
-                  ),
               ],
             );
           },
@@ -194,18 +180,5 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     _searchController.clear();
-  }
-
-  void _openLevel(Level level) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => CourseScreen(level: level)));
-  }
-
-  double _levelProgress(Level level) {
-    final ids = level.courses
-        .expand((c) => c.topics)
-        .expand((t) => t.exercises)
-        .map((e) => e.id);
-    return ProgressStore.instance.completionFor(ids);
   }
 }

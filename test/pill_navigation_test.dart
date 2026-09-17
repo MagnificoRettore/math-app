@@ -9,6 +9,7 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/lesson_card.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
@@ -28,6 +29,11 @@ Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
   await tester.pumpAndSettle();
 }
+
+Finder _pillIcon(IconData icon) => find.descendant(
+  of: find.byType(PillNavBar),
+  matching: find.byIcon(icon),
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -150,20 +156,18 @@ void main() {
     expect(find.text('ESERCIZI'), findsOneWidget);
     expect(find.text('PROFILO'), findsOneWidget);
 
-    await tester.dragUntilVisible(
-      find.text('Scuola Superiore'),
-      find.byType(ListView),
-      const Offset(0, -80),
-    );
-    await tester.drag(
-      find.byType(ListView),
-      const Offset(0, -160),
-    );
+    await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Scuola Superiore').last);
+    await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
 
-    expect(find.byType(CourseScreen), findsOneWidget);
+    expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+    expect(find.text('HOME'), findsOneWidget);
+
+    await tester.tap(find.text('Introduzione alle frazioni'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LessonScreen), findsOneWidget);
     expect(find.text('HOME'), findsNothing);
   });
 
@@ -245,6 +249,92 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Lezioni per scuola'), findsOneWidget);
+    },
+  );
+
+  testWidgets('dopo il back dalle lezioni la pillola torna su HOME', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.text('LEZIONI'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Matematica'), findsOneWidget);
+    expect(_pillIcon(Icons.home), findsOneWidget);
+    expect(_pillIcon(Icons.home_outlined), findsNothing);
+  });
+
+  testWidgets('dopo il back dal profilo la pillola torna su HOME', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.text('PROFILO'));
+    await tester.pumpAndSettle();
+    expect(find.text('Profilo'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Matematica'), findsOneWidget);
+    expect(_pillIcon(Icons.home), findsOneWidget);
+    expect(_pillIcon(Icons.home_outlined), findsNothing);
+  });
+
+  testWidgets('dopo il back la pillola di Home resta navigabile', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.text('LEZIONI'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ESERCIZI'));
+    await tester.pumpAndSettle();
+    expect(find.text('Esercizi per scuola'), findsOneWidget);
+  });
+
+  testWidgets(
+    'dopo un drag verso le lezioni e il back la pillola non resta evidenziata',
+    (tester) async {
+      await _pumpHome(tester);
+
+      final bar = find.byType(PillNavBar);
+      final barSize = tester.getSize(bar);
+      final center = tester.getCenter(bar);
+
+      final gesture = await tester.startGesture(
+        Offset(center.dx - barSize.width * 3 / 8, center.dy),
+      );
+      await tester.pump();
+      await gesture.moveBy(Offset(barSize.width / 4, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lezioni per scuola'), findsOneWidget);
+      await tester.tap(find.text('Scuola Media').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Matematica'), findsOneWidget);
+      expect(_pillIcon(Icons.home), findsOneWidget);
+      expect(_pillIcon(Icons.menu_book_outlined), findsOneWidget);
+      expect(_pillIcon(Icons.menu_book), findsNothing);
     },
   );
 

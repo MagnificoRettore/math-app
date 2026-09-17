@@ -43,7 +43,9 @@ void main() {
     expect(quadratic, isNotEmpty);
   });
 
-  testWidgets('Home screen renderizza i livelli', (tester) async {
+  testWidgets('Home screen renderizza il contenuto principale', (
+    tester,
+  ) async {
     await ContentRepository.instance.load();
     SearchIndex.instance.build(ContentRepository.instance.levels);
     await ProgressStore.instance.load();
@@ -61,19 +63,6 @@ void main() {
 
     expect(find.text('Matematica'), findsOneWidget);
     expect(find.text('La nostra missione'), findsOneWidget);
-
-    final listView = find.byType(ListView);
-    await tester.dragUntilVisible(
-      find.text('Scuola Superiore'),
-      listView,
-      const Offset(0, -100),
-    );
-    expect(find.text('Scuola Superiore'), findsOneWidget);
-    await tester.dragUntilVisible(
-      find.text('Università'),
-      listView,
-      const Offset(0, -100),
-    );
-    expect(find.text('Università'), findsOneWidget);
+    expect(find.text('Livelli'), findsNothing);
   });
 }
