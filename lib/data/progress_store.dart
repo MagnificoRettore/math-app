@@ -51,6 +51,15 @@ class ProgressStore extends ChangeNotifier {
     await load();
   }
 
+  @visibleForTesting
+  Future<void> resetForTest() async {
+    _loaded = false;
+    _progress.clear();
+    _completedLessons.clear();
+    _loadError = null;
+    await load();
+  }
+
   ExerciseProgress? forExercise(String id) => _progress[id];
 
   ExerciseStatus statusOf(String id) =>
@@ -59,23 +68,35 @@ class ProgressStore extends ChangeNotifier {
   bool isBookmarked(String id) => _progress[id]?.bookmarked ?? false;
 
   Future<void> setStatus(String id, ExerciseStatus status) async {
-    final current = _progress[id] ??
-        ExerciseProgress(exerciseId: id, status: ExerciseStatus.none, bookmarked: false);
+    final current =
+        _progress[id] ??
+        ExerciseProgress(
+          exerciseId: id,
+          status: ExerciseStatus.none,
+          bookmarked: false,
+        );
     _progress[id] = current.copyWith(status: status);
     notifyListeners();
     await _persist();
   }
 
   Future<void> toggleBookmark(String id) async {
-    final current = _progress[id] ??
-        ExerciseProgress(exerciseId: id, status: ExerciseStatus.none, bookmarked: false);
+    final current =
+        _progress[id] ??
+        ExerciseProgress(
+          exerciseId: id,
+          status: ExerciseStatus.none,
+          bookmarked: false,
+        );
     _progress[id] = current.copyWith(bookmarked: !current.bookmarked);
     notifyListeners();
     await _persist();
   }
 
-  List<String> get bookmarkedIds =>
-      _progress.entries.where((e) => e.value.bookmarked).map((e) => e.key).toList();
+  List<String> get bookmarkedIds => _progress.entries
+      .where((e) => e.value.bookmarked)
+      .map((e) => e.key)
+      .toList();
 
   double completionFor(Iterable<String> exerciseIds) {
     final ids = exerciseIds.toList();
@@ -89,6 +110,16 @@ class ProgressStore extends ChangeNotifier {
       }
     }
     return done / ids.length;
+  }
+
+  double masteredRatioFor(Iterable<String> exerciseIds) {
+    final ids = exerciseIds.toList();
+    if (ids.isEmpty) return 0;
+    var mastered = 0;
+    for (final id in ids) {
+      if (statusOf(id) == ExerciseStatus.mastered) mastered++;
+    }
+    return mastered / ids.length;
   }
 
   bool isLessonCompleted(String id) => _completedLessons.contains(id);

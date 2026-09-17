@@ -57,7 +57,11 @@ class LessonStep {
   }
 
   static String _normalize(String value) {
-    return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '').replaceAll(',', '.');
+    return value
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'\s+'), '')
+        .replaceAll(',', '.');
   }
 
   static bool _equalValue(String a, String b) {

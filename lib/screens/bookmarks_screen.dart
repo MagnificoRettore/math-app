@@ -31,7 +31,6 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             color: c.textPrimary,
           ),
         ),
-        automaticallyImplyLeading: false,
       ),
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
@@ -50,8 +49,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     exercise: entry.exercise,
                     bookmarked: true,
                     status: ProgressStore.instance.statusOf(entry.exercise.id),
-                    onToggleBookmark: (_) =>
-                        ProgressStore.instance.toggleBookmark(entry.exercise.id),
+                    onToggleBookmark: (_) => ProgressStore.instance
+                        .toggleBookmark(entry.exercise.id),
                     onTap: () => _openExercise(entry),
                   ),
                 ),
@@ -63,17 +62,20 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   }
 
   List<({Level level, Course course, Topic topic, Exercise exercise})>
-      _collectBookmarked() {
-    final results = <
-        ({Level level, Course course, Topic topic, Exercise exercise})>[];
+  _collectBookmarked() {
+    final results =
+        <({Level level, Course course, Topic topic, Exercise exercise})>[];
     for (final level in ContentRepository.instance.levels) {
       for (final course in level.courses) {
         for (final topic in course.topics) {
           for (final ex in topic.exercises) {
             if (ProgressStore.instance.isBookmarked(ex.id)) {
-              results.add(
-                (level: level, course: course, topic: topic, exercise: ex),
-              );
+              results.add((
+                level: level,
+                course: course,
+                topic: topic,
+                exercise: ex,
+              ));
             }
           }
         }
@@ -83,7 +85,8 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   }
 
   void _openExercise(
-      ({Level level, Course course, Topic topic, Exercise exercise}) entry) {
+    ({Level level, Course course, Topic topic, Exercise exercise}) entry,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ExerciseDetailScreen(
@@ -107,8 +110,7 @@ class _EmptyBookmarks extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.bookmark_border,
-              size: 56, color: c.textSecondary),
+          Icon(Icons.bookmark_border, size: 56, color: c.textSecondary),
           const SizedBox(height: 12),
           Text(
             'Nessun segnalibro',

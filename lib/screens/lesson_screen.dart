@@ -180,14 +180,13 @@ class _LessonScreenState extends State<LessonScreen> {
           transitionBuilder: (child, animation) => FadeTransition(
             opacity: animation,
             child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.06, 0.08),
-                end: Offset.zero,
-              ).animate(
-                animation.drive(
-                  CurveTween(curve: Curves.easeOutCubic),
-                ),
-              ),
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0.06, 0.08),
+                    end: Offset.zero,
+                  ).animate(
+                    animation.drive(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
               child: child,
             ),
           ),
@@ -247,11 +246,7 @@ class _LessonScreenState extends State<LessonScreen> {
               color: c.accentSoft,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.lightbulb_outline,
-              color: c.accent,
-              size: 22,
-            ),
+            child: Icon(Icons.lightbulb_outline, color: c.accent, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -335,16 +330,14 @@ class _StepCard extends StatelessWidget {
                     onContinue: onContinue,
                   )
                 : attempted
-                    ? _ShakeWidget(
-                        key: ValueKey('wrong-$attemptId'),
-                        child: _FeedbackCard(
-                          correct: false,
-                          message: 'Non è corretto. Riprova!',
-                        ),
-                      )
-                    : const SizedBox.shrink(
-                        key: ValueKey('idle'),
-                      ),
+                ? _ShakeWidget(
+                    key: ValueKey('wrong-$attemptId'),
+                    child: _FeedbackCard(
+                      correct: false,
+                      message: 'Non è corretto. Riprova!',
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('idle')),
           ),
         ],
       ),
@@ -387,20 +380,18 @@ class _StepCard extends StatelessWidget {
               : TextInputType.text,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => onSubmitInput(),
-          style: TextStyle(
-            fontSize: 17,
-            color: c.textPrimary,
-          ),
+          style: TextStyle(fontSize: 17, color: c.textPrimary),
           decoration: InputDecoration(
             hintText: step.type == LessonStepType.numeric
                 ? 'Inserisci un numero'
                 : 'Scrivi la risposta',
-            hintStyle:
-                TextStyle(color: c.textSecondary, fontSize: 15),
+            hintStyle: TextStyle(color: c.textSecondary, fontSize: 15),
             filled: true,
             fillColor: c.surface,
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
@@ -457,29 +448,19 @@ class _OptionTile extends StatelessWidget {
     final c = AppColors.of(context);
     final (borderColor, fillColor, iconColor, check) = switch (state) {
       _OptionState.correct => (
-          c.easy,
-          c.easy.withValues(alpha: 0.12),
-          c.easy,
-          Icons.check_circle,
-        ),
+        c.easy,
+        c.easy.withValues(alpha: 0.12),
+        c.easy,
+        Icons.check_circle,
+      ),
       _OptionState.wrong => (
-          c.hard,
-          c.hard.withValues(alpha: 0.10),
-          c.hard,
-          null,
-        ),
-      _OptionState.selected => (
-          c.accent,
-          c.accentSoft,
-          c.accent,
-          null,
-        ),
-      _OptionState.idle => (
-          c.border,
-          c.surface,
-          c.textSecondary,
-          null,
-        ),
+        c.hard,
+        c.hard.withValues(alpha: 0.10),
+        c.hard,
+        null,
+      ),
+      _OptionState.selected => (c.accent, c.accentSoft, c.accent, null),
+      _OptionState.idle => (c.border, c.surface, c.textSecondary, null),
     };
 
     return AnimatedContainer(
@@ -488,7 +469,10 @@ class _OptionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor, width: state == _OptionState.correct ? 1.8 : 1.2),
+        border: Border.all(
+          color: borderColor,
+          width: state == _OptionState.correct ? 1.8 : 1.2,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -571,11 +555,7 @@ class _FeedbackCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.4,
-              color: c.textPrimary,
-            ),
+            style: TextStyle(fontSize: 14, height: 1.4, color: c.textPrimary),
           ),
           if (correct && onContinue != null) ...[
             const SizedBox(height: 14),
@@ -621,23 +601,31 @@ class _ShakeWidgetState extends State<_ShakeWidget>
   );
   late final Animation<double> _shake = TweenSequence<double>([
     TweenSequenceItem(
-      tween: Tween(begin: 0.0, end: -12.0)
-          .chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween(
+        begin: 0.0,
+        end: -12.0,
+      ).chain(CurveTween(curve: Curves.easeOut)),
       weight: 2,
     ),
     TweenSequenceItem(
-      tween: Tween(begin: -12.0, end: 12.0)
-          .chain(CurveTween(curve: Curves.easeInOut)),
+      tween: Tween(
+        begin: -12.0,
+        end: 12.0,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
       weight: 4,
     ),
     TweenSequenceItem(
-      tween: Tween(begin: 12.0, end: -8.0)
-          .chain(CurveTween(curve: Curves.easeInOut)),
+      tween: Tween(
+        begin: 12.0,
+        end: -8.0,
+      ).chain(CurveTween(curve: Curves.easeInOut)),
       weight: 3,
     ),
     TweenSequenceItem(
-      tween: Tween(begin: -8.0, end: 0.0)
-          .chain(CurveTween(curve: Curves.easeOut)),
+      tween: Tween(
+        begin: -8.0,
+        end: 0.0,
+      ).chain(CurveTween(curve: Curves.easeOut)),
       weight: 3,
     ),
   ]).animate(_controller);
@@ -658,10 +646,8 @@ class _ShakeWidgetState extends State<_ShakeWidget>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) => Transform.translate(
-        offset: Offset(_shake.value, 0),
-        child: child,
-      ),
+      builder: (context, child) =>
+          Transform.translate(offset: Offset(_shake.value, 0), child: child),
       child: widget.child,
     );
   }
@@ -759,10 +745,8 @@ class _Celebration extends StatelessWidget {
           tween: Tween(begin: 0.0, end: 1.0),
           curve: Curves.elasticOut,
           duration: const Duration(milliseconds: 700),
-          builder: (context, value, child) => Transform.scale(
-            scale: value,
-            child: child,
-          ),
+          builder: (context, value, child) =>
+              Transform.scale(scale: value, child: child),
           child: Container(
             width: 96,
             height: 96,
@@ -770,11 +754,7 @@ class _Celebration extends StatelessWidget {
               color: c.accentSoft,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.emoji_events_outlined,
-              color: c.accent,
-              size: 52,
-            ),
+            child: Icon(Icons.emoji_events_outlined, color: c.accent, size: 52),
           ),
         ),
       ],
@@ -826,8 +806,7 @@ class _ConfettiBurstState extends State<_ConfettiBurst>
         builder: (context, _) => Stack(
           alignment: Alignment.center,
           children: [
-            for (final (i, pos) in _positions.indexed)
-              _dot(i, pos.dx, pos.dy),
+            for (final (i, pos) in _positions.indexed) _dot(i, pos.dx, pos.dy),
           ],
         ),
       ),

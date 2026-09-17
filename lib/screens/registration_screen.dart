@@ -47,11 +47,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           Text(
             'Crea un profilo con i tuoi dati. Subito dopo sceglierai la tua '
             'scuola per ricevere consigli su misura.',
-            style: TextStyle(
-              fontSize: 14,
-              color: c.textSecondary,
-              height: 1.4,
-            ),
+            style: TextStyle(fontSize: 14, color: c.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 20),
           Form(
@@ -66,7 +62,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   validator: (value) {
                     final v = value?.trim() ?? '';
                     if (v.isEmpty) return 'Inserisci il tuo nome';
-                    if (v.length < 2) return 'Il nome deve avere almeno 2 caratteri';
+                    if (v.length < 2) {
+                      return 'Il nome deve avere almeno 2 caratteri';
+                    }
                     return null;
                   },
                 ),
@@ -79,9 +77,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   decoration: _inputDecoration('Email'),
                   validator: (value) {
                     final v = value?.trim() ?? '';
-                    final valid = RegExp(
-                      r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                    ).hasMatch(v);
+                    final valid = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                        .hasMatch(v);
                     if (v.isEmpty) return 'Inserisci il tuo indirizzo email';
                     if (!valid) return 'Inserisci un indirizzo email valido';
                     return null;
@@ -180,9 +177,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SchoolPickerScreen(
-          onSaved: () => _goToHome(context),
-        ),
+        builder: (_) => SchoolPickerScreen(onSaved: () => _goToHome(context)),
       ),
     );
   }

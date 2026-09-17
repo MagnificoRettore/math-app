@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/course.dart';
@@ -40,9 +41,9 @@ class ContentRepository {
     if (_loaded) return;
     _loadError = null;
     try {
-      final levelsJson =
-          jsonDecode(await rootBundle.loadString('assets/data/levels.json'))
-              as Map<String, dynamic>;
+      final levelsJson = jsonDecode(
+        await rootBundle.loadString('assets/data/levels.json'),
+      ) as Map<String, dynamic>;
 
       final rawLevels = (levelsJson['levels'] as List<dynamic>)
           .map((e) => Level.fromJson(e as Map<String, dynamic>))
@@ -51,9 +52,9 @@ class ContentRepository {
       final levels = <Level>[];
       for (final level in rawLevels) {
         final dataFile = level.dataFile;
-        final coursesJson =
-            jsonDecode(await rootBundle.loadString('assets/data/$dataFile'))
-                as Map<String, dynamic>;
+        final coursesJson = jsonDecode(
+          await rootBundle.loadString('assets/data/$dataFile'),
+        ) as Map<String, dynamic>;
         final courses = (coursesJson['courses'] as List<dynamic>)
             .map((e) => Course.fromJson(e as Map<String, dynamic>))
             .toList();
@@ -79,6 +80,14 @@ class ContentRepository {
   Future<void> reload() async {
     _loaded = false;
     _levels = [];
+    await load();
+  }
+
+  @visibleForTesting
+  Future<void> resetForTest() async {
+    _loaded = false;
+    _levels = [];
+    _loadError = null;
     await load();
   }
 

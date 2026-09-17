@@ -8,10 +8,7 @@ import 'progress_store.dart';
 class RecommendationEngine {
   const RecommendationEngine._();
 
-  static List<Lesson> recommendedLessons(
-    String levelId, {
-    int limit = 2,
-  }) {
+  static List<Lesson> recommendedLessons(String levelId, {int limit = 2}) {
     final completed = ProgressStore.instance.completedLessonIds;
     final lessons = LessonRepository.instance.lessons
         .where((l) => l.levelId == levelId && !completed.contains(l.id))
@@ -24,12 +21,19 @@ class RecommendationEngine {
     int limit = 4,
   }) {
     final store = ProgressStore.instance;
-    final locations = ContentRepository.instance.allExerciseLocations()
-        .where((loc) => loc.level.id == levelId)
-        .where((loc) => store.statusOf(loc.exercise.id) == ExerciseStatus.none)
-        .toList()
-      ..sort((a, b) => _rank(a.exercise.difficulty)
-          .compareTo(_rank(b.exercise.difficulty)));
+    final locations =
+        ContentRepository.instance
+            .allExerciseLocations()
+            .where((loc) => loc.level.id == levelId)
+            .where(
+              (loc) => store.statusOf(loc.exercise.id) == ExerciseStatus.none,
+            )
+            .toList()
+          ..sort(
+            (a, b) =>
+                _rank(a.exercise.difficulty)
+                    .compareTo(_rank(b.exercise.difficulty)),
+          );
     return locations.take(limit).toList();
   }
 

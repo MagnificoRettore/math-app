@@ -9,11 +9,7 @@ class SchoolPickerScreen extends StatefulWidget {
   final String initialLevelId;
   final VoidCallback? onSaved;
 
-  const SchoolPickerScreen({
-    super.key,
-    this.initialLevelId = '',
-    this.onSaved,
-  });
+  const SchoolPickerScreen({super.key, this.initialLevelId = '', this.onSaved});
 
   @override
   State<SchoolPickerScreen> createState() => _SchoolPickerScreenState();
@@ -33,8 +29,9 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
     final c = AppColors.of(context);
     final level = AuthStore.instance.currentUser == null
         ? null
-        : ContentRepository.instance
-            .levelById(AuthStore.instance.currentUser!.schoolLevelId);
+        : ContentRepository.instance.levelById(
+            AuthStore.instance.currentUser!.schoolLevelId,
+          );
     final levels = ContentRepository.instance.levels;
     final onboarding = widget.onSaved != null;
 
@@ -55,14 +52,11 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
           Text(
             onboarding
                 ? 'Scegli la tua scuola per ricevere lezioni ed esercizi '
-                    'pensati per te. Potrai cambiarla in qualsiasi momento.'
+                      'pensati per te. Potrai cambiarla in qualsiasi momento.'
                 : level == null
-                    ? 'Seleziona il tuo livello scolastico.'
-                    : 'Ora frequenti ${level.title}. Puoi cambiarlo quando vuoi.',
-            style: TextStyle(
-              fontSize: 14,
-              color: c.textSecondary,
-            ),
+                ? 'Seleziona il tuo livello scolastico.'
+                : 'Ora frequenti ${level.title}. Puoi cambiarlo quando vuoi.',
+            style: TextStyle(fontSize: 14, color: c.textSecondary),
           ),
           const SizedBox(height: 16),
           for (final item in levels)

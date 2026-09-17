@@ -58,9 +58,9 @@ Future<void> showSchoolChoiceSheet(
               Text(
                 isLessons
                     ? 'Scegli la tua scuola per vedere le lezioni guidate '
-                        'pensate per te.'
+                          'pensate per te.'
                     : 'Scegli la tua scuola per accedere agli esercizi '
-                        'organizzati per anno e argomento.',
+                          'organizzati per anno e argomento.',
                 style: TextStyle(
                   fontSize: 13,
                   color: c.textSecondary,
@@ -100,11 +100,8 @@ Future<void> showSchoolChoiceSheet(
   );
 }
 
-void _open(
-  NavigatorState navigator,
-  bool isLessons,
-  Level level,
-) {
+void _open(NavigatorState navigator, bool isLessons, Level level) {
+  navigator.popUntil((route) => route.isFirst);
   navigator.push(
     MaterialPageRoute(
       builder: (_) => isLessons

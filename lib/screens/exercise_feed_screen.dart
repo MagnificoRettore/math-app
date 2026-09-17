@@ -49,8 +49,8 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
           final exercises = _filter == null
               ? widget.topic.exercises
               : widget.topic.exercises
-                  .where((e) => e.difficulty == _filter)
-                  .toList();
+                    .where((e) => e.difficulty == _filter)
+                    .toList();
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -62,7 +62,9 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ExerciseCard(
                     exercise: exercise,
-                    bookmarked: ProgressStore.instance.isBookmarked(exercise.id),
+                    bookmarked: ProgressStore.instance.isBookmarked(
+                      exercise.id,
+                    ),
                     status: ProgressStore.instance.statusOf(exercise.id),
                     onToggleBookmark: (val) =>
                         ProgressStore.instance.toggleBookmark(exercise.id),
@@ -103,9 +105,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
               onSelected: (_) => setState(() => _filter = difficulty),
               selectedColor: c.accentSoft,
               labelStyle: TextStyle(
-                color: _filter == difficulty
-                    ? c.accent
-                    : c.textPrimary,
+                color: _filter == difficulty ? c.accent : c.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -62,8 +62,9 @@ class RecommendedSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: ExerciseCard(
               exercise: location.exercise,
-              bookmarked:
-                  ProgressStore.instance.isBookmarked(location.exercise.id),
+              bookmarked: ProgressStore.instance.isBookmarked(
+                location.exercise.id,
+              ),
               status: ProgressStore.instance.statusOf(location.exercise.id),
               onToggleBookmark: (_) =>
                   ProgressStore.instance.toggleBookmark(location.exercise.id),
@@ -86,9 +87,8 @@ class RecommendedSection extends StatelessWidget {
   void _openLevel(BuildContext context, String levelId) {
     final level = ContentRepository.instance.levelById(levelId);
     if (level == null) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => CourseScreen(level: level)),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => CourseScreen(level: level)));
   }
 }
 

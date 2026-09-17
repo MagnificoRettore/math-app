@@ -26,10 +26,7 @@ class ExerciseProgress {
     required this.bookmarked,
   });
 
-  ExerciseProgress copyWith({
-    ExerciseStatus? status,
-    bool? bookmarked,
-  }) {
+  ExerciseProgress copyWith({ExerciseStatus? status, bool? bookmarked}) {
     return ExerciseProgress(
       exerciseId: exerciseId,
       status: status ?? this.status,

@@ -34,8 +34,11 @@ class CourseRow extends StatelessWidget {
               color: effectiveIconColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.menu_book_outlined,
-                color: effectiveIconColor, size: 22),
+            child: Icon(
+              Icons.menu_book_outlined,
+              color: effectiveIconColor,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -54,10 +57,7 @@ class CourseRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     course.subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: c.textSecondary,
-                    ),
+                    style: TextStyle(fontSize: 13, color: c.textSecondary),
                   ),
                 ],
                 const SizedBox(height: 10),

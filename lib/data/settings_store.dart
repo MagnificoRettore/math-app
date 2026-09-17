@@ -50,6 +50,15 @@ class SettingsStore extends ChangeNotifier {
     await load();
   }
 
+  @visibleForTesting
+  Future<void> resetForTest() async {
+    _loaded = false;
+    _onboardingSeen = false;
+    _themeMode = ThemeMode.light;
+    _loadError = null;
+    await load();
+  }
+
   Future<void> completeOnboarding() async {
     _onboardingSeen = true;
     notifyListeners();

@@ -17,6 +17,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color indigo;
   final Color shadow;
   final List<Color> iconPalette;
+  final Color splashTop;
+  final Color splashBottom;
+  final Color onSplash;
 
   const AppPalette({
     required this.background,
@@ -35,6 +38,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.indigo,
     required this.shadow,
     required this.iconPalette,
+    required this.splashTop,
+    required this.splashBottom,
+    required this.onSplash,
   });
 
   static const AppPalette light = AppPalette(
@@ -62,6 +68,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       Color(0xFFFF9500),
       Color(0xFF34C759),
     ],
+    splashTop: Color(0xFF007AFF),
+    splashBottom: Color(0xFF5C6BC0),
+    onSplash: Color(0xFFFFFFFF),
   );
 
   static const AppPalette dark = AppPalette(
@@ -89,6 +98,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       Color(0xFFFFB340),
       Color(0xFF4CD964),
     ],
+    splashTop: Color(0xFF007AFF),
+    splashBottom: Color(0xFF5C6BC0),
+    onSplash: Color(0xFFFFFFFF),
   );
 
   @override
@@ -109,6 +121,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? indigo,
     Color? shadow,
     List<Color>? iconPalette,
+    Color? splashTop,
+    Color? splashBottom,
+    Color? onSplash,
   }) {
     return AppPalette(
       background: background ?? this.background,
@@ -127,6 +142,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       indigo: indigo ?? this.indigo,
       shadow: shadow ?? this.shadow,
       iconPalette: iconPalette ?? this.iconPalette,
+      splashTop: splashTop ?? this.splashTop,
+      splashBottom: splashBottom ?? this.splashBottom,
+      onSplash: onSplash ?? this.onSplash,
     );
   }
 
@@ -154,6 +172,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
         (i) => Color.lerp(iconPalette[i], other.iconPalette[i], t)!,
         growable: false,
       ),
+      splashTop: Color.lerp(splashTop, other.splashTop, t)!,
+      splashBottom: Color.lerp(splashBottom, other.splashBottom, t)!,
+      onSplash: Color.lerp(onSplash, other.onSplash, t)!,
     );
   }
 }

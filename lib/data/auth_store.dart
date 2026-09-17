@@ -27,8 +27,9 @@ class AuthStore extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_key);
       if (raw != null) {
-        _currentUser =
-            UserProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+        _currentUser = UserProfile.fromJson(
+          jsonDecode(raw) as Map<String, dynamic>,
+        );
       }
       _loaded = true;
       notifyListeners();
@@ -43,6 +44,14 @@ class AuthStore extends ChangeNotifier {
     await load();
   }
 
+  @visibleForTesting
+  Future<void> resetForTest() async {
+    _loaded = false;
+    _currentUser = null;
+    _loadError = null;
+    await load();
+  }
+
   Future<UserProfile> registerManual({
     required String name,
     required String email,
@@ -52,7 +61,6 @@ class AuthStore extends ChangeNotifier {
     final user = UserProfile(
       name: name.trim(),
       email: email.trim(),
-      password: password,
       authMethod: AuthMethod.manual,
       schoolLevelId: schoolLevelId,
       createdAt: DateTime.now(),
@@ -89,18 +97,10 @@ class AuthStore extends ChangeNotifier {
     await _persist();
   }
 
-  Future<void> updateProfile({
-    String? name,
-    String? email,
-    String? password,
-  }) async {
+  Future<void> updateProfile({String? name, String? email}) async {
     final user = _currentUser;
     if (user == null) return;
-    _currentUser = user.copyWith(
-      name: name,
-      email: email,
-      password: password,
-    );
+    _currentUser = user.copyWith(name: name, email: email);
     notifyListeners();
     await _persist();
   }

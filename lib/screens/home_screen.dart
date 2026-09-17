@@ -15,6 +15,7 @@ import '../widgets/pill_nav_bar.dart';
 import '../widgets/recommended_section.dart';
 import '../widgets/section_header.dart';
 import '../widgets/streak_card.dart';
+import '../widgets/weak_topics_section.dart';
 import 'bookmarks_screen.dart';
 import 'course_screen.dart';
 import 'mission_screen.dart';
@@ -48,14 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.bookmark_outline,
-              color: c.textPrimary,
-            ),
+            icon: Icon(Icons.bookmark_outline, color: c.textPrimary),
             tooltip: 'Segnalibri',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const BookmarksScreen()),
-            ),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const BookmarksScreen())),
           ),
         ],
       ),
@@ -96,6 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 16),
                   _buildGuestCard(),
                 ],
+                const SizedBox(height: 8),
+                const WeakTopicsSection(),
                 const SectionHeader('Livelli'),
                 for (final level in levels)
                   Padding(
@@ -117,9 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildGuestCard() {
     final c = AppColors.of(context);
     return AppCard(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-      ),
+      onTap: () =>
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const WelcomeScreen())),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
@@ -130,22 +130,14 @@ class _HomeScreenState extends State<HomeScreen> {
               color: c.indigo.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.person_outline,
-              color: c.indigo,
-              size: 24,
-            ),
+            child: Icon(Icons.person_outline, color: c.indigo, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               'Crea il tuo profilo per ricevere lezioni ed esercizi '
               'consigliati per la tua scuola.',
-              style: TextStyle(
-                fontSize: 14,
-                color: c.textPrimary,
-                height: 1.3,
-              ),
+              style: TextStyle(fontSize: 14, color: c.textPrimary, height: 1.3),
             ),
           ),
           Icon(Icons.chevron_right, color: c.textSecondary),
@@ -206,11 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openLevel(Level level) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CourseScreen(level: level),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => CourseScreen(level: level)));
   }
 
   double _levelProgress(Level level) {

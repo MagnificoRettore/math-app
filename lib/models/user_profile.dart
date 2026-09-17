@@ -3,7 +3,6 @@ enum AuthMethod { manual, google }
 class UserProfile {
   final String name;
   final String email;
-  final String? password;
   final AuthMethod authMethod;
   final String? photoUrl;
   final String schoolLevelId;
@@ -12,7 +11,6 @@ class UserProfile {
   const UserProfile({
     required this.name,
     required this.email,
-    this.password,
     this.authMethod = AuthMethod.manual,
     this.photoUrl,
     this.schoolLevelId = '',
@@ -22,7 +20,6 @@ class UserProfile {
   UserProfile copyWith({
     String? name,
     String? email,
-    String? password,
     AuthMethod? authMethod,
     String? photoUrl,
     String? schoolLevelId,
@@ -31,7 +28,6 @@ class UserProfile {
     return UserProfile(
       name: name ?? this.name,
       email: email ?? this.email,
-      password: password ?? this.password,
       authMethod: authMethod ?? this.authMethod,
       photoUrl: photoUrl ?? this.photoUrl,
       schoolLevelId: schoolLevelId ?? this.schoolLevelId,
@@ -43,7 +39,6 @@ class UserProfile {
     return {
       'name': name,
       'email': email,
-      'password': password,
       'authMethod': authMethod.name,
       'photoUrl': photoUrl,
       'schoolLevelId': schoolLevelId,
@@ -55,12 +50,13 @@ class UserProfile {
     return UserProfile(
       name: json['name'] as String? ?? '',
       email: json['email'] as String? ?? '',
-      password: json['password'] as String?,
-      authMethod: AuthMethod.values.asNameMap()[json['authMethod'] as String?] ??
+      authMethod:
+          AuthMethod.values.asNameMap()[json['authMethod'] as String?] ??
           AuthMethod.manual,
       photoUrl: json['photoUrl'] as String?,
       schoolLevelId: json['schoolLevelId'] as String? ?? '',
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
     );
   }

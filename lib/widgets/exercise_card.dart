@@ -38,7 +38,11 @@ class ExerciseCard extends StatelessWidget {
               color: _statusColor(c, status).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(_statusIcon(status), color: _statusColor(c, status), size: 21),
+            child: Icon(
+              _statusIcon(status),
+              color: _statusColor(c, status),
+              size: 21,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -65,10 +69,7 @@ class ExerciseCard extends StatelessWidget {
                   _preview(exercise.problem),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: c.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: c.textSecondary),
                 ),
               ],
             ),

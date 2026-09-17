@@ -52,10 +52,10 @@ class SearchResultsScreen extends StatelessWidget {
 
   List<Widget> _buildSections(BuildContext context) {
     final topics = results.where((r) => r.type == ResultType.topic).toList();
-    final exercises =
-        results.where((r) => r.type == ResultType.exercise).toList();
-    final lessons =
-        results.where((r) => r.type == ResultType.lesson).toList();
+    final exercises = results
+        .where((r) => r.type == ResultType.exercise)
+        .toList();
+    final lessons = results.where((r) => r.type == ResultType.lesson).toList();
 
     final children = <Widget>[];
     if (topics.isNotEmpty) {
@@ -107,18 +107,12 @@ class SearchResultsScreen extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 '${result.level!.title} · ${result.course!.title}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: c.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: c.textSecondary),
               ),
               const SizedBox(height: 6),
               Text(
                 '${topic.subtitle} · ${topic.exercises.length} esercizi',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: c.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: c.textSecondary),
               ),
             ],
           ),
@@ -148,18 +142,12 @@ class SearchResultsScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 ex.tags.join(', '),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: c.textSecondary,
-                ),
+                style: TextStyle(fontSize: 13, color: c.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
                 '${result.level!.title} · ${result.course!.title} · ${result.topic!.title}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: c.textSecondary,
-                ),
+                style: TextStyle(fontSize: 12, color: c.textSecondary),
               ),
             ],
           ),
@@ -189,7 +177,10 @@ class SearchResultsScreen extends StatelessWidget {
   }
 
   void _openExercise(
-      BuildContext context, SearchResult result, Exercise exercise) {
+    BuildContext context,
+    SearchResult result,
+    Exercise exercise,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ExerciseDetailScreen(

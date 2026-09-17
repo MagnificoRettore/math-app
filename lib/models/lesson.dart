@@ -27,6 +27,8 @@ class Lesson {
   final String completionMessage;
   final LessonAnimation animation;
   final String levelId;
+  final String yearId;
+  final List<String> topics;
   final List<LessonStep> steps;
 
   const Lesson({
@@ -38,6 +40,8 @@ class Lesson {
     required this.completionMessage,
     required this.animation,
     required this.levelId,
+    this.yearId = '',
+    this.topics = const [],
     required this.steps,
   });
 
@@ -51,6 +55,10 @@ class Lesson {
       completionMessage: json['completionMessage'] as String? ?? '',
       animation: LessonAnimation.fromString(json['animation'] as String? ?? ''),
       levelId: json['level'] as String? ?? '',
+      yearId: json['year'] as String? ?? '',
+      topics: (json['topics'] as List<dynamic>? ?? const [])
+          .map((e) => e as String)
+          .toList(),
       steps: (json['steps'] as List<dynamic>? ?? const [])
           .map((e) => LessonStep.fromJson(e as Map<String, dynamic>))
           .toList(),

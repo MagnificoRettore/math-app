@@ -12,11 +12,7 @@ class TopicScreen extends StatelessWidget {
   final Level level;
   final Course course;
 
-  const TopicScreen({
-    super.key,
-    required this.level,
-    required this.course,
-  });
+  const TopicScreen({super.key, required this.level, required this.course});
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +36,7 @@ class TopicScreen extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 course.subtitle,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: c.textSecondary,
-                ),
+                style: TextStyle(fontSize: 14, color: c.textSecondary),
               ),
             ),
           for (final topic in course.topics)
@@ -63,11 +56,8 @@ class TopicScreen extends StatelessWidget {
   void _openTopic(BuildContext context, Topic topic) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ExerciseFeedScreen(
-          level: level,
-          course: course,
-          topic: topic,
-        ),
+        builder: (_) =>
+            ExerciseFeedScreen(level: level, course: course, topic: topic),
       ),
     );
   }

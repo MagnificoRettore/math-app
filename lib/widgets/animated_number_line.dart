@@ -18,8 +18,7 @@ class _AnimatedNumberLineState extends State<AnimatedNumberLine> {
 
   void _setValueFromOffset(double x, double width) {
     final fraction = (x / width).clamp(0.0, 1.0);
-    final value =
-        (min + fraction * (max - min)).round().clamp(min, max);
+    final value = (min + fraction * (max - min)).round().clamp(min, max);
     if (value != _value) {
       setState(() => _value = value);
     }
@@ -34,14 +33,17 @@ class _AnimatedNumberLineState extends State<AnimatedNumberLine> {
         builder: (context, constraints) {
           final width = constraints.maxWidth;
           final fraction = (_value - min) / (max - min);
-          final left =
-              (fraction * width - markerWidth / 2).clamp(8.0, width - markerWidth - 8);
+          final left = (fraction * width - markerWidth / 2).clamp(
+            8.0,
+            width - markerWidth - 8,
+          );
 
           return Stack(
             children: [
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTapDown: (details) => _setValueFromOffset(details.localPosition.dx, width),
+                onTapDown: (details) =>
+                    _setValueFromOffset(details.localPosition.dx, width),
                 onHorizontalDragUpdate: (details) =>
                     _setValueFromOffset(details.localPosition.dx, width),
                 child: SizedBox(
@@ -145,10 +147,7 @@ class _NumberLinePainter extends CustomPainter {
           text: TextSpan(text: '$v', style: labelStyle),
           textDirection: TextDirection.ltr,
         )..layout();
-        painter.paint(
-          canvas,
-          Offset(x - painter.width / 2, midY + 8),
-        );
+        painter.paint(canvas, Offset(x - painter.width / 2, midY + 8));
       }
     }
   }

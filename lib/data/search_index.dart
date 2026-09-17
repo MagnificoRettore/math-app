@@ -58,9 +58,7 @@ class SearchIndex {
       }
     }
     for (final lesson in lessons) {
-      _results.add(
-        SearchResult(type: ResultType.lesson, lesson: lesson),
-      );
+      _results.add(SearchResult(type: ResultType.lesson, lesson: lesson));
     }
   }
 
@@ -107,9 +105,7 @@ class SearchIndex {
           lesson.subtitle,
           lesson.introduction,
           lesson.completionMessage,
-          ...lesson.steps.expand(
-            (s) => [s.prompt, s.explanation],
-          ),
+          ...lesson.steps.expand((s) => [s.prompt, s.explanation]),
         ].join(' ').toLowerCase();
         return haystack.contains(q);
     }

@@ -42,9 +42,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _openWelcome(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const WelcomeScreen()));
   }
 }
 
@@ -68,11 +67,7 @@ class _GuestProfile extends StatelessWidget {
               color: c.accentSoft,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.person_outline,
-              size: 44,
-              color: c.accent,
-            ),
+            child: Icon(Icons.person_outline, size: 44, color: c.accent),
           ),
         ),
         const SizedBox(height: 20),
@@ -92,11 +87,7 @@ class _GuestProfile extends StatelessWidget {
             'Crea il tuo profilo per ricevere lezioni ed esercizi '
             'consigliati per la tua scuola.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: c.textSecondary,
-              height: 1.4,
-            ),
+            style: TextStyle(fontSize: 14, color: c.textSecondary, height: 1.4),
           ),
         ),
         const SizedBox(height: 24),
@@ -165,10 +156,7 @@ class _ProfileContent extends StatelessWidget {
                   Text(
                     user.email,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: c.textSecondary,
-                    ),
+                    style: TextStyle(fontSize: 14, color: c.textSecondary),
                   ),
                 ],
               ),
@@ -195,9 +183,7 @@ class _ProfileContent extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    level == null
-                        ? Icons.help_outline
-                        : _iconFor(level.icon),
+                    level == null ? Icons.help_outline : _iconFor(level.icon),
                     size: 16,
                     color: levelColor,
                   ),
@@ -221,9 +207,8 @@ class _ProfileContent extends StatelessWidget {
         AppCard(
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => SchoolPickerScreen(
-                initialLevelId: user.schoolLevelId,
-              ),
+              builder: (_) =>
+                  SchoolPickerScreen(initialLevelId: user.schoolLevelId),
             ),
           ),
           child: Row(
@@ -240,10 +225,7 @@ class _ProfileContent extends StatelessWidget {
                   ),
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: c.textSecondary,
-              ),
+              Icon(Icons.chevron_right, color: c.textSecondary),
             ],
           ),
         ),

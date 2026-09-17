@@ -9,8 +9,11 @@ import 'package:math_app/data/settings_store.dart';
 import 'package:math_app/app.dart';
 
 void main() {
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    await ContentRepository.instance.resetForTest();
+    await ProgressStore.instance.resetForTest();
+    await SettingsStore.instance.resetForTest();
   });
 
   test('carica i contenuti dal JSON bundled', () async {

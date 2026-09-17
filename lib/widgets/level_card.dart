@@ -51,18 +51,12 @@ class LevelCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   level.subtitle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: c.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: c.textSecondary),
                 ),
               ],
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            color: c.textSecondary,
-          ),
+          Icon(Icons.chevron_right, color: c.textSecondary),
         ],
       ),
     );

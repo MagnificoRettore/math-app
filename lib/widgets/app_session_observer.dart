@@ -56,10 +56,7 @@ class _AppSessionObserverState extends State<AppSessionObserver>
 
   void _startCounting() {
     _sessionSince ??= DateTime.now();
-    _timer ??= Timer.periodic(
-      _tick,
-      (_) => _flushTime(),
-    );
+    _timer ??= Timer.periodic(_tick, (_) => _flushTime());
   }
 
   Future<void> _flushTime() async {

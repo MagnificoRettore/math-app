@@ -24,11 +24,7 @@ class MissionHero extends StatelessWidget {
               color: c.accentSoft,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(
-              Icons.auto_stories_outlined,
-              color: c.accent,
-              size: 28,
-            ),
+            child: Icon(Icons.auto_stories_outlined, color: c.accent, size: 28),
           ),
           const SizedBox(height: 20),
           Text(
@@ -46,11 +42,7 @@ class MissionHero extends StatelessWidget {
             'aiutare ogni studente a imparare con fiducia, offrendo esercizi '
             'risolti passo-passo, spiegazioni chiare e un percorso di studio '
             'che cresce insieme ai suoi progressi.',
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              color: c.textSecondary,
-            ),
+            style: TextStyle(fontSize: 15, height: 1.5, color: c.textSecondary),
           ),
         ],
       ),

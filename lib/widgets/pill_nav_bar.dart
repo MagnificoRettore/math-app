@@ -19,18 +19,14 @@ void navigateToTab(BuildContext context, PillTab tab) {
       navigator.popUntil((route) => route.isFirst);
     case PillTab.profile:
       navigator.popUntil((route) => route.isFirst);
-      navigator.push(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-      );
+      navigator.push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
     case PillTab.lessons:
-      navigator.popUntil((route) => route.isFirst);
       if (user != null && user.schoolLevelId.isNotEmpty) {
+        navigator.popUntil((route) => route.isFirst);
         navigator.push(
           MaterialPageRoute(
-            builder: (_) => LessonListScreen(
-              levelId: user.schoolLevelId,
-              showPill: true,
-            ),
+            builder: (_) =>
+                LessonListScreen(levelId: user.schoolLevelId, showPill: true),
           ),
         );
       } else {
@@ -40,11 +36,10 @@ void navigateToTab(BuildContext context, PillTab tab) {
         );
       }
     case PillTab.exercises:
-      navigator.popUntil((route) => route.isFirst);
       if (user != null && user.schoolLevelId.isNotEmpty) {
-        final level =
-            ContentRepository.instance.levelById(user.schoolLevelId);
+        final level = ContentRepository.instance.levelById(user.schoolLevelId);
         if (level != null) {
+          navigator.popUntil((route) => route.isFirst);
           navigator.push(
             MaterialPageRoute(
               builder: (_) => CourseScreen(level: level, showPill: true),
@@ -145,8 +140,7 @@ class _PillButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color:
-                      selected ? c.accent : c.textSecondary,
+                  color: selected ? c.accent : c.textSecondary,
                 ),
               ),
             ],

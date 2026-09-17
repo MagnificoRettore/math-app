@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 
-import '../models/topic.dart';
+import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
 import 'app_card.dart';
 import 'progress_bar.dart';
 
-class TopicRow extends StatelessWidget {
-  final Topic topic;
+class WeakTopicRow extends StatelessWidget {
+  final WeakTopic weakTopic;
   final VoidCallback onTap;
-  final double progress;
 
-  const TopicRow({
-    super.key,
-    required this.topic,
-    required this.onTap,
-    required this.progress,
-  });
+  const WeakTopicRow({super.key, required this.weakTopic, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final icon = _iconFor(topic.icon);
-    final color = _colorFor(c, topic.icon);
+    final icon = _iconFor(weakTopic.topic.icon);
+    final color = _colorFor(c, weakTopic.topic.icon);
+    final count = weakTopic.needsReviewCount;
 
     return AppCard(
       onTap: onTap,
@@ -46,7 +41,7 @@ class TopicRow extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        topic.title,
+                        weakTopic.topic.title,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -54,25 +49,46 @@ class TopicRow extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      '${topic.exercises.length}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: c.textSecondary,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.medium.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.autorenew, size: 13, color: c.medium),
+                          const SizedBox(width: 4),
+                          Text(
+                            count == 1
+                                ? '1 da ripassare'
+                                : '$count da ripassare',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: c.medium,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                if (topic.subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 1),
-                  Text(
-                    topic.subtitle,
-                    style: TextStyle(fontSize: 12, color: c.textSecondary),
-                  ),
-                ],
+                const SizedBox(height: 3),
+                Text(
+                  '${weakTopic.level.title} · ${weakTopic.course.title}',
+                  style: TextStyle(fontSize: 12, color: c.textSecondary),
+                ),
                 const SizedBox(height: 8),
-                ProgressBar(progress: progress, height: 4, color: c.accent),
+                ProgressBar(
+                  progress: weakTopic.masteredRatio,
+                  height: 4,
+                  color: c.medium,
+                ),
               ],
             ),
           ),

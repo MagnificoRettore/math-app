@@ -20,6 +20,7 @@ class StudyStore extends ChangeNotifier {
   int _todayExercises = 0;
   int _todayLessons = 0;
   int _todayMinutes = 0;
+  final Set<String> _todayExerciseIds = {};
   DateTime? _debugNow;
 
   bool get loaded => _loaded;
@@ -60,6 +61,10 @@ class StudyStore extends ChangeNotifier {
           _todayExercises = json['todayExercises'] as int? ?? 0;
           _todayLessons = json['todayLessons'] as int? ?? 0;
           _todayMinutes = json['todayMinutes'] as int? ?? 0;
+          final ids = json['todayExerciseIds'] as List<dynamic>? ?? const [];
+          _todayExerciseIds
+            ..clear()
+            ..addAll(ids.cast<String>());
         }
       } catch (_) {
         // dati corrotti: si riparte da zero.
@@ -70,9 +75,11 @@ class StudyStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> recordExerciseCompleted() async {
+  Future<bool> recordExerciseCompleted(String exerciseId) async {
     await _ensureLoaded();
     _recordActivity();
+    if (_todayExerciseIds.contains(exerciseId)) return false;
+    _todayExerciseIds.add(exerciseId);
     final was = exerciseGoalReached;
     _todayExercises++;
     final reached = exerciseGoalReached && !was;
@@ -111,6 +118,7 @@ class StudyStore extends ChangeNotifier {
       _todayExercises = 0;
       _todayLessons = 0;
       _todayMinutes = 0;
+      _todayExerciseIds.clear();
     }
   }
 
@@ -140,6 +148,7 @@ class StudyStore extends ChangeNotifier {
         'todayExercises': _todayExercises,
         'todayLessons': _todayLessons,
         'todayMinutes': _todayMinutes,
+        'todayExerciseIds': _todayExerciseIds.toList(),
       }),
     );
   }
@@ -166,6 +175,7 @@ class StudyStore extends ChangeNotifier {
     _todayExercises = 0;
     _todayLessons = 0;
     _todayMinutes = 0;
+    _todayExerciseIds.clear();
     await load();
   }
 }

@@ -52,8 +52,9 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           ListenableBuilder(
             listenable: ProgressStore.instance,
             builder: (context, _) {
-              final bookmarked =
-                  ProgressStore.instance.isBookmarked(widget.exercise.id);
+              final bookmarked = ProgressStore.instance.isBookmarked(
+                widget.exercise.id,
+              );
               return IconButton(
                 icon: Icon(
                   bookmarked ? Icons.bookmark : Icons.bookmark_border,
@@ -167,8 +168,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline,
-                  color: c.accent, size: 20),
+              Icon(Icons.lightbulb_outline, color: c.accent, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -290,7 +290,9 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   Future<void> _markStatus(ExerciseStatus status) async {
     HapticFeedback.selectionClick();
     ProgressStore.instance.setStatus(widget.exercise.id, status);
-    final goalReached = await StudyStore.instance.recordExerciseCompleted();
+    final goalReached = status == ExerciseStatus.mastered
+        ? await StudyStore.instance.recordExerciseCompleted(widget.exercise.id)
+        : false;
     if (goalReached && mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()

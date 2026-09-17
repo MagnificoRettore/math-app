@@ -30,7 +30,7 @@ void main() {
 
     final reached = <bool>[];
     for (var i = 0; i < 5; i++) {
-      reached.add(await StudyStore.instance.recordExerciseCompleted());
+      reached.add(await StudyStore.instance.recordExerciseCompleted('ex$i'));
     }
 
     expect(reached, [false, false, false, false, true]);
@@ -39,23 +39,36 @@ void main() {
     expect(StudyStore.instance.bestStreak, 1);
   });
 
-  test('giorno consecutivo incrementa la serie, giorno saltato la azzera',
-      () async {
+  test('lo stesso esercizio conta una sola volta al giorno', () async {
     StudyStore.instance.debugSetNow(day1);
     await StudyStore.instance.resetForTest();
-    await StudyStore.instance.recordExerciseCompleted();
-    expect(StudyStore.instance.currentStreak, 1);
 
-    StudyStore.instance.debugSetNow(day2);
-    await StudyStore.instance.recordExerciseCompleted();
-    expect(StudyStore.instance.currentStreak, 2);
-    expect(StudyStore.instance.bestStreak, 2);
+    await StudyStore.instance.recordExerciseCompleted('ex1');
+    await StudyStore.instance.recordExerciseCompleted('ex1');
 
-    StudyStore.instance.debugSetNow(day4);
-    await StudyStore.instance.recordExerciseCompleted();
-    expect(StudyStore.instance.currentStreak, 1);
-    expect(StudyStore.instance.bestStreak, 2);
+    expect(StudyStore.instance.todayExercises, 1);
+    expect(StudyStore.instance.exerciseGoalReached, isFalse);
   });
+
+  test(
+    'giorno consecutivo incrementa la serie, giorno saltato la azzera',
+    () async {
+      StudyStore.instance.debugSetNow(day1);
+      await StudyStore.instance.resetForTest();
+      await StudyStore.instance.recordExerciseCompleted('ex1');
+      expect(StudyStore.instance.currentStreak, 1);
+
+      StudyStore.instance.debugSetNow(day2);
+      await StudyStore.instance.recordExerciseCompleted('ex2');
+      expect(StudyStore.instance.currentStreak, 2);
+      expect(StudyStore.instance.bestStreak, 2);
+
+      StudyStore.instance.debugSetNow(day4);
+      await StudyStore.instance.recordExerciseCompleted('ex3');
+      expect(StudyStore.instance.currentStreak, 1);
+      expect(StudyStore.instance.bestStreak, 2);
+    },
+  );
 
   test('10 minuti raggiungono l\'obiettivo di tempo', () async {
     StudyStore.instance.debugSetNow(day1);
@@ -74,10 +87,10 @@ void main() {
     StudyStore.instance.debugSetNow(day1);
     await StudyStore.instance.resetForTest();
     await StudyStore.instance.addMinutes(12);
-    await StudyStore.instance.recordExerciseCompleted();
+    await StudyStore.instance.recordExerciseCompleted('ex1');
 
     StudyStore.instance.debugSetNow(day2);
-    await StudyStore.instance.recordExerciseCompleted();
+    await StudyStore.instance.recordExerciseCompleted('ex2');
 
     expect(StudyStore.instance.todayExercises, 1);
     expect(StudyStore.instance.todayMinutes, 0);
@@ -85,22 +98,24 @@ void main() {
     expect(StudyStore.instance.minutesGoalReached, isFalse);
   });
 
-  test('persistenza: i dati sopravvivono a un nuovo load nello stesso giorno',
-      () async {
-    StudyStore.instance.debugSetNow(day1);
-    await StudyStore.instance.resetForTest();
-    await StudyStore.instance.recordExerciseCompleted();
-    await StudyStore.instance.recordExerciseCompleted();
-    await StudyStore.instance.addMinutes(10);
+  test(
+    'persistenza: i dati sopravvivono a un nuovo load nello stesso giorno',
+    () async {
+      StudyStore.instance.debugSetNow(day1);
+      await StudyStore.instance.resetForTest();
+      await StudyStore.instance.recordExerciseCompleted('exA');
+      await StudyStore.instance.recordExerciseCompleted('exB');
+      await StudyStore.instance.addMinutes(10);
 
-    StudyStore.instance.debugSetNow(day1);
-    await StudyStore.instance.resetForTest();
+      StudyStore.instance.debugSetNow(day1);
+      await StudyStore.instance.resetForTest();
 
-    expect(StudyStore.instance.todayExercises, 2);
-    expect(StudyStore.instance.todayMinutes, 10);
-    expect(StudyStore.instance.currentStreak, 1);
-    expect(StudyStore.instance.bestStreak, 1);
-    expect(StudyStore.instance.exerciseGoalReached, isFalse);
-    expect(StudyStore.instance.minutesGoalReached, isTrue);
-  });
+      expect(StudyStore.instance.todayExercises, 2);
+      expect(StudyStore.instance.todayMinutes, 10);
+      expect(StudyStore.instance.currentStreak, 1);
+      expect(StudyStore.instance.bestStreak, 1);
+      expect(StudyStore.instance.exerciseGoalReached, isFalse);
+      expect(StudyStore.instance.minutesGoalReached, isTrue);
+    },
+  );
 }

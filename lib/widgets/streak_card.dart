@@ -58,11 +58,7 @@ class StreakCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.emoji_events_outlined,
-                    color: c.medium,
-                    size: 22,
-                  ),
+                  Icon(Icons.emoji_events_outlined, color: c.medium, size: 22),
                 ],
               ),
               const SizedBox(height: 14),

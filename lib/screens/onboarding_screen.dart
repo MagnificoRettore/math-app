@@ -15,26 +15,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static List<({IconData icon, Color color, String title, String body})> _slides(AppPalette c) => [
+  static List<({IconData icon, Color color, String title, String body})>
+  _slides(AppPalette c) => [
     (
       icon: Icons.calculate_outlined,
       color: c.accent,
       title: 'Esercizi risolti passo passo',
-      body: 'Ogni esercizio mostra le formule chiave, i suggerimenti e la '
+      body:
+          'Ogni esercizio mostra le formule chiave, i suggerimenti e la '
           'soluzione completa per imparare davvero.',
     ),
     (
       icon: Icons.school_outlined,
       color: c.indigo,
       title: 'Studia per la tua scuola',
-      body: 'Scegli Scuola Media, Superiore o Università: ricevi lezioni ed '
+      body:
+          'Scegli Scuola Media, Superiore o Università: ricevi lezioni ed '
           'esercizi consigliati su misura per te.',
     ),
     (
       icon: Icons.local_fire_department,
       color: c.medium,
       title: 'Costruisci una serie',
-      body: 'Allenati ogni giorno: raggiungi gli obiettivi di 5 esercizi e '
+      body:
+          'Allenati ogni giorno: raggiungi gli obiettivi di 5 esercizi e '
           '10 minuti e mantieni viva la tua serie.',
     ),
   ];
@@ -92,10 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: _skip,
                     child: Text(
                       isLast ? '' : 'Salta',
-                      style: TextStyle(
-                        color: c.textSecondary,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: c.textSecondary, fontSize: 14),
                     ),
                   ),
                   const Spacer(),
@@ -106,9 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       width: i == _page ? 22 : 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: i == _page
-                            ? c.accent
-                            : c.border,
+                        color: i == _page ? c.accent : c.border,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -120,9 +119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: PageView(
                 controller: _controller,
                 onPageChanged: (i) => setState(() => _page = i),
-                children: [
-                  for (final slide in slides) _buildSlide(slide),
-                ],
+                children: [for (final slide in slides) _buildSlide(slide)],
               ),
             ),
             Padding(
@@ -149,7 +146,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildSlide(({IconData icon, Color color, String title, String body}) slide) {
+  Widget _buildSlide(
+    ({IconData icon, Color color, String title, String body}) slide,
+  ) {
     final c = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -180,11 +179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             slide.body,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 15,
-              height: 1.5,
-              color: c.textSecondary,
-            ),
+            style: TextStyle(fontSize: 15, height: 1.5, color: c.textSecondary),
           ),
         ],
       ),

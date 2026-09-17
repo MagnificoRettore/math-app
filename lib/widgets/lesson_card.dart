@@ -49,10 +49,7 @@ class LessonCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${lesson.steps.length} passaggi · ${lesson.subtitle}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: c.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 13, color: c.textSecondary),
                 ),
               ],
             ),

@@ -37,7 +37,10 @@ class MathText extends StatelessWidget {
           for (final seg in segments)
             seg.isMath
                 ? _mathSpan(seg.text, effectiveColor, fontSize)
-                : TextSpan(text: seg.text, style: TextStyle(fontSize: fontSize)),
+                : TextSpan(
+                    text: seg.text,
+                    style: TextStyle(fontSize: fontSize),
+                  ),
         ],
       ),
     );
@@ -79,19 +82,37 @@ class MathText extends StatelessWidget {
 
   static List<_Segment> _splitMath(String data) {
     final segments = <_Segment>[];
-    final pattern = RegExp(r'\$\$.*?\$\$');
+    final block = RegExp(r'\$\$.*?\$\$');
     var lastIndex = 0;
-    for (final match in pattern.allMatches(data)) {
+    for (final match in block.allMatches(data)) {
       if (match.start > lastIndex) {
-        segments.add(
-          _Segment(data.substring(lastIndex, match.start), isMath: false),
-        );
+        segments.addAll(_splitInline(data.substring(lastIndex, match.start)));
       }
       segments.add(_Segment(match.group(0)!, isMath: true));
       lastIndex = match.end;
     }
     if (lastIndex < data.length) {
-      segments.add(_Segment(data.substring(lastIndex), isMath: false));
+      segments.addAll(_splitInline(data.substring(lastIndex)));
+    }
+    return segments;
+  }
+
+  static List<_Segment> _splitInline(String text) {
+    if (text.isEmpty) return const [];
+    final segments = <_Segment>[];
+    final inline = RegExp(r'\$[^$\n]+\$');
+    var lastIndex = 0;
+    for (final match in inline.allMatches(text)) {
+      if (match.start > lastIndex) {
+        segments.add(
+          _Segment(text.substring(lastIndex, match.start), isMath: false),
+        );
+      }
+      segments.add(_Segment(match.group(0)!, isMath: true));
+      lastIndex = match.end;
+    }
+    if (lastIndex < text.length) {
+      segments.add(_Segment(text.substring(lastIndex), isMath: false));
     }
     return segments;
   }

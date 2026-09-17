@@ -12,10 +12,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: c.background,
-        actions: const [],
-      ),
+      appBar: AppBar(backgroundColor: c.background, actions: const []),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
@@ -33,22 +30,14 @@ class WelcomeScreen extends StatelessWidget {
           Text(
             'Raccontaci quale scuola frequenti e ti proponiamo le lezioni '
             'guidate e gli esercizi più adatti a te.',
-            style: TextStyle(
-              fontSize: 15,
-              color: c.textSecondary,
-              height: 1.4,
-            ),
+            style: TextStyle(fontSize: 15, color: c.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 24),
-          _GoogleButton(
-            onTap: () => _continueWithGoogle(context),
-          ),
+          _GoogleButton(onTap: () => _continueWithGoogle(context)),
           const SizedBox(height: 12),
           FilledButton(
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const RegistrationScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const RegistrationScreen()),
             ),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(52),
@@ -81,10 +70,7 @@ class WelcomeScreen extends StatelessWidget {
             child: Text(
               'Il tuo profilo è salvato solo su questo dispositivo.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: c.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: c.textSecondary),
             ),
           ),
         ],
@@ -103,9 +89,7 @@ class WelcomeScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SchoolPickerScreen(
-          onSaved: () => _goToHome(context),
-        ),
+        builder: (_) => SchoolPickerScreen(onSaved: () => _goToHome(context)),
       ),
     );
   }
@@ -209,10 +193,7 @@ class _GoogleLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(22, 22),
-      painter: _GoogleLogoPainter(),
-    );
+    return CustomPaint(size: const Size(22, 22), painter: _GoogleLogoPainter());
   }
 }
 
@@ -289,16 +270,14 @@ Future<(String, String)?> _askGoogleIdentity(BuildContext context) async {
           child: const Text('Annulla'),
         ),
         FilledButton(
-          onPressed: () => Navigator.of(context).pop(
-            (
-              nameController.text.trim().isEmpty
-                  ? 'Studente Google'
-                  : nameController.text.trim(),
-              emailController.text.trim().isEmpty
-                  ? 'studente@gmail.com'
-                  : emailController.text.trim(),
-            ),
-          ),
+          onPressed: () => Navigator.of(context).pop((
+            nameController.text.trim().isEmpty
+                ? 'Studente Google'
+                : nameController.text.trim(),
+            emailController.text.trim().isEmpty
+                ? 'studente@gmail.com'
+                : emailController.text.trim(),
+          )),
           child: const Text('Continua'),
         ),
       ],

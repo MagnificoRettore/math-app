@@ -12,14 +12,16 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    await ContentRepository.instance.load();
-    await LessonRepository.instance.load();
-    await ProgressStore.instance.load();
+    await ContentRepository.instance.resetForTest();
+    await LessonRepository.instance.resetForTest();
+    await ProgressStore.instance.resetForTest();
   });
 
   test('consiglia le lezioni del livello non ancora completate', () {
-    final lessons =
-        RecommendationEngine.recommendedLessons('middle-school', limit: 10);
+    final lessons = RecommendationEngine.recommendedLessons(
+      'middle-school',
+      limit: 10,
+    );
     final ids = lessons.map((l) => l.id).toList();
     expect(ids, contains('fractions-basics'));
     expect(ids, contains('pythagoras'));
@@ -31,8 +33,10 @@ void main() {
 
   test('esclude le lezioni già completate', () async {
     await ProgressStore.instance.completeLesson('fractions-basics');
-    final lessons =
-        RecommendationEngine.recommendedLessons('middle-school', limit: 10);
+    final lessons = RecommendationEngine.recommendedLessons(
+      'middle-school',
+      limit: 10,
+    );
     final ids = lessons.map((l) => l.id).toList();
     expect(ids, isNot(contains('fractions-basics')));
     expect(ids, contains('pythagoras'));
@@ -73,8 +77,10 @@ void main() {
       limit: 1,
     );
     final first = before.first;
-    await ProgressStore.instance
-        .setStatus(first.exercise.id, ExerciseStatus.mastered);
+    await ProgressStore.instance.setStatus(
+      first.exercise.id,
+      ExerciseStatus.mastered,
+    );
 
     final after = RecommendationEngine.recommendedExercises(
       'middle-school',

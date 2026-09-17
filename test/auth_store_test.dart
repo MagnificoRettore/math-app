@@ -10,9 +10,11 @@ import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/welcome_screen.dart';
 
 void main() {
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    AuthStore.instance.load();
+    await AuthStore.instance.resetForTest();
+    await ContentRepository.instance.resetForTest();
+    await ProgressStore.instance.resetForTest();
   });
 
   test('registrazione manuale crea e persiste il profilo', () async {
@@ -35,6 +37,11 @@ void main() {
     final raw = prefs.getString('user_profile_v1')!;
     expect(raw, contains('Anna Rossi'));
     expect(raw, contains('anna@example.com'));
+    expect(
+      raw,
+      isNot(contains('segreta1')),
+      reason: 'la password non deve essere persistita in chiaro',
+    );
   });
 
   test('iscrizione con Google simulato imposta authMethod google', () async {
@@ -82,8 +89,9 @@ void main() {
     expect(prefs.getString('user_profile_v1'), isNull);
   });
 
-  testWidgets('welcome screen mostra le opzioni di registrazione',
-      (tester) async {
+  testWidgets('welcome screen mostra le opzioni di registrazione', (
+    tester,
+  ) async {
     await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
     await tester.pumpAndSettle();
 
@@ -92,8 +100,9 @@ void main() {
     expect(find.text('Scopri come ospite'), findsOneWidget);
   });
 
-  testWidgets('home mostra la card ospite e poi i consigli per la scuola',
-      (tester) async {
+  testWidgets('home mostra la card ospite e poi i consigli per la scuola', (
+    tester,
+  ) async {
     await ContentRepository.instance.load();
     await ProgressStore.instance.load();
     await AuthStore.instance.load();
