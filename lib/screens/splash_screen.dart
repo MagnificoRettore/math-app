@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:rive/rive.dart' as rive;
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
@@ -9,6 +10,7 @@ import '../data/progress_store.dart';
 import '../data/search_index.dart';
 import '../data/settings_store.dart';
 import '../data/study_store.dart';
+import '../theme/app_colors.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 
@@ -24,10 +26,45 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _failed = false;
   bool _started = false;
 
+  rive.File? _riveFile;
+  rive.RiveWidgetController? _riveController;
+
   @override
   void initState() {
     super.initState();
+    _loadSplashRive();
     _init();
+  }
+
+  @override
+  void dispose() {
+    _riveController?.dispose();
+    _riveFile?.dispose();
+    super.dispose();
+  }
+
+  bool get _riveEnabled {
+    final binding = WidgetsBinding.instance;
+    return !binding.runtimeType.toString().contains(
+      'TestWidgetsFlutterBinding',
+    );
+  }
+
+  Future<void> _loadSplashRive() async {
+    if (!_riveEnabled) return;
+    try {
+      final file = await rive.File.asset(
+        'assets/rive/rewards.riv',
+        riveFactory: rive.Factory.flutter,
+      );
+      if (!mounted || file == null) return;
+      setState(() {
+        _riveFile = file;
+        _riveController = rive.RiveWidgetController(file);
+      });
+    } catch (_) {
+      // Fallback: resta l'icona statica.
+    }
   }
 
   Future<void> _init() async {
@@ -94,16 +131,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF007AFF),
-              Color(0xFF5C6BC0),
-            ],
+            colors: [c.splashTop, c.splashBottom],
           ),
         ),
         child: SafeArea(
@@ -112,22 +147,20 @@ class _SplashScreenState extends State<SplashScreen> {
               return SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const _Logo(),
+                        _buildLogo(),
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Math App',
                           style: TextStyle(
                             fontSize: 34,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: c.onSplash,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -137,7 +170,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: c.onSplash.withValues(alpha: 0.85),
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -149,7 +182,7 @@ class _SplashScreenState extends State<SplashScreen> {
                             height: 26,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: c.onSplash.withValues(alpha: 0.9),
                             ),
                           ),
                       ],
@@ -164,22 +197,35 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
+  Widget _buildLogo() {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.scale(scale: 0.9 + 0.1 * value, child: child),
+        );
+      },
+      child: _Logo(controller: _riveController),
+    );
+  }
+
   Widget _buildRetry() {
+    final c = AppColors.of(context);
     return Column(
       children: [
-        const Text(
+        Text(
           'Non è stato possibile caricare i contenuti.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 14, color: c.onSplash),
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
           style: FilledButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF007AFF),
+            backgroundColor: c.onSplash,
+            foregroundColor: c.splashTop,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -198,15 +244,19 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class _Logo extends StatelessWidget {
-  const _Logo();
+  final rive.RiveWidgetController? controller;
+
+  const _Logo({this.controller});
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final riveController = controller;
     return Container(
       width: 112,
       height: 112,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.onSplash,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -216,10 +266,17 @@ class _Logo extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.calculate_outlined,
-        size: 56,
-        color: Color(0xFF007AFF),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: riveController == null
+            ? Icon(Icons.calculate_outlined, size: 56, color: c.splashTop)
+            : Padding(
+                padding: const EdgeInsets.all(8),
+                child: rive.RiveWidget(
+                  controller: riveController,
+                  fit: rive.Fit.contain,
+                ),
+              ),
       ),
     );
   }
