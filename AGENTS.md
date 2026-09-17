@@ -18,7 +18,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 |---|---|
 | `flutter run` | Run the app (dev) |
 | `flutter analyze` | Static analysis — must stay at **0 issues** |
-| `flutter test` | Run all unit + widget tests (50 tests / 9 files) |
+| `flutter test` | Run all unit + widget tests (58 tests / 9 files) |
 | `flutter test --coverage` | Generate coverage report |
 | `dart format .` | Format code |
 | `flutter pub get` | Install dependencies |
@@ -44,7 +44,7 @@ lib/
                          # school_picker, profile, onboarding, weak_points,
                          # weak_topic)
   widgets/               # reusable UI components (app_card, math_text, progress_bar,
-                         # difficulty_badge, level_card, course_row, topic_row,
+                         # difficulty_badge, topic_row,
                          # exercise_card, lesson_card, section_header, mission_hero,
                          # recommended_section, pill_nav_bar, school_level_tile,
                          # school_choice_sheet, streak_card, animated_fraction_pie,
