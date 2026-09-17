@@ -86,54 +86,50 @@ class PillNavBar extends StatefulWidget {
 class _PillNavBarState extends State<PillNavBar> {
   static const _itemCount = 4;
 
-  late int _selected;
-  bool _navigating = false;
-  bool _navigationDone = false;
-
+  // La sezione selezionata è derivata da [PillNavBar.selected]: la barra
+  // riflette sempre la schermata corrente, quindi l'indicatore non può
+  // rimanere "bloccato" su una vecchia sezione quando la schermata torna
+  // visibile dopo un pop.
+  //
+  // Queste variabili sono transitorie: valgono solo durante una singola
+  // interazione (un tap in attesa dello snap o un drag in corso).
   bool _dragging = false;
   double? _dragLeft;
   int? _activeIndex;
+  int? _pendingTabIndex;
 
-  @override
-  void initState() {
-    super.initState();
-    _selected = widget.selected.index;
-  }
+  int get _selectedIndex => widget.selected.index;
 
   @override
   void didUpdateWidget(covariant PillNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selected != widget.selected) {
-      _selected = widget.selected.index;
-      _navigating = false;
-      _navigationDone = false;
       _dragging = false;
       _dragLeft = null;
       _activeIndex = null;
+      _pendingTabIndex = null;
     }
   }
 
   /// Seleziona la sezione al tocco: l'indicatore scivola sulla nuova
   /// posizione, poi (a fine snap) la pagina viene caricata sotto la pillola.
   void _commit(int index) {
-    if (_navigating || index == _selected) return;
+    if (_pendingTabIndex != null || index == _selectedIndex) return;
     HapticFeedback.selectionClick();
-    _navigating = true;
-    setState(() => _selected = index);
+    setState(() => _pendingTabIndex = index);
   }
 
   void _onSnapComplete() {
-    if (!_navigating || _navigationDone || !mounted) return;
-    _performNavigation(_selected);
+    if (!mounted) return;
+    final pending = _pendingTabIndex;
+    if (pending == null) return;
+    setState(() => _pendingTabIndex = null);
+    _performNavigation(pending);
   }
 
-  /// Esegue la navigazione esattamente una volta per selezione, anche se
-  /// viene invocata sia dal rilascio del drag sia dal termine dello snap.
+  /// Esegue la navigazione esattamente una volta per interazione: per il tap
+  /// parte dallo snap completato (`_onSnapComplete`), per il drag dal rilascio.
   void _performNavigation(int index) {
-    if (_navigationDone) return;
-    _navigationDone = true;
-    _navigating = true;
-
     final tab = PillTab.values[index];
     final navigator = Navigator.of(context);
 
@@ -175,11 +171,11 @@ class _PillNavBarState extends State<PillNavBar> {
     );
     if (!mounted) return;
     if (chosen == null) {
-      // Scelta annullata: l'indicatore torna sulla sezione della schermata.
+      // Scelta annullata: la pillola torna sulla sezione della schermata.
       setState(() {
-        _navigating = false;
-        _navigationDone = false;
-        _selected = widget.selected.index;
+        _dragging = false;
+        _dragLeft = null;
+        _activeIndex = null;
       });
       return;
     }
@@ -200,8 +196,14 @@ class _PillNavBarState extends State<PillNavBar> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    final fillTop = c.surface.withValues(alpha: isDark ? 0.92 : 0.9);
-    final fillBottom = c.surface.withValues(alpha: isDark ? 0.6 : 0.55);
+    // ―― Liquid Glass ――――――――――――――――――――――――――――――――――――――
+    // Tinta del vetro: semi-trasparente e più spessa in alto, così la
+    // sfocatura del contenuto sottostante resta ben visibile.
+    final glassTop = c.surface.withValues(alpha: isDark ? 0.52 : 0.42);
+    final glassBottom = c.surface.withValues(alpha: isDark ? 0.3 : 0.2);
+    // Riflessi di luce: più marcati in chiaro, soffusi in scuro.
+    final rim = isDark ? 0.35 : 0.6;
+    final glare = isDark ? 0.12 : 0.2;
 
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
@@ -210,50 +212,132 @@ class _PillNavBarState extends State<PillNavBar> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
+            // Ombra di profondità molto morbida: stacca la pillola dallo sfondo.
             BoxShadow(
               color: c.shadow,
-              blurRadius: 24,
-              offset: const Offset(0, 10),
+              blurRadius: 28,
+              offset: const Offset(0, 12),
+            ),
+            // Ombra di contatto più corta per "ancorare" il vetro.
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(32),
+          // Un unico BackdropFilter ristretto al "buco" della pillola: sfoca in
+          // tempo reale ciò che scorre sotto, con sigma moderato per non pesare
+          // sul framerate.
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: Stack(
               children: [
+                // 1) Corpo di vetro: gradiente verticale semi-trasparente.
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [fillTop, fillBottom],
-                      ),
-                      border: Border.all(
-                        color: c.border.withValues(alpha: 0.6),
-                        width: 0.8,
+                        colors: [glassTop, glassBottom],
                       ),
                     ),
                   ),
                 ),
+                // 2) Tinta "liquida": leggera sfumatura d'accento che simula
+                //    lo spessore e la rifrazione del vetro.
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.25, 1],
+                        colors: [
+                          c.accent.withValues(alpha: 0.05),
+                          c.accent.withValues(alpha: 0.015),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // 3) Bordo esterno sottile e nitido.
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: isDark ? 0.14 : 0.55),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                // 4) Riflesso superiore: linea di luce sul bordo alto.
+                Positioned(
+                  left: 4,
+                  right: 4,
+                  top: 0,
+                  height: 22,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: rim),
+                          Colors.white.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // 5) Riflessi laterali: bordi verticali del vetro.
+                Positioned(left: 0, top: 8, bottom: 8, width: 12, child: _EdgeGlare(alpha: glare)),
+                Positioned(right: 0, top: 8, bottom: 8, width: 12, child: _EdgeGlare(alpha: glare, flip: true)),
+                // 6) Bagliore diagonale: rifrazione "liquida" sulla superficie.
                 Positioned.fill(
                   child: IgnorePointer(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
                         gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0, 0.38, 1],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          stops: const [0, 0.45, 1],
                           colors: [
-                            c.textPrimary.withValues(alpha: 0.05),
-                            c.textPrimary.withValues(alpha: 0.01),
-                            Colors.transparent,
+                            Colors.white.withValues(alpha: glare),
+                            Colors.white.withValues(alpha: 0),
+                            Colors.white.withValues(alpha: glare * 0.6),
                           ],
                         ),
+                      ),
+                    ),
+                  ),
+                ),
+                // 7) Ombra interna al fondo: spessore percepito del vetro.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 18,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(28),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
+                          Colors.black.withValues(alpha: 0),
+                        ],
                       ),
                     ),
                   ),
@@ -278,8 +362,10 @@ class _PillNavBarState extends State<PillNavBar> {
                           (x / segWidth).floor().clamp(0, _itemCount - 1);
                       double indicatorLeft(int index) => index * segWidth;
 
-                      final draggingFrom = _dragLeft ?? indicatorLeft(_selected);
-                      final activeIndex = _activeIndex ?? _selected;
+                      final draggingFrom = _dragLeft ??
+                          indicatorLeft(_pendingTabIndex ?? _selectedIndex);
+                      final activeIndex =
+                          _activeIndex ?? _pendingTabIndex ?? _selectedIndex;
                       final snapDuration =
                           (!_dragging && !reduceMotion)
                               ? const Duration(milliseconds: 260)
@@ -294,12 +380,13 @@ class _PillNavBarState extends State<PillNavBar> {
                             _dragging = true;
                             _dragLeft = clampLeft(x - segWidth / 2);
                             _activeIndex = segmentAt(x);
+                            _pendingTabIndex = null;
                           });
                         },
                         onHorizontalDragUpdate: (details) {
                           setState(() {
                             _dragLeft = clampLeft(
-                              (_dragLeft ?? indicatorLeft(_selected)) +
+                              (_dragLeft ?? indicatorLeft(_selectedIndex)) +
                                   details.delta.dx,
                             );
                             final index = segmentAt(_dragLeft! + segWidth / 2);
@@ -312,8 +399,8 @@ class _PillNavBarState extends State<PillNavBar> {
                         onHorizontalDragEnd: (_) {
                           final releasedIndex =
                               _activeIndex ??
-                              segmentAt(indicatorLeft(_selected) + segWidth / 2);
-                          if (releasedIndex == _selected) {
+                              segmentAt(indicatorLeft(_selectedIndex) + segWidth / 2);
+                          if (releasedIndex == _selectedIndex) {
                             // Rilascio sulla sezione attuale: niente navigazione,
                             // l'indicatore torna centrato sul segmento.
                             setState(() {
@@ -325,22 +412,24 @@ class _PillNavBarState extends State<PillNavBar> {
                           }
                           // Al rilascio avviene la selezione: l'indicatore è già
                           // sul segmento, quindi si naviga subito (il movimento
-                          // è stato mostrato durante il trascinamento).
+                          // è stato mostrato durante il trascinamento). Tutto lo
+                          // stato transitorio viene azzerato qui, così quando la
+                          // schermata tornerà visibile l'evidenziazione e
+                          // l'indicatore saranno di nuovo sulla sezione corrente.
                           HapticFeedback.selectionClick();
-                          _navigating = true;
                           setState(() {
                             _dragging = false;
                             _dragLeft = null;
                             _activeIndex = null;
-                            _selected = releasedIndex;
                           });
-                          _performNavigation(_selected);
+                          _performNavigation(releasedIndex);
                         },
                         onHorizontalDragCancel: () {
                           setState(() {
                             _dragging = false;
                             _dragLeft = null;
                             _activeIndex = null;
+                            _pendingTabIndex = null;
                           });
                         },
                         child: Stack(
@@ -389,25 +478,83 @@ class _GlassIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            c.surface.withValues(alpha: 0.98),
-            c.surface.withValues(alpha: 0.82),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          // Capsula di vetro "accesa": traslucida ma ben visibile, con un
+          // riflesso di luce sul bordo alto come il vetro liquido.
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark
+                ? [
+                    Colors.white.withValues(alpha: 0.16),
+                    Colors.white.withValues(alpha: 0.07),
+                  ]
+                : [
+                    Colors.white.withValues(alpha: 0.9),
+                    Colors.white.withValues(alpha: 0.45),
+                  ],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.55),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: c.shadow,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
-        border: Border.all(color: c.border.withValues(alpha: 0.6)),
-        boxShadow: [
-          BoxShadow(
-            color: c.shadow,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            height: 16,
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withValues(alpha: isDark ? 0.5 : 0.7),
+                  Colors.white.withValues(alpha: 0),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Riflesso verticale lungo un bordo laterale del vetro:
+/// un gradiente orizzontale che sfuma verso il centro.
+class _EdgeGlare extends StatelessWidget {
+  final double alpha;
+  final bool flip;
+
+  const _EdgeGlare({required this.alpha, this.flip = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: flip ? Alignment.centerRight : Alignment.centerLeft,
+          end: flip ? Alignment.centerLeft : Alignment.centerRight,
+          colors: [
+            Colors.white.withValues(alpha: alpha),
+            Colors.white.withValues(alpha: 0),
+          ],
+        ),
       ),
     );
   }
