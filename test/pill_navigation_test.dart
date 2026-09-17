@@ -9,13 +9,14 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/widgets/lesson_card.dart';
 
 Future<void> _prepare() async {
-  await AuthStore.instance.signOut();
-  await AuthStore.instance.load();
-  await ContentRepository.instance.load();
-  await LessonRepository.instance.load();
-  await ProgressStore.instance.load();
+  SharedPreferences.setMockInitialValues({});
+  await AuthStore.instance.resetForTest();
+  await ContentRepository.instance.resetForTest();
+  await LessonRepository.instance.resetForTest();
+  await ProgressStore.instance.resetForTest();
   SearchIndex.instance.build(
     ContentRepository.instance.levels,
     lessons: LessonRepository.instance.lessons,
@@ -23,57 +24,124 @@ Future<void> _prepare() async {
 }
 
 Future<void> _pumpHome(WidgetTester tester) async {
-  await _prepare();
   await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
   await tester.pumpAndSettle();
 }
 
 void main() {
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-  });
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('ospite: LEZIONI apre pop-up e mostra lezioni della scuola scelta',
-      (tester) async {
+  setUp(_prepare);
+
+  testWidgets(
+    'ospite: LEZIONI apre pop-up e mostra lezioni della scuola scelta',
+    (tester) async {
+      await _pumpHome(tester);
+
+      await tester.tap(find.text('LEZIONI'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lezioni per scuola'), findsOneWidget);
+      expect(find.text('Scuola Media'), findsWidgets);
+
+      await tester.tap(find.text('Scuola Media').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+      expect(find.text('Introduzione alle frazioni'), findsOneWidget);
+      expect(find.text('Equazioni di primo grado'), findsNothing);
+    },
+  );
+
+  testWidgets('ospite: le lezioni sono divise per anno come gli esercizi', (
+    tester,
+  ) async {
     await _pumpHome(tester);
 
     await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
-
-    expect(find.text('Lezioni per scuola'), findsOneWidget);
-    expect(find.text('Scuola Media'), findsWidgets);
-
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
 
     expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+    expect(find.text('Anno 1'), findsWidgets);
+    expect(find.text('Anno 3'), findsWidgets);
     expect(find.text('Introduzione alle frazioni'), findsOneWidget);
-    expect(find.text('Equazioni di primo grado'), findsNothing);
+    expect(find.text('Teorema di Pitagora'), findsNothing);
+
+    await tester.tap(find.text('Anno 2').first);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LessonCard), findsNothing);
+    expect(find.text('Introduzione alle frazioni'), findsNothing);
+
+    await tester.tap(find.text('Anno 3').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Teorema di Pitagora'), findsOneWidget);
+    expect(find.text('Introduzione alle frazioni'), findsNothing);
   });
 
   testWidgets(
-      'loggato: ESERCIZI apre subito la pagina della scuola del profilo',
-      (tester) async {
-    await _prepare();
-    await AuthStore.instance.registerManual(
-      name: 'Anna',
-      email: 'anna@example.com',
-      password: 'segreta1',
-      schoolLevelId: 'high-school',
-    );
-    await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
-    await tester.pumpAndSettle();
+    'loggato: ESERCIZI apre subito la pagina della scuola del profilo',
+    (tester) async {
+      await AuthStore.instance.registerManual(
+        name: 'Anna',
+        email: 'anna@example.com',
+        password: 'segreta1',
+        schoolLevelId: 'high-school',
+      );
+      await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('ESERCIZI'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('ESERCIZI'));
+      await tester.pumpAndSettle();
 
-    expect(find.byType(CourseScreen), findsOneWidget);
-    expect(find.text('Scuola Superiore'), findsOneWidget);
-    expect(find.text('Lezioni per scuola'), findsNothing);
+      expect(find.byType(CourseScreen), findsOneWidget);
+      expect(find.text('Scuola Superiore'), findsOneWidget);
+      expect(find.text('Lezioni per scuola'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'ospite: ESERCIZI da una pagina di profondità non torna alla home',
+    (tester) async {
+      await _pumpHome(tester);
+
+      await tester.tap(find.text('LEZIONI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Scuola Media').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+
+      await tester.tap(find.text('ESERCIZI'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Esercizi per scuola'), findsOneWidget);
+      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+      expect(find.text('Matematica'), findsNothing);
+    },
+  );
+
+  testWidgets('segnalibri: si può tornare indietro con il pulsante back', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.byTooltip('Segnalibri'));
+    await tester.pumpAndSettle();
+    expect(find.text('Segnalibri'), findsOneWidget);
+    expect(find.text('Matematica'), findsNothing);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Matematica'), findsOneWidget);
+    expect(find.text('Segnalibri'), findsNothing);
   });
 
-  testWidgets('la pillola compare solo sulle schermate principali',
-      (tester) async {
+  testWidgets('la pillola compare solo sulle schermate principali', (
+    tester,
+  ) async {
     await _pumpHome(tester);
 
     expect(find.text('HOME'), findsOneWidget);
@@ -93,8 +161,9 @@ void main() {
     expect(find.text('HOME'), findsNothing);
   });
 
-  testWidgets('PROFILO apre il profilo e HOME ritorna alla home',
-      (tester) async {
+  testWidgets('PROFILO apre il profilo e HOME ritorna alla home', (
+    tester,
+  ) async {
     await _pumpHome(tester);
 
     await tester.tap(find.text('PROFILO'));

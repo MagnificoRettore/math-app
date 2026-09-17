@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson.dart';
@@ -12,8 +13,9 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     TestWidgetsFlutterBinding.ensureInitialized();
-    await LessonRepository.instance.load();
-    await ProgressStore.instance.load();
+    await ContentRepository.instance.resetForTest();
+    await LessonRepository.instance.resetForTest();
+    await ProgressStore.instance.resetForTest();
   });
 
   test('repository carica le lezioni con i passaggi', () {
@@ -25,9 +27,56 @@ void main() {
     }
   });
 
+  test('le lezioni sono assegnate a un anno del proprio livello', () {
+    final content = ContentRepository.instance;
+    for (final lesson in LessonRepository.instance.lessons) {
+      expect(lesson.yearId, isNotEmpty, reason: lesson.id);
+      final level = content.levelById(lesson.levelId);
+      expect(level, isNotNull, reason: lesson.id);
+      expect(
+        level!.courses.any((c) => c.id == lesson.yearId),
+        isTrue,
+        reason: '${lesson.id}: anno ${lesson.yearId} non nel livello',
+      );
+    }
+  });
+
+  test('lessonsInYear filtra per livello e anno', () {
+    final repo = LessonRepository.instance;
+
+    final ms1 = repo.lessonsInYear('middle-school', 'ms-year1');
+    expect(ms1.map((l) => l.id), contains('fractions-basics'));
+    expect(ms1.every((l) => l.yearId == 'ms-year1'), isTrue);
+
+    final ms3 = repo.lessonsInYear('middle-school', 'ms-year3');
+    expect(ms3.map((l) => l.id), contains('pythagoras'));
+
+    expect(repo.lessonsInYear('middle-school', 'ms-year2'), isEmpty);
+    expect(repo.lessonsInYear('university', 'analysis1'), isEmpty);
+  });
+
+  test('Lesson.fromJson legge year e usa vuoto come default', () {
+    final withYear = Lesson.fromJson({
+      'id': 'x',
+      'title': 'X',
+      'level': 'high-school',
+      'year': 'year2',
+    });
+    expect(withYear.yearId, 'year2');
+
+    final without = Lesson.fromJson({
+      'id': 'y',
+      'title': 'Y',
+      'level': 'high-school',
+    });
+    expect(without.yearId, '');
+  });
+
   test('checkAnswer confronta numeri e frazioni', () {
     final repo = LessonRepository.instance;
-    final fractions = repo.lessons.firstWhere((l) => l.id == 'fractions-basics');
+    final fractions = repo.lessons.firstWhere(
+      (l) => l.id == 'fractions-basics',
+    );
     final sumStep = fractions.steps[1];
 
     expect(sumStep.checkAnswer('5/6'), isTrue);
@@ -42,7 +91,10 @@ void main() {
     expect(total, greaterThanOrEqualTo(3));
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: LessonScreen(lesson: lesson)),
+      MaterialApp(
+        theme: AppTheme.light,
+        home: LessonScreen(lesson: lesson),
+      ),
     );
     await tester.pumpAndSettle();
 
@@ -95,13 +147,18 @@ void main() {
     expect(find.textContaining('Passo 1 di'), findsOneWidget);
   });
 
-  testWidgets('la lezione con animazione mostra il visual interattivo',
-      (tester) async {
-    final lesson = LessonRepository.instance.lessons
-        .firstWhere((l) => l.animation == LessonAnimation.pie);
+  testWidgets('la lezione con animazione mostra il visual interattivo', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.lessons.firstWhere(
+      (l) => l.animation == LessonAnimation.pie,
+    );
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: LessonScreen(lesson: lesson)),
+      MaterialApp(
+        theme: AppTheme.light,
+        home: LessonScreen(lesson: lesson),
+      ),
     );
     await tester.pumpAndSettle();
 
