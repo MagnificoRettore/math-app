@@ -27,16 +27,18 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: const PillNavBar(selected: PillTab.profile),
-      body: ListenableBuilder(
-        listenable: AuthStore.instance,
-        builder: (context, _) {
-          final user = AuthStore.instance.currentUser;
-          if (user == null) {
-            return _GuestProfile(onCreate: () => _openWelcome(context));
-          }
-          return _ProfileContent(user: user);
-        },
+      body: PillNavOverlay(
+        selected: PillTab.profile,
+        child: ListenableBuilder(
+          listenable: AuthStore.instance,
+          builder: (context, _) {
+            final user = AuthStore.instance.currentUser;
+            if (user == null) {
+              return _GuestProfile(onCreate: () => _openWelcome(context));
+            }
+            return _ProfileContent(user: user);
+          },
+        ),
       ),
     );
   }

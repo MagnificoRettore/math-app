@@ -69,18 +69,21 @@ class _CourseScreenState extends State<CourseScreen> {
           ),
         ),
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) => setState(() => _selectedIndex = index),
-        children: [
-          for (final course in courses)
-            _CourseTopicsView(level: widget.level, course: course),
-        ],
-      ),
-      bottomNavigationBar: widget.showPill
-          ? const PillNavBar(selected: PillTab.exercises)
-          : null,
+      body: _buildPages(courses),
     );
+  }
+
+  Widget _buildPages(List<Course> courses) {
+    final pageView = PageView(
+      controller: _pageController,
+      onPageChanged: (index) => setState(() => _selectedIndex = index),
+      children: [
+        for (final course in courses)
+          _CourseTopicsView(level: widget.level, course: course),
+      ],
+    );
+    if (!widget.showPill) return pageView;
+    return PillNavOverlay(selected: PillTab.exercises, child: pageView);
   }
 }
 

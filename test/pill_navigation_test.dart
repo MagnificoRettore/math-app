@@ -10,6 +10,7 @@ import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/widgets/lesson_card.dart';
+import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -154,6 +155,11 @@ void main() {
       find.byType(ListView),
       const Offset(0, -80),
     );
+    await tester.drag(
+      find.byType(ListView),
+      const Offset(0, -160),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Scuola Superiore').last);
     await tester.pumpAndSettle();
 
@@ -176,4 +182,96 @@ void main() {
 
     expect(find.text('Matematica'), findsOneWidget);
   });
+
+  testWidgets('trascinando la pillola si cambia sezione', (tester) async {
+    await _pumpHome(tester);
+
+    expect(find.text('Profilo'), findsNothing);
+    expect(find.text('HOME'), findsOneWidget);
+
+    final bar = find.byType(PillNavBar);
+    final barSize = tester.getSize(bar);
+    final center = tester.getCenter(bar);
+
+    final gesture = await tester.startGesture(
+      Offset(center.dx - barSize.width * 3 / 8, center.dy),
+    );
+    await tester.pump();
+    await gesture.moveBy(Offset(barSize.width * 3 / 4, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Profilo'), findsOneWidget);
+  });
+
+  testWidgets('la pillola parte centrata sulla HOME', (tester) async {
+    await _pumpHome(tester);
+
+    final barRect = tester.getRect(find.byType(PillNavBar));
+    final indicator = tester.getRect(
+      find.byKey(const ValueKey('pill-indicator')),
+    );
+
+    // L'indicatore deve partire centrato sul primo segmento (HOME),
+    // non sul confine HOME/LEZIONI.
+    expect(indicator.left - barRect.left, lessThan(60));
+    expect(
+      indicator.center.dx - barRect.left,
+      lessThan(barRect.width * 0.2),
+    );
+    expect(
+      indicator.center.dx - barRect.left,
+      greaterThan(barRect.width * 0.05),
+    );
+  });
+
+  testWidgets(
+    'ospite: trascinando verso LEZIONI la scelta appare una sola volta',
+    (tester) async {
+      await _pumpHome(tester);
+
+      final bar = find.byType(PillNavBar);
+      final barSize = tester.getSize(bar);
+      final center = tester.getCenter(bar);
+
+      final gesture = await tester.startGesture(
+        Offset(center.dx - barSize.width * 3 / 8, center.dy),
+      );
+      await tester.pump();
+      await gesture.moveBy(Offset(barSize.width / 4, 0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lezioni per scuola'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ospite: annullare la scelta della scuola riporta la pillola su HOME',
+    (tester) async {
+      await _pumpHome(tester);
+
+      await tester.tap(find.text('LEZIONI'));
+      await tester.pumpAndSettle();
+      expect(find.text('Lezioni per scuola'), findsOneWidget);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lezioni per scuola'), findsNothing);
+      expect(find.text('Matematica'), findsOneWidget);
+
+      final pill = find.byType(PillNavBar);
+      expect(
+        find.descendant(of: pill, matching: find.byIcon(Icons.home)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: pill, matching: find.byIcon(Icons.home_outlined)),
+        findsNothing,
+      );
+    },
+  );
 }

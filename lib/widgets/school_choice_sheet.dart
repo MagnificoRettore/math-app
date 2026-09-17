@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../data/content_repository.dart';
 import '../models/level.dart';
-import '../screens/course_screen.dart';
-import '../screens/lesson_list_screen.dart';
 import '../theme/app_colors.dart';
 import 'school_level_tile.dart';
 
 enum SchoolChoiceDestination { lessons, exercises }
 
-Future<void> showSchoolChoiceSheet(
+Future<Level?> showSchoolChoiceSheet(
   BuildContext context, {
   required SchoolChoiceDestination destination,
 }) async {
   final levels = ContentRepository.instance.levels;
   final isLessons = destination == SchoolChoiceDestination.lessons;
-  final navigator = Navigator.of(context);
   final bottomInset = MediaQuery.of(context).padding.bottom;
 
-  await showModalBottomSheet<void>(
+  return showModalBottomSheet<Level>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -74,10 +71,7 @@ Future<void> showSchoolChoiceSheet(
                   child: SchoolLevelTile(
                     level: level,
                     selected: false,
-                    onTap: () {
-                      Navigator.of(sheetContext).pop();
-                      _open(navigator, isLessons, level);
-                    },
+                    onTap: () => Navigator.of(sheetContext).pop(level),
                   ),
                 ),
               Center(
@@ -97,16 +91,5 @@ Future<void> showSchoolChoiceSheet(
         ),
       );
     },
-  );
-}
-
-void _open(NavigatorState navigator, bool isLessons, Level level) {
-  navigator.popUntil((route) => route.isFirst);
-  navigator.push(
-    MaterialPageRoute(
-      builder: (_) => isLessons
-          ? LessonListScreen(levelId: level.id, showPill: true)
-          : CourseScreen(level: level, showPill: true),
-    ),
   );
 }

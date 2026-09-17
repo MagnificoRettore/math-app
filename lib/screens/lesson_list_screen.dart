@@ -68,16 +68,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
             ),
           ),
         ),
-        bottomNavigationBar: widget.showPill
-            ? const PillNavBar(selected: PillTab.lessons)
-            : null,
-        body: lessons.isEmpty
-            ? const _EmptyLessons(
-                title: 'Nessuna lezione disponibile',
-                subtitle:
-                    'Le lezioni guidate per questo livello sono in arrivo.',
-              )
-            : _LessonsList(lessons: lessons),
+        body: _wrapBody(
+          lessons.isEmpty
+              ? const _EmptyLessons(
+                  title: 'Nessuna lezione disponibile',
+                  subtitle:
+                      'Le lezioni guidate per questo livello sono in arrivo.',
+                )
+              : _LessonsList(lessons: lessons),
+        ),
       );
     }
 
@@ -100,18 +99,22 @@ class _LessonListScreenState extends State<LessonListScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: widget.showPill
-          ? const PillNavBar(selected: PillTab.lessons)
-          : null,
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) => setState(() => _selectedIndex = index),
-        children: [
-          for (final course in courses)
-            _YearLessonsView(levelId: level.id, course: course),
-        ],
+      body: _wrapBody(
+        PageView(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _selectedIndex = index),
+          children: [
+            for (final course in courses)
+              _YearLessonsView(levelId: level.id, course: course),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _wrapBody(Widget body) {
+    if (!widget.showPill) return body;
+    return PillNavOverlay(selected: PillTab.lessons, child: body);
   }
 }
 

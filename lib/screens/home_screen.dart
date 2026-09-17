@@ -57,8 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _buildHomeTab(),
-      bottomNavigationBar: const PillNavBar(selected: PillTab.home),
+      body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),
     );
   }
 
