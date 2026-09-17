@@ -1,0 +1,69 @@
+argomenti seconda superiore:
+FRATTE:
+
+MODULI:
+introduzione:
+- cos'è e cosa fa un modulo?
+    1. esempio solo numerico, sia con numeri positivi che negativi
+    2. esempio con espressione letterale (es. |x-3| se x valesse 5 ottengo 2 ma se valesse -10 ottengo +13) -> quindi di fatto fin quando x assume valore 3 o superiore il modulo è come se non servisse!
+- sottolineare sempre il segno per capire di pù la sua funzione
+- note: (è come se rimuovesse la parte del segno da un numero) 
+
+(opzionale) esempi con espressioni sui moduli:
+
+Equazioni/disequazioni con moduli singoli
+(DIsequazioni ed equazioni sono indipendenti dalla presenza di un modulo)
+- generalmente risolvere un equazione che ha un modulo ha come primo step lo <b>Studio del Modulo</b>
+    Lo studio del modulo ci fa chiedere quando l'argomento è positivo o al più uguale a zero.
+- questo ci permette di dividere la nostra equazione in due equazioni "simili" ma senza il modulo. (mostrare la doppia freccia)
+- appunto molto importante (quando si rimuove il modulo, poichè siamo nel caso negativo è importante inserire un meno a tutto il nostro modulo
+    poichè siamo sicuri che quello all'interno darà come risultato un numero negativo e quindi possiamo rimuovere il modulo solo se otteniamo 
+    la sua stessa funzione, ossia quella di rendere il tutto positivo)
+
+Equazioni/Disequazioni con moduli multipli
+
+
+grafici (rette/parabole) con moduli
+- mostrare molti esempi con differenza tra funzioni senza e poi con modulo per far capire il suo effetto (relativamente a moduli rispetto ad asse X o Y)
+- mostrare esempi che cambiano in toto la funzione a seconda di quale modulo viene considerata. generando cosi delle vere e proprie <b>Funzioni a tratti</b>
+
+problemi applicati alla realta sui moduli:
+- cercare su internet (fare anche affidamento alle pagine matematica blu, renderli anche interattivi o animati)
+
+Scheda riassuntiva su macro aree (es. tutti i moduli)
+- bigino scaricabile (solo premium) che riassume tutti i metodi sui moduli
+
+Spunti Innovativi:
+- sezione in cui si prende il concetto e lo si estende verso qualcosa di molto più avanzato cosi da stimolare lo studente
+
+RADICALI:
+introduzione:
+- cos'è un radicale? info e terminologia 
+    mostrare esempi numerici anche con diversi indici, mostrandone anche il risultato
+- condizioni di esistenza di un radicale ad indice pari (mostrare perchè)
+    aggiungere nota che per radicali ad indice dispari non c'è nessun problema
+- radicali ad indice pari sono sempre positivi
+    aggiungere nota che per radicali ad indice dispari possono invece avere qualsiasi segno
+
+equazioni con radicali:
+- equazione con radicale con indice GENERICO e fuori da radicale una componente sempre positiva (sia caso con numero che caso con lettere (e.s. x^2))
+    quando indice è pari allora mi comporto in un modo 
+    quando è dispari in un altro
+
+disequazioni con radicali:
+
+Note: e radicali con moduli come funzionano?
+
+
+CONDIZIONI DI ESISTENZA:
+recap di tutte le condizioni di esistenza presenti/possibili e dei casi mixed
+
+MAIN FOCUS:
+cercare di rimanere vicini alla struttura dei libri scolastici ma stringare i concetti per spiegare le cose chiave
+
+Novita:
+- aggiungere il widget della calcolatrice durante lo svolgimento di esercizi o lezioni guidate. il widget deve essere visibile in alto a destra con iconcina e andare in overlay ma permettendo all'utente di leggere il testo sopraù
+- esercizi flash, esercizi da fare a mente al volo. quasi minigiochi
+
+
+
