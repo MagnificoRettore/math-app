@@ -3,7 +3,7 @@
   "courses": [
     {
       "id": "ms-year1",
-      "title": "Anno 1",
+      "title": "prima",
       "subtitle": "Fondamenti",
       "sections": [
         {
@@ -86,7 +86,7 @@
     },
     {
       "id": "ms-year2",
-      "title": "Anno 2",
+      "title": "seconda",
       "subtitle": "Proporzioni ed equazioni",
       "sections": [
         {
@@ -150,7 +150,7 @@
     },
     {
       "id": "ms-year3",
-      "title": "Anno 3",
+      "title": "terza",
       "subtitle": "Geometria e statistica",
       "sections": [
         {

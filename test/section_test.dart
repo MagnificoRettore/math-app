@@ -7,9 +7,11 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
+import 'package:math_app/models/course.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/exercise_feed_screen.dart';
 import 'package:math_app/screens/year_exercises_screen.dart';
+import 'package:math_app/widgets/year_tabs.dart';
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -51,6 +53,34 @@ void main() {
     expect(moduli.topics.single.exercises, hasLength(2));
   });
 
+  test('gli anni sono etichettati con i nomi ordinali', () {
+    final highSchool = ContentRepository.instance.levelById('high-school')!;
+    expect(
+      highSchool.courses.map((c) => c.title),
+      ['prima', 'seconda', 'terza', 'quarta', 'quinta'],
+    );
+  });
+
+  test('yearCircleText mappa gli anni ordinali ai numeri romani', () {
+    expect(yearCircleText('prima'), 'I');
+    expect(yearCircleText('seconda'), 'II');
+    expect(yearCircleText('terza'), 'III');
+    expect(yearCircleText('quarta'), 'IV');
+    expect(yearCircleText('quinta'), 'V');
+  });
+
+  test('Course.fromJson legge l\'immagine opzionale e usa null di default', () {
+    final withImage = Course.fromJson({
+      'id': 'x',
+      'title': 'prima',
+      'image': 'assets/images/anno1.png',
+    });
+    expect(withImage.image, 'assets/images/anno1.png');
+
+    final without = Course.fromJson({'id': 'y', 'title': 'seconda'});
+    expect(without.image, isNull);
+  });
+
   testWidgets('anno: l\'elenco è piatto per argomento, con la card aggregata', (
     tester,
   ) async {
@@ -85,7 +115,7 @@ void main() {
   ) async {
     await _pumpHighSchool(tester);
 
-    await tester.tap(find.text('Anno 2'));
+    await tester.tap(find.text('seconda'));
     await tester.pumpAndSettle();
 
     expect(find.text('Equazioni di secondo grado'), findsOneWidget);

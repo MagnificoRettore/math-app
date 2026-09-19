@@ -24,6 +24,7 @@ class Lesson {
   final String subtitle;
   final String icon;
   final String introduction;
+  final String? image;
   final String completionMessage;
   final LessonAnimation animation;
   final String levelId;
@@ -38,6 +39,7 @@ class Lesson {
     required this.subtitle,
     required this.icon,
     required this.introduction,
+    this.image,
     required this.completionMessage,
     required this.animation,
     required this.levelId,
@@ -54,6 +56,7 @@ class Lesson {
       subtitle: json['subtitle'] as String? ?? '',
       icon: json['icon'] as String? ?? 'menu_book',
       introduction: json['introduction'] as String? ?? '',
+      image: json['image'] as String?,
       completionMessage: json['completionMessage'] as String? ?? '',
       animation: LessonAnimation.fromString(json['animation'] as String? ?? ''),
       levelId: json['level'] as String? ?? '',

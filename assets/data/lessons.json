@@ -10,6 +10,7 @@
       "section": "ms1-numbers",
       "animation": "pie",
       "introduction": "Le frazioni rappresentano parti di un intero. Tocca la torta qui sotto per giocare con la parte colorata, poi rispondi alle domande per procedere.",
+      "image": "assets/images/lesson-intro-fractions.png",
       "completionMessage": "Ottimo! Ora sai confrontare e sommare le frazioni.",
       "steps": [
         {

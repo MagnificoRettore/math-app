@@ -37,6 +37,7 @@ class YearTabs extends StatelessWidget {
                     _YearTab(
                       circleText: yearCircleText(course.title),
                       label: course.title,
+                      image: course.image,
                       selected: index == selectedIndex,
                       onTap: () => onSelected(index),
                     ),
@@ -60,6 +61,19 @@ String yearCircleText(String title) {
   ).firstMatch(title);
   if (roman != null) return roman.group(1)!.toUpperCase();
 
+  switch (title.toLowerCase().trim()) {
+    case 'prima':
+      return 'I';
+    case 'seconda':
+      return 'II';
+    case 'terza':
+      return 'III';
+    case 'quarta':
+      return 'IV';
+    case 'quinta':
+      return 'V';
+  }
+
   final words = title.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
   if (words.isEmpty) return '';
   if (words.length == 1) return words.first.substring(0, 1).toUpperCase();
@@ -69,12 +83,14 @@ String yearCircleText(String title) {
 class _YearTab extends StatelessWidget {
   final String circleText;
   final String label;
+  final String? image;
   final bool selected;
   final VoidCallback onTap;
 
   const _YearTab({
     required this.circleText,
     required this.label,
+    this.image,
     required this.selected,
     required this.onTap,
   });
@@ -82,6 +98,7 @@ class _YearTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final circleImage = image;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -111,14 +128,18 @@ class _YearTab extends StatelessWidget {
                     ]
                   : null,
             ),
-            child: Text(
-              circleText,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: selected ? Colors.white : c.textSecondary,
-              ),
-            ),
+            child: circleImage != null && circleImage.isNotEmpty
+                ? ClipOval(
+                    child: Image.asset(
+                      circleImage,
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) =>
+                          _CircleText(text: circleText, selected: selected),
+                    ),
+                  )
+                : _CircleText(text: circleText, selected: selected),
           ),
           const SizedBox(height: 5),
           ConstrainedBox(
@@ -136,6 +157,26 @@ class _YearTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CircleText extends StatelessWidget {
+  final String text;
+  final bool selected;
+
+  const _CircleText({required this.text, this.selected = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+        color: selected ? Colors.white : c.textSecondary,
       ),
     );
   }

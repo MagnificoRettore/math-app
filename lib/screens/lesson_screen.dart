@@ -228,30 +228,48 @@ class _LessonScreenState extends State<LessonScreen> {
 
   Widget _buildIntroduction() {
     final c = AppColors.of(context);
+    final image = widget.lesson.image;
     return AppCard(
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: c.accentSoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.lightbulb_outline, color: c.accent, size: 22),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: c.accentSoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.lightbulb_outline, color: c.accent, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  widget.lesson.introduction,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: c.textSecondary,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              widget.lesson.introduction,
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.4,
-                color: c.textSecondary,
+          if (image != null && image.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                image,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

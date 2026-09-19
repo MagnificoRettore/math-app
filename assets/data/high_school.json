@@ -3,8 +3,9 @@
   "courses": [
     {
       "id": "year1",
-      "title": "Anno 1",
+      "title": "prima",
       "subtitle": "Fondamenti",
+      "image": "assets/images/anno-prima.png",
       "sections": [
         {
           "id": "year1-numbers",
@@ -97,7 +98,7 @@
     },
     {
       "id": "year2",
-      "title": "Anno 2",
+      "title": "seconda",
       "subtitle": "Algebra e geometria",
       "sections": [
         {
@@ -147,6 +148,7 @@
               "title": "Moduli",
               "subtitle": "Variabile reale e valore assoluto",
               "icon": "functions",
+              "image": "assets/images/mondrian.jpg",
               "exercises": [
                 {
                   "id": "mod-easy-1",
@@ -195,13 +197,13 @@
     },
     {
       "id": "year3",
-      "title": "Anno 3",
+      "title": "terza",
       "subtitle": "Analisi del piano",
       "sections": []
     },
     {
       "id": "year4",
-      "title": "Anno 4",
+      "title": "quarta",
       "subtitle": "Esponenziali e logaritmi",
       "sections": [
         {
@@ -308,7 +310,7 @@
     },
     {
       "id": "year5",
-      "title": "Anno 5",
+      "title": "quinta",
       "subtitle": "Limiti, derivate e integrali",
       "sections": [
         {

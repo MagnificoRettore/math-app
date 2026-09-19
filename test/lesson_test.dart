@@ -105,6 +105,17 @@ void main() {
     });
     expect(without.yearId, '');
     expect(without.sectionId, '');
+    expect(without.image, isNull);
+  });
+
+  test('Lesson.fromJson legge la immagine opzionale di introduzione', () {
+    final withImage = Lesson.fromJson({
+      'id': 'z',
+      'title': 'Z',
+      'level': 'middle-school',
+      'image': 'assets/images/lesson-intro-fractions.png',
+    });
+    expect(withImage.image, 'assets/images/lesson-intro-fractions.png');
   });
 
   test('la sezione "Moduli" ha lezioni reali, complete e senza TODO', () {
@@ -160,12 +171,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Step anno: barra anni in alto (come ESERCIZI), Anno 1 già attivo
-      expect(find.text('Anno 1'), findsWidgets);
-      expect(find.text('Anno 2'), findsWidgets);
-      expect(find.text('Anno 3'), findsWidgets);
+      // Step anno: barra anni in alto (come ESERCIZI), prima già attivo
+      expect(find.text('prima'), findsWidgets);
+      expect(find.text('seconda'), findsWidgets);
+      expect(find.text('terza'), findsWidgets);
 
-      await tester.tap(find.text('Anno 2'));
+      await tester.tap(find.text('seconda'));
       await tester.pumpAndSettle();
 
       // Step argomento: un unico argomento "Moduli" con entrambe le lezioni
@@ -200,6 +211,11 @@ void main() {
     expect(find.textContaining('Passo 1 di'), findsOneWidget);
 
     // Passo 1 (multiple choice): risposta sbagliata → feedback immediato
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('option_1')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tapVisible(tester, find.byKey(const ValueKey('option_1')));
     expect(find.text('Non è corretto'), findsOneWidget);
     expect(find.text('Continua'), findsNothing);
@@ -266,6 +282,24 @@ void main() {
 
     expect(find.text('Animazione interattiva'), findsOneWidget);
     expect(find.text('Tocca la torta per esplorare'), findsOneWidget);
+  });
+
+  testWidgets('la card di introduzione mostra l\'immagine della lezione', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.lessons.firstWhere(
+      (l) => l.image != null && l.image!.isNotEmpty,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: LessonScreen(lesson: lesson),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsWidgets);
   });
 }
 

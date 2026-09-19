@@ -55,9 +55,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LessonListScreen), findsOneWidget);
-      expect(find.text('Anno 1'), findsWidgets);
-      expect(find.text('Anno 2'), findsWidgets);
-      expect(find.text('Anno 3'), findsWidgets);
+      expect(find.text('prima'), findsWidgets);
+      expect(find.text('seconda'), findsWidgets);
+      expect(find.text('terza'), findsWidgets);
       expect(find.text('Equazioni di primo grado'), findsNothing);
     },
   );
@@ -74,13 +74,13 @@ void main() {
 
       // Step anno: barra anni in alto (come ESERCIZI), Anno 1 già attivo
       expect(find.byType(LessonListScreen), findsOneWidget);
-      expect(find.text('Anno 1'), findsWidgets);
-      expect(find.text('Anno 2'), findsWidgets);
-      expect(find.text('Anno 3'), findsWidgets);
+      expect(find.text('prima'), findsWidgets);
+      expect(find.text('seconda'), findsWidgets);
+      expect(find.text('terza'), findsWidgets);
       expect(find.text('Frazioni'), findsOneWidget);
       expect(find.text('Teorema di Pitagora'), findsNothing);
 
-      // Step argomento → sezione → lezione (Anno 1, Scuola Media)
+      // Step argomento → sezione → lezione (prima, Scuola Media)
       await tester.tap(find.text('Frazioni'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Introduzione alle frazioni'));
@@ -94,14 +94,14 @@ void main() {
       expect(find.byType(LessonListScreen), findsOneWidget);
 
       // Anno 2: senza lezioni, pagina argomento vuota
-      await tester.tap(find.text('Anno 2'));
+      await tester.tap(find.text('seconda'));
       await tester.pumpAndSettle();
 
       expect(find.text('Nessuna lezione in questo anno'), findsOneWidget);
       expect(find.text('Introduzione alle frazioni'), findsNothing);
 
       // Anno 3: solo i propri argomenti
-      await tester.tap(find.text('Anno 3'));
+      await tester.tap(find.text('terza'));
       await tester.pumpAndSettle();
 
       expect(find.text('Teorema di Pitagora'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CourseScreen), findsOneWidget);
-      expect(find.text('Anno 1'), findsWidgets);
+      expect(find.text('prima'), findsWidgets);
       expect(find.text('Lezioni per scuola'), findsNothing);
     },
   );

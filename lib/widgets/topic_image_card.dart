@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import 'app_card.dart';
@@ -30,7 +32,10 @@ class TopicImageCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              TopicBackground(image: image, color: color),
+              ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                child: TopicBackground(image: image, color: color),
+              ),
               Positioned(
                 left: 16,
                 right: 16,
@@ -40,7 +45,7 @@ class TopicImageCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                     color: Colors.white,
