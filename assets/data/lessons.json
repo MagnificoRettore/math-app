@@ -98,47 +98,36 @@
     },
     {
       "id": "moduli-definition",
-      "title": "Il valore assoluto",
+      "title": "Definizione",
       "subtitle": "Definizione di modulo",
       "icon": "functions",
       "level": "high-school",
       "year": "year2",
       "section": "year2-moduli",
       "animation": "none",
-      "introduction": "Il valore assoluto (o modulo) di un numero è la sua distanza dallo zero sulla retta reale: è sempre positivo o nullo. Lo scopriamo insieme passo dopo passo.",
-      "completionMessage": "Perfetto! Sai calcolare il valore assoluto di un numero.",
+      "introduction": "Il modulo di un numero misura la sua distanza dallo zero sulla retta reale. Scopriamolo insieme passo dopo passo.",
+      "completionMessage": "Perfetto! Hai capito come funziona il modulo, anche con le lettere.",
       "steps": [
         {
-          "type": "multiple_choice",
-          "prompt": "Quanto vale $$\\lvert 5 \\rvert$$?",
-          "options": [
-            "5",
-            "-5",
-            "0",
-            "10"
+          "type": "info",
+          "prompt": "Il valore assoluto (o modulo) di un numero è la sua distanza dallo zero sulla retta reale: è sempre positivo o nullo.",
+          "formula": "$$|x| = \\begin{cases} x & \\text{se } x \\ge 0 \\\\ -x & \\text{se } x < 0 \\end{cases}$$",
+          "numberLine": { "min": -10, "max": 10, "values": [7, -7] },
+          "examples": [
+            { "expression": "$$|7| = 7$$", "note": "7 è positivo: dista 7 dallo zero.", "positive": true },
+            { "expression": "$$|-7| = 7$$", "note": "-7 è negativo: il modulo toglie il segno e la distanza è sempre 7.", "positive": false }
           ],
-          "correctIndex": 0,
-          "explanation": "|5| = 5 perché 5 è già positivo: il modulo è la distanza dallo zero."
+          "explanation": ""
         },
         {
-          "type": "multiple_choice",
-          "prompt": "Quanto vale $$\\lvert -3 \\rvert$$?",
-          "options": [
-            "3",
-            "-3",
-            "0",
-            "6"
+          "type": "info",
+          "prompt": "Dentro al modulo può esserci un'espressione: il modulo è sempre la distanza dallo zero dell'intera espressione.\n\nSostituisci il valore di x, calcola l'espressione e, se è negativa, togli il segno.",
+          "formula": "$$|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}$$",
+          "examples": [
+            { "expression": "$$x = 5 \\Rightarrow |5-3| = 2$$", "note": "5 − 3 = 2: positivo, il modulo non cambia nulla.", "positive": true },
+            { "expression": "$$x = -10 \\Rightarrow |-10-3| = 13$$", "note": "−10 − 3 = −13: negativo, il modulo toglie il segno.", "positive": false }
           ],
-          "correctIndex": 0,
-          "explanation": "Il modulo toglie il segno: |-3| = 3 perché -3 dista 3 dallo zero."
-        },
-        {
-          "type": "numeric",
-          "prompt": "Quanto vale $$\\lvert 0 \\rvert$$?",
-          "answers": [
-            "0"
-          ],
-          "explanation": "Lo zero dista 0 da se stesso: |0| = 0."
+          "explanation": ""
         }
       ],
       "topics": [

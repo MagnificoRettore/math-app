@@ -182,15 +182,14 @@ void main() {
       // Step argomento: un unico argomento "Moduli" con entrambe le lezioni
       expect(find.text('Moduli'), findsOneWidget);
       expect(find.text('Definizione'), findsNothing);
-      expect(find.text('Il valore assoluto'), findsNothing);
       expect(find.text('Equazioni con i moduli'), findsNothing);
 
       await tester.tap(find.text('Moduli'));
       await tester.pumpAndSettle();
 
-      // Step sezione: "Moduli" (titolo + intestazione) con entrambe le lezioni
-      expect(find.text('Moduli'), findsNWidgets(2));
-      expect(find.text('Il valore assoluto'), findsOneWidget);
+      // Step sezione: "Moduli" (solo intestazione di sfondo) con entrambe le lezioni
+      expect(find.text('Moduli'), findsOneWidget);
+      expect(find.text('Definizione'), findsOneWidget);
       expect(find.text('Equazioni con i moduli'), findsOneWidget);
     },
   );
@@ -264,6 +263,46 @@ void main() {
     await tapVisible(tester, find.text('Ripeti la lezione'));
     expect(find.textContaining('Passo 1 di'), findsOneWidget);
   });
+
+  testWidgets(
+    'la lezione Definizione parte con una pagina informativa senza interazione',
+    (tester) async {
+      final lesson = LessonRepository.instance.lessons.firstWhere(
+        (l) => l.id == 'moduli-definition',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: LessonScreen(lesson: lesson),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Primo passo: solo contenuto (definizione + esempio numerico), niente input
+      expect(find.text('Definizione'), findsAtLeastNWidgets(1));
+      expect(find.byType(TextField), findsNothing);
+      expect(find.byKey(const ValueKey('option_0')), findsNothing);
+      expect(find.text('Continua'), findsOneWidget);
+
+      // Il pulsante avanza alla seconda pagina informativa (espressione letterale)
+      await tapVisible(tester, find.text('Continua'));
+      // la lezione è in una ListView lazy: dopo lo scroll torna in cima per vedere l'intestazione
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, 1000));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Passo 2 di'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+      expect(find.byKey(const ValueKey('option_0')), findsNothing);
+
+      // Ultima pagina: Continua completa la lezione
+      await tapVisible(tester, find.text('Continua'));
+      expect(find.text('Lezione completata!'), findsOneWidget);
+      expect(
+        ProgressStore.instance.isLessonCompleted(lesson.levelId, lesson.id),
+        isTrue,
+      );
+    },
+  );
 
   testWidgets('la lezione con animazione mostra il visual interattivo', (
     tester,

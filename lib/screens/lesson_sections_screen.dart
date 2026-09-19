@@ -10,7 +10,6 @@ import '../models/topic.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/lesson_card.dart';
-import '../widgets/section_header.dart';
 import '../widgets/topic_background.dart';
 import 'lesson_screen.dart';
 
@@ -56,11 +55,10 @@ class LessonSectionsScreen extends StatelessWidget {
                 const SizedBox(height: 320, child: _EmptySections())
               else
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40),
+                  padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
                   child: Column(
                     children: [
-                      for (final group in groups) ...[
-                        SectionHeader(group.section.title),
+                      for (final group in groups)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
@@ -83,7 +81,6 @@ class LessonSectionsScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),

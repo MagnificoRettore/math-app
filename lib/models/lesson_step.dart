@@ -1,10 +1,14 @@
 enum LessonStepType {
+  info,
   multipleChoice,
   numeric,
   text;
 
   static LessonStepType fromString(String value) {
     switch (value.toLowerCase()) {
+      case 'info':
+      case 'definition':
+        return LessonStepType.info;
       case 'mcq':
       case 'multiple_choice':
         return LessonStepType.multipleChoice;
@@ -16,6 +20,48 @@ enum LessonStepType {
   }
 }
 
+class LessonExample {
+  final String expression;
+  final String note;
+  final bool positive;
+
+  const LessonExample({
+    required this.expression,
+    this.note = '',
+    this.positive = true,
+  });
+
+  factory LessonExample.fromJson(Map<String, dynamic> json) {
+    return LessonExample(
+      expression: json['expression'] as String? ?? '',
+      note: json['note'] as String? ?? '',
+      positive: json['positive'] as bool? ?? true,
+    );
+  }
+}
+
+class NumberLineSpec {
+  final int min;
+  final int max;
+  final List<int> values;
+
+  const NumberLineSpec({
+    required this.min,
+    required this.max,
+    required this.values,
+  });
+
+  factory NumberLineSpec.fromJson(Map<String, dynamic> json) {
+    return NumberLineSpec(
+      min: json['min'] as int? ?? -10,
+      max: json['max'] as int? ?? 10,
+      values: (json['values'] as List<dynamic>? ?? const [])
+          .map((e) => e as int)
+          .toList(),
+    );
+  }
+}
+
 class LessonStep {
   final LessonStepType type;
   final String prompt;
@@ -23,6 +69,9 @@ class LessonStep {
   final int correctIndex;
   final List<String> acceptedAnswers;
   final String explanation;
+  final String formula;
+  final List<LessonExample> examples;
+  final NumberLineSpec? numberLine;
 
   const LessonStep({
     required this.type,
@@ -31,6 +80,9 @@ class LessonStep {
     this.correctIndex = -1,
     this.acceptedAnswers = const [],
     this.explanation = '',
+    this.formula = '',
+    this.examples = const [],
+    this.numberLine,
   });
 
   factory LessonStep.fromJson(Map<String, dynamic> json) {
@@ -45,6 +97,13 @@ class LessonStep {
           .map((e) => e as String)
           .toList(),
       explanation: json['explanation'] as String? ?? '',
+      formula: json['formula'] as String? ?? '',
+      examples: (json['examples'] as List<dynamic>? ?? const [])
+          .map((e) => LessonExample.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      numberLine: json['numberLine'] == null
+          ? null
+          : NumberLineSpec.fromJson(json['numberLine'] as Map<String, dynamic>),
     );
   }
 

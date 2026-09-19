@@ -119,7 +119,8 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget _buildLesson() {
     final c = AppColors.of(context);
     final total = widget.lesson.steps.length;
-    final progress = (_stepIndex + (_solved ? 1 : 0)) / total;
+    final isInfoStep = _step.type == LessonStepType.info;
+    final progress = (_stepIndex + (_solved || isInfoStep ? 1 : 0)) / total;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -128,7 +129,9 @@ class _LessonScreenState extends State<LessonScreen> {
           _buildAnimationCard(),
           const SizedBox(height: 20),
         ],
-        if (_stepIndex == 0 && widget.lesson.introduction.isNotEmpty) ...[
+        if (_stepIndex == 0 &&
+            widget.lesson.introduction.isNotEmpty &&
+            _step.type != LessonStepType.info) ...[
           _buildIntroduction(),
           const SizedBox(height: 20),
         ],
@@ -306,6 +309,9 @@ class _StepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (step.type == LessonStepType.info) {
+      return _InfoContent(step: step, onContinue: onContinue);
+    }
     final c = AppColors.of(context);
     return AppCard(
       padding: const EdgeInsets.all(20),
@@ -438,6 +444,273 @@ class _StepCard extends StatelessWidget {
       ],
     );
   }
+}
+
+class _InfoContent extends StatelessWidget {
+  final LessonStep step;
+  final VoidCallback onContinue;
+
+  const _InfoContent({
+    required this.step,
+    required this.onContinue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: c.accentSoft,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.lightbulb_outline, color: c.accent, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Definizione',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          MathText(step.prompt, fontSize: 16),
+          if (step.numberLine != null) ...[
+            const SizedBox(height: 20),
+            _ModuloNumberLine(spec: step.numberLine!),
+          ],
+          if (step.formula.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _FormulaCallout(formula: step.formula),
+          ],
+          if (step.examples.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                for (final (i, example) in step.examples.indexed) ...[
+                  if (i > 0) const SizedBox(width: 12),
+                  Expanded(child: _ExampleCard(example: example)),
+                ],
+              ],
+            ),
+          ],
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: c.accent,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: onContinue,
+            icon: const Icon(Icons.arrow_forward, size: 18),
+            label: const Text(
+              'Continua',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FormulaCallout extends StatelessWidget {
+  final String formula;
+
+  const _FormulaCallout({required this.formula});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: c.accentSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.accent.withValues(alpha: 0.25)),
+      ),
+      child: Center(child: MathText(formula, fontSize: 17)),
+    );
+  }
+}
+
+class _ExampleCard extends StatelessWidget {
+  final LessonExample example;
+
+  const _ExampleCard({required this.example});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final color = example.positive ? c.easy : c.medium;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: MathText(example.expression, fontSize: 17),
+          ),
+          if (example.note.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              example.note,
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.35,
+                color: c.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ModuloNumberLine extends StatelessWidget {
+  final NumberLineSpec spec;
+
+  const _ModuloNumberLine({required this.spec});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return SizedBox(
+      height: 100,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _ModuloLinePainter(
+          spec: spec,
+          axisColor: c.border,
+          textColor: c.textSecondary,
+          highlight: c.accent,
+        ),
+      ),
+    );
+  }
+}
+
+class _ModuloLinePainter extends CustomPainter {
+  final NumberLineSpec spec;
+  final Color axisColor;
+  final Color textColor;
+  final Color highlight;
+
+  _ModuloLinePainter({
+    required this.spec,
+    required this.axisColor,
+    required this.textColor,
+    required this.highlight,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final left = 16.0;
+    final right = size.width - 16;
+    final axisY = size.height * 0.72;
+    double xFor(double v) =>
+        left + (v - spec.min) / (spec.max - spec.min) * (right - left);
+
+    final axis = Paint()
+      ..color = axisColor
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(left, axisY), Offset(right, axisY), axis);
+
+    final tick = Paint()
+      ..color = axisColor
+      ..strokeWidth = 1.4;
+    for (var v = spec.min; v <= spec.max; v++) {
+      final x = xFor(v.toDouble());
+      canvas.drawLine(Offset(x, axisY - 4), Offset(x, axisY + 4), tick);
+    }
+
+    final zeroX = xFor(0);
+    _label(canvas, '0', Offset(zeroX, axisY + 8), textColor, fontSize: 11);
+
+    final segment = Paint()
+      ..color = highlight.withValues(alpha: 0.30)
+      ..strokeWidth = 8
+      ..strokeCap = StrokeCap.round;
+    final dot = Paint()..color = highlight;
+
+    for (final v in spec.values) {
+      final x = xFor(v.toDouble());
+      canvas.drawLine(Offset(zeroX, axisY), Offset(x, axisY), segment);
+      canvas.drawCircle(Offset(x, axisY), 5, dot);
+      _label(
+        canvas,
+        v.abs().toString(),
+        Offset((zeroX + x) / 2, axisY - 34),
+        highlight,
+        fontSize: 14,
+        bold: true,
+      );
+      _label(
+        canvas,
+        v < 0 ? '−${v.abs()}' : '$v',
+        Offset(x, axisY + 8),
+        textColor,
+        fontSize: 11,
+      );
+    }
+  }
+
+  void _label(
+    Canvas canvas,
+    String text,
+    Offset anchor,
+    Color color, {
+    double fontSize = 11,
+    bool bold = false,
+  }) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: color,
+          fontWeight: bold ? FontWeight.w700 : FontWeight.w600,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(
+      canvas,
+      Offset(anchor.dx - painter.width / 2, anchor.dy),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ModuloLinePainter old) =>
+      old.spec.min != spec.min ||
+      old.spec.max != spec.max ||
+      old.spec.values != spec.values ||
+      old.axisColor != axisColor ||
+      old.textColor != textColor ||
+      old.highlight != highlight;
 }
 
 class _OptionTile extends StatelessWidget {
