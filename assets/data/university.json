@@ -5,108 +5,115 @@
       "id": "analysis1",
       "title": "Analisi I",
       "subtitle": "Limit, derivate, integrali",
-      "topics": [
+      "sections": [
         {
-          "id": "anal1-limits",
-          "title": "Limiti",
-          "subtitle": "Calcolo e teoremi",
-          "icon": "trending_up",
-          "exercises": [
+          "id": "anal1-analysis",
+          "title": "Analisi",
+          "subtitle": "",
+          "topics": [
             {
-              "id": "lim-easy-1",
-              "title": "Limite finito per sostituzione",
-              "difficulty": "easy",
-              "tags": ["limiti", "sostituzione"],
-              "problem": "Calcola il limite:\n\n$$\\lim_{x \\to 2} (3x^2 - 1)$$",
-              "formulas": [
-                "$$\\lim_{x \\to c} f(x)$$"
-              ],
-              "hints": [
-                "Per le funzioni polinomiali puoi sostituire direttamente il valore di x = c."
-              ],
-              "steps": [
-                "La funzione è polinomiale, quindi continua in x = 2 in tutto il dominio.",
-                "Sostituisci direttamente: $$3 \\cdot 2^2 - 1 = 3 \\cdot 4 - 1$$",
-                "Calcola: $$12 - 1 = 11$$",
-                "Quindi $$\\lim_{x \\to 2} (3x^2 - 1) = 11$$"
+              "id": "anal1-limits",
+              "title": "Limiti",
+              "subtitle": "Calcolo e teoremi",
+              "icon": "trending_up",
+              "exercises": [
+                {
+                  "id": "lim-easy-1",
+                  "title": "Limite finito per sostituzione",
+                  "difficulty": "easy",
+                  "tags": ["limiti", "sostituzione"],
+                  "problem": "Calcola il limite:\n\n$$\\lim_{x \\to 2} (3x^2 - 1)$$",
+                  "formulas": [
+                    "$$\\lim_{x \\to c} f(x)$$"
+                  ],
+                  "hints": [
+                    "Per le funzioni polinomiali puoi sostituire direttamente il valore di x = c."
+                  ],
+                  "steps": [
+                    "La funzione è polinomiale, quindi continua in x = 2 in tutto il dominio.",
+                    "Sostituisci direttamente: $$3 \\cdot 2^2 - 1 = 3 \\cdot 4 - 1$$",
+                    "Calcola: $$12 - 1 = 11$$",
+                    "Quindi $$\\lim_{x \\to 2} (3x^2 - 1) = 11$$"
+                  ]
+                },
+                {
+                  "id": "lim-medium-1",
+                  "title": "Limite notevole",
+                  "difficulty": "medium",
+                  "tags": ["limiti", "limite notevole", "seno"],
+                  "problem": "Calcola il limite notevole:\n\n$$\\lim_{x \\to 0} \\frac{\\sin x}{x}$$",
+                  "formulas": [
+                    "$$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$"
+                  ],
+                  "hints": [
+                    "Questo è un limite notevole fondamentale: la funzione seno diviso l'argomento.",
+                    "Non si tratta di una forma indeterminata del tipo 0/0 nel senso classico: va usato il teorema del confronto."
+                  ],
+                  "steps": [
+                    "L'espressione è una forma indeterminata 0/0 in x=0.",
+                    "Usando il limite notevole fondamentale, sappiamo che il seno è asintoticamente uguale al proprio argomento vicino a 0:",
+                    "$$\\sin x \\approx x \\quad \\text{per } x \\to 0$$",
+                    "Pertanto: $$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$"
+                  ]
+                }
               ]
             },
             {
-              "id": "lim-medium-1",
-              "title": "Limite notevole",
-              "difficulty": "medium",
-              "tags": ["limiti", "limite notevole", "seno"],
-              "problem": "Calcola il limite notevole:\n\n$$\\lim_{x \\to 0} \\frac{\\sin x}{x}$$",
-              "formulas": [
-                "$$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$"
-              ],
-              "hints": [
-                "Questo è un limite notevole fondamentale: la funzione seno diviso l'argomento.",
-                "Non si tratta di una forma indeterminata del tipo 0/0 nel senso classico: va usato il teorema del confronto."
-              ],
-              "steps": [
-                "L'espressione è una forma indeterminata 0/0 in x=0.",
-                "Usando il limite notevole fondamentale, sappiamo che il seno è asintoticamente uguale al proprio argomento vicino a 0:",
-                "$$\\sin x \\approx x \\quad \\text{per } x \\to 0$$",
-                "Pertanto: $$\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1$$"
+              "id": "anal1-derivatives",
+              "title": "Derivate",
+              "subtitle": "Regole e applicazioni",
+              "icon": "show_chart",
+              "exercises": [
+                {
+                  "id": "der-medium-1",
+                  "title": "Derivata di un polinomio",
+                  "difficulty": "medium",
+                  "tags": ["derivate", "polinomi"],
+                  "problem": "Calcola la derivata della funzione:\n\n$$f(x) = x^4 - 3x^2 + 5x - 7$$",
+                  "formulas": [
+                    "$$\\frac{d}{dx} x^n = n x^{n-1}$$"
+                  ],
+                  "hints": [
+                    "Applica la regola di derivazione di una potenza a ciascun termine.",
+                    "Il termine costante -7 ha derivata 0."
+                  ],
+                  "steps": [
+                    "Deriva termine per termine.",
+                    "Derivata di x^4: $$4x^3$$",
+                    "Derivata di -3x^2: $$-3 \\cdot 2x = -6x$$",
+                    "Derivata di 5x: 5. Derivata di -7: 0.",
+                    "Risultato finale: $$f'(x) = 4x^3 - 6x + 5$$"
+                  ]
+                }
               ]
-            }
-          ]
-        },
-        {
-          "id": "anal1-derivatives",
-          "title": "Derivate",
-          "subtitle": "Regole e applicazioni",
-          "icon": "show_chart",
-          "exercises": [
+            },
             {
-              "id": "der-medium-1",
-              "title": "Derivata di un polinomio",
-              "difficulty": "medium",
-              "tags": ["derivate", "polinomi"],
-              "problem": "Calcola la derivata della funzione:\n\n$$f(x) = x^4 - 3x^2 + 5x - 7$$",
-              "formulas": [
-                "$$\\frac{d}{dx} x^n = n x^{n-1}$$"
-              ],
-              "hints": [
-                "Applica la regola di derivazione di una potenza a ciascun termine.",
-                "Il termine costante -7 ha derivata 0."
-              ],
-              "steps": [
-                "Deriva termine per termine.",
-                "Derivata di x^4: $$4x^3$$",
-                "Derivata di -3x^2: $$-3 \\cdot 2x = -6x$$",
-                "Derivata di 5x: 5. Derivata di -7: 0.",
-                "Risultato finale: $$f'(x) = 4x^3 - 6x + 5$$"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "anal1-integrals",
-          "title": "Integrali",
-          "subtitle": "Integrali definiti e indefiniti",
-          "icon": "calculate",
-          "exercises": [
-            {
-              "id": "int-hard-1",
-              "title": "Integrazione per parti",
-              "difficulty": "hard",
-              "tags": ["integrali", "integrazione per parti"],
-              "problem": "Calcola l'integrale indefinito:\n\n$$\\int x \\, e^x \\, dx$$",
-              "formulas": [
-                "$$\\int u \\, dv = uv - \\int v \\, du$$"
-              ],
-              "hints": [
-                "Usa l'integrazione per parti scegliendo u = x e dv = e^x dx.",
-                "La derivata di x è semplice (1), mentre l'integrale di e^x è se stesso."
-              ],
-              "steps": [
-                "Applica l'integrazione per parti: scegli u = x e dv = e^x dx.",
-                "Calcola du = dx e v = e^x.",
-                "Applica la formula: $$\\int x e^x dx = x e^x - \\int e^x dx$$",
-                "Integra: $$\\int e^x dx = e^x$$",
-                "Risultato: $$x e^x - e^x + C = e^x (x - 1) + C$$"
+              "id": "anal1-integrals",
+              "title": "Integrali",
+              "subtitle": "Integrali definiti e indefiniti",
+              "icon": "calculate",
+              "exercises": [
+                {
+                  "id": "int-hard-1",
+                  "title": "Integrazione per parti",
+                  "difficulty": "hard",
+                  "tags": ["integrali", "integrazione per parti"],
+                  "problem": "Calcola l'integrale indefinito:\n\n$$\\int x \\, e^x \\, dx$$",
+                  "formulas": [
+                    "$$\\int u \\, dv = uv - \\int v \\, du$$"
+                  ],
+                  "hints": [
+                    "Usa l'integrazione per parti scegliendo u = x e dv = e^x dx.",
+                    "La derivata di x è semplice (1), mentre l'integrale di e^x è se stesso."
+                  ],
+                  "steps": [
+                    "Applica l'integrazione per parti: scegli u = x e dv = e^x dx.",
+                    "Calcola du = dx e v = e^x.",
+                    "Applica la formula: $$\\int x e^x dx = x e^x - \\int e^x dx$$",
+                    "Integra: $$\\int e^x dx = e^x$$",
+                    "Risultato: $$x e^x - e^x + C = e^x (x - 1) + C$$"
+                  ]
+                }
               ]
             }
           ]
@@ -117,29 +124,36 @@
       "id": "linear-algebra",
       "title": "Algebra Lineare",
       "subtitle": "Matrici e vettori",
-      "topics": [
+      "sections": [
         {
-          "id": "algeo-matrices",
-          "title": "Matrici",
-          "subtitle": "Operazioni e determinanti",
-          "icon": "grid_on",
-          "exercises": [
+          "id": "algeb-matrices",
+          "title": "Matrici e vettori",
+          "subtitle": "",
+          "topics": [
             {
-              "id": "mat-easy-1",
-              "title": "Prodotto matriciale",
-              "difficulty": "easy",
-              "tags": ["matrici", "prodotto"],
-              "problem": "Calcola il prodotto delle matrici:\n\n$$\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 5 & 6 \\\\ 7 & 8 \\end{pmatrix}$$",
-              "formulas": [],
-              "hints": [
-                "Il prodotto riga × colonna: per l'elemento (1,1) moltiplica la prima riga della prima matrice per la prima colonna della seconda."
-              ],
-              "steps": [
-                "Elemento (1,1): 1·5 + 2·7 = 5 + 14 = 19.",
-                "Elemento (1,2): 1·6 + 2·8 = 6 + 16 = 22.",
-                "Elemento (2,1): 3·5 + 4·7 = 15 + 28 = 43.",
-                "Elemento (2,2): 3·6 + 4·8 = 18 + 32 = 50.",
-                "Risultato: $$\\begin{pmatrix} 19 & 22 \\\\ 43 & 50 \\end{pmatrix}$$"
+              "id": "algeo-matrices",
+              "title": "Matrici",
+              "subtitle": "Operazioni e determinanti",
+              "icon": "grid_on",
+              "exercises": [
+                {
+                  "id": "mat-easy-1",
+                  "title": "Prodotto matriciale",
+                  "difficulty": "easy",
+                  "tags": ["matrici", "prodotto"],
+                  "problem": "Calcola il prodotto delle matrici:\n\n$$\\begin{pmatrix} 1 & 2 \\\\ 3 & 4 \\end{pmatrix} \\cdot \\begin{pmatrix} 5 & 6 \\\\ 7 & 8 \\end{pmatrix}$$",
+                  "formulas": [],
+                  "hints": [
+                    "Il prodotto riga × colonna: per l'elemento (1,1) moltiplica la prima riga della prima matrice per la prima colonna della seconda."
+                  ],
+                  "steps": [
+                    "Elemento (1,1): 1·5 + 2·7 = 5 + 14 = 19.",
+                    "Elemento (1,2): 1·6 + 2·8 = 6 + 16 = 22.",
+                    "Elemento (2,1): 3·5 + 4·7 = 15 + 28 = 43.",
+                    "Elemento (2,2): 3·6 + 4·8 = 18 + 32 = 50.",
+                    "Risultato: $$\\begin{pmatrix} 19 & 22 \\\\ 43 & 50 \\end{pmatrix}$$"
+                  ]
+                }
               ]
             }
           ]
@@ -150,39 +164,46 @@
       "id": "probability",
       "title": "Probabilità",
       "subtitle": "Calcolo delle probabilità",
-      "topics": [
+      "sections": [
         {
-          "id": "prob-basics",
-          "title": "Probabilità elementare",
-          "subtitle": "Eventi e probabilità",
-          "icon": "casino",
-          "exercises": [
+          "id": "prob-calc",
+          "title": "Calcolo delle probabilità",
+          "subtitle": "",
+          "topics": [
             {
-              "id": "prob-easy-1",
-              "title": "Probabilità di un evento semplice",
-              "difficulty": "easy",
-              "tags": ["probabilità", "eventi"],
-              "problem": "Qual è la probabilità di ottenere un numero pari lanciando un dado a 6 facce?",
-              "formulas": [
-                "$$P(E) = \\frac{\\text{casi favorevoli}}{\\text{casi possibili}}$$"
-              ],
-              "hints": [
-                "Conta i numeri pari tra 1 e 6."
-              ],
-              "steps": [
-                "Gli esiti possibili sono 6: {1,2,3,4,5,6}.",
-                "I casi favorevoli (pari) sono {2,4,6}, cioè 3 casi.",
-                "Probabilità: $$P = \\frac{3}{6} = \\frac{1}{2}$$"
+              "id": "prob-basics",
+              "title": "Probabilità elementare",
+              "subtitle": "Eventi e probabilità",
+              "icon": "casino",
+              "exercises": [
+                {
+                  "id": "prob-easy-1",
+                  "title": "Probabilità di un evento semplice",
+                  "difficulty": "easy",
+                  "tags": ["probabilità", "eventi"],
+                  "problem": "Qual è la probabilità di ottenere un numero pari lanciando un dado a 6 facce?",
+                  "formulas": [
+                    "$$P(E) = \\frac{\\text{casi favorevoli}}{\\text{casi possibili}}$$"
+                  ],
+                  "hints": [
+                    "Conta i numeri pari tra 1 e 6."
+                  ],
+                  "steps": [
+                    "Gli esiti possibili sono 6: {1,2,3,4,5,6}.",
+                    "I casi favorevoli (pari) sono {2,4,6}, cioè 3 casi.",
+                    "Probabilità: $$P = \\frac{3}{6} = \\frac{1}{2}$$"
+                  ]
+                }
               ]
+            },
+            {
+              "id": "prob-conditional",
+              "title": "Probabilità condizionata",
+              "subtitle": "Formula di Bayes",
+              "icon": "account_tree",
+              "exercises": []
             }
           ]
-        },
-        {
-          "id": "prob-conditional",
-          "title": "Probabilità condizionata",
-          "subtitle": "Formula di Bayes",
-          "icon": "account_tree",
-          "exercises": []
         }
       ]
     }

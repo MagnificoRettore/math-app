@@ -23,6 +23,12 @@ class LessonRepository {
         .toList();
   }
 
+  List<Lesson> lessonsInSection(String levelId, String sectionId) {
+    return _lessons
+        .where((l) => l.levelId == levelId && l.sectionId == sectionId)
+        .toList();
+  }
+
   Future<void> load() async {
     if (_loaded) return;
     _loadError = null;

@@ -6,6 +6,7 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson.dart';
+import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
 
@@ -41,6 +42,20 @@ void main() {
     }
   });
 
+  test('ogni lezione è assegnata a una sezione del proprio anno', () {
+    final content = ContentRepository.instance;
+    for (final lesson in LessonRepository.instance.lessons) {
+      expect(lesson.sectionId, isNotEmpty, reason: lesson.id);
+      final level = content.levelById(lesson.levelId)!;
+      final course = level.courses.firstWhere((c) => c.id == lesson.yearId);
+      expect(
+        course.sections.any((s) => s.id == lesson.sectionId),
+        isTrue,
+        reason: '${lesson.id}: sezione ${lesson.sectionId} non nell\'anno',
+      );
+    }
+  });
+
   test('lessonsInYear filtra per livello e anno', () {
     final repo = LessonRepository.instance;
 
@@ -55,14 +70,33 @@ void main() {
     expect(repo.lessonsInYear('university', 'analysis1'), isEmpty);
   });
 
-  test('Lesson.fromJson legge year e usa vuoto come default', () {
-    final withYear = Lesson.fromJson({
+  test('lessonsInSection filtra per livello e sezione', () {
+    final repo = LessonRepository.instance;
+
+    final moduli = repo.lessonsInSection('high-school', 'year2-moduli');
+    expect(
+      moduli.map((l) => l.id),
+      containsAll(['moduli-definition', 'moduli-equations']),
+    );
+    expect(moduli.every((l) => l.sectionId == 'year2-moduli'), isTrue);
+
+    expect(repo.lessonsInSection('high-school', 'year1-numbers'), isEmpty);
+    expect(
+      repo.lessonsInSection('middle-school', 'ms3-geometry').map((l) => l.id),
+      contains('pythagoras'),
+    );
+  });
+
+  test('Lesson.fromJson legge sezione e anno e usa vuoto come default', () {
+    final withSection = Lesson.fromJson({
       'id': 'x',
       'title': 'X',
       'level': 'high-school',
       'year': 'year2',
+      'section': 'year2-moduli',
     });
-    expect(withYear.yearId, 'year2');
+    expect(withSection.yearId, 'year2');
+    expect(withSection.sectionId, 'year2-moduli');
 
     final without = Lesson.fromJson({
       'id': 'y',
@@ -70,6 +104,36 @@ void main() {
       'level': 'high-school',
     });
     expect(without.yearId, '');
+    expect(without.sectionId, '');
+  });
+
+  test('la sezione "Moduli" ha lezioni reali, complete e senza TODO', () {
+    final repo = LessonRepository.instance;
+    final moduli = repo.lessonsInSection('high-school', 'year2-moduli');
+    expect(moduli, hasLength(2));
+
+    for (final lesson in moduli) {
+      expect(lesson.subtitle, isNot(contains('[TODO]')), reason: lesson.id);
+      expect(lesson.introduction, isNot(contains('[TODO]')), reason: lesson.id);
+      expect(
+        lesson.completionMessage,
+        isNot(contains('[TODO]')),
+        reason: lesson.id,
+      );
+      expect(lesson.steps, isNotEmpty, reason: lesson.id);
+      for (final step in lesson.steps) {
+        expect(step.prompt, isNot(contains('[TODO]')), reason: lesson.id);
+        expect(step.explanation, isNot(contains('[TODO]')), reason: lesson.id);
+      }
+    }
+
+    final definition = moduli.singleWhere((l) => l.id == 'moduli-definition');
+    expect(definition.topics, contains('year2-moduli-definition'));
+
+    final equations = moduli.singleWhere((l) => l.id == 'moduli-equations');
+    expect(equations.topics, contains('year2-moduli-definition'));
+    expect(equations.steps[1].checkAnswer('5'), isTrue);
+    expect(equations.steps[1].checkAnswer('-1'), isTrue);
   });
 
   test('checkAnswer confronta numeri e frazioni', () {
@@ -84,6 +148,41 @@ void main() {
     expect(sumStep.checkAnswer('2'), isFalse);
     expect(sumStep.checkAnswer(''), isFalse);
   });
+
+  testWidgets(
+    'il flusso lezioni è a cascata: anno (tab) → argomento → sezione',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const LessonListScreen(levelId: 'high-school'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Step anno: barra anni in alto (come ESERCIZI), Anno 1 già attivo
+      expect(find.text('Anno 1'), findsWidgets);
+      expect(find.text('Anno 2'), findsWidgets);
+      expect(find.text('Anno 3'), findsWidgets);
+
+      await tester.tap(find.text('Anno 2'));
+      await tester.pumpAndSettle();
+
+      // Step argomento: un unico argomento "Moduli" con entrambe le lezioni
+      expect(find.text('Moduli'), findsOneWidget);
+      expect(find.text('Definizione'), findsNothing);
+      expect(find.text('Il valore assoluto'), findsNothing);
+      expect(find.text('Equazioni con i moduli'), findsNothing);
+
+      await tester.tap(find.text('Moduli'));
+      await tester.pumpAndSettle();
+
+      // Step sezione: "Moduli" (titolo + intestazione) con entrambe le lezioni
+      expect(find.text('Moduli'), findsNWidgets(2));
+      expect(find.text('Il valore assoluto'), findsOneWidget);
+      expect(find.text('Equazioni con i moduli'), findsOneWidget);
+    },
+  );
 
   testWidgets('flusso completo di una lezione', (tester) async {
     final lesson = LessonRepository.instance.lessons.first;

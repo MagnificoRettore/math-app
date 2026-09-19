@@ -2,6 +2,7 @@ import '../models/course.dart';
 import '../models/exercise.dart';
 import '../models/lesson.dart';
 import '../models/level.dart';
+import '../models/section.dart';
 import '../models/topic.dart';
 
 enum ResultType { topic, exercise, lesson }
@@ -10,6 +11,7 @@ class SearchResult {
   final ResultType type;
   final Level? level;
   final Course? course;
+  final Section? section;
   final Topic? topic;
   final Exercise? exercise;
   final Lesson? lesson;
@@ -18,6 +20,7 @@ class SearchResult {
     required this.type,
     this.level,
     this.course,
+    this.section,
     this.topic,
     this.exercise,
     this.lesson,
@@ -34,25 +37,29 @@ class SearchIndex {
     _results.clear();
     for (final level in levels) {
       for (final course in level.courses) {
-        for (final topic in course.topics) {
-          _results.add(
-            SearchResult(
-              type: ResultType.topic,
-              level: level,
-              course: course,
-              topic: topic,
-            ),
-          );
-          for (final exercise in topic.exercises) {
+        for (final section in course.sections) {
+          for (final topic in section.topics) {
             _results.add(
               SearchResult(
-                type: ResultType.exercise,
+                type: ResultType.topic,
                 level: level,
                 course: course,
+                section: section,
                 topic: topic,
-                exercise: exercise,
               ),
             );
+            for (final exercise in topic.exercises) {
+              _results.add(
+                SearchResult(
+                  type: ResultType.exercise,
+                  level: level,
+                  course: course,
+                  section: section,
+                  topic: topic,
+                  exercise: exercise,
+                ),
+              );
+            }
           }
         }
       }
@@ -82,6 +89,7 @@ class SearchIndex {
       case ResultType.topic:
         final topic = result.topic!;
         final haystack = [
+          result.section?.title ?? '',
           topic.title,
           topic.subtitle,
           ...topic.exercises.expand((e) => [e.title, ...e.tags]),

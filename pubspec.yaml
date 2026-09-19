@@ -33,7 +33,6 @@ dependencies:
 
   flutter_math_fork: ^0.7.4
   shared_preferences: ^2.5.5
-  rive: ^0.14.11
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +58,6 @@ flutter:
 
   assets:
     - assets/data/
-    - assets/rive/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

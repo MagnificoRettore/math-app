@@ -18,7 +18,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 |---|---|
 | `flutter run` | Run the app (dev) |
 | `flutter analyze` | Static analysis — must stay at **0 issues** |
-| `flutter test` | Run all unit + widget tests (58 tests / 9 files) |
+| `flutter test` | Run all unit + widget tests (68 tests / 11 files) |
 | `flutter test --coverage` | Generate coverage report |
 | `dart format .` | Format code |
 | `flutter pub get` | Install dependencies |
@@ -31,22 +31,24 @@ lib/
   main.dart              # entry: loads content + progress + profile + search index
   app.dart               # MathApp (MaterialApp + theme)
   theme/                 # app_theme.dart, app_colors.dart
-  models/                # plain Dart data classes (level, course, topic, exercise,
-                         # difficulty, progress, lesson, lesson_step, user_profile,
-                         # weak_topic)
+  models/                # plain Dart data classes (level, course, section, topic,
+                         # exercise, difficulty, progress, lesson, lesson_step,
+                         # user_profile, weak_topic)
   data/                  # repositories + stores (singletons): content_repository,
                          # lesson_repository, progress_store, auth_store,
                          # settings_store, study_store, search_index,
                          # recommendation_engine, weak_topic_engine
-  screens/               # full-page widgets (home, course, topic, exercise_feed,
+  screens/               # full-page widgets (home, course, exercise_feed,
                          # exercise_detail, bookmarks, search_results, splash,
-                         # mission, lesson_list, lesson, welcome, registration,
+                         # mission, lesson_list, lesson, lesson_topics, lesson_sections,
+                         # welcome, registration,
                          # school_picker, profile, onboarding, weak_points,
-                         # weak_topic)
+                         # weak_topic, year_exercises)
   widgets/               # reusable UI components (app_card, math_text, progress_bar,
                          # difficulty_badge, topic_row,
                          # exercise_card, lesson_card, section_header, mission_hero,
                          # recommended_section, pill_nav_bar, school_level_tile,
+                         # home_greeting,
                          # school_choice_sheet, streak_card, animated_fraction_pie,
                          # animated_number_line, app_session_observer,
                          # weak_topic_row, weak_topics_section, year_tabs)

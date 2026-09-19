@@ -40,14 +40,6 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.exercise.title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
         actions: [
           ListenableBuilder(
             listenable: ProgressStore.instance,

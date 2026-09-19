@@ -11,6 +11,7 @@ import 'package:math_app/data/study_store.dart';
 import 'package:math_app/models/progress.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/weak_points_screen.dart';
+import 'package:math_app/screens/weak_topic_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/weak_topic_row.dart';
 
@@ -90,7 +91,7 @@ void main() {
     await tester.tap(find.byType(WeakTopicRow));
     await tester.pumpAndSettle();
 
-    expect(find.text('Frazioni'), findsOneWidget);
+    expect(find.byType(WeakTopicScreen), findsOneWidget);
     expect(find.text('Progresso'), findsOneWidget);
     expect(find.text('Ripassa'), findsOneWidget);
     expect(find.text('Introduzione alle frazioni'), findsOneWidget);
@@ -123,7 +124,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(WeakPointsScreen), findsOneWidget);
-    expect(find.text('I tuoi punti deboli'), findsOneWidget);
     expect(find.byType(WeakTopicRow), findsNWidgets(4));
   });
 

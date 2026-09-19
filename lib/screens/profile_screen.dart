@@ -15,18 +15,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Profilo',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: PillNavOverlay(
         selected: PillTab.profile,
         child: ListenableBuilder(

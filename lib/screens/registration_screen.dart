@@ -31,16 +31,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Registrazione',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [

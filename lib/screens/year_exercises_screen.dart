@@ -10,23 +10,17 @@ import '../theme/app_colors.dart';
 import '../widgets/exercise_card.dart';
 import 'exercise_detail_screen.dart';
 
-class ExerciseFeedScreen extends StatefulWidget {
+class YearExercisesScreen extends StatefulWidget {
   final Level level;
   final Course course;
-  final Topic topic;
 
-  const ExerciseFeedScreen({
-    super.key,
-    required this.level,
-    required this.course,
-    required this.topic,
-  });
+  const YearExercisesScreen({super.key, required this.level, required this.course});
 
   @override
-  State<ExerciseFeedScreen> createState() => _ExerciseFeedScreenState();
+  State<YearExercisesScreen> createState() => _YearExercisesScreenState();
 }
 
-class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
+class _YearExercisesScreenState extends State<YearExercisesScreen> {
   Difficulty? _filter;
 
   @override
@@ -36,10 +30,10 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {
-          final exercises = _filter == null
-              ? widget.topic.exercises
-              : widget.topic.exercises
-                    .where((e) => e.difficulty == _filter)
+          final entries = _filter == null
+              ? _allEntries()
+              : _allEntries()
+                    .where((e) => e.exercise.difficulty == _filter)
                     .toList();
 
           return ListView(
@@ -47,18 +41,18 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
             children: [
               _buildFilterChips(),
               const SizedBox(height: 12),
-              for (final exercise in exercises)
+              for (final entry in entries)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ExerciseCard(
-                    exercise: exercise,
+                    exercise: entry.exercise,
                     bookmarked: ProgressStore.instance.isBookmarked(
-                      exercise.id,
+                      entry.exercise.id,
                     ),
-                    status: ProgressStore.instance.statusOf(exercise.id),
-                    onToggleBookmark: (val) =>
-                        ProgressStore.instance.toggleBookmark(exercise.id),
-                    onTap: () => _openExercise(exercise),
+                    status: ProgressStore.instance.statusOf(entry.exercise.id),
+                    onToggleBookmark: (val) => ProgressStore.instance
+                        .toggleBookmark(entry.exercise.id),
+                    onTap: () => _openExercise(entry),
                   ),
                 ),
             ],
@@ -104,16 +98,32 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
     );
   }
 
-  void _openExercise(Exercise exercise) {
+  List<_Entry> _allEntries() {
+    return [
+      for (final section in widget.course.sections)
+        for (final topic in section.topics)
+          for (final exercise in topic.exercises)
+            _Entry(topic: topic, exercise: exercise),
+    ];
+  }
+
+  void _openExercise(_Entry entry) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => ExerciseDetailScreen(
           level: widget.level,
           course: widget.course,
-          topic: widget.topic,
-          exercise: exercise,
+          topic: entry.topic,
+          exercise: entry.exercise,
         ),
       ),
     );
   }
+}
+
+class _Entry {
+  final Topic topic;
+  final Exercise exercise;
+
+  const _Entry({required this.topic, required this.exercise});
 }

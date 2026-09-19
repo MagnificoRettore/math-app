@@ -27,18 +27,8 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.weakTopic.topic.title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {

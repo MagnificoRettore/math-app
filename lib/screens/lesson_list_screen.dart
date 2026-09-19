@@ -5,11 +5,13 @@ import '../data/lesson_repository.dart';
 import '../data/progress_store.dart';
 import '../models/course.dart';
 import '../models/lesson.dart';
-import '../theme/app_colors.dart';
 import '../widgets/lesson_card.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/year_tabs.dart';
+import '../theme/app_colors.dart';
 import 'lesson_screen.dart';
+import 'lesson_sections_screen.dart';
+import 'lesson_topics_screen.dart';
 
 class LessonListScreen extends StatefulWidget {
   final String? levelId;
@@ -39,16 +41,11 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
   void _selectYear(int index) {
     setState(() => _selectedIndex = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutCubic,
-    );
+    _pageController.jumpToPage(index);
   }
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     final levelId = widget.levelId;
     final level = levelId == null
         ? null
@@ -58,16 +55,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
     if (level == null || courses.isEmpty) {
       final lessons = LessonRepository.instance.lessons;
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Lezioni interattive',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color: c.textPrimary,
-            ),
-          ),
-        ),
+        appBar: AppBar(),
         body: _wrapBody(
           lessons.isEmpty
               ? const _EmptyLessons(
@@ -82,14 +70,6 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Lezioni · ${level.title}',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
@@ -105,7 +85,20 @@ class _LessonListScreenState extends State<LessonListScreen> {
           onPageChanged: (index) => setState(() => _selectedIndex = index),
           children: [
             for (final course in courses)
-              _YearLessonsView(levelId: level.id, course: course),
+              LessonTopicsList(
+                level: level,
+                course: course,
+                onSelectArgument: (title, topic) => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => LessonSectionsScreen(
+                      level: level,
+                      course: course,
+                      title: title,
+                      topic: topic,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -115,20 +108,6 @@ class _LessonListScreenState extends State<LessonListScreen> {
   Widget _wrapBody(Widget body) {
     if (!widget.showPill) return body;
     return PillNavOverlay(selected: PillTab.lessons, child: body);
-  }
-}
-
-class _YearLessonsView extends StatelessWidget {
-  final String levelId;
-  final Course course;
-
-  const _YearLessonsView({required this.levelId, required this.course});
-
-  @override
-  Widget build(BuildContext context) {
-    final lessons = LessonRepository.instance.lessonsInYear(levelId, course.id);
-    if (lessons.isEmpty) return const SizedBox.expand();
-    return _LessonsList(lessons: lessons);
   }
 }
 

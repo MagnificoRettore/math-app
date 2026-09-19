@@ -12,18 +12,8 @@ class WeakPointsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'I tuoi punti deboli',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {

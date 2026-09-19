@@ -7,10 +7,12 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
+import 'package:math_app/screens/bookmarks_screen.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
-import 'package:math_app/widgets/lesson_card.dart';
+import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
@@ -30,10 +32,8 @@ Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Finder _pillIcon(IconData icon) => find.descendant(
-  of: find.byType(PillNavBar),
-  matching: find.byIcon(icon),
-);
+Finder _pillIcon(IconData icon) =>
+    find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -54,40 +54,60 @@ void main() {
       await tester.tap(find.text('Scuola Media').last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
-      expect(find.text('Introduzione alle frazioni'), findsOneWidget);
+      expect(find.byType(LessonListScreen), findsOneWidget);
+      expect(find.text('Anno 1'), findsWidgets);
+      expect(find.text('Anno 2'), findsWidgets);
+      expect(find.text('Anno 3'), findsWidgets);
       expect(find.text('Equazioni di primo grado'), findsNothing);
     },
   );
 
-  testWidgets('ospite: le lezioni sono divise per anno come gli esercizi', (
-    tester,
-  ) async {
-    await _pumpHome(tester);
+  testWidgets(
+    'ospite: le lezioni hanno la barra anni e poi argomento e sezione',
+    (tester) async {
+      await _pumpHome(tester);
 
-    await tester.tap(find.text('LEZIONI'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Scuola Media').last);
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('LEZIONI'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Scuola Media').last);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
-    expect(find.text('Anno 1'), findsWidgets);
-    expect(find.text('Anno 3'), findsWidgets);
-    expect(find.text('Introduzione alle frazioni'), findsOneWidget);
-    expect(find.text('Teorema di Pitagora'), findsNothing);
+      // Step anno: barra anni in alto (come ESERCIZI), Anno 1 già attivo
+      expect(find.byType(LessonListScreen), findsOneWidget);
+      expect(find.text('Anno 1'), findsWidgets);
+      expect(find.text('Anno 2'), findsWidgets);
+      expect(find.text('Anno 3'), findsWidgets);
+      expect(find.text('Frazioni'), findsOneWidget);
+      expect(find.text('Teorema di Pitagora'), findsNothing);
 
-    await tester.tap(find.text('Anno 2').first);
-    await tester.pumpAndSettle();
+      // Step argomento → sezione → lezione (Anno 1, Scuola Media)
+      await tester.tap(find.text('Frazioni'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Introduzione alle frazioni'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LessonScreen), findsOneWidget);
 
-    expect(find.byType(LessonCard), findsNothing);
-    expect(find.text('Introduzione alle frazioni'), findsNothing);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(LessonListScreen), findsOneWidget);
 
-    await tester.tap(find.text('Anno 3').first);
-    await tester.pumpAndSettle();
+      // Anno 2: senza lezioni, pagina argomento vuota
+      await tester.tap(find.text('Anno 2'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Teorema di Pitagora'), findsOneWidget);
-    expect(find.text('Introduzione alle frazioni'), findsNothing);
-  });
+      expect(find.text('Nessuna lezione in questo anno'), findsOneWidget);
+      expect(find.text('Introduzione alle frazioni'), findsNothing);
+
+      // Anno 3: solo i propri argomenti
+      await tester.tap(find.text('Anno 3'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Teorema di Pitagora'), findsOneWidget);
+      expect(find.text('Introduzione alle frazioni'), findsNothing);
+    },
+  );
 
   testWidgets(
     'loggato: ESERCIZI apre subito la pagina della scuola del profilo',
@@ -105,7 +125,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CourseScreen), findsOneWidget);
-      expect(find.text('Scuola Superiore'), findsOneWidget);
+      expect(find.text('Anno 1'), findsWidgets);
       expect(find.text('Lezioni per scuola'), findsNothing);
     },
   );
@@ -119,14 +139,14 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Scuola Media').last);
       await tester.pumpAndSettle();
-      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+      expect(find.byType(LessonListScreen), findsOneWidget);
 
       await tester.tap(find.text('ESERCIZI'));
       await tester.pumpAndSettle();
 
       expect(find.text('Esercizi per scuola'), findsOneWidget);
-      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
-      expect(find.text('Matematica'), findsNothing);
+      expect(find.byType(LessonListScreen), findsOneWidget);
+      expect(find.byType(HomeScreen), findsNothing);
     },
   );
 
@@ -137,13 +157,13 @@ void main() {
 
     await tester.tap(find.byTooltip('Segnalibri'));
     await tester.pumpAndSettle();
-    expect(find.text('Segnalibri'), findsOneWidget);
-    expect(find.text('Matematica'), findsNothing);
+    expect(find.byType(BookmarksScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsNothing);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.text('Matematica'), findsOneWidget);
-    expect(find.text('Segnalibri'), findsNothing);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(BookmarksScreen), findsNothing);
   });
 
   testWidgets('la pillola compare solo sulle schermate principali', (
@@ -161,9 +181,11 @@ void main() {
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+    expect(find.byType(LessonListScreen), findsOneWidget);
     expect(find.text('HOME'), findsOneWidget);
 
+    await tester.tap(find.text('Frazioni'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Introduzione alle frazioni'));
     await tester.pumpAndSettle();
 
@@ -179,18 +201,18 @@ void main() {
     await tester.tap(find.text('PROFILO'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Profilo'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
 
     await tester.tap(find.text('HOME'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Matematica'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 
   testWidgets('trascinando la pillola si cambia sezione', (tester) async {
     await _pumpHome(tester);
 
-    expect(find.text('Profilo'), findsNothing);
+    expect(find.byType(ProfileScreen), findsNothing);
     expect(find.text('HOME'), findsOneWidget);
 
     final bar = find.byType(PillNavBar);
@@ -206,7 +228,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.text('Profilo'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
   });
 
   testWidgets('la pillola parte centrata sulla HOME', (tester) async {
@@ -220,10 +242,7 @@ void main() {
     // L'indicatore deve partire centrato sul primo segmento (HOME),
     // non sul confine HOME/LEZIONI.
     expect(indicator.left - barRect.left, lessThan(60));
-    expect(
-      indicator.center.dx - barRect.left,
-      lessThan(barRect.width * 0.2),
-    );
+    expect(indicator.center.dx - barRect.left, lessThan(barRect.width * 0.2));
     expect(
       indicator.center.dx - barRect.left,
       greaterThan(barRect.width * 0.05),
@@ -261,12 +280,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
-    expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+    expect(find.byType(LessonListScreen), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('Matematica'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
     expect(_pillIcon(Icons.home), findsOneWidget);
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
@@ -278,12 +297,12 @@ void main() {
 
     await tester.tap(find.text('PROFILO'));
     await tester.pumpAndSettle();
-    expect(find.text('Profilo'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    expect(find.text('Matematica'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
     expect(_pillIcon(Icons.home), findsOneWidget);
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
@@ -326,12 +345,12 @@ void main() {
       expect(find.text('Lezioni per scuola'), findsOneWidget);
       await tester.tap(find.text('Scuola Media').last);
       await tester.pumpAndSettle();
-      expect(find.text('Lezioni · Scuola Media'), findsOneWidget);
+      expect(find.byType(LessonListScreen), findsOneWidget);
 
       await tester.pageBack();
       await tester.pumpAndSettle();
 
-      expect(find.text('Matematica'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
       expect(_pillIcon(Icons.home), findsOneWidget);
       expect(_pillIcon(Icons.menu_book_outlined), findsOneWidget);
       expect(_pillIcon(Icons.menu_book), findsNothing);
@@ -351,7 +370,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Lezioni per scuola'), findsNothing);
-      expect(find.text('Matematica'), findsOneWidget);
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       final pill = find.byType(PillNavBar);
       expect(

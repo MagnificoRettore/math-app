@@ -20,18 +20,8 @@ class BookmarksScreen extends StatefulWidget {
 class _BookmarksScreenState extends State<BookmarksScreen> {
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Segnalibri',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {

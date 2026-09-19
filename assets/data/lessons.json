@@ -7,6 +7,7 @@
       "icon": "pie_chart",
       "level": "middle-school",
       "year": "ms-year1",
+      "section": "ms1-numbers",
       "animation": "pie",
       "introduction": "Le frazioni rappresentano parti di un intero. Tocca la torta qui sotto per giocare con la parte colorata, poi rispondi alle domande per procedere.",
       "completionMessage": "Ottimo! Ora sai confrontare e sommare le frazioni.",
@@ -52,6 +53,7 @@
       "icon": "functions",
       "level": "high-school",
       "year": "year1",
+      "section": "year1-equations",
       "animation": "number_line",
       "introduction": "Risolvere un'equazione significa trovare il valore dell'incognita. Muovi il punto sulla retta per esplorare i valori di x, poi rispondi.",
       "completionMessage": "Grande! Hai risolto la tua prima equazione passo-passo.",
@@ -94,12 +96,112 @@
       ]
     },
     {
+      "id": "moduli-definition",
+      "title": "Il valore assoluto",
+      "subtitle": "Definizione di modulo",
+      "icon": "functions",
+      "level": "high-school",
+      "year": "year2",
+      "section": "year2-moduli",
+      "animation": "none",
+      "introduction": "Il valore assoluto (o modulo) di un numero è la sua distanza dallo zero sulla retta reale: è sempre positivo o nullo. Lo scopriamo insieme passo dopo passo.",
+      "completionMessage": "Perfetto! Sai calcolare il valore assoluto di un numero.",
+      "steps": [
+        {
+          "type": "multiple_choice",
+          "prompt": "Quanto vale $$\\lvert 5 \\rvert$$?",
+          "options": [
+            "5",
+            "-5",
+            "0",
+            "10"
+          ],
+          "correctIndex": 0,
+          "explanation": "|5| = 5 perché 5 è già positivo: il modulo è la distanza dallo zero."
+        },
+        {
+          "type": "multiple_choice",
+          "prompt": "Quanto vale $$\\lvert -3 \\rvert$$?",
+          "options": [
+            "3",
+            "-3",
+            "0",
+            "6"
+          ],
+          "correctIndex": 0,
+          "explanation": "Il modulo toglie il segno: |-3| = 3 perché -3 dista 3 dallo zero."
+        },
+        {
+          "type": "numeric",
+          "prompt": "Quanto vale $$\\lvert 0 \\rvert$$?",
+          "answers": [
+            "0"
+          ],
+          "explanation": "Lo zero dista 0 da se stesso: |0| = 0."
+        }
+      ],
+      "topics": [
+        "year2-moduli-definition"
+      ]
+    },
+    {
+      "id": "moduli-equations",
+      "title": "Equazioni con i moduli",
+      "subtitle": "Risolvere |ax+b| = k",
+      "icon": "functions",
+      "level": "high-school",
+      "year": "year2",
+      "section": "year2-moduli",
+      "animation": "none",
+      "introduction": "Un'equazione con modulo si risolve ricordando che |x| = a (con a ≥ 0) significa x = a oppure x = -a. Proviamo insieme.",
+      "completionMessage": "Ottimo! Sai risolvere le equazioni con il valore assoluto.",
+      "steps": [
+        {
+          "type": "multiple_choice",
+          "prompt": "Quali sono le soluzioni di $$\\lvert x \\rvert = 5$$?",
+          "options": [
+            "5 e -5",
+            "Solo 5",
+            "Solo -5",
+            "25 e -25"
+          ],
+          "correctIndex": 0,
+          "explanation": "|x| = 5 significa x = 5 oppure x = -5: entrambe distano 5 dallo zero."
+        },
+        {
+          "type": "numeric",
+          "prompt": "Risolvi $$\\lvert x - 2 \\rvert = 3$$ e scrivi una delle soluzioni.",
+          "answers": [
+            "5",
+            "-1"
+          ],
+          "explanation": "Due casi: x - 2 = 3 → x = 5; oppure x - 2 = -3 → x = -1."
+        },
+        {
+          "type": "multiple_choice",
+          "prompt": "Quante soluzioni ha $$\\lvert x \\rvert = -4$$?",
+          "options": [
+            "Nessuna",
+            "Una",
+            "Due",
+            "Infinite"
+          ],
+          "correctIndex": 0,
+          "explanation": "Il modulo è una distanza e non può mai essere negativo: nessuna soluzione."
+        }
+      ],
+      "topics": [
+        "year2-moduli-definition"
+      ]
+    },
+    {
       "id": "pythagoras",
       "title": "Teorema di Pitagora",
       "subtitle": "Triangoli rettangoli",
       "icon": "triangle",
       "level": "middle-school",
       "year": "ms-year3",
+      "section": "ms3-geometry",
       "animation": "none",
       "introduction": "In un triangolo rettangolo, il quadrato dell'ipotenusa è uguale alla somma dei quadrati dei cateti.",
       "completionMessage": "Perfetto! Sai applicare il teorema di Pitagora.",

@@ -26,16 +26,7 @@ class SearchResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Risultati per "$query"',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: results.isEmpty
           ? Center(
               child: Text(

@@ -36,16 +36,7 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
     final onboarding = widget.onSaved != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          onboarding ? 'Cosa studi?' : 'La tua scuola',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [

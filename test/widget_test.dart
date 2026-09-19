@@ -61,7 +61,6 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    expect(find.text('Matematica'), findsOneWidget);
     expect(find.text('La nostra missione'), findsOneWidget);
     expect(find.text('Livelli'), findsNothing);
   });

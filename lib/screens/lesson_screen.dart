@@ -101,18 +101,8 @@ class _LessonScreenState extends State<LessonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.lesson.title,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-      ),
+      appBar: AppBar(),
       body: _completed
           ? _CompletedView(
               lesson: widget.lesson,

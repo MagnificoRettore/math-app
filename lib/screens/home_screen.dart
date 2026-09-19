@@ -8,6 +8,7 @@ import '../data/progress_store.dart';
 import '../data/search_index.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
+import '../widgets/home_greeting.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/recommended_section.dart';
@@ -41,8 +42,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Matematica'),
         automaticallyImplyLeading: false,
+        titleSpacing: 20,
+        centerTitle: false,
+        title: const HomeGreeting(),
         actions: [
           IconButton(
             icon: Icon(Icons.bookmark_outline, color: c.textPrimary),
