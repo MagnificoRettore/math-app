@@ -157,9 +157,6 @@ class _CourseSectionsView extends StatelessWidget {
             child: TopicRow(
               key: Key('topic-${topic.id}'),
               topic: topic,
-              progress: ProgressStore.instance.completionFor(
-                topic.exercises.map((e) => e.id),
-              ),
               onTap: () => _openTopic(context, topic),
             ),
           ),

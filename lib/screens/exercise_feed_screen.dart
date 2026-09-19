@@ -7,7 +7,9 @@ import '../models/exercise.dart';
 import '../models/level.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/topic_style.dart';
 import '../widgets/exercise_card.dart';
+import '../widgets/topic_background.dart';
 import 'exercise_detail_screen.dart';
 
 class ExerciseFeedScreen extends StatefulWidget {
@@ -31,8 +33,14 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {
@@ -43,24 +51,42 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
                     .toList();
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            padding: EdgeInsets.zero,
             children: [
-              _buildFilterChips(),
-              const SizedBox(height: 12),
-              for (final exercise in exercises)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ExerciseCard(
-                    exercise: exercise,
-                    bookmarked: ProgressStore.instance.isBookmarked(
-                      exercise.id,
-                    ),
-                    status: ProgressStore.instance.statusOf(exercise.id),
-                    onToggleBookmark: (val) =>
-                        ProgressStore.instance.toggleBookmark(exercise.id),
-                    onTap: () => _openExercise(exercise),
-                  ),
+              TopicHeader(
+                title: widget.topic.title,
+                subtitle: widget.topic.subtitle.isEmpty
+                    ? null
+                    : widget.topic.subtitle,
+                image: widget.topic.image,
+                color: topicColor(c, widget.topic.icon),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildFilterChips(),
+                    const SizedBox(height: 12),
+                    for (final exercise in exercises)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ExerciseCard(
+                          exercise: exercise,
+                          bookmarked: ProgressStore.instance.isBookmarked(
+                            exercise.id,
+                          ),
+                          status: ProgressStore.instance.statusOf(exercise.id),
+                          onToggleBookmark: (val) =>
+                              ProgressStore.instance.toggleBookmark(
+                            exercise.id,
+                          ),
+                          onTap: () => _openExercise(exercise),
+                        ),
+                      ),
+                  ],
                 ),
+              ),
             ],
           );
         },
