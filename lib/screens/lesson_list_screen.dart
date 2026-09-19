@@ -128,7 +128,10 @@ class _LessonsList extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 12),
               child: LessonCard(
                 lesson: lesson,
-                completed: ProgressStore.instance.isLessonCompleted(lesson.id),
+                completed: ProgressStore.instance.isLessonCompleted(
+                  lesson.levelId,
+                  lesson.id,
+                ),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => LessonScreen(lesson: lesson),

@@ -23,7 +23,7 @@ class WeakTopicEngine {
         loc.topic.id,
         () => _Agg(level: loc.level, course: loc.course, topic: loc.topic),
       );
-      final status = store.statusOf(loc.exercise.id);
+      final status = store.statusOf(loc.level.id, loc.exercise.id);
       if (status == ExerciseStatus.needsReview) agg.weak.add(loc);
       if (status == ExerciseStatus.mastered) agg.mastered++;
       agg.total++;
@@ -59,11 +59,11 @@ class WeakTopicEngine {
   }
 
   static List<Lesson> lessonsForTopic(String topicId, {String? levelId}) {
-    final completed = ProgressStore.instance.completedLessonIds;
+    final store = ProgressStore.instance;
     return LessonRepository.instance.lessons
         .where((l) => l.topics.contains(topicId))
         .where((l) => levelId == null || l.levelId == levelId)
-        .where((l) => !completed.contains(l.id))
+        .where((l) => !store.isLessonCompleted(l.levelId, l.id))
         .toList();
   }
 }

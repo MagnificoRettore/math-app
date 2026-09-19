@@ -9,7 +9,7 @@ class RecommendationEngine {
   const RecommendationEngine._();
 
   static List<Lesson> recommendedLessons(String levelId, {int limit = 2}) {
-    final completed = ProgressStore.instance.completedLessonIds;
+    final completed = ProgressStore.instance.completedLessonIdsFor(levelId);
     final lessons = LessonRepository.instance.lessons
         .where((l) => l.levelId == levelId && !completed.contains(l.id))
         .toList();
@@ -26,7 +26,9 @@ class RecommendationEngine {
             .allExerciseLocations()
             .where((loc) => loc.level.id == levelId)
             .where(
-              (loc) => store.statusOf(loc.exercise.id) == ExerciseStatus.none,
+              (loc) =>
+                  store.statusOf(levelId, loc.exercise.id) ==
+                  ExerciseStatus.none,
             )
             .toList()
           ..sort(

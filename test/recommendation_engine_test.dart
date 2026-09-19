@@ -32,7 +32,10 @@ void main() {
   });
 
   test('esclude le lezioni già completate', () async {
-    await ProgressStore.instance.completeLesson('fractions-basics');
+    await ProgressStore.instance.completeLesson(
+      'middle-school',
+      'fractions-basics',
+    );
     final lessons = RecommendationEngine.recommendedLessons(
       'middle-school',
       limit: 10,
@@ -51,7 +54,7 @@ void main() {
     for (final loc in middle) {
       expect(loc.level.id, 'middle-school');
       expect(
-        ProgressStore.instance.statusOf(loc.exercise.id),
+        ProgressStore.instance.statusOf(loc.level.id, loc.exercise.id),
         ExerciseStatus.none,
       );
     }
@@ -78,6 +81,7 @@ void main() {
     );
     final first = before.first;
     await ProgressStore.instance.setStatus(
+      first.level.id,
       first.exercise.id,
       ExerciseStatus.mastered,
     );

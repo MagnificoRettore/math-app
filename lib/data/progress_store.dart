@@ -9,7 +9,7 @@ class ProgressStore extends ChangeNotifier {
   static final ProgressStore instance = ProgressStore._();
   ProgressStore._();
 
-  static const _key = 'exercise_progress_v1';
+  static const _progressKey = 'exercise_progress_v1';
   static const _lessonsKey = 'lessons_completed_v1';
 
   final Map<String, ExerciseProgress> _progress = {};
@@ -25,12 +25,12 @@ class ProgressStore extends ChangeNotifier {
     _loadError = null;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_key);
+      final raw = prefs.getString(_progressKey);
       if (raw != null) {
         final list = jsonDecode(raw) as List<dynamic>;
         for (final item in list) {
           final p = ExerciseProgress.fromJson(item as Map<String, dynamic>);
-          _progress[p.exerciseId] = p;
+          _progress[p.scopedKey] = p;
         }
       }
       final done = prefs.getStringList(_lessonsKey);
@@ -60,50 +60,61 @@ class ProgressStore extends ChangeNotifier {
     await load();
   }
 
-  ExerciseProgress? forExercise(String id) => _progress[id];
+  /// Restituisce il progresso per un esercizio nel livello scolastico indicato.
+  ExerciseProgress? forExercise(String levelId, String exerciseId) =>
+      _progress[scopedKey(levelId, exerciseId)];
 
-  ExerciseStatus statusOf(String id) =>
-      _progress[id]?.status ?? ExerciseStatus.none;
+  ExerciseStatus statusOf(String levelId, String exerciseId) =>
+      _progress[scopedKey(levelId, exerciseId)]?.status ?? ExerciseStatus.none;
 
-  bool isBookmarked(String id) => _progress[id]?.bookmarked ?? false;
+  bool isBookmarked(String levelId, String exerciseId) =>
+      _progress[scopedKey(levelId, exerciseId)]?.bookmarked ?? false;
 
-  Future<void> setStatus(String id, ExerciseStatus status) async {
+  Future<void> setStatus(
+    String levelId,
+    String exerciseId,
+    ExerciseStatus status,
+  ) async {
+    final key = scopedKey(levelId, exerciseId);
     final current =
-        _progress[id] ??
+        _progress[key] ??
         ExerciseProgress(
-          exerciseId: id,
+          exerciseId: exerciseId,
           status: ExerciseStatus.none,
           bookmarked: false,
         );
-    _progress[id] = current.copyWith(status: status);
+    _progress[key] = current.copyWith(status: status);
     notifyListeners();
     await _persist();
   }
 
-  Future<void> toggleBookmark(String id) async {
+  Future<void> toggleBookmark(String levelId, String exerciseId) async {
     final current =
-        _progress[id] ??
+        _progress[scopedKey(levelId, exerciseId)] ??
         ExerciseProgress(
-          exerciseId: id,
+          exerciseId: exerciseId,
           status: ExerciseStatus.none,
           bookmarked: false,
         );
-    _progress[id] = current.copyWith(bookmarked: !current.bookmarked);
+    _progress[scopedKey(levelId, exerciseId)] =
+        current.copyWith(bookmarked: !current.bookmarked);
     notifyListeners();
     await _persist();
   }
 
-  List<String> get bookmarkedIds => _progress.entries
-      .where((e) => e.value.bookmarked)
-      .map((e) => e.key)
+  /// Id dei segnalibri del livello scolastico indicato (esercizi marcati).
+  List<String> bookmarkedIdsFor(String levelId) => _progress.entries
+      .where((e) => e.key.startsWith('$levelId::') && e.value.bookmarked)
+      .map((e) => e.value.exerciseId)
       .toList();
 
-  double completionFor(Iterable<String> exerciseIds) {
+  /// Completeness (mastered + needsReview) per il livello indicato.
+  double completionFor(String levelId, Iterable<String> exerciseIds) {
     final ids = exerciseIds.toList();
     if (ids.isEmpty) return 0;
     var done = 0;
     for (final id in ids) {
-      final status = statusOf(id);
+      final status = statusOf(levelId, id);
       if (status == ExerciseStatus.mastered ||
           status == ExerciseStatus.needsReview) {
         done++;
@@ -112,25 +123,33 @@ class ProgressStore extends ChangeNotifier {
     return done / ids.length;
   }
 
-  double masteredRatioFor(Iterable<String> exerciseIds) {
+  /// Ratio di esercizi padroneggiati (solo mastered) per il livello indicato.
+  double masteredRatioFor(String levelId, Iterable<String> exerciseIds) {
     final ids = exerciseIds.toList();
     if (ids.isEmpty) return 0;
     var mastered = 0;
     for (final id in ids) {
-      if (statusOf(id) == ExerciseStatus.mastered) mastered++;
+      if (statusOf(levelId, id) == ExerciseStatus.mastered) mastered++;
     }
     return mastered / ids.length;
   }
 
-  bool isLessonCompleted(String id) => _completedLessons.contains(id);
+  bool isLessonCompleted(String levelId, String lessonId) =>
+      _completedLessons.contains(scopedKey(levelId, lessonId));
 
-  Set<String> get completedLessonIds => Set.unmodifiable(_completedLessons);
+  Set<String> completedLessonIdsFor(String levelId) => Set.unmodifiable(
+        _completedLessons
+            .where((key) => key.startsWith('$levelId::'))
+            .map((key) => key.substring(levelId.length + 2)),
+      );
 
-  Future<void> completeLesson(String id) async {
-    if (!_completedLessons.add(id)) return;
+  Future<void> completeLesson(String levelId, String lessonId) async {
+    if (!_completedLessons.add(scopedKey(levelId, lessonId))) return;
     notifyListeners();
     await _persistLessons();
   }
+
+  static String scopedKey(String levelId, String id) => '$levelId::$id';
 
   Future<void> _persistLessons() async {
     final prefs = await SharedPreferences.getInstance();
@@ -140,6 +159,6 @@ class ProgressStore extends ChangeNotifier {
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     final list = _progress.values.map((p) => p.toJson()).toList();
-    await prefs.setString(_key, jsonEncode(list));
+    await prefs.setString(_progressKey, jsonEncode(list));
   }
 }

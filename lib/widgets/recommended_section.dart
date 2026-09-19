@@ -47,7 +47,10 @@ class RecommendedSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: LessonCard(
               lesson: lesson,
-              completed: ProgressStore.instance.isLessonCompleted(lesson.id),
+              completed: ProgressStore.instance.isLessonCompleted(
+                level.id,
+                lesson.id,
+              ),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => LessonScreen(lesson: lesson)),
               ),
@@ -63,11 +66,17 @@ class RecommendedSection extends StatelessWidget {
             child: ExerciseCard(
               exercise: location.exercise,
               bookmarked: ProgressStore.instance.isBookmarked(
+                level.id,
                 location.exercise.id,
               ),
-              status: ProgressStore.instance.statusOf(location.exercise.id),
-              onToggleBookmark: (_) =>
-                  ProgressStore.instance.toggleBookmark(location.exercise.id),
+              status: ProgressStore.instance.statusOf(
+                level.id,
+                location.exercise.id,
+              ),
+              onToggleBookmark: (_) => ProgressStore.instance.toggleBookmark(
+                level.id,
+                location.exercise.id,
+              ),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => ExerciseDetailScreen(

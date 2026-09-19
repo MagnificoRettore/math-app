@@ -64,6 +64,7 @@ void main() {
   ) async {
     await _pumpHome(tester);
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
@@ -82,6 +83,7 @@ void main() {
   ) async {
     await _pumpHome(tester);
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
@@ -111,7 +113,11 @@ void main() {
       'ms-eq-1',
     ];
     for (final id in weakIds) {
-      await ProgressStore.instance.setStatus(id, ExerciseStatus.needsReview);
+      await ProgressStore.instance.setStatus(
+        'middle-school',
+        id,
+        ExerciseStatus.needsReview,
+      );
     }
     await tester.pumpAndSettle();
 
@@ -132,6 +138,7 @@ void main() {
   ) async {
     await _pumpHome(tester);
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
@@ -140,6 +147,7 @@ void main() {
     expect(find.byType(WeakTopicRow), findsOneWidget);
 
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.mastered,
     );

@@ -45,6 +45,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
             listenable: ProgressStore.instance,
             builder: (context, _) {
               final bookmarked = ProgressStore.instance.isBookmarked(
+                widget.level.id,
                 widget.exercise.id,
               );
               return IconButton(
@@ -53,8 +54,10 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                   color: bookmarked ? c.accent : null,
                 ),
                 tooltip: 'Segnalibro',
-                onPressed: () =>
-                    ProgressStore.instance.toggleBookmark(widget.exercise.id),
+                onPressed: () => ProgressStore.instance.toggleBookmark(
+                  widget.level.id,
+                  widget.exercise.id,
+                ),
               );
             },
           ),
@@ -63,7 +66,10 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       body: ListenableBuilder(
         listenable: ProgressStore.instance,
         builder: (context, _) {
-          final status = ProgressStore.instance.statusOf(widget.exercise.id);
+          final status = ProgressStore.instance.statusOf(
+            widget.level.id,
+            widget.exercise.id,
+          );
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
@@ -281,7 +287,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   Future<void> _markStatus(ExerciseStatus status) async {
     HapticFeedback.selectionClick();
-    ProgressStore.instance.setStatus(widget.exercise.id, status);
+    ProgressStore.instance.setStatus(
+      widget.level.id,
+      widget.exercise.id,
+      status,
+    );
     final goalReached = status == ExerciseStatus.mastered
         ? await StudyStore.instance.recordExerciseCompleted(widget.exercise.id)
         : false;

@@ -239,7 +239,10 @@ void main() {
     await tapVisible(tester, find.text('Continua'));
     expect(find.text('Lezione completata!'), findsOneWidget);
     expect(find.text('Torna alle lezioni'), findsOneWidget);
-    expect(ProgressStore.instance.isLessonCompleted(lesson.id), isTrue);
+    expect(
+      ProgressStore.instance.isLessonCompleted(lesson.levelId, lesson.id),
+      isTrue,
+    );
 
     // ripeti la lezione
     await tapVisible(tester, find.text('Ripeti la lezione'));

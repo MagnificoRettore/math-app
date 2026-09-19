@@ -14,7 +14,11 @@ class YearExercisesScreen extends StatefulWidget {
   final Level level;
   final Course course;
 
-  const YearExercisesScreen({super.key, required this.level, required this.course});
+  const YearExercisesScreen({
+    super.key,
+    required this.level,
+    required this.course,
+  });
 
   @override
   State<YearExercisesScreen> createState() => _YearExercisesScreenState();
@@ -47,11 +51,15 @@ class _YearExercisesScreenState extends State<YearExercisesScreen> {
                   child: ExerciseCard(
                     exercise: entry.exercise,
                     bookmarked: ProgressStore.instance.isBookmarked(
+                      widget.level.id,
                       entry.exercise.id,
                     ),
-                    status: ProgressStore.instance.statusOf(entry.exercise.id),
+                    status: ProgressStore.instance.statusOf(
+                      widget.level.id,
+                      entry.exercise.id,
+                    ),
                     onToggleBookmark: (val) => ProgressStore.instance
-                        .toggleBookmark(entry.exercise.id),
+                        .toggleBookmark(widget.level.id, entry.exercise.id),
                     onTap: () => _openExercise(entry),
                   ),
                 ),

@@ -86,13 +86,15 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
                   child: ExerciseCard(
                     exercise: location.exercise,
                     bookmarked: ProgressStore.instance.isBookmarked(
+                      current.level.id,
                       location.exercise.id,
                     ),
                     status: ProgressStore.instance.statusOf(
+                      current.level.id,
                       location.exercise.id,
                     ),
                     onToggleBookmark: (_) => ProgressStore.instance
-                        .toggleBookmark(location.exercise.id),
+                        .toggleBookmark(current.level.id, location.exercise.id),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => ExerciseDetailScreen(

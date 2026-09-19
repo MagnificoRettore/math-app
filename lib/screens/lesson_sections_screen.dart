@@ -71,7 +71,7 @@ class LessonSectionsScreen extends StatelessWidget {
                                   child: LessonCard(
                                     lesson: lesson,
                                     completed: ProgressStore.instance
-                                        .isLessonCompleted(lesson.id),
+                                        .isLessonCompleted(level.id, lesson.id),
                                     onTap: () => Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) =>

@@ -74,13 +74,15 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
                         child: ExerciseCard(
                           exercise: exercise,
                           bookmarked: ProgressStore.instance.isBookmarked(
+                            widget.level.id,
                             exercise.id,
                           ),
-                          status: ProgressStore.instance.statusOf(exercise.id),
-                          onToggleBookmark: (val) =>
-                              ProgressStore.instance.toggleBookmark(
+                          status: ProgressStore.instance.statusOf(
+                            widget.level.id,
                             exercise.id,
                           ),
+                          onToggleBookmark: (val) => ProgressStore.instance
+                              .toggleBookmark(widget.level.id, exercise.id),
                           onTap: () => _openExercise(exercise),
                         ),
                       ),

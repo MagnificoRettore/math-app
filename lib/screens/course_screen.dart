@@ -91,7 +91,10 @@ class _CourseSectionsView extends StatelessWidget {
       for (final topic in topics)
         for (final exercise in topic.exercises) exercise.id,
     ];
-    final allProgress = ProgressStore.instance.completionFor(allExerciseIds);
+    final allProgress = ProgressStore.instance.completionFor(
+      level.id,
+      allExerciseIds,
+    );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),

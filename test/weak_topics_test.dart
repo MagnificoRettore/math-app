@@ -23,6 +23,7 @@ void main() {
 
   test('un esercizio da ripassare rende debole il suo topic', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
@@ -36,10 +37,12 @@ void main() {
 
   test('conta tutti gli esercizi da ripassare del topic', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-sum-1',
       ExerciseStatus.needsReview,
     );
@@ -52,10 +55,12 @@ void main() {
 
   test('il topic scompare quando resta solo assimilato', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-sum-1',
       ExerciseStatus.needsReview,
     );
@@ -63,10 +68,12 @@ void main() {
     expect(WeakTopicEngine.weakTopics(), hasLength(1));
 
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.mastered,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-sum-1',
       ExerciseStatus.mastered,
     );
@@ -76,14 +83,17 @@ void main() {
 
   test('ordinamento per numero di esercizi da ripassare', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-sum-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-perc-1',
       ExerciseStatus.needsReview,
     );
@@ -94,14 +104,17 @@ void main() {
 
   test('a parità di conteggio vince chi ha completato meno', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-perc-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'high-school',
       'frac-easy-1',
       ExerciseStatus.needsReview,
     );
     await ProgressStore.instance.setStatus(
+      'high-school',
       'frac-hard-1',
       ExerciseStatus.mastered,
     );
@@ -117,17 +130,19 @@ void main() {
 
   test('masteredRatioFor conta solo gli esercizi assimilati', () async {
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-compare-1',
       ExerciseStatus.mastered,
     );
     await ProgressStore.instance.setStatus(
+      'middle-school',
       'ms-frac-sum-1',
       ExerciseStatus.needsReview,
     );
 
     final ids = ['ms-frac-compare-1', 'ms-frac-sum-1'];
-    expect(ProgressStore.instance.masteredRatioFor(ids), 0.5);
-    expect(ProgressStore.instance.completionFor(ids), 1.0);
+    expect(ProgressStore.instance.masteredRatioFor('middle-school', ids), 0.5);
+    expect(ProgressStore.instance.completionFor('middle-school', ids), 1.0);
   });
 
   test(
@@ -143,7 +158,10 @@ void main() {
 
       expect(WeakTopicEngine.lessonsForTopic('ms2-proportions'), isEmpty);
 
-      await ProgressStore.instance.completeLesson('fractions-basics');
+      await ProgressStore.instance.completeLesson(
+        'middle-school',
+        'fractions-basics',
+      );
       expect(
         WeakTopicEngine.lessonsForTopic('ms1-fractions').map((l) => l.id),
         isNot(contains('fractions-basics')),

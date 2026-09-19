@@ -72,7 +72,10 @@ class _LessonScreenState extends State<LessonScreen> {
   void _continue() {
     if (_stepIndex >= widget.lesson.steps.length - 1) {
       setState(() => _completed = true);
-      ProgressStore.instance.completeLesson(widget.lesson.id);
+      ProgressStore.instance.completeLesson(
+        widget.lesson.levelId,
+        widget.lesson.id,
+      );
       StudyStore.instance.recordLessonCompleted();
       HapticFeedback.mediumImpact();
       return;

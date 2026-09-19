@@ -38,9 +38,12 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                   child: ExerciseCard(
                     exercise: entry.exercise,
                     bookmarked: true,
-                    status: ProgressStore.instance.statusOf(entry.exercise.id),
+                    status: ProgressStore.instance.statusOf(
+                      entry.level.id,
+                      entry.exercise.id,
+                    ),
                     onToggleBookmark: (_) => ProgressStore.instance
-                        .toggleBookmark(entry.exercise.id),
+                        .toggleBookmark(entry.level.id, entry.exercise.id),
                     onTap: () => _openExercise(entry),
                   ),
                 ),
@@ -59,7 +62,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       for (final course in level.courses) {
         for (final topic in course.topics) {
           for (final ex in topic.exercises) {
-            if (ProgressStore.instance.isBookmarked(ex.id)) {
+            if (ProgressStore.instance.isBookmarked(level.id, ex.id)) {
               results.add((
                 level: level,
                 course: course,
