@@ -1,5 +1,3 @@
-import 'package:material_3_expressive/material_3_expressive.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,6 +12,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
 import '../widgets/difficulty_badge.dart';
 import '../widgets/math_text.dart';
+import '../widgets/exercise_tools_bar.dart';
 import '../widgets/section_header.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
@@ -65,34 +64,43 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           ),
         ],
       ),
-      body: ListenableBuilder(
-        listenable: ProgressStore.instance,
-        builder: (context, _) {
-          final status = ProgressStore.instance.statusOf(
-            widget.level.id,
-            widget.exercise.id,
-          );
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-            children: [
-              _buildMetaRow(),
-              const SizedBox(height: 16),
-              _buildProblem(),
-              if (widget.exercise.formulas.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                _buildFormulas(),
-              ],
-              if (widget.exercise.hints.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                _buildHints(),
-              ],
-              const SizedBox(height: 24),
-              _buildSolution(title: 'Soluzione'),
-              const SizedBox(height: 24),
-              _buildStatusActions(status),
-            ],
-          );
-        },
+      body: Stack(
+        children: [
+          ListenableBuilder(
+            listenable: ProgressStore.instance,
+            builder: (context, _) {
+              final status = ProgressStore.instance.statusOf(
+                widget.level.id,
+                widget.exercise.id,
+              );
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+                children: [
+                  _buildMetaRow(),
+                  const SizedBox(height: 16),
+                  _buildProblem(),
+                  if (widget.exercise.formulas.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _buildFormulas(),
+                  ],
+                  if (widget.exercise.hints.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    _buildHints(),
+                  ],
+                  const SizedBox(height: 24),
+                  _buildSolution(title: 'Soluzione'),
+                  const SizedBox(height: 24),
+                  _buildStatusActions(status),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            left: 16,
+            bottom: 16,
+            child: ExerciseToolsBar(),
+          ),
+        ],
       ),
     );
   }

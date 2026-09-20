@@ -69,16 +69,13 @@ void main() {
     expect(yearCircleText('quinta'), 'V');
   });
 
-  test('Course.fromJson legge l\'immagine opzionale e usa null di default', () {
-    final withImage = Course.fromJson({
+  test("Course.fromJson ignora la chiave 'image' legacy senza rompersi", () {
+    final course = Course.fromJson({
       'id': 'x',
       'title': 'prima',
       'image': 'assets/images/anno1.png',
     });
-    expect(withImage.image, 'assets/images/anno1.png');
-
-    final without = Course.fromJson({'id': 'y', 'title': 'seconda'});
-    expect(without.image, isNull);
+    expect(course.title, 'prima');
   });
 
   testWidgets('anno: l\'elenco è piatto per argomento, con la card aggregata', (

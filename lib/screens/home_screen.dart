@@ -9,6 +9,7 @@ import '../data/search_index.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
 import '../widgets/home_greeting.dart';
+import '../widgets/image_carousel.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/recommended_section.dart';
@@ -76,6 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
+                const ImageCarousel(),
+                const SizedBox(height: 20),
                 MissionHero(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const MissionScreen()),

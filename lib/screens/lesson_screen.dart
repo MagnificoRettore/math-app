@@ -109,13 +109,41 @@ class _LessonScreenState extends State<LessonScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: _completed
-          ? _CompletedView(
-              lesson: widget.lesson,
-              onRestart: _restart,
-              onClose: () => Navigator.of(context).pop(),
-            )
-          : _buildLesson(),
+      body: Stack(
+        children: [
+          _completed
+              ? _CompletedView(
+                  lesson: widget.lesson,
+                  onRestart: _restart,
+                  onClose: () => Navigator.of(context).pop(),
+                )
+              : _buildLesson(),
+          if (_showFloatingContinue)
+            Positioned(
+              right: 24,
+              bottom: 24,
+              child: FloatingActionButton.small(
+                onPressed: _continue,
+                backgroundColor: AppColors.of(context).accent,
+                foregroundColor: AppColors.of(context).surface,
+                shape: const CircleBorder(),
+                tooltip: _isLastStep ? 'Completa la lezione' : 'Continua',
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: Icon(
+                    _isLastStep
+                        ? Symbols.thumb_up_filled_rounded
+                        : Icons.arrow_forward,
+                    key: ValueKey(_isLastStep),
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -133,7 +161,7 @@ class _LessonScreenState extends State<LessonScreen> {
     final progress = (_stepIndex + (_solved || isInfoStep ? 1 : 0)) / total;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 96),
       children: [
         if (widget.lesson.animation != LessonAnimation.none) ...[
           _buildAnimationCard(),
@@ -149,7 +177,7 @@ class _LessonScreenState extends State<LessonScreen> {
           children: [
             Expanded(
               child: Text(
-                'Passaggio',
+                widget.lesson.title,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
@@ -158,7 +186,7 @@ class _LessonScreenState extends State<LessonScreen> {
               ),
             ),
             Text(
-              'Passo ${_stepIndex + 1} di $total · ${(progress * 100).round()}%',
+              '${(progress * 100).round()}%',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -454,6 +482,16 @@ class _InfoContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    if (step.cards.isNotEmpty) {
+      return Column(
+        children: [
+          for (final (i, card) in step.cards.indexed) ...[
+            if (i > 0) const SizedBox(height: 12),
+            _ConceptCard(text: card),
+          ],
+        ],
+      );
+    }
     return AppCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -503,6 +541,41 @@ class _InfoContent extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConceptCard extends StatelessWidget {
+  final String text;
+
+  const _ConceptCard({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: c.accentSoft,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.lightbulb_outline,
+              color: c.accent,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: MathText(text, fontSize: 16)),
         ],
       ),
     );

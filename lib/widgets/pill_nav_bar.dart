@@ -200,8 +200,8 @@ class _PillNavBarState extends State<PillNavBar> {
     // ―― Liquid Glass ――――――――――――――――――――――――――――――――――――――
     // Tinta del vetro: semi-trasparente e più spessa in alto, così la
     // sfocatura del contenuto sottostante resta ben visibile.
-    final glassTop = c.surface.withValues(alpha: isDark ? 0.52 : 0.42);
-    final glassBottom = c.surface.withValues(alpha: isDark ? 0.3 : 0.2);
+    final glassTop = c.surface.withValues(alpha: isDark ? 0.25 : 0.18);
+    final glassBottom = c.surface.withValues(alpha: isDark ? 0.12 : 0.08);
     // Riflessi di luce: più marcati in chiaro, soffusi in scuro.
     final rim = isDark ? 0.35 : 0.6;
     final glare = isDark ? 0.12 : 0.2;

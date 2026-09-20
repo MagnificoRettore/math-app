@@ -113,7 +113,7 @@ class SearchIndex {
           lesson.subtitle,
           lesson.introduction,
           lesson.completionMessage,
-          ...lesson.steps.expand((s) => [s.prompt, s.explanation]),
+          ...lesson.steps.expand((s) => [s.prompt, ...s.cards, s.explanation]),
         ].join(' ').toLowerCase();
         return haystack.contains(q);
     }

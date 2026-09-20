@@ -39,7 +39,7 @@ Applicazione Flutter per **studenti italiani** con esercizi di matematica **riso
 - **Barra di navigazione "Liquid Glass"** flottante a 4 voci (Home, Lezioni, Esercizi, Profilo) con effetto vetro sfocato, navigazione a **tap e drag**, indicatore animato; se assente un profilo, apre il bottom sheet di scelta scuola.
 - **LaTeX offline**: testo matematico renderizzato con `flutter_math_fork` (KaTeX in Dart puro, nessun WebView). Delimitatori `$...$` (inline) e `$$...$$` (blocco) nei contenuti.
 - Animazioni: splash/onboarding con fade, transizioni in fade tra le tab, card animate, confetti.
-- **Tab annuali con immagine**: i cerchi delle tab anni mostrano un'immagine per corso se presente nel JSON (`"image"`); in caso contrario — o se l'asset manca — mostrano i numeri romani (I–V). Le label degli anni usano i nomi ordinali (*prima, seconda, terza, quarta, quinta*).
+- **Tab annuali**: i cerchi delle tab anni mostrano i numeri romani (I–V). Le label degli anni usano i nomi ordinali (*prima, seconda, terza, quarta, quinta*).
 - Solo **orientamento portrait**, app in italiano.
 
 ## Stack tecnologico

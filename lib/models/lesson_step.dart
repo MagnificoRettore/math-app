@@ -65,6 +65,7 @@ class NumberLineSpec {
 class LessonStep {
   final LessonStepType type;
   final String prompt;
+  final List<String> cards;
   final List<String> options;
   final int correctIndex;
   final List<String> acceptedAnswers;
@@ -76,6 +77,7 @@ class LessonStep {
   const LessonStep({
     required this.type,
     required this.prompt,
+    this.cards = const [],
     this.options = const [],
     this.correctIndex = -1,
     this.acceptedAnswers = const [],
@@ -89,6 +91,9 @@ class LessonStep {
     return LessonStep(
       type: LessonStepType.fromString(json['type'] as String),
       prompt: json['prompt'] as String,
+      cards: (json['cards'] as List<dynamic>? ?? const [])
+          .map((e) => e as String)
+          .toList(),
       options: (json['options'] as List<dynamic>? ?? const [])
           .map((e) => e as String)
           .toList(),

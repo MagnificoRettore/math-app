@@ -5,7 +5,6 @@
       "id": "year1",
       "title": "prima",
       "subtitle": "Fondamenti",
-      "image": "assets/images/anno-prima.png",
       "sections": [
         {
           "id": "year1-numbers",
@@ -148,7 +147,7 @@
               "title": "Moduli",
               "subtitle": "Variabile reale e valore assoluto",
               "icon": "functions",
-              "image": "assets/images/mondrian.jpg",
+              "image": "assets/images/moduli.jpg",
               "exercises": [
                 {
                   "id": "mod-easy-1",

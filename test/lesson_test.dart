@@ -144,8 +144,12 @@ void main() {
 
     final equations = moduli.singleWhere((l) => l.id == 'moduli-equations');
     expect(equations.topics, contains('year2-moduli-definition'));
-    expect(equations.steps[1].checkAnswer('5'), isTrue);
-    expect(equations.steps[1].checkAnswer('-1'), isTrue);
+    expect(equations.steps, hasLength(1));
+    final step = equations.steps.single;
+    expect(step.cards, hasLength(3));
+    expect(step.cards[0], contains('Studio del Modulo'));
+    expect(step.cards[1], contains('x - 5'));
+    expect(step.cards[2], contains('positivo o al più uguale a zero'));
   });
 
   test('checkAnswer confronta numeri e frazioni', () {
@@ -208,7 +212,7 @@ void main() {
     );
     await pumpFrames(tester);
 
-    expect(find.textContaining('Passo 1 di'), findsOneWidget);
+    expect(find.textContaining('%'), findsOneWidget);
 
     // Passo 1 (multiple choice): risposta sbagliata → feedback immediato
     await tester.scrollUntilVisible(
@@ -227,7 +231,7 @@ void main() {
 
     // avanza al passo 2 (numerico)
     await tapVisible(tester, find.byIcon(Icons.arrow_forward));
-    expect(find.textContaining('Passo 2 di'), findsOneWidget);
+    expect(find.textContaining('%'), findsOneWidget);
 
     // risposta numerica sbagliata
     await tester.ensureVisible(find.byType(TextField));
@@ -243,7 +247,7 @@ void main() {
     expect(find.text('Corretto!'), findsOneWidget);
 
     await tapVisible(tester, find.byIcon(Icons.arrow_forward));
-    expect(find.textContaining('Passo 3 di'), findsOneWidget);
+    expect(find.textContaining('%'), findsOneWidget);
 
     // passo 3 testo
     await tester.ensureVisible(find.byType(TextField));
@@ -265,7 +269,7 @@ void main() {
 
     // ripeti la lezione
     await tapVisible(tester, find.text('Ripeti la lezione'));
-    expect(find.textContaining('Passo 1 di'), findsOneWidget);
+    expect(find.textContaining('%'), findsOneWidget);
   });
 
   testWidgets(
@@ -294,7 +298,7 @@ void main() {
       // la lezione è in una ListView lazy: dopo lo scroll torna in cima per vedere l'intestazione
       await tester.drag(find.byType(Scrollable).first, const Offset(0, 1000));
       await pumpFrames(tester);
-      expect(find.textContaining('Passo 2 di'), findsOneWidget);
+      expect(find.textContaining('%'), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
       expect(find.byKey(const ValueKey('option_0')), findsNothing);
 

@@ -22,6 +22,7 @@ class Lesson {
   final String id;
   final String title;
   final String subtitle;
+  final int minutes;
   final String icon;
   final String introduction;
   final String? image;
@@ -37,6 +38,7 @@ class Lesson {
     required this.id,
     required this.title,
     required this.subtitle,
+    this.minutes = 0,
     required this.icon,
     required this.introduction,
     this.image,
@@ -54,6 +56,7 @@ class Lesson {
       id: json['id'] as String,
       title: json['title'] as String,
       subtitle: json['subtitle'] as String? ?? '',
+      minutes: json['minutes'] as int? ?? 0,
       icon: json['icon'] as String? ?? 'menu_book',
       introduction: json['introduction'] as String? ?? '',
       image: json['image'] as String?,

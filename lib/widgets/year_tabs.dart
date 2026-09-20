@@ -37,7 +37,6 @@ class YearTabs extends StatelessWidget {
                     _YearTab(
                       circleText: yearCircleText(course.title),
                       label: course.title,
-                      image: course.image,
                       selected: index == selectedIndex,
                       onTap: () => onSelected(index),
                     ),
@@ -83,14 +82,12 @@ String yearCircleText(String title) {
 class _YearTab extends StatelessWidget {
   final String circleText;
   final String label;
-  final String? image;
   final bool selected;
   final VoidCallback onTap;
 
   const _YearTab({
     required this.circleText,
     required this.label,
-    this.image,
     required this.selected,
     required this.onTap,
   });
@@ -98,7 +95,6 @@ class _YearTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final circleImage = image;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -128,18 +124,7 @@ class _YearTab extends StatelessWidget {
                     ]
                   : null,
             ),
-            child: circleImage != null && circleImage.isNotEmpty
-                ? ClipOval(
-                    child: Image.asset(
-                      circleImage,
-                      width: 44,
-                      height: 44,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          _CircleText(text: circleText, selected: selected),
-                    ),
-                  )
-                : _CircleText(text: circleText, selected: selected),
+            child: _CircleText(text: circleText, selected: selected),
           ),
           const SizedBox(height: 5),
           ConstrainedBox(

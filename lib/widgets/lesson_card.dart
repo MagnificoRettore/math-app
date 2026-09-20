@@ -7,6 +7,7 @@ import 'app_card.dart';
 class LessonCard extends StatelessWidget {
   final Lesson lesson;
   final bool completed;
+  final int? number;
   final VoidCallback onTap;
 
   const LessonCard({
@@ -14,6 +15,7 @@ class LessonCard extends StatelessWidget {
     required this.lesson,
     required this.completed,
     required this.onTap,
+    this.number,
   });
 
   @override
@@ -24,58 +26,83 @@ class LessonCard extends StatelessWidget {
       onTap: onTap,
       child: Row(
         children: [
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
+              color: (completed ? c.easy : color).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(_iconFor(lesson.icon), color: color, size: 24),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
+              child: Icon(
+                completed ? Icons.check_circle : Icons.play_circle_outlined,
+                key: ValueKey(completed),
+                color: completed ? c.easy : color,
+                size: 24,
+              ),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  lesson.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: c.textPrimary,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (number != null) ...[
+                      Text(
+                        '$number.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: c.accent,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    Expanded(
+                      child: Text(
+                        lesson.title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: c.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  '${lesson.steps.length} passaggi · ${lesson.subtitle}',
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+                Row(
+                  children: [
+                    Icon(Icons.schedule, size: 13, color: c.textSecondary),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '$_minutes min${lesson.subtitle.isEmpty ? '' : ' · ${lesson.subtitle}'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 13, color: c.textSecondary),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          if (completed) ...[
-            Icon(Icons.check_circle, color: c.easy, size: 22),
-            const SizedBox(width: 8),
-          ],
           Icon(Icons.chevron_right, color: c.textSecondary),
         ],
       ),
     );
   }
 
-  IconData _iconFor(String name) {
-    switch (name) {
-      case 'pie_chart':
-        return Icons.pie_chart_outline;
-      case 'functions':
-        return Icons.functions;
-      case 'triangle':
-        return Icons.change_history_outlined;
-      default:
-        return Icons.menu_book_outlined;
-    }
-  }
+  int get _minutes =>
+      lesson.minutes > 0 ? lesson.minutes : lesson.steps.length * 2;
 
   Color _colorFor(AppPalette c, String name) {
     switch (name) {

@@ -56,39 +56,45 @@ class LessonSectionsScreen extends StatelessWidget {
               else
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 16, 0, 40),
-                  child: Column(
-                    children: [
-                      for (final group in groups)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
-                            children: [
-                              for (final lesson in group.lessons)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: LessonCard(
-                                    lesson: lesson,
-                                    completed: ProgressStore.instance
-                                        .isLessonCompleted(level.id, lesson.id),
-                                    onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            LessonScreen(lesson: lesson),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: Column(children: _buildGroups(context)),
                 ),
             ],
           );
         },
       ),
     );
+  }
+
+  List<Widget> _buildGroups(BuildContext context) {
+    final result = <Widget>[];
+    var lessonNumber = 0;
+    for (final group in _groups()) {
+      result.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              for (final lesson in group.lessons)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: LessonCard(
+                    lesson: lesson,
+                    number: ++lessonNumber,
+                    completed: ProgressStore.instance
+                        .isLessonCompleted(level.id, lesson.id),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LessonScreen(lesson: lesson),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+    return result;
   }
 
   List<_SectionLessons> _groups() {

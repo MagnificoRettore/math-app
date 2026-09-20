@@ -9,6 +9,7 @@ import '../models/topic.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/exercise_card.dart';
+import '../widgets/exercise_tools_bar.dart';
 import '../widgets/topic_background.dart';
 import 'exercise_detail_screen.dart';
 
@@ -41,57 +42,66 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: ListenableBuilder(
-        listenable: ProgressStore.instance,
-        builder: (context, _) {
-          final exercises = _filter == null
-              ? widget.topic.exercises
-              : widget.topic.exercises
-                    .where((e) => e.difficulty == _filter)
-                    .toList();
+      body: Stack(
+        children: [
+          ListenableBuilder(
+            listenable: ProgressStore.instance,
+            builder: (context, _) {
+              final exercises = _filter == null
+                  ? widget.topic.exercises
+                  : widget.topic.exercises
+                        .where((e) => e.difficulty == _filter)
+                        .toList();
 
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              TopicHeader(
-                title: widget.topic.title,
-                subtitle: widget.topic.subtitle.isEmpty
-                    ? null
-                    : widget.topic.subtitle,
-                image: widget.topic.image,
-                color: topicColor(c, widget.topic.icon),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildFilterChips(),
-                    const SizedBox(height: 12),
-                    for (final exercise in exercises)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ExerciseCard(
-                          exercise: exercise,
-                          bookmarked: ProgressStore.instance.isBookmarked(
-                            widget.level.id,
-                            exercise.id,
+              return ListView(
+                padding: const EdgeInsets.only(bottom: 112),
+                children: [
+                  TopicHeader(
+                    title: widget.topic.title,
+                    subtitle: widget.topic.subtitle.isEmpty
+                        ? null
+                        : widget.topic.subtitle,
+                    image: widget.topic.image,
+                    color: topicColor(c, widget.topic.icon),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFilterChips(),
+                        const SizedBox(height: 12),
+                        for (final exercise in exercises)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: ExerciseCard(
+                              exercise: exercise,
+                              bookmarked: ProgressStore.instance.isBookmarked(
+                                widget.level.id,
+                                exercise.id,
+                              ),
+                              status: ProgressStore.instance.statusOf(
+                                widget.level.id,
+                                exercise.id,
+                              ),
+                              onToggleBookmark: (val) => ProgressStore.instance
+                                  .toggleBookmark(widget.level.id, exercise.id),
+                              onTap: () => _openExercise(exercise),
+                            ),
                           ),
-                          status: ProgressStore.instance.statusOf(
-                            widget.level.id,
-                            exercise.id,
-                          ),
-                          onToggleBookmark: (val) => ProgressStore.instance
-                              .toggleBookmark(widget.level.id, exercise.id),
-                          onTap: () => _openExercise(exercise),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            left: 16,
+            bottom: 16,
+            child: ExerciseToolsBar(),
+          ),
+        ],
       ),
     );
   }

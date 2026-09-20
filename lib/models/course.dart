@@ -5,14 +5,12 @@ class Course {
   final String id;
   final String title;
   final String subtitle;
-  final String? image;
   final List<Section> sections;
 
   const Course({
     required this.id,
     required this.title,
     required this.subtitle,
-    this.image,
     required this.sections,
   });
 
@@ -41,7 +39,6 @@ class Course {
       id: json['id'] as String,
       title: json['title'] as String,
       subtitle: json['subtitle'] as String? ?? '',
-      image: json['image'] as String?,
       sections: sections,
     );
   }
