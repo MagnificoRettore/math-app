@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/content_repository.dart';
@@ -205,7 +206,7 @@ void main() {
         home: LessonScreen(lesson: lesson),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
 
     expect(find.textContaining('Passo 1 di'), findsOneWidget);
 
@@ -217,20 +218,20 @@ void main() {
     );
     await tapVisible(tester, find.byKey(const ValueKey('option_1')));
     expect(find.text('Non è corretto'), findsOneWidget);
-    expect(find.text('Continua'), findsNothing);
+    expect(find.byIcon(Icons.arrow_forward), findsNothing);
 
     // risposta corretta → feedback + Continua
     await tapVisible(tester, find.byKey(const ValueKey('option_0')));
     expect(find.text('Corretto!'), findsOneWidget);
-    expect(find.text('Continua'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
 
     // avanza al passo 2 (numerico)
-    await tapVisible(tester, find.text('Continua'));
+    await tapVisible(tester, find.byIcon(Icons.arrow_forward));
     expect(find.textContaining('Passo 2 di'), findsOneWidget);
 
     // risposta numerica sbagliata
     await tester.ensureVisible(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
     await tester.enterText(find.byType(TextField), '999');
     await tapVisible(tester, find.text('Controlla'));
     expect(find.text('Non è corretto'), findsOneWidget);
@@ -241,17 +242,20 @@ void main() {
     await tapVisible(tester, find.text('Controlla'));
     expect(find.text('Corretto!'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Continua'));
+    await tapVisible(tester, find.byIcon(Icons.arrow_forward));
     expect(find.textContaining('Passo 3 di'), findsOneWidget);
 
     // passo 3 testo
     await tester.ensureVisible(find.byType(TextField));
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
     await tester.enterText(find.byType(TextField), '4/3');
     await tapVisible(tester, find.text('Controlla'));
     expect(find.text('Corretto!'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Continua'));
+    // ultimo passaggio: il bottone diventa un pollice in su pieno
+    expect(find.byIcon(Symbols.thumb_up_filled_rounded), findsOneWidget);
+
+    await tapVisible(tester, find.byIcon(Symbols.thumb_up_filled_rounded));
     expect(find.text('Lezione completata!'), findsOneWidget);
     expect(find.text('Torna alle lezioni'), findsOneWidget);
     expect(
@@ -277,25 +281,25 @@ void main() {
           home: LessonScreen(lesson: lesson),
         ),
       );
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Primo passo: solo contenuto (definizione + esempio numerico), niente input
       expect(find.text('Definizione'), findsAtLeastNWidgets(1));
       expect(find.byType(TextField), findsNothing);
       expect(find.byKey(const ValueKey('option_0')), findsNothing);
-      expect(find.text('Continua'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
 
       // Il pulsante avanza alla seconda pagina informativa (espressione letterale)
-      await tapVisible(tester, find.text('Continua'));
+      await tapVisible(tester, find.byIcon(Icons.arrow_forward));
       // la lezione è in una ListView lazy: dopo lo scroll torna in cima per vedere l'intestazione
       await tester.drag(find.byType(Scrollable).first, const Offset(0, 1000));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
       expect(find.textContaining('Passo 2 di'), findsOneWidget);
       expect(find.byType(TextField), findsNothing);
       expect(find.byKey(const ValueKey('option_0')), findsNothing);
 
       // Ultima pagina: Continua completa la lezione
-      await tapVisible(tester, find.text('Continua'));
+      await tapVisible(tester, find.byIcon(Symbols.thumb_up_filled_rounded));
       expect(find.text('Lezione completata!'), findsOneWidget);
       expect(
         ProgressStore.instance.isLessonCompleted(lesson.levelId, lesson.id),
@@ -317,7 +321,7 @@ void main() {
         home: LessonScreen(lesson: lesson),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
 
     expect(find.text('Animazione interattiva'), findsOneWidget);
     expect(find.text('Tocca la torta per esplorare'), findsOneWidget);
@@ -336,15 +340,21 @@ void main() {
         home: LessonScreen(lesson: lesson),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
 
     expect(find.byType(Image), findsWidgets);
   });
 }
 
+Future<void> pumpFrames(WidgetTester tester) async {
+  for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+}
+
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   await tester.ensureVisible(finder);
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
   await tester.tap(finder);
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/auth_store.dart';
@@ -34,6 +35,12 @@ Future<void> _pumpHome(WidgetTester tester) async {
 
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
+
+Future<void> pumpFrames(WidgetTester tester) async {
+  for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(milliseconds: 400));
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -84,11 +91,11 @@ void main() {
       await tester.tap(find.text('Frazioni'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Introduzione alle frazioni'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
       expect(find.byType(LessonScreen), findsOneWidget);
 
       await tester.pageBack();
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.byType(LessonListScreen), findsOneWidget);
@@ -187,7 +194,7 @@ void main() {
     await tester.tap(find.text('Frazioni'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Introduzione alle frazioni'));
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
 
     expect(find.byType(LessonScreen), findsOneWidget);
     expect(find.text('HOME'), findsNothing);
@@ -286,7 +293,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(_pillIcon(Icons.home), findsOneWidget);
+    expect(_pillIcon(Symbols.home_rounded), findsOneWidget);
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
 
@@ -303,7 +310,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(_pillIcon(Icons.home), findsOneWidget);
+    expect(_pillIcon(Symbols.home_rounded), findsOneWidget);
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
 
@@ -351,9 +358,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(HomeScreen), findsOneWidget);
-      expect(_pillIcon(Icons.home), findsOneWidget);
-      expect(_pillIcon(Icons.menu_book_outlined), findsOneWidget);
-      expect(_pillIcon(Icons.menu_book), findsNothing);
+      expect(_pillIcon(Symbols.home_rounded), findsOneWidget);
+      expect(_pillIcon(Symbols.book_2_rounded), findsOneWidget);
+      expect(_pillIcon(Icons.menu_book_outlined), findsNothing);
     },
   );
 
@@ -374,7 +381,7 @@ void main() {
 
       final pill = find.byType(PillNavBar);
       expect(
-        find.descendant(of: pill, matching: find.byIcon(Icons.home)),
+        find.descendant(of: pill, matching: find.byIcon(Symbols.home_rounded)),
         findsOneWidget,
       );
       expect(

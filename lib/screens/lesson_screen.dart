@@ -1,5 +1,8 @@
+import 'package:material_3_expressive/material_3_expressive.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../data/progress_store.dart';
 import '../data/study_store.dart';
@@ -116,6 +119,13 @@ class _LessonScreenState extends State<LessonScreen> {
     );
   }
 
+  bool get _isLastStep => _stepIndex >= widget.lesson.steps.length - 1;
+
+  bool get _showFloatingContinue {
+    final isInfoStep = _step.type == LessonStepType.info;
+    return !_completed && (isInfoStep || _solved);
+  }
+
   Widget _buildLesson() {
     final c = AppColors.of(context);
     final total = widget.lesson.steps.length;
@@ -158,17 +168,11 @@ class _LessonScreenState extends State<LessonScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: progress),
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOutCubic,
-          builder: (context, value, _) => LinearProgressIndicator(
-            value: value.clamp(0.0, 1.0),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-            backgroundColor: c.accentSoft,
-            valueColor: AlwaysStoppedAnimation(c.accent),
-          ),
+        M3ESlider.wavy(
+          value: progress.clamp(0.0, 1.0),
+          enabled: true,
+          trackThickness: 16,
+          onChanged: (double v) {},
         ),
         const SizedBox(height: 20),
         AnimatedSwitcher(
@@ -197,7 +201,6 @@ class _LessonScreenState extends State<LessonScreen> {
             inputController: _inputController,
             onSelectOption: _selectOption,
             onSubmitInput: _submitInput,
-            onContinue: _continue,
           ),
         ),
       ],
@@ -291,7 +294,6 @@ class _StepCard extends StatelessWidget {
   final TextEditingController inputController;
   final ValueChanged<int> onSelectOption;
   final VoidCallback onSubmitInput;
-  final VoidCallback onContinue;
 
   const _StepCard({
     super.key,
@@ -304,13 +306,12 @@ class _StepCard extends StatelessWidget {
     required this.inputController,
     required this.onSelectOption,
     required this.onSubmitInput,
-    required this.onContinue,
   });
 
   @override
   Widget build(BuildContext context) {
     if (step.type == LessonStepType.info) {
-      return _InfoContent(step: step, onContinue: onContinue);
+      return _InfoContent(step: step);
     }
     final c = AppColors.of(context);
     return AppCard(
@@ -344,7 +345,6 @@ class _StepCard extends StatelessWidget {
                     key: const ValueKey('correct'),
                     correct: true,
                     message: step.explanation,
-                    onContinue: onContinue,
                   )
                 : attempted
                 ? _ShakeWidget(
@@ -448,12 +448,8 @@ class _StepCard extends StatelessWidget {
 
 class _InfoContent extends StatelessWidget {
   final LessonStep step;
-  final VoidCallback onContinue;
 
-  const _InfoContent({
-    required this.step,
-    required this.onContinue,
-  });
+  const _InfoContent({required this.step});
 
   @override
   Widget build(BuildContext context) {
@@ -507,21 +503,6 @@ class _InfoContent extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 24),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: c.accent,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            onPressed: onContinue,
-            icon: const Icon(Icons.arrow_forward, size: 18),
-            label: const Text(
-              'Continua',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
-          ),
         ],
       ),
     );
@@ -794,13 +775,11 @@ class _OptionTile extends StatelessWidget {
 class _FeedbackCard extends StatelessWidget {
   final bool correct;
   final String message;
-  final VoidCallback? onContinue;
 
   const _FeedbackCard({
     super.key,
     required this.correct,
     required this.message,
-    this.onContinue,
   });
 
   @override
@@ -841,27 +820,6 @@ class _FeedbackCard extends StatelessWidget {
             message,
             style: TextStyle(fontSize: 14, height: 1.4, color: c.textPrimary),
           ),
-          if (correct && onContinue != null) ...[
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: c.easy,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: onContinue,
-                icon: const Icon(Icons.arrow_forward, size: 18),
-                label: const Text(
-                  'Continua',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

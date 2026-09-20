@@ -62,6 +62,8 @@ MAIN FOCUS:
 cercare di rimanere vicini alla struttura dei libri scolastici ma stringare i concetti per spiegare le cose chiave
 
 Novita:
+- implementare carosello nella HOME di material3 expressive (sito: https://paadevelopments.github.io/material_3_expressive/)
+- aggiungere toolbar da material3
 - aggiungere il widget della calcolatrice durante lo svolgimento di esercizi o lezioni guidate. il widget deve essere visibile in alto a destra con iconcina e andare in overlay ma permettendo all'utente di leggere il testo sopraù
 - esercizi flash, esercizi da fare a mente al volo. quasi minigiochi
 

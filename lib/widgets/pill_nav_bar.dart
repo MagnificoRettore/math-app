@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
@@ -614,9 +615,9 @@ class _PillButton extends StatelessWidget {
   IconData get _outlinedIcon {
     switch (tab) {
       case PillTab.home:
-        return Icons.home_outlined;
+        return Symbols.home_rounded;
       case PillTab.lessons:
-        return Icons.menu_book_outlined;
+        return Symbols.book_2_rounded;
       case PillTab.exercises:
         return Icons.calculate_outlined;
       case PillTab.profile:
@@ -627,9 +628,9 @@ class _PillButton extends StatelessWidget {
   IconData get _filledIcon {
     switch (tab) {
       case PillTab.home:
-        return Icons.home;
+        return Symbols.home_rounded;
       case PillTab.lessons:
-        return Icons.menu_book;
+        return Symbols.book_2_rounded;
       case PillTab.exercises:
         return Icons.calculate;
       case PillTab.profile:

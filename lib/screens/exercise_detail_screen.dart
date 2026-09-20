@@ -1,3 +1,5 @@
+import 'package:material_3_expressive/material_3_expressive.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,7 +43,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          ListenableBuilder(
+                    ListenableBuilder(
             listenable: ProgressStore.instance,
             builder: (context, _) {
               final bookmarked = ProgressStore.instance.isBookmarked(
