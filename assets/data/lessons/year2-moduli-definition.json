@@ -1,0 +1,87 @@
+{
+    "level": "high-school",
+    "year": "year2",
+    "section": "year2-moduli",
+    "topic": "year2-moduli-definition",
+    "lessons": [
+        {
+            "id": "moduli-definition",
+            "title": "Definizione",
+            "subtitle": "Definizione di modulo",
+            "icon": "functions",
+            "animation": "none",
+            "introduction": "Il modulo di un numero misura la sua distanza dallo zero sulla retta reale. Scopriamolo insieme passo dopo passo.",
+            "completionMessage": "Perfetto! Hai capito come funziona il modulo, anche con le lettere.",
+            "steps": [
+                {
+                    "type": "info",
+                    "prompt": "Il valore assoluto (o modulo) di un numero è la sua distanza dallo zero sulla retta reale: è sempre positivo o nullo.",
+                    "formula": "$$|x| = \\begin{cases} x & \\text{se } x \\ge 0 \\\\ -x & \\text{se } x < 0 \\end{cases}$$",
+                    "numberLine": {
+                        "min": -10,
+                        "max": 10,
+                        "values": [
+                            7,
+                            -7
+                        ]
+                    },
+                    "examples": [
+                        {
+                            "expression": "$$|7| = 7$$",
+                            "note": "7 è positivo: dista 7 dallo zero.",
+                            "positive": true
+                        },
+                        {
+                            "expression": "$$|-7| = 7$$",
+                            "note": "-7 è negativo: il modulo toglie il segno e la distanza è sempre 7.",
+                            "positive": false
+                        }
+                    ],
+                    "explanation": ""
+                },
+                {
+                    "type": "info",
+                    "prompt": "Dentro al modulo può esserci un'espressione: il modulo è sempre la distanza dallo zero dell'intera espressione.\n\nSostituisci il valore di x, calcola l'espressione e, se è negativa, togli il segno.",
+                    "formula": "$$|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}$$",
+                    "examples": [
+                        {
+                            "expression": "$$x = 5 \\Rightarrow |5-3| = 2$$",
+                            "note": "5 − 3 = 2: positivo, il modulo non cambia nulla.",
+                            "positive": true
+                        },
+                        {
+                            "expression": "$$x = -10 \\Rightarrow |-10-3| = 13$$",
+                            "note": "−10 − 3 = −13: negativo, il modulo toglie il segno.",
+                            "positive": false
+                        }
+                    ],
+                    "explanation": ""
+                }
+            ],
+            "minutes": 4
+        },
+        {
+            "id": "moduli-equations",
+            "title": "Equazioni con i moduli",
+            "subtitle": "Risolvere |ax+b| = k",
+            "icon": "functions",
+            "animation": "none",
+            "introduction": "Un'equazione con modulo si risolve ricordando che |x| = a (con a ≥ 0) significa x = a oppure x = -a. Proviamo insieme.",
+            "completionMessage": "Ottimo! Sai risolvere le equazioni con il valore assoluto.",
+            "steps": [
+{
+                            "type": "info",
+                            "prompt": "",
+                            "cards": [
+                                "Generalmente, risolvere un'equazione che ha un modulo ha come primo step lo <b>Studio del Modulo</b>.",
+                                "Esempio: risolviamo $$\\lvert x - 5 \\rvert = 2$$. Come sempre partiamo dallo <b>Studio del Modulo</b>: l'argomento $$x - 5$$ è positivo o al più nullo quando $$x \\ge 5$$. Questo ci permetterà di dividere l'equazione in due casi senza modulo.",
+                                "Lo studio del modulo ci fa chiedere quando l'argomento è positivo o al più uguale a zero.",
+                                "$$|x-5|=4x$$"
+                            ],
+                            "explanation": ""
+                        }
+            ],
+            "minutes": 3
+        }
+    ]
+}

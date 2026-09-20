@@ -145,11 +145,12 @@ void main() {
     final equations = moduli.singleWhere((l) => l.id == 'moduli-equations');
     expect(equations.topics, contains('year2-moduli-definition'));
     expect(equations.steps, hasLength(1));
-    final step = equations.steps.single;
-    expect(step.cards, hasLength(3));
-    expect(step.cards[0], contains('Studio del Modulo'));
-    expect(step.cards[1], contains('x - 5'));
-    expect(step.cards[2], contains('positivo o al più uguale a zero'));
+    final studyStep = equations.steps.single;
+    expect(studyStep.cards, hasLength(4));
+    expect(studyStep.cards[0], contains('Studio del Modulo'));
+    expect(studyStep.cards[1], contains('x - 5'));
+    expect(studyStep.cards[2], contains('positivo o al più uguale a zero'));
+    expect(studyStep.cards[3], r'$$|x-5|=4x$$');
   });
 
   test('checkAnswer confronta numeri e frazioni', () {
@@ -348,6 +349,30 @@ void main() {
 
     expect(find.byType(Image), findsWidgets);
   });
+
+  testWidgets(
+    'una card composta solo da un equazione è trasparente e dentro la pagina',
+    (tester) async {
+      final lesson = LessonRepository.instance.lessons.firstWhere(
+        (l) => l.id == 'moduli-equations',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: LessonScreen(lesson: lesson),
+        ),
+      );
+      await pumpFrames(tester);
+
+      // stessa pagina: 3 card concetto con lightbulb + una formula senza icona
+      expect(find.byIcon(Icons.lightbulb_outline), findsNWidgets(3));
+      final formulaCard = find.byKey(const ValueKey('formula_card'));
+      expect(formulaCard, findsOneWidget);
+      final container = tester.widget<Container>(formulaCard);
+      expect(container.decoration, isNull);
+    },
+  );
 }
 
 Future<void> pumpFrames(WidgetTester tester) async {

@@ -555,6 +555,20 @@ class _ConceptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final trimmed = text.trim();
+    final formulaOnly = trimmed.startsWith(r'$$') && trimmed.endsWith(r'$$');
+    if (formulaOnly) {
+      return Container(
+        key: const ValueKey('formula_card'),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: _FormulaCardText(formula: trimmed),
+        ),
+      );
+    }
     return AppCard(
       padding: const EdgeInsets.all(20),
       child: Row(
@@ -579,6 +593,17 @@ class _ConceptCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _FormulaCardText extends StatelessWidget {
+  final String formula;
+
+  const _FormulaCardText({required this.formula});
+
+  @override
+  Widget build(BuildContext context) {
+    return MathText(formula, fontSize: 22, fontWeight: FontWeight.w700);
   }
 }
 

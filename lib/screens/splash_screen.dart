@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
@@ -148,15 +149,19 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ] else
                   const SizedBox(height: 32),
-                if (!_failed)
-                  SizedBox(
-                    width: 26,
-                    height: 26,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: c.onSplash.withValues(alpha: 0.9),
+                if (!_failed) ...[
+                  const SizedBox(height: 24),
+                  Lottie.asset(
+                    'assets/animations/splash_loading.json',
+                    width: 260,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
                     ),
                   ),
+                ],
               ],
             ),
           ),

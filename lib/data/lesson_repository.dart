@@ -29,20 +29,45 @@ class LessonRepository {
         .toList();
   }
 
+  static const _indexPath = 'assets/data/lessons/index.json';
+  static const _dirPath = 'assets/data/lessons/';
+
   Future<void> load() async {
     if (_loaded) return;
     _loadError = null;
     try {
-      final json = jsonDecode(
-        await rootBundle.loadString('assets/data/lessons.json'),
+      final indexJson = jsonDecode(
+        await rootBundle.loadString(_indexPath),
       ) as Map<String, dynamic>;
-      _lessons = (json['lessons'] as List<dynamic>)
-          .map((e) => Lesson.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final lessons = <Lesson>[];
+      for (final file in indexJson['argomenti'] as List<dynamic>) {
+        final argomento = jsonDecode(
+          await rootBundle.loadString('$_dirPath$file'),
+        ) as Map<String, dynamic>;
+        lessons.addAll(_lessonsOf(argomento));
+      }
+      _lessons = lessons;
       _loaded = true;
     } catch (error) {
       _loadError = error;
     }
+  }
+
+  List<Lesson> _lessonsOf(Map<String, dynamic> argomento) {
+    final levelId = argomento['level'] as String;
+    final yearId = argomento['year'] as String;
+    final sectionId = argomento['section'] as String;
+    final topicId = argomento['topic'] as String;
+    return [
+      for (final lesson in argomento['lessons'] as List<dynamic>)
+        Lesson.fromJson({
+          ...(lesson as Map<String, dynamic>),
+          'level': levelId,
+          'year': yearId,
+          'section': sectionId,
+          'topics': [topicId],
+        }),
+    ];
   }
 
   Future<void> reload() async {

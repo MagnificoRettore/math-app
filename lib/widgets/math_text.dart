@@ -8,6 +8,7 @@ class MathText extends StatelessWidget {
   final double fontSize;
   final Color? color;
   final TextAlign textAlign;
+  final FontWeight? fontWeight;
 
   const MathText(
     this.data, {
@@ -15,6 +16,7 @@ class MathText extends StatelessWidget {
     this.fontSize = 16,
     this.color,
     this.textAlign = TextAlign.left,
+    this.fontWeight,
   });
 
   @override
@@ -88,8 +90,15 @@ class MathText extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Math.tex(
         cleaned,
-        textStyle: TextStyle(fontSize: fontSize * 1.1, color: color),
-        options: MathOptions(fontSize: fontSize * 1.1, color: color),
+        textStyle:
+            TextStyle(fontSize: fontSize * 1.1, color: color, fontWeight: fontWeight),
+        options: MathOptions(
+          fontSize: fontSize * 1.1,
+          color: color,
+          mathFontOptions: fontWeight == null
+              ? null
+              : FontOptions(fontWeight: fontWeight!),
+        ),
       ),
     );
   }
@@ -100,8 +109,15 @@ class MathText extends StatelessWidget {
       alignment: PlaceholderAlignment.middle,
       child: Math.tex(
         cleaned,
-        textStyle: TextStyle(fontSize: fontSize, color: color),
-        options: MathOptions(fontSize: fontSize, color: color),
+        textStyle:
+            TextStyle(fontSize: fontSize, color: color, fontWeight: fontWeight),
+        options: MathOptions(
+          fontSize: fontSize,
+          color: color,
+          mathFontOptions: fontWeight == null
+              ? null
+              : FontOptions(fontWeight: fontWeight!),
+        ),
       ),
     );
   }
