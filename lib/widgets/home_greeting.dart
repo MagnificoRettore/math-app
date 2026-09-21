@@ -93,8 +93,7 @@ class _GreetingText extends StatelessWidget {
       textDirection: TextDirection.ltr,
       maxLines: 1,
       textScaler: scaler,
-    )..layout())
-        .width;
+    )..layout()).width;
   }
 
   @override
@@ -159,9 +158,9 @@ class _ProfileAvatar extends StatelessWidget {
     return InkWell(
       key: const Key('home-profile-avatar'),
       customBorder: const CircleBorder(),
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-      ),
+      onTap: () =>
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
       child: Container(
         width: 40,
         height: 40,

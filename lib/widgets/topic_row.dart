@@ -9,11 +9,7 @@ class TopicRow extends StatelessWidget {
   final Topic topic;
   final VoidCallback onTap;
 
-  const TopicRow({
-    super.key,
-    required this.topic,
-    required this.onTap,
-  });
+  const TopicRow({super.key, required this.topic, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

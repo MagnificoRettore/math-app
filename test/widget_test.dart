@@ -43,9 +43,7 @@ void main() {
     expect(quadratic, isNotEmpty);
   });
 
-  testWidgets('Home screen renderizza il contenuto principale', (
-    tester,
-  ) async {
+  testWidgets('Home screen renderizza il contenuto principale', (tester) async {
     await ContentRepository.instance.load();
     SearchIndex.instance.build(ContentRepository.instance.levels);
     await ProgressStore.instance.load();

@@ -53,10 +53,13 @@ void main() {
 
   test('gli anni sono etichettati con i nomi ordinali', () {
     final highSchool = ContentRepository.instance.levelById('high-school')!;
-    expect(
-      highSchool.courses.map((c) => c.title),
-      ['prima', 'seconda', 'terza', 'quarta', 'quinta'],
-    );
+    expect(highSchool.courses.map((c) => c.title), [
+      'prima',
+      'seconda',
+      'terza',
+      'quarta',
+      'quinta',
+    ]);
   });
 
   test('yearCircleText mappa gli anni ordinali ai numeri romani', () {

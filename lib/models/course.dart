@@ -24,17 +24,17 @@ class Course {
               .map((e) => Section.fromJson(e as Map<String, dynamic>))
               .toList()
         : rawTopics == null
-              ? const <Section>[]
-              : [
-                  Section(
-                    id: '${json['id']}-general',
-                    title: 'Argomenti',
-                    subtitle: '',
-                    topics: rawTopics
-                        .map((e) => Topic.fromJson(e as Map<String, dynamic>))
-                        .toList(),
-                  ),
-                ];
+        ? const <Section>[]
+        : [
+            Section(
+              id: '${json['id']}-general',
+              title: 'Argomenti',
+              subtitle: '',
+              topics: rawTopics
+                  .map((e) => Topic.fromJson(e as Map<String, dynamic>))
+                  .toList(),
+            ),
+          ];
     return Course(
       id: json['id'] as String,
       title: json['title'] as String,

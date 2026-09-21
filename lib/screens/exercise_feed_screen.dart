@@ -96,11 +96,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
               );
             },
           ),
-          Positioned(
-            left: 16,
-            bottom: 16,
-            child: ExerciseToolsBar(),
-          ),
+          Positioned(left: 16, bottom: 16, child: ExerciseToolsBar()),
         ],
       ),
     );

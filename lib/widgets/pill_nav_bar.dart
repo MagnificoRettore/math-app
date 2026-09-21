@@ -36,10 +36,7 @@ Route<T> _fadeRoute<T>(Widget page) {
     pageBuilder: (_, _, _) => page,
     transitionsBuilder: (_, animation, _, child) {
       return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOut,
-        ),
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
         child: child,
       );
     },
@@ -52,7 +49,11 @@ class PillNavOverlay extends StatelessWidget {
   final PillTab selected;
   final Widget child;
 
-  const PillNavOverlay({super.key, required this.selected, required this.child});
+  const PillNavOverlay({
+    super.key,
+    required this.selected,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +272,9 @@ class _PillNavBarState extends State<PillNavBar> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(32),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: isDark ? 0.14 : 0.55),
+                        color: Colors.white.withValues(
+                          alpha: isDark ? 0.14 : 0.55,
+                        ),
                         width: 1,
                       ),
                     ),
@@ -300,8 +303,20 @@ class _PillNavBarState extends State<PillNavBar> {
                   ),
                 ),
                 // 5) Riflessi laterali: bordi verticali del vetro.
-                Positioned(left: 0, top: 8, bottom: 8, width: 12, child: _EdgeGlare(alpha: glare)),
-                Positioned(right: 0, top: 8, bottom: 8, width: 12, child: _EdgeGlare(alpha: glare, flip: true)),
+                Positioned(
+                  left: 0,
+                  top: 8,
+                  bottom: 8,
+                  width: 12,
+                  child: _EdgeGlare(alpha: glare),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 8,
+                  bottom: 8,
+                  width: 12,
+                  child: _EdgeGlare(alpha: glare, flip: true),
+                ),
                 // 6) Bagliore diagonale: rifrazione "liquida" sulla superficie.
                 Positioned.fill(
                   child: IgnorePointer(
@@ -350,27 +365,23 @@ class _PillNavBarState extends State<PillNavBar> {
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final segWidth =
-                          (constraints.maxWidth / _itemCount).clamp(
-                            1.0,
-                            double.infinity,
-                          );
+                      final segWidth = (constraints.maxWidth / _itemCount)
+                          .clamp(1.0, double.infinity);
                       final maxLeft = constraints.maxWidth - segWidth;
 
-                      double clampLeft(double left) =>
-                          left.clamp(0.0, maxLeft);
+                      double clampLeft(double left) => left.clamp(0.0, maxLeft);
                       int segmentAt(double x) =>
                           (x / segWidth).floor().clamp(0, _itemCount - 1);
                       double indicatorLeft(int index) => index * segWidth;
 
-                      final draggingFrom = _dragLeft ??
+                      final draggingFrom =
+                          _dragLeft ??
                           indicatorLeft(_pendingTabIndex ?? _selectedIndex);
                       final activeIndex =
                           _activeIndex ?? _pendingTabIndex ?? _selectedIndex;
-                      final snapDuration =
-                          (!_dragging && !reduceMotion)
-                              ? const Duration(milliseconds: 260)
-                              : Duration.zero;
+                      final snapDuration = (!_dragging && !reduceMotion)
+                          ? const Duration(milliseconds: 260)
+                          : Duration.zero;
                       final snapCurve = Curves.easeOutCubic;
 
                       return GestureDetector(
@@ -400,7 +411,9 @@ class _PillNavBarState extends State<PillNavBar> {
                         onHorizontalDragEnd: (_) {
                           final releasedIndex =
                               _activeIndex ??
-                              segmentAt(indicatorLeft(_selectedIndex) + segWidth / 2);
+                              segmentAt(
+                                indicatorLeft(_selectedIndex) + segWidth / 2,
+                              );
                           if (releasedIndex == _selectedIndex) {
                             // Rilascio sulla sezione attuale: niente navigazione,
                             // l'indicatore torna centrato sul segmento.

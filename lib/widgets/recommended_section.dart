@@ -38,9 +38,7 @@ class RecommendedSection extends StatelessWidget {
             ),
           ),
         ),
-        if (exercises.isNotEmpty) ...[
-          const _MiniHeader('Esercizi da provare'),
-        ],
+        if (exercises.isNotEmpty) ...[const _MiniHeader('Esercizi da provare')],
         for (final location in exercises)
           Padding(
             padding: const EdgeInsets.only(bottom: 10),

@@ -42,7 +42,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-                    ListenableBuilder(
+          ListenableBuilder(
             listenable: ProgressStore.instance,
             builder: (context, _) {
               final bookmarked = ProgressStore.instance.isBookmarked(
@@ -95,11 +95,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
               );
             },
           ),
-          Positioned(
-            left: 16,
-            bottom: 16,
-            child: ExerciseToolsBar(),
-          ),
+          Positioned(left: 16, bottom: 16, child: ExerciseToolsBar()),
         ],
       ),
     );

@@ -4,11 +4,7 @@ class TopicBackground extends StatelessWidget {
   final String? image;
   final Color color;
 
-  const TopicBackground({
-    super.key,
-    required this.image,
-    required this.color,
-  });
+  const TopicBackground({super.key, required this.image, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -126,10 +122,7 @@ class _Gradient extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.7),
-            color,
-          ],
+          colors: [color.withValues(alpha: 0.7), color],
         ),
       ),
     );
