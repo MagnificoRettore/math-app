@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
+import '../data/lesson_repository.dart';
 import '../data/progress_store.dart';
 import '../data/search_index.dart';
 import '../data/settings_store.dart';
@@ -39,6 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final loadFuture = Future.wait([
       ContentRepository.instance.load(),
+      LessonRepository.instance.load(),
       ProgressStore.instance.load(),
       AuthStore.instance.load(),
       SettingsStore.instance.load(),
@@ -52,6 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (ContentRepository.instance.loadError != null ||
+        LessonRepository.instance.loadError != null ||
         ProgressStore.instance.loadError != null ||
         AuthStore.instance.loadError != null ||
         SettingsStore.instance.loadError != null) {

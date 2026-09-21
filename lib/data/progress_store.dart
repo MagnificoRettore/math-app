@@ -10,8 +10,10 @@ class ProgressStore extends ChangeNotifier {
   ProgressStore._();
 
   static const _progressKey = 'exercise_progress_v1';
+  static const _lessonsKey = 'lessons_completed_v1';
 
   final Map<String, ExerciseProgress> _progress = {};
+  final Set<String> _completedLessons = {};
   bool _loaded = false;
   Object? _loadError;
 
@@ -31,6 +33,10 @@ class ProgressStore extends ChangeNotifier {
           _progress[p.scopedKey] = p;
         }
       }
+      final done = prefs.getStringList(_lessonsKey);
+      if (done != null) {
+        _completedLessons.addAll(done);
+      }
       _loaded = true;
       notifyListeners();
     } catch (error) {
@@ -41,6 +47,7 @@ class ProgressStore extends ChangeNotifier {
   Future<void> reload() async {
     _loaded = false;
     _progress.clear();
+    _completedLessons.clear();
     await load();
   }
 
@@ -48,6 +55,7 @@ class ProgressStore extends ChangeNotifier {
   Future<void> resetForTest() async {
     _loaded = false;
     _progress.clear();
+    _completedLessons.clear();
     _loadError = null;
     await load();
   }
@@ -88,8 +96,9 @@ class ProgressStore extends ChangeNotifier {
           status: ExerciseStatus.none,
           bookmarked: false,
         );
-    _progress[scopedKey(levelId, exerciseId)] =
-        current.copyWith(bookmarked: !current.bookmarked);
+    _progress[scopedKey(levelId, exerciseId)] = current.copyWith(
+      bookmarked: !current.bookmarked,
+    );
     notifyListeners();
     await _persist();
   }
@@ -126,7 +135,21 @@ class ProgressStore extends ChangeNotifier {
     return mastered / ids.length;
   }
 
+  bool isLessonCompleted(String levelId, String lessonId) =>
+      _completedLessons.contains(scopedKey(levelId, lessonId));
+
+  Future<void> completeLesson(String levelId, String lessonId) async {
+    if (!_completedLessons.add(scopedKey(levelId, lessonId))) return;
+    notifyListeners();
+    await _persistLessons();
+  }
+
   static String scopedKey(String levelId, String id) => '$levelId::$id';
+
+  Future<void> _persistLessons() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(_lessonsKey, _completedLessons.toList());
+  }
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();

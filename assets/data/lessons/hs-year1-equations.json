@@ -1,0 +1,41 @@
+{
+    "level": "high-school",
+    "year": "year1",
+    "section": "year1-equations",
+    "topic": "year1-equations",
+    "title": "Equazioni di primo grado",
+    "subtitle": "Guida introduttiva passo-passo",
+    "icon": "functions",
+    "lessons": [
+        {
+            "id": "eq1-intro",
+            "title": "Equazioni di primo grado",
+            "subtitle": "Concetti e risoluzione guidata",
+            "minutes": 5,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Cos'è un'equazione",
+                    "content": "# Cos'è\n\nUn'equazione è un'**uguaglianza** tra due espressioni che contiene un'*incognita*, cioè un valore **__sconosciuto__** da trovare.\n\n## Esempio\n\n::center\n$$2x + 3 = 7$$\n\nRisolvere l'equazione significa trovare il valore di $$x$$ che la rende vera.\n\n~~Il valore è 10~~ il valore è la soluzione dell'uguaglianza."
+                },
+                {
+                    "type": "info",
+                    "title": "Equazione di primo grado",
+                    "content": "# Titolo\n\n## Intestazione\n\n### Sottointestazione\n\nQuesto è il **corpo** del testo, con parola *corsiva*, parola __sottolineata__ e parola ~~barrata~~, anche in combinazione **__grassetto sottolineato__**. Posso usare del codice inline: `x = 2`.\n\n::left\nLa formula è: $$2x + 3 = 7$$ e la soluzione è $$x = 2$$.\n\n## Elenco puntato\n\n- primo *punto* dell'elenco\n- secondo **punto** dell'elenco\n- terzo punto con formula $$x + 1 = 2$$\n\n::center\n$$x = \\frac{7 - 3}{2} = 2$$\n\n::right\n~~formula errata~~: $x = 3$\n\nBlocco monostile:\n\n`ax + b = 0`"
+                },
+                {
+                    "type": "mcq",
+                    "title": "Verifica",
+                    "prompt": "Qual è la soluzione di $$3x - 1 = 5$$?",
+                    "options": [
+                        "$$x = 2$$",
+                        "$$x = 4$$",
+                        "$$x = 3$$"
+                    ],
+                    "correctIndex": 0,
+                    "explanation": "Porta $$-1$$ a destra cambiando segno: $$3x = 5 + 1 = 6$$, poi dividi per 3 e ottieni $$x = 2$$."
+                }
+            ]
+        }
+    ]
+}

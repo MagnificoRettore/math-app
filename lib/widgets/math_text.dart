@@ -3,6 +3,89 @@ import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../theme/app_colors.dart';
 
+class MathSegment {
+  final String text;
+  final bool isMath;
+  const MathSegment(this.text, {required this.isMath});
+}
+
+/// Divide un testo in segmenti matematici (`$$..$$`, block) e inline (`$..$`)
+/// e segmenti di testo puro.
+List<MathSegment> splitMath(String data) {
+  final segments = <MathSegment>[];
+  final block = RegExp(r'\$\$.*?\$\$');
+  var lastIndex = 0;
+  for (final match in block.allMatches(data)) {
+    if (match.start > lastIndex) {
+      segments.addAll(_splitInlineMath(data.substring(lastIndex, match.start)));
+    }
+    segments.add(MathSegment(match.group(0)!, isMath: true));
+    lastIndex = match.end;
+  }
+  if (lastIndex < data.length) {
+    segments.addAll(_splitInlineMath(data.substring(lastIndex)));
+  }
+  return segments;
+}
+
+List<MathSegment> _splitInlineMath(String text) {
+  if (text.isEmpty) return const [];
+  final segments = <MathSegment>[];
+  final inline = RegExp(r'\$[^$\n]+\$');
+  var lastIndex = 0;
+  for (final match in inline.allMatches(text)) {
+    if (match.start > lastIndex) {
+      segments.add(
+        MathSegment(text.substring(lastIndex, match.start), isMath: false),
+      );
+    }
+    segments.add(MathSegment(match.group(0)!, isMath: true));
+    lastIndex = match.end;
+  }
+  if (lastIndex < text.length) {
+    segments.add(MathSegment(text.substring(lastIndex), isMath: false));
+  }
+  return segments;
+}
+
+String _stripDollars(String value) {
+  var s = value.trim();
+  if (s.startsWith(r'$$') && s.endsWith(r'$$')) {
+    s = s.substring(2, s.length - 2);
+  } else if (s.startsWith(r'$') && s.endsWith(r'$')) {
+    s = s.substring(1, s.length - 1);
+  }
+  return s;
+}
+
+/// Widget span per matematica inline, condiviso tra [MathText] e NotesText.
+InlineSpan mathSpan(
+  String tex, {
+  required double fontSize,
+  required Color color,
+  FontWeight? fontWeight,
+}) {
+  final cleaned = _stripDollars(tex);
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.middle,
+    child: Math.tex(
+      cleaned,
+      textStyle: TextStyle(
+        fontSize: fontSize,
+        color: color,
+        fontWeight: fontWeight,
+      ),
+      options: MathOptions(
+        fontSize: fontSize,
+        color: color,
+        mathFontOptions: fontWeight == null
+            ? null
+            : FontOptions(fontWeight: fontWeight),
+      ),
+    ),
+  );
+}
+
 class MathText extends StatelessWidget {
   final String data;
   final double fontSize;
@@ -23,11 +106,28 @@ class MathText extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final effectiveColor = color ?? c.textPrimary;
-    final segments = _splitMath(data);
+    final segments = splitMath(data);
     if (segments.length == 1 && segments.first.isMath) {
       return Align(
         alignment: Alignment.centerLeft,
-        child: _mathBlock(segments.first.text, effectiveColor, fontSize),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Math.tex(
+            _stripDollars(segments.first.text),
+            textStyle: TextStyle(
+              fontSize: fontSize * 1.1,
+              color: effectiveColor,
+              fontWeight: fontWeight,
+            ),
+            options: MathOptions(
+              fontSize: fontSize * 1.1,
+              color: effectiveColor,
+              mathFontOptions: fontWeight == null
+                  ? null
+                  : FontOptions(fontWeight: fontWeight!),
+            ),
+          ),
+        ),
       );
     }
 
@@ -38,7 +138,12 @@ class MathText extends StatelessWidget {
         children: [
           for (final seg in segments)
             if (seg.isMath)
-              _mathSpan(seg.text, effectiveColor, fontSize)
+              mathSpan(
+                seg.text,
+                fontSize: fontSize,
+                color: effectiveColor,
+                fontWeight: fontWeight,
+              )
             else
               ..._plainSpans(seg.text, effectiveColor, fontSize),
         ],
@@ -51,7 +156,10 @@ class MathText extends StatelessWidget {
     final matches = bold.allMatches(text);
     if (matches.isEmpty) {
       return [
-        TextSpan(text: text, style: TextStyle(fontSize: fontSize)),
+        TextSpan(
+          text: text,
+          style: TextStyle(fontSize: fontSize),
+        ),
       ];
     }
     final spans = <InlineSpan>[];
@@ -83,95 +191,4 @@ class MathText extends StatelessWidget {
     }
     return spans;
   }
-
-  Widget _mathBlock(String tex, Color color, double fontSize) {
-    final cleaned = _stripDollars(tex);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Math.tex(
-        cleaned,
-        textStyle:
-            TextStyle(fontSize: fontSize * 1.1, color: color, fontWeight: fontWeight),
-        options: MathOptions(
-          fontSize: fontSize * 1.1,
-          color: color,
-          mathFontOptions: fontWeight == null
-              ? null
-              : FontOptions(fontWeight: fontWeight!),
-        ),
-      ),
-    );
-  }
-
-  InlineSpan _mathSpan(String tex, Color color, double fontSize) {
-    final cleaned = _stripDollars(tex);
-    return WidgetSpan(
-      alignment: PlaceholderAlignment.middle,
-      child: Math.tex(
-        cleaned,
-        textStyle:
-            TextStyle(fontSize: fontSize, color: color, fontWeight: fontWeight),
-        options: MathOptions(
-          fontSize: fontSize,
-          color: color,
-          mathFontOptions: fontWeight == null
-              ? null
-              : FontOptions(fontWeight: fontWeight!),
-        ),
-      ),
-    );
-  }
-
-  String _stripDollars(String value) {
-    var s = value.trim();
-    if (s.startsWith(r'$$') && s.endsWith(r'$$')) {
-      s = s.substring(2, s.length - 2);
-    } else if (s.startsWith(r'$') && s.endsWith(r'$')) {
-      s = s.substring(1, s.length - 1);
-    }
-    return s;
-  }
-
-  static List<_Segment> _splitMath(String data) {
-    final segments = <_Segment>[];
-    final block = RegExp(r'\$\$.*?\$\$');
-    var lastIndex = 0;
-    for (final match in block.allMatches(data)) {
-      if (match.start > lastIndex) {
-        segments.addAll(_splitInline(data.substring(lastIndex, match.start)));
-      }
-      segments.add(_Segment(match.group(0)!, isMath: true));
-      lastIndex = match.end;
-    }
-    if (lastIndex < data.length) {
-      segments.addAll(_splitInline(data.substring(lastIndex)));
-    }
-    return segments;
-  }
-
-  static List<_Segment> _splitInline(String text) {
-    if (text.isEmpty) return const [];
-    final segments = <_Segment>[];
-    final inline = RegExp(r'\$[^$\n]+\$');
-    var lastIndex = 0;
-    for (final match in inline.allMatches(text)) {
-      if (match.start > lastIndex) {
-        segments.add(
-          _Segment(text.substring(lastIndex, match.start), isMath: false),
-        );
-      }
-      segments.add(_Segment(match.group(0)!, isMath: true));
-      lastIndex = match.end;
-    }
-    if (lastIndex < text.length) {
-      segments.add(_Segment(text.substring(lastIndex), isMath: false));
-    }
-    return segments;
-  }
-}
-
-class _Segment {
-  final String text;
-  final bool isMath;
-  _Segment(this.text, {required this.isMath});
 }
