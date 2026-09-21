@@ -1,11 +1,10 @@
 import '../models/course.dart';
 import '../models/exercise.dart';
-import '../models/lesson.dart';
 import '../models/level.dart';
 import '../models/section.dart';
 import '../models/topic.dart';
 
-enum ResultType { topic, exercise, lesson }
+enum ResultType { topic, exercise }
 
 class SearchResult {
   final ResultType type;
@@ -14,7 +13,6 @@ class SearchResult {
   final Section? section;
   final Topic? topic;
   final Exercise? exercise;
-  final Lesson? lesson;
 
   const SearchResult({
     required this.type,
@@ -23,7 +21,6 @@ class SearchResult {
     this.section,
     this.topic,
     this.exercise,
-    this.lesson,
   });
 }
 
@@ -33,7 +30,7 @@ class SearchIndex {
 
   final List<SearchResult> _results = [];
 
-  void build(List<Level> levels, {List<Lesson> lessons = const []}) {
+  void build(List<Level> levels) {
     _results.clear();
     for (final level in levels) {
       for (final course in level.courses) {
@@ -63,9 +60,6 @@ class SearchIndex {
           }
         }
       }
-    }
-    for (final lesson in lessons) {
-      _results.add(SearchResult(type: ResultType.lesson, lesson: lesson));
     }
   }
 
@@ -104,16 +98,6 @@ class SearchIndex {
           ex.problem,
           ...ex.steps,
           ...ex.hints,
-        ].join(' ').toLowerCase();
-        return haystack.contains(q);
-      case ResultType.lesson:
-        final lesson = result.lesson!;
-        final haystack = [
-          lesson.title,
-          lesson.subtitle,
-          lesson.introduction,
-          lesson.completionMessage,
-          ...lesson.steps.expand((s) => [s.prompt, ...s.cards, s.explanation]),
         ].join(' ').toLowerCase();
         return haystack.contains(q);
     }

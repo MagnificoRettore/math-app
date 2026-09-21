@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../data/content_repository.dart';
-import '../data/lesson_repository.dart';
-import '../data/progress_store.dart';
 import '../models/course.dart';
-import '../models/lesson.dart';
-import '../widgets/lesson_card.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/year_tabs.dart';
 import '../theme/app_colors.dart';
-import 'lesson_screen.dart';
-import 'lesson_sections_screen.dart';
-import 'lesson_topics_screen.dart';
 
 class LessonListScreen extends StatefulWidget {
   final String? levelId;
@@ -53,17 +46,13 @@ class _LessonListScreenState extends State<LessonListScreen> {
     final courses = level?.courses ?? const <Course>[];
 
     if (level == null || courses.isEmpty) {
-      final lessons = LessonRepository.instance.lessons;
       return Scaffold(
         appBar: AppBar(),
         body: _wrapBody(
-          lessons.isEmpty
-              ? const _EmptyLessons(
-                  title: 'Nessuna lezione disponibile',
-                  subtitle:
-                      'Le lezioni guidate per questo livello sono in arrivo.',
-                )
-              : _LessonsList(lessons: lessons),
+          const _EmptyLessons(
+            title: 'Nessuna lezione disponibile',
+            subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
+          ),
         ),
       );
     }
@@ -85,19 +74,10 @@ class _LessonListScreenState extends State<LessonListScreen> {
           onPageChanged: (index) => setState(() => _selectedIndex = index),
           children: [
             for (final course in courses)
-              LessonTopicsList(
-                level: level,
-                course: course,
-                onSelectArgument: (title, topic) => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => LessonSectionsScreen(
-                      level: level,
-                      course: course,
-                      title: title,
-                      topic: topic,
-                    ),
-                  ),
-                ),
+              _EmptyLessons(
+                title: 'Nessuna lezione in ${course.title}',
+                subtitle:
+                    'Le lezioni guidate per ${course.title} sono in arrivo.',
               ),
           ],
         ),
@@ -108,40 +88,6 @@ class _LessonListScreenState extends State<LessonListScreen> {
   Widget _wrapBody(Widget body) {
     if (!widget.showPill) return body;
     return PillNavOverlay(selected: PillTab.lessons, child: body);
-  }
-}
-
-class _LessonsList extends StatelessWidget {
-  final List<Lesson> lessons;
-
-  const _LessonsList({required this.lessons});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: ProgressStore.instance,
-      builder: (context, _) => ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-        children: [
-          for (final lesson in lessons)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: LessonCard(
-                lesson: lesson,
-                completed: ProgressStore.instance.isLessonCompleted(
-                  lesson.levelId,
-                  lesson.id,
-                ),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => LessonScreen(lesson: lesson),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 }
 

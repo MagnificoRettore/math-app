@@ -60,10 +60,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/
-    - assets/data/lessons/
-    - assets/images/
-    - assets/animations/
+   - assets/data/
+   - assets/images/
+   - assets/animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/content_repository.dart';
-import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/recommendation_engine.dart';
 import 'package:math_app/models/difficulty.dart';
@@ -13,36 +12,7 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await ContentRepository.instance.resetForTest();
-    await LessonRepository.instance.resetForTest();
     await ProgressStore.instance.resetForTest();
-  });
-
-  test('consiglia le lezioni del livello non ancora completate', () {
-    final lessons = RecommendationEngine.recommendedLessons(
-      'middle-school',
-      limit: 10,
-    );
-    final ids = lessons.map((l) => l.id).toList();
-    expect(ids, contains('fractions-basics'));
-    expect(ids, contains('pythagoras'));
-    expect(ids, isNot(contains('linear-equations')));
-
-    final hs = RecommendationEngine.recommendedLessons('high-school');
-    expect(hs.map((l) => l.id), contains('linear-equations'));
-  });
-
-  test('esclude le lezioni già completate', () async {
-    await ProgressStore.instance.completeLesson(
-      'middle-school',
-      'fractions-basics',
-    );
-    final lessons = RecommendationEngine.recommendedLessons(
-      'middle-school',
-      limit: 10,
-    );
-    final ids = lessons.map((l) => l.id).toList();
-    expect(ids, isNot(contains('fractions-basics')));
-    expect(ids, contains('pythagoras'));
   });
 
   test('consiglia esercizi solo del livello, mai tentati, facili prima', () {

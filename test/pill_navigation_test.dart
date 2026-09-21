@@ -5,14 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
-import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/bookmarks_screen.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
-import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
@@ -20,12 +18,8 @@ Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
   await ContentRepository.instance.resetForTest();
-  await LessonRepository.instance.resetForTest();
   await ProgressStore.instance.resetForTest();
-  SearchIndex.instance.build(
-    ContentRepository.instance.levels,
-    lessons: LessonRepository.instance.lessons,
-  );
+  SearchIndex.instance.build(ContentRepository.instance.levels);
 }
 
 Future<void> _pumpHome(WidgetTester tester) async {
@@ -36,19 +30,13 @@ Future<void> _pumpHome(WidgetTester tester) async {
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
 
-Future<void> pumpFrames(WidgetTester tester) async {
-  for (var i = 0; i < 4; i++) {
-    await tester.pump(const Duration(milliseconds: 400));
-  }
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(_prepare);
 
   testWidgets(
-    'ospite: LEZIONI apre pop-up e mostra lezioni della scuola scelta',
+    'ospite: LEZIONI apre pop-up e mostra la barra anni della scuola scelta',
     (tester) async {
       await _pumpHome(tester);
 
@@ -65,12 +53,12 @@ void main() {
       expect(find.text('prima'), findsWidgets);
       expect(find.text('seconda'), findsWidgets);
       expect(find.text('terza'), findsWidgets);
-      expect(find.text('Equazioni di primo grado'), findsNothing);
+      expect(find.text('Nessuna lezione in prima'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'ospite: le lezioni hanno la barra anni e poi argomento e sezione',
+    'ospite: la pagina lezioni ha la barra anni con il placeholder vuoto',
     (tester) async {
       await _pumpHome(tester);
 
@@ -84,35 +72,19 @@ void main() {
       expect(find.text('prima'), findsWidgets);
       expect(find.text('seconda'), findsWidgets);
       expect(find.text('terza'), findsWidgets);
-      expect(find.text('Frazioni'), findsOneWidget);
-      expect(find.text('Teorema di Pitagora'), findsNothing);
+      expect(find.text('Nessuna lezione in prima'), findsOneWidget);
 
-      // Step argomento → sezione → lezione (prima, Scuola Media)
-      await tester.tap(find.text('Frazioni'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Introduzione alle frazioni'));
-      await pumpFrames(tester);
-      expect(find.byType(LessonScreen), findsOneWidget);
-
-      await tester.pageBack();
-      await pumpFrames(tester);
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-      expect(find.byType(LessonListScreen), findsOneWidget);
-
-      // Anno 2: senza lezioni, pagina argomento vuota
+      // Anno 2: nessuna lezione, placeholder
       await tester.tap(find.text('seconda'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Nessuna lezione in questo anno'), findsOneWidget);
-      expect(find.text('Introduzione alle frazioni'), findsNothing);
+      expect(find.text('Nessuna lezione in seconda'), findsOneWidget);
 
-      // Anno 3: solo i propri argomenti
+      // Anno 3: nessuna lezione, placeholder
       await tester.tap(find.text('terza'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Teorema di Pitagora'), findsOneWidget);
-      expect(find.text('Introduzione alle frazioni'), findsNothing);
+      expect(find.text('Nessuna lezione in terza'), findsOneWidget);
     },
   );
 
@@ -190,14 +162,6 @@ void main() {
 
     expect(find.byType(LessonListScreen), findsOneWidget);
     expect(find.text('HOME'), findsOneWidget);
-
-    await tester.tap(find.text('Frazioni'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Introduzione alle frazioni'));
-    await pumpFrames(tester);
-
-    expect(find.byType(LessonScreen), findsOneWidget);
-    expect(find.text('HOME'), findsNothing);
   });
 
   testWidgets('PROFILO apre il profilo e HOME ritorna alla home', (

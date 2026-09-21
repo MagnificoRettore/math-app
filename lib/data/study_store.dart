@@ -18,7 +18,6 @@ class StudyStore extends ChangeNotifier {
   int _currentStreak = 0;
   int _bestStreak = 0;
   int _todayExercises = 0;
-  int _todayLessons = 0;
   int _todayMinutes = 0;
   final Set<String> _todayExerciseIds = {};
   DateTime? _debugNow;
@@ -29,7 +28,6 @@ class StudyStore extends ChangeNotifier {
   int get currentStreak => _currentStreak;
   int get bestStreak => _bestStreak;
   int get todayExercises => _todayExercises;
-  int get todayLessons => _todayLessons;
   int get todayMinutes => _todayMinutes;
 
   bool get exerciseGoalReached => _todayExercises >= exerciseGoal;
@@ -59,7 +57,6 @@ class StudyStore extends ChangeNotifier {
             : _dateOnly(DateTime.tryParse(last) ?? DateTime.now());
         if (json['today'] == _keyOf(today)) {
           _todayExercises = json['todayExercises'] as int? ?? 0;
-          _todayLessons = json['todayLessons'] as int? ?? 0;
           _todayMinutes = json['todayMinutes'] as int? ?? 0;
           final ids = json['todayExerciseIds'] as List<dynamic>? ?? const [];
           _todayExerciseIds
@@ -88,14 +85,6 @@ class StudyStore extends ChangeNotifier {
     return reached;
   }
 
-  Future<void> recordLessonCompleted() async {
-    await _ensureLoaded();
-    _recordActivity();
-    _todayLessons++;
-    notifyListeners();
-    await _persist();
-  }
-
   Future<bool> addMinutes(int minutes) async {
     await _ensureLoaded();
     _recordActivity();
@@ -116,7 +105,6 @@ class StudyStore extends ChangeNotifier {
     if (today != _today) {
       _today = today;
       _todayExercises = 0;
-      _todayLessons = 0;
       _todayMinutes = 0;
       _todayExerciseIds.clear();
     }
@@ -146,7 +134,6 @@ class StudyStore extends ChangeNotifier {
         'currentStreak': _currentStreak,
         'bestStreak': _bestStreak,
         'todayExercises': _todayExercises,
-        'todayLessons': _todayLessons,
         'todayMinutes': _todayMinutes,
         'todayExerciseIds': _todayExerciseIds.toList(),
       }),
@@ -173,7 +160,6 @@ class StudyStore extends ChangeNotifier {
     _currentStreak = 0;
     _bestStreak = 0;
     _todayExercises = 0;
-    _todayLessons = 0;
     _todayMinutes = 0;
     _todayExerciseIds.clear();
     await load();

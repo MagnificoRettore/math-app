@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../data/progress_store.dart';
 import '../data/search_index.dart';
 import '../models/exercise.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
 import '../widgets/difficulty_badge.dart';
-import '../widgets/lesson_card.dart';
 import 'exercise_detail_screen.dart';
 import 'exercise_feed_screen.dart';
-import 'lesson_screen.dart';
 
 class SearchResultsScreen extends StatelessWidget {
   final String query;
@@ -46,7 +43,6 @@ class SearchResultsScreen extends StatelessWidget {
     final exercises = results
         .where((r) => r.type == ResultType.exercise)
         .toList();
-    final lessons = results.where((r) => r.type == ResultType.lesson).toList();
 
     final children = <Widget>[];
     if (topics.isNotEmpty) {
@@ -58,12 +54,6 @@ class SearchResultsScreen extends StatelessWidget {
     if (exercises.isNotEmpty) {
       children.add(_SectionHeader('Esercizi'));
       for (final result in exercises) {
-        children.add(_resultWithPadding(context, result));
-      }
-    }
-    if (lessons.isNotEmpty) {
-      children.add(_SectionHeader('Lezioni'));
-      for (final result in lessons) {
         children.add(_resultWithPadding(context, result));
       }
     }
@@ -141,18 +131,6 @@ class SearchResultsScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 12, color: c.textSecondary),
               ),
             ],
-          ),
-        );
-      case ResultType.lesson:
-        final lesson = result.lesson!;
-        return LessonCard(
-          lesson: lesson,
-          completed: ProgressStore.instance.isLessonCompleted(
-            lesson.levelId,
-            lesson.id,
-          ),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => LessonScreen(lesson: lesson)),
           ),
         );
     }

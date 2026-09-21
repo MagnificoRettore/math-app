@@ -1,11 +1,9 @@
 import '../models/course.dart';
-import '../models/lesson.dart';
 import '../models/level.dart';
 import '../models/progress.dart';
 import '../models/topic.dart';
 import '../models/weak_topic.dart';
 import 'content_repository.dart';
-import 'lesson_repository.dart';
 import 'progress_store.dart';
 
 class WeakTopicEngine {
@@ -56,15 +54,6 @@ class WeakTopicEngine {
       if (weak.topic.id == topicId) return weak;
     }
     return null;
-  }
-
-  static List<Lesson> lessonsForTopic(String topicId, {String? levelId}) {
-    final store = ProgressStore.instance;
-    return LessonRepository.instance.lessons
-        .where((l) => l.topics.contains(topicId))
-        .where((l) => levelId == null || l.levelId == levelId)
-        .where((l) => !store.isLessonCompleted(l.levelId, l.id))
-        .toList();
   }
 }
 

@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
-import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
@@ -19,13 +18,9 @@ Future<void> _resetStores() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
   await ContentRepository.instance.resetForTest();
-  await LessonRepository.instance.resetForTest();
   await ProgressStore.instance.resetForTest();
   await StudyStore.instance.resetForTest();
-  SearchIndex.instance.build(
-    ContentRepository.instance.levels,
-    lessons: LessonRepository.instance.lessons,
-  );
+  SearchIndex.instance.build(ContentRepository.instance.levels);
 }
 
 Future<void> _pumpHome(WidgetTester tester) async {
@@ -95,8 +90,6 @@ void main() {
 
     expect(find.byType(WeakTopicScreen), findsOneWidget);
     expect(find.text('Progresso'), findsOneWidget);
-    expect(find.text('Ripassa'), findsOneWidget);
-    expect(find.text('Introduzione alle frazioni'), findsOneWidget);
     expect(find.text('Da ripassare'), findsOneWidget);
     expect(find.text('Confronto di frazioni'), findsOneWidget);
   });

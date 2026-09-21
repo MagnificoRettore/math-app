@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/content_repository.dart';
-import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/weak_topic_engine.dart';
 import 'package:math_app/models/progress.dart';
@@ -13,7 +12,6 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     await ContentRepository.instance.resetForTest();
-    await LessonRepository.instance.resetForTest();
     await ProgressStore.instance.resetForTest();
   });
 
@@ -144,28 +142,4 @@ void main() {
     expect(ProgressStore.instance.masteredRatioFor('middle-school', ids), 0.5);
     expect(ProgressStore.instance.completionFor('middle-school', ids), 1.0);
   });
-
-  test(
-    'lezioni collegate a un topic, solo quelle non ancora completate',
-    () async {
-      final fractionsLessons = WeakTopicEngine.lessonsForTopic('ms1-fractions');
-      expect(fractionsLessons.map((l) => l.id), contains('fractions-basics'));
-
-      final equationsLessons = WeakTopicEngine.lessonsForTopic(
-        'year1-equations',
-      );
-      expect(equationsLessons.map((l) => l.id), contains('linear-equations'));
-
-      expect(WeakTopicEngine.lessonsForTopic('ms2-proportions'), isEmpty);
-
-      await ProgressStore.instance.completeLesson(
-        'middle-school',
-        'fractions-basics',
-      );
-      expect(
-        WeakTopicEngine.lessonsForTopic('ms1-fractions').map((l) => l.id),
-        isNot(contains('fractions-basics')),
-      );
-    },
-  );
 }

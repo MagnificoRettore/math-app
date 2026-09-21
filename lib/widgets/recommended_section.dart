@@ -6,10 +6,8 @@ import '../data/recommendation_engine.dart';
 import '../models/user_profile.dart';
 import '../screens/course_screen.dart';
 import '../screens/exercise_detail_screen.dart';
-import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
 import 'exercise_card.dart';
-import 'lesson_card.dart';
 import 'section_header.dart';
 
 class RecommendedSection extends StatelessWidget {
@@ -23,9 +21,8 @@ class RecommendedSection extends StatelessWidget {
     final level = ContentRepository.instance.levelById(user.schoolLevelId);
     if (level == null) return const SizedBox.shrink();
 
-    final lessons = RecommendationEngine.recommendedLessons(level.id);
     final exercises = RecommendationEngine.recommendedExercises(level.id);
-    if (lessons.isEmpty && exercises.isEmpty) return const SizedBox.shrink();
+    if (exercises.isEmpty) return const SizedBox.shrink();
 
     final c = AppColors.of(context);
     return Column(
@@ -41,23 +38,7 @@ class RecommendedSection extends StatelessWidget {
             ),
           ),
         ),
-        if (lessons.isNotEmpty) const _MiniHeader('Lezioni da provare'),
-        for (final lesson in lessons)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: LessonCard(
-              lesson: lesson,
-              completed: ProgressStore.instance.isLessonCompleted(
-                level.id,
-                lesson.id,
-              ),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => LessonScreen(lesson: lesson)),
-              ),
-            ),
-          ),
         if (exercises.isNotEmpty) ...[
-          const SizedBox(height: 10),
           const _MiniHeader('Esercizi da provare'),
         ],
         for (final location in exercises)

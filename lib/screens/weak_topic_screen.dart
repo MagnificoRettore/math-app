@@ -7,11 +7,9 @@ import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
 import '../widgets/exercise_card.dart';
-import '../widgets/lesson_card.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/section_header.dart';
 import 'exercise_detail_screen.dart';
-import 'lesson_screen.dart';
 
 class WeakTopicScreen extends StatefulWidget {
   final WeakTopic weakTopic;
@@ -54,30 +52,12 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
 
           if (current == null) return const _AllMasteredView();
 
-          final lessons = WeakTopicEngine.lessonsForTopic(current.topic.id);
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
               _buildBreadcrumb(current),
               const SizedBox(height: 12),
               _buildProgressCard(current),
-              if (lessons.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                SectionHeader('Ripassa'),
-                for (final lesson in lessons)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: LessonCard(
-                      lesson: lesson,
-                      completed: false,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => LessonScreen(lesson: lesson),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
               const SizedBox(height: 8),
               SectionHeader('Da ripassare'),
               for (final location in current.weakExercises)

@@ -1,20 +1,10 @@
 import '../models/difficulty.dart';
-import '../models/lesson.dart';
 import '../models/progress.dart';
 import 'content_repository.dart';
-import 'lesson_repository.dart';
 import 'progress_store.dart';
 
 class RecommendationEngine {
   const RecommendationEngine._();
-
-  static List<Lesson> recommendedLessons(String levelId, {int limit = 2}) {
-    final completed = ProgressStore.instance.completedLessonIdsFor(levelId);
-    final lessons = LessonRepository.instance.lessons
-        .where((l) => l.levelId == levelId && !completed.contains(l.id))
-        .toList();
-    return lessons.take(limit).toList();
-  }
 
   static List<ExerciseLocation> recommendedExercises(
     String levelId, {

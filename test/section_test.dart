@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
-import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/models/course.dart';
@@ -17,7 +16,6 @@ Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
   await ContentRepository.instance.resetForTest();
-  await LessonRepository.instance.resetForTest();
   await ProgressStore.instance.resetForTest();
   SearchIndex.instance.build(ContentRepository.instance.levels);
 }
