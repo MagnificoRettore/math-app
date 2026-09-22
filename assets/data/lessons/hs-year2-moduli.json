@@ -1,0 +1,154 @@
+{
+    "level": "high-school",
+    "year": "year2",
+    "section": "year2-moduli",
+    "topic": "year2-moduli-definition",
+    "title": "Moduli",
+    "subtitle": "Variabile reale e valore assoluto",
+    "icon": "functions",
+    "lessons": [
+        {
+            "id": "mod-definition",
+            "title": "Definizione",
+            "subtitle": "",
+            "minutes": 0,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Definizione",
+                    "content": []
+                }
+            ]
+        },
+        {
+            "id": "mod-equations-intro",
+            "title": "Modulo e Equazioni con Modulo",
+            "subtitle": "Distanza, espressioni letterali e studio del segno",
+            "minutes": 6,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Che cos'è il Modulo?",
+                    "content": [
+                        "Il **modulo** (o **valore assoluto**) indica la **distanza** di un numero dallo zero sulla retta reale. La distanza è **sempre** $\\ge 0$: il modulo non può mai essere negativo.",
+                        "",
+                        "",
+                        {
+                            "id": "mod-def-formula",
+                            "box_type": "math_formula",
+                            "title": "Definizione",
+                            "payload": {
+                                "tex": "|x| = \\begin{cases} x & \\text{se } x \\ge 0 \\\\ -x & \\text{se } x < 0 \\end{cases}",
+                                "mode": "display",
+                                "fontSizeMultiplier": 1.2
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Esempi pratici",
+                    "content": [
+                        "- $|7| = 7$ — distanza **7** dallo zero",
+                        "- $|-7| = 7$ — toglie il segno negativo, la distanza è **7**",
+                        "",
+                        "## Attenzione",
+                        "",
+                        "- **Il modulo non è mai negativo**: $|x| \\ge 0$ per ogni numero $x$.",
+                        "- Due numeri opposti hanno la **stessa distanza** dallo zero."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Modulo ed Espressioni Letterali",
+                    "content": [
+                        "Quando dentro il modulo c'è un'espressione con l'incognita, il modulo dipende dal **segno dell'argomento**: se l'argomento è negativo, il modulo cambia segno.",
+                        "",
+                        {
+                            "id": "mod-abs-ish",
+                            "box_type": "math_formula",
+                            "title": "Espressione letterale",
+                            "payload": {
+                                "tex": "|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}",
+                                "mode": "display",
+                                "fontSizeMultiplier": 1.1
+                            }
+                        },
+                        "",
+                        "## Esempi pratici",
+                        "",
+                        "- **$x = 5$**: $|5-3| = |2| = 2$ — l'argomento è **positivo**, il modulo non cambia nulla.",
+                        "- **$x = -10$**: $|-10-3| = |-13| = 13$ — l'argomento è **negativo**, il modulo toglie il segno.",
+                        "",
+                        "## Takeaway",
+                        "",
+                        "- **Se $x \\ge 3$**, l'argomento è già positivo: il modulo è **superfluo**.",
+                        "- **Se $x < 3$**, l'argomento è negativo: il modulo inverte il segno."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Equazioni con Modulo",
+                    "content": [
+                        "Per risolvere un'equazione del tipo $|ax+b| = k$ il primo passo è lo **studio del segno dell'argomento**: da esso dipendono i casi da risolvere.",
+                        "",
+                        "## Procedura",
+                        "",
+                        "- **Chiediti**: quando l'argomento $ax+b$ è $\\ge 0$?",
+                        "- **Dividi** l'equazione nei due casi corrispondenti, **senza modulo**, e risolvi separatamente.",
+                        "",
+                        "## Esempio guidato",
+                        "",
+                        "- Equazione: $|x - 5| = 2$",
+                        "- Studio del modulo: $x - 5 \\ge 0 \\Rightarrow x \\ge 5$",
+                        "- **Caso 1** ($x \\ge 5$): $x - 5 = 2 \\Rightarrow x = 7$ — valida perché $7 \\ge 5$.",
+                        "- **Caso 2** ($x < 5$): $-(x - 5) = 2 \\Rightarrow x = 3$ — valida perché $3 < 5$.",
+                        "- Soluzioni: $x = 7$ e $x = 3$.",
+                        "",
+                        {
+                            "id": "mod-eq-graph",
+                            "box_type": "interactive_chart",
+                            "title": "Vedi le soluzioni sul grafico",
+                            "payload": {
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "xMin": -2,
+                                "xMax": 10,
+                                "xStep": 1,
+                                "yMin": -8,
+                                "yMax": 8,
+                                "toggleable": true,
+                                "series": [
+                                    {
+                                        "label": "argomento x - 5",
+                                        "expression": "x - 5",
+                                        "colorKey": "accent"
+                                    },
+                                    {
+                                        "label": "k = 2",
+                                        "expression": "2",
+                                        "colorKey": "easy"
+                                    },
+                                    {
+                                        "label": "k = -2",
+                                        "expression": "-2",
+                                        "colorKey": "hard"
+                                    }
+                                ]
+                            }
+                        },
+                        "",
+                        "## Takeaway",
+                        "",
+                        "- **Sempre due casi**: argomento $\\ge 0$ e argomento $< 0$.",
+                        "- **Verifica** che le soluzioni rispettino la condizione del caso.",
+                        "",
+                        "## Prova tu",
+                        "",
+                        "- Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione."
+                    ]
+                }
+            ]
+        }
+    ]
+}

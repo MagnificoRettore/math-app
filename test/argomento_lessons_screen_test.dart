@@ -17,7 +17,9 @@ void main() {
   });
 
   Widget host(String levelId) {
-    final argomento = LessonRepository.instance.argomenti.single;
+    final argomento = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    );
     return MaterialApp(
       home: ArgomentoLessonsScreen(argomento: argomento, levelId: levelId),
     );
@@ -59,5 +61,30 @@ void main() {
     await tester.pump();
 
     expect(find.text('Completata'), findsOneWidget);
+  });
+
+  testWidgets('Moduli mostra le lezioni Definizione e Modulo e Equazioni', (
+    tester,
+  ) async {
+    final argomento = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ArgomentoLessonsScreen(argomento: argomento, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Moduli'), findsOneWidget);
+    expect(find.text('Definizione'), findsOneWidget);
+    expect(find.text('Modulo e Equazioni con Modulo'), findsOneWidget);
+    expect(find.text('6 min'), findsOneWidget);
+
+    await tester.tap(find.text('Modulo e Equazioni con Modulo'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    expect(find.byType(LessonScreen), findsOneWidget);
   });
 }

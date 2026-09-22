@@ -24,19 +24,31 @@ void main() {
 
   test('il repository carica gli argomenti e filtra per anno', () {
     expect(LessonRepository.instance.loaded, isTrue);
-    expect(LessonRepository.instance.argomenti, hasLength(1));
+    expect(LessonRepository.instance.argomenti, hasLength(2));
 
-    final argomento = LessonRepository.instance.argomenti.single;
-    expect(argomento.title, 'Equazioni di primo grado');
+    final argomento = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    );
     expect(argomento.levelId, 'high-school');
     expect(argomento.yearId, 'year1');
     expect(argomento.lessons, hasLength(1));
+
+    final moduli = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    );
+    expect(moduli.levelId, 'high-school');
+    expect(moduli.yearId, 'year2');
+    expect(moduli.topicId, 'year2-moduli-definition');
+    expect(moduli.lessons, hasLength(2));
 
     final lessons = LessonRepository.instance.lessonsInYear(
       'high-school',
       'year1',
     );
     expect(lessons, hasLength(1));
+    expect(LessonRepository.instance.lessonsInYear('high-school', 'year2'), [
+      ...moduli.lessons,
+    ]);
     expect(
       LessonRepository.instance.lessonsInYear('scuola-media', 'year1'),
       isEmpty,
@@ -44,7 +56,9 @@ void main() {
   });
 
   test('la lezione parsifica passaggi info e mcq', () {
-    final lesson = LessonRepository.instance.argomenti.single.lessons.first;
+    final lesson = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    ).lessons.first;
     expect(lesson.id, 'eq1-intro');
     expect(lesson.minutes, 5);
     expect(lesson.steps, hasLength(3));
@@ -57,7 +71,9 @@ void main() {
   });
 
   test('content come array appiattisce testo e riquadri', () {
-    final lesson = LessonRepository.instance.argomenti.single.lessons.first;
+    final lesson = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    ).lessons.first;
     final contenuto = lesson.steps[1].content;
 
     expect(contenuto.contains('# Titolo'), isTrue);
@@ -72,7 +88,9 @@ void main() {
   testWidgets('lo schermo lezione mostra le card e avanza coi passaggi', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti.single.lessons.first;
+    final lesson = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    ).lessons.first;
     await tester.pumpWidget(
       MaterialApp(
         home: LessonScreen(lesson: lesson, levelId: 'high-school'),
@@ -92,7 +110,9 @@ void main() {
   testWidgets('risposta sbagliata scuote, quella giusta spiega e completa', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti.single.lessons.first;
+    final lesson = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Equazioni di primo grado',
+    ).lessons.first;
     final levelId = 'high-school';
     await tester.pumpWidget(
       MaterialApp(
@@ -124,5 +144,54 @@ void main() {
       ProgressStore.instance.isLessonCompleted(levelId, lesson.id),
       isTrue,
     );
+  });
+
+  testWidgets('la lezione Definizione è una card vuota con solo il titolo', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    ).lessons.first;
+    expect(lesson.title, 'Definizione');
+    expect(lesson.steps, hasLength(1));
+    expect(lesson.steps.single.title, 'Definizione');
+    expect(lesson.steps.single.content, isEmpty);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(LessonScreen), findsOneWidget);
+    expect(find.text('Definizione'), findsWidgets);
+  });
+
+  test('la lezione Modulo e Equazioni con Modulo ha quattro card', () {
+    final moduli = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    );
+    final lesson = moduli.lessons.firstWhere(
+      (l) => l.id == 'mod-equations-intro',
+    );
+    expect(lesson.title, 'Modulo e Equazioni con Modulo');
+    expect(lesson.minutes, 6);
+    expect(lesson.steps, hasLength(4));
+    expect(lesson.steps.map((s) => s.title), [
+      'Che cos\'è il Modulo?',
+      'Esempi pratici',
+      'Modulo ed Espressioni Letterali',
+      'Equazioni con Modulo',
+    ]);
+    for (final step in lesson.steps) {
+      expect(step.type, LessonStepType.info);
+      expect(step.content, isNotEmpty);
+    }
+    final step1 = lesson.steps[0].content;
+    expect(step1.split('::box').length - 1, 1);
+    expect(step1, contains(r'\begin{cases}'));
+    expect(step1, isNot(contains('Esempi pratici')));
+    expect(lesson.steps[3].content, contains('x - 5'));
   });
 }
