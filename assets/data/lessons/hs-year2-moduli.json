@@ -52,8 +52,7 @@
                         "- $|7| = 7$ — distanza **7** dallo zero",
                         "- $|-7| = 7$ — toglie il segno negativo, la distanza è **7**",
                         "",
-                        "## Attenzione",
-                        "",
+                        ":::attenzione",
                         "- **Il modulo non è mai negativo**: $|x| \\ge 0$ per ogni numero $x$.",
                         "- Due numeri opposti hanno la **stessa distanza** dallo zero."
                     ]
@@ -80,8 +79,7 @@
                         "- **$x = 5$**: $|5-3| = |2| = 2$ — l'argomento è **positivo**, il modulo non cambia nulla.",
                         "- **$x = -10$**: $|-10-3| = |-13| = 13$ — l'argomento è **negativo**, il modulo toglie il segno.",
                         "",
-                        "## Takeaway",
-                        "",
+                        ":::takeaway",
                         "- **Se $x \\ge 3$**, l'argomento è già positivo: il modulo è **superfluo**.",
                         "- **Se $x < 3$**, l'argomento è negativo: il modulo inverte il segno."
                     ]
@@ -138,8 +136,7 @@
                             }
                         },
                         "",
-                        "## Takeaway",
-                        "",
+                        ":::takeaway",
                         "- **Sempre due casi**: argomento $\\ge 0$ e argomento $< 0$.",
                         "- **Verifica** che le soluzioni rispettino la condizione del caso.",
                         "",

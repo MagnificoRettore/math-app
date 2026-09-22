@@ -282,4 +282,43 @@ void main() {
     expect(_richContaining(tester, 'riga 249'), isNotNull);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('callout attenzione mostra label icona e testo', (tester) async {
+    await _pump(tester, ':::attenzione\n- Il modulo non è mai negativo');
+    expect(find.text('Attenzione'), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(_richContaining(tester, 'Il modulo non è mai negativo'), isNotNull);
+  });
+
+  testWidgets('callout takeaway mostra bullet colorati', (tester) async {
+    await _pump(tester, ':::takeaway\n- sempre due casi\n- verifica');
+    expect(find.text('Takeaway'), findsOneWidget);
+    expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);
+    expect(find.text('•'), findsNWidgets(2));
+  });
+
+  testWidgets('callout chiuso da heading', (tester) async {
+    await _pump(tester, ':::takeaway\n- caso\n\n## Titolo dopo');
+    expect(find.text('Takeaway'), findsOneWidget);
+    expect(_richContaining(tester, 'caso'), isNotNull);
+    expect(_richContaining(tester, 'Titolo dopo'), isNotNull);
+    expect(_spanStyle(tester, 'Titolo dopo').fontSize, 22);
+  });
+
+  testWidgets('chiave callout ignota resta testo puro', (tester) async {
+    await _pump(tester, ':::ignoto questo è testo');
+    expect(find.text('Takeaway'), findsNothing);
+    expect(find.text('Attenzione'), findsNothing);
+    expect(_richContaining(tester, ':::ignoto questo è testo'), isNotNull);
+  });
+
+  testWidgets('due callout consecutivi restano separati', (tester) async {
+    await _pump(tester, ':::attenzione\n- primo\n\n:::takeaway\n- secondo');
+    expect(find.text('Attenzione'), findsOneWidget);
+    expect(find.text('Takeaway'), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.lightbulb_outline), findsOneWidget);
+    expect(_richContaining(tester, 'primo'), isNotNull);
+    expect(_richContaining(tester, 'secondo'), isNotNull);
+  });
 }

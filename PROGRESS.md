@@ -2,6 +2,13 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-22 — Box Callout in NotesText
+
+- Nuova sintassi callout `:::chiave` in `notes_text.dart`: apre un box tinto colorato, chiuso da riga vuota, heading `#`/`##`/`###`, altro `:::` o fine contenuto.
+- Chiavi: `attenzione|warning|pericolo` → colore `medium` + `warning_amber_rounded` «Attenzione»; `takeaway|suggerimento|consiglio|tip` → colore `accent` + `lightbulb_outline` «Takeaway». Chiave ignota → testo puro (fallback). Testo inline dopo la chiave (`:::takeaway testo`) va nel box; più callout consecutivi restano separati.
+- Demo: lezione Moduli `mod-equations-intro` — «Attenzione» (card Esempi pratici) e 2 «Takeaway» (card Espressioni Letterali, Equazioni con Modulo) ora box callout invece di heading.
+- Test: 5 nuovi in `notes_text_test.dart`. Suite: **160 verde**.
+
 ## 2026-09-22 — Lezione Modulo e Equazioni con Modulo
 
 - Nuova 2ª lezione `mod-equations-intro` nell'argomento Moduli (year2): "Modulo e Equazioni con Modulo" (6 min).
