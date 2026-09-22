@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum LessonStepType {
   info,
   mcq;
@@ -37,13 +39,32 @@ class LessonStep {
     return LessonStep(
       type: LessonStepType.fromString(json['type'] as String? ?? 'info'),
       title: json['title'] as String? ?? '',
-      content: json['content'] as String? ?? '',
+      content: _contentFromJson(json['content']),
       options: (json['options'] as List<dynamic>? ?? const [])
           .map((e) => e as String)
           .toList(),
       correctIndex: json['correctIndex'] as int? ?? -1,
       explanation: json['explanation'] as String? ?? '',
     );
+  }
+
+  /// `content` può essere una stringa markdown oppure un array di segmenti:
+  /// elementi stringa sono righe di testo, elementi mappa sono riquadri
+  /// multifunzione (serializzati nella sintassi `::box`/`::endbox`).
+  static String _contentFromJson(Object? raw) {
+    if (raw is String) return raw;
+    if (raw is List) {
+      final out = <String>[];
+      for (final seg in raw) {
+        if (seg is String) {
+          out.add(seg);
+        } else if (seg is Map<String, dynamic>) {
+          out.add('::box\n${jsonEncode(seg)}\n::endbox');
+        }
+      }
+      return out.join('\n');
+    }
+    return '';
   }
 
   bool get isQuestion => type == LessonStepType.mcq;

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_app/widgets/notes_text.dart';
+import 'package:math_app/widgets/multifunction_box_widget.dart';
 
 Future<void> _pump(WidgetTester tester, String data) {
   return tester.pumpWidget(
@@ -151,6 +154,114 @@ void main() {
       '\n'
       r'`code` fine.',
     );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('box multifunzione rende il widget dedicato', (tester) async {
+    await _pump(
+      tester,
+      'testo prima'
+      '\n'
+      '::box'
+      '\n'
+      '{"id":"b1","box_type":"math_formula","payload":{"tex":"x^2"}}'
+      '\n'
+      '::endbox'
+      '\n'
+      'testo dopo',
+    );
+    expect(find.byType(MultifunctionBoxWidget), findsOneWidget);
+    expect(_richContaining(tester, 'testo prima'), isNotNull);
+    expect(_richContaining(tester, 'testo dopo'), isNotNull);
+  });
+
+  testWidgets('box single-line rende il widget dedicato', (tester) async {
+    await _pump(
+      tester,
+      '::box {"id":"b2","box_type":"math_formula","payload":{"tex":"x+1"}} ::endbox'
+      '\n'
+      'fine',
+    );
+    expect(find.byType(MultifunctionBoxWidget), findsOneWidget);
+  });
+
+  testWidgets('box con JSON non valido ricade su testo puro', (tester) async {
+    await _pump(
+      tester,
+      '::box'
+      '\n'
+      'non sono json'
+      '\n'
+      '::endbox',
+    );
+    expect(find.byType(MultifunctionBoxWidget), findsNothing);
+    expect(_richContaining(tester, 'non sono json'), isNotNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('box senza chiusura resta testo', (tester) async {
+    await _pump(tester, '::box\n{"id":"b3"}');
+    expect(find.byType(MultifunctionBoxWidget), findsNothing);
+  });
+
+  testWidgets('box formula e grafico insieme al testo legacy', (tester) async {
+    await _pump(
+      tester,
+      '# Spiegazione'
+      '\n'
+      '- punto **importante**'
+      '\n'
+      '::box'
+      '\n'
+      '{"id":"f","box_type":"math_formula","payload":{"tex":"\\\\frac{a}{b}"}}'
+      '\n'
+      '::endbox'
+      '\n'
+      '::box'
+      '\n'
+      '{"id":"c","box_type":"chart","payload":{"kind":"bar","series":[{"label":"S","values":[1,2]}]}}'
+      '\n'
+      '::endbox',
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(2));
+  });
+
+  testWidgets('box immagine con asset mancante non va in errore', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      '::box'
+      '\n'
+      '{"id":"i","box_type":"image","title":"Foto","payload":{"source":"assets/images/assente.png"}}'
+      '\n'
+      '::endbox',
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(MultifunctionBoxWidget), findsOneWidget);
+  });
+
+  testWidgets('nota mista completa rende box e testo legacy', (tester) async {
+    final content = File('test/fixtures/notes_mixed_content.txt')
+        .readAsStringSync();
+    await _pump(tester, content);
+    expect(tester.takeException(), isNull);
+    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(6));
+    expect(_richContaining(tester, 'Funzione quadratica'), isNotNull);
+    expect(_richContaining(tester, 'il grafico è una'), isNotNull);
+    expect(_richContaining(tester, 'Conclusione'), isNotNull);
+  });
+
+  testWidgets('box con endbox oltre la finestra resta testo', (tester) async {
+    final content = StringBuffer('::box\n{"id":"far"}');
+    for (var i = 0; i < 250; i++) {
+      content.write('\nriga $i');
+    }
+    content.write('\n::endbox\ndopo');
+    await _pump(tester, content.toString());
+    expect(find.byType(MultifunctionBoxWidget), findsNothing);
+    expect(_richContaining(tester, 'riga 249'), isNotNull);
     expect(tester.takeException(), isNull);
   });
 }

@@ -48,7 +48,8 @@ List<MathSegment> _splitInlineMath(String text) {
   return segments;
 }
 
-String _stripDollars(String value) {
+/// Rimuove i delimitatori `$$...$$` o `$...$` (se presenti) da una stringa LaTeX.
+String stripMathDelimiters(String value) {
   var s = value.trim();
   if (s.startsWith(r'$$') && s.endsWith(r'$$')) {
     s = s.substring(2, s.length - 2);
@@ -65,7 +66,7 @@ InlineSpan mathSpan(
   required Color color,
   FontWeight? fontWeight,
 }) {
-  final cleaned = _stripDollars(tex);
+  final cleaned = stripMathDelimiters(tex);
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
     child: Math.tex(
@@ -113,7 +114,7 @@ class MathText extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Math.tex(
-            _stripDollars(segments.first.text),
+            stripMathDelimiters(segments.first.text),
             textStyle: TextStyle(
               fontSize: fontSize * 1.1,
               color: effectiveColor,

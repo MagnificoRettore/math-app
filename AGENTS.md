@@ -9,6 +9,8 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 - **LaTeX rendering**: `flutter_math_fork` ^0.7.4 (KaTeX pure Dart, offline, no WebView)
 - **Persistence**: `shared_preferences` ^2.5.5
 - **Inline LaTeX in content**: `$$...$$` block delimiters
+- **Riquadri multifunzione in content**: fenced syntax `::box` ... `::endbox` wrapping a `MultifunctionBox` JSON node (`box_type`: `image` | `chart` | `interactive_chart` | `math_formula`). Invalid JSON falls back to plain text. Charts render via CustomPainter, interactive charts evaluate `expression` strings over `x`/`t` with `ExpressionEvaluator`.
+- **Lesson `content`**: può essere stringa markdown oppure **array di segmenti** (righe di testo come stringhe, riquadri come oggetti). `LessonStep.fromJson` appiattisce entrambi in una stringa con sintassi `::box`/`::endbox`; preferisci l'array nei JSON per leggibilità.
 - **UI style**: Material 3, iOS-native-inspired minimal design
 - **No network calls, no code generation, no third-party state management**
 
@@ -33,7 +35,7 @@ lib/
   theme/                 # app_theme.dart, app_colors.dart
   models/                # plain Dart data classes (level, course, section, topic,
                          # exercise, difficulty, progress, lesson, lesson_step,
-                         # user_profile, weak_topic)
+                         # user_profile, weak_topic, multifunction_box/)
   data/                  # repositories + stores (singletons): content_repository,
                          # lesson_repository, progress_store, auth_store,
                          # settings_store, study_store, search_index,
@@ -51,7 +53,9 @@ lib/
                          # home_greeting,
                          # school_choice_sheet, streak_card, animated_fraction_pie,
                          # animated_number_line, app_session_observer,
-                         # weak_topic_row, weak_topics_section, year_tabs)
+                         # weak_topic_row, weak_topics_section, year_tabs,
+                         # multifunction_box_widget, chart_widgets, chart_colors,
+                         # interactive_chart_view, expression_evaluator)
 assets/data/             # levels.json, middle_school.json, high_school.json,
                          # university.json, lessons.json
 ```

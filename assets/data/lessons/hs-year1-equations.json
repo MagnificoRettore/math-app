@@ -16,12 +16,98 @@
                 {
                     "type": "info",
                     "title": "Cos'è un'equazione",
-                    "content": "# Cos'è\n\nUn'equazione è un'**uguaglianza** tra due espressioni che contiene un'*incognita*, cioè un valore **__sconosciuto__** da trovare.\n\n## Esempio\n\n::center\n$$2x + 3 = 7$$\n\nRisolvere l'equazione significa trovare il valore di $$x$$ che la rende vera.\n\n~~Il valore è 10~~ il valore è la soluzione dell'uguaglianza."
+                    "content": [
+                        "# Cos'è",
+                        "",
+                        "Un'equazione è un'**uguaglianza** tra due espressioni che contiene un'*incognita*, cioè un valore **__sconosciuto__** da trovare.",
+                        "",
+                        "## Esempio",
+                        "",
+                        "::center",
+                        "$$2x + 3 = 7$$",
+                        "",
+                        "Risolvere l'equazione significa trovare il valore di $$x$$ che la rende vera.",
+                        "",
+                        "~~Il valore è 10~~ il valore è la soluzione dell'uguaglianza."
+                    ]
                 },
                 {
                     "type": "info",
                     "title": "Equazione di primo grado",
-                    "content": "# Titolo\n\n## Intestazione\n\n### Sottointestazione\n\nQuesto è il **corpo** del testo, con parola *corsiva*, parola __sottolineata__ e parola ~~barrata~~, anche in combinazione **__grassetto sottolineato__**. Posso usare del codice inline: `x = 2`.\n\n::left\nLa formula è: $$2x + 3 = 7$$ e la soluzione è $$x = 2$$.\n\n## Elenco puntato\n\n- primo *punto* dell'elenco\n- secondo **punto** dell'elenco\n- terzo punto con formula $$x + 1 = 2$$\n\n::center\n$$x = \\frac{7 - 3}{2} = 2$$\n\n::right\n~~formula errata~~: $x = 3$\n\nBlocco monostile:\n\n`ax + b = 0`"
+                    "content": [
+                        "# Titolo",
+                        "",
+                        "## Intestazione",
+                        "",
+                        "### Sottointestazione",
+                        "",
+                        "Questo è il **corpo** del testo, con parola *corsiva*, parola __sottolineata__ e parola ~~barrata~~, anche in combinazione **__grassetto sottolineato__**. Posso usare del codice inline: `x = 2`.",
+                        "",
+                        "::left",
+                        "La formula è: $$2x + 3 = 7$$ e la soluzione è $$x = 2$$.",
+                        "",
+                        "## Elenco puntato",
+                        "",
+                        "- primo *punto* dell'elenco",
+                        "- secondo **punto** dell'elenco",
+                        "- terzo punto con formula $$x + 1 = 2$$",
+                        "",
+                        "::center",
+                        "$$x = \\frac{7 - 3}{2} = 2$$",
+                        "",
+                        "::right",
+                        "~~formula errata~~: $x = 3$",
+                        "",
+                        "Blocco monostile:",
+                        "",
+                        "`ax + b = 0`",
+                        {
+                            "id": "eq1-formula",
+                            "box_type": "math_formula",
+                            "title": "Soluzione generale",
+                            "payload": {
+                                "tex": "ax + b = 0 \\quad\\Rightarrow\\quad x = -\\frac{b}{a}",
+                                "mode": "display",
+                                "fontSizeMultiplier": 1.2
+                            }
+                        },
+                        "",
+                        {
+                            "id": "eq1-radice",
+                            "box_type": "interactive_chart",
+                            "title": "La radice al variare di t",
+                            "payload": {
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "xMin": -6,
+                                "xMax": 6,
+                                "xStep": 1,
+                                "yMin": -8,
+                                "yMax": 8,
+                                "parameter": {
+                                    "name": "t",
+                                    "min": -3,
+                                    "max": 3,
+                                    "step": 0.1,
+                                    "default": 1
+                                },
+                                "toggleable": true,
+                                "series": [
+                                    {
+                                        "label": "y = 2x + t",
+                                        "expression": "2 * x + t",
+                                        "colorKey": "accent"
+                                    },
+                                    {
+                                        "label": "asse x (y = 0)",
+                                        "expression": "0",
+                                        "colorKey": "medium"
+                                    }
+                                ]
+                            }
+                        },
+                        ""
+                    ]
                 },
                 {
                     "type": "mcq",

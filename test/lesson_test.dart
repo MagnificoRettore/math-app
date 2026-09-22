@@ -56,6 +56,19 @@ void main() {
     expect(lesson.steps[2].explanation, isNotEmpty);
   });
 
+  test('content come array appiattisce testo e riquadri', () {
+    final lesson = LessonRepository.instance.argomenti.single.lessons.first;
+    final contenuto = lesson.steps[1].content;
+
+    expect(contenuto.contains('# Titolo'), isTrue);
+    expect(contenuto.contains('Blocco monostile:'), isTrue);
+    expect(contenuto.split('::box').length - 1, 2);
+    expect(contenuto.split('::endbox').length - 1, 2);
+    expect(contenuto, contains(r'\frac{b}{a}'));
+    expect(contenuto, contains('2 * x + t'));
+    expect(contenuto, contains('::left'));
+  });
+
   testWidgets('lo schermo lezione mostra le card e avanza coi passaggi', (
     tester,
   ) async {

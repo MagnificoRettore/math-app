@@ -1,21 +1,45 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
+import '../models/multifunction_box/multifunction_box.dart';
 import '../theme/app_colors.dart';
 import 'math_text.dart';
+import 'multifunction_box_widget.dart';
 
 enum NotesBlockType { title, heading, subheading, body, mono, bullet }
 
 enum NotesAlign { left, center, right }
 
+sealed class _Line {
+  const _Line();
+}
+
+class _TextLine extends _Line {
+  final String raw;
+  const _TextLine(this.raw);
+}
+
+class _BoxLine extends _Line {
+  final MultifunctionBox box;
+  const _BoxLine(this.box);
+}
+
 class _Block {
   final NotesBlockType type;
   final NotesAlign align;
   final String text;
+  final MultifunctionBox? box;
 
-  const _Block(this.type, this.align, this.text);
+  const _Block(this.type, this.align, this.text, [this.box]);
+
+  bool get isBox => box != null;
 }
 
 class NotesText extends StatelessWidget {
+  static const int _maxBoxScan = 200;
+
   final String data;
   final double baseFontSize;
   final Color? color;
@@ -42,7 +66,12 @@ class NotesText extends StatelessWidget {
   List<_Block> _parseBlocks(String data) {
     final result = <_Block>[];
     var pendingAlign = NotesAlign.left;
-    for (final rawLine in data.split('\n')) {
+    for (final line in _tokenizeLines(data)) {
+      if (line is _BoxLine) {
+        result.add(_Block(NotesBlockType.body, NotesAlign.left, '', line.box));
+        continue;
+      }
+      final rawLine = (line as _TextLine).raw;
       final trimmed = rawLine.trim();
       if (trimmed.isEmpty) continue;
 
@@ -86,6 +115,61 @@ class NotesText extends StatelessWidget {
     return result;
   }
 
+  List<_Line> _tokenizeLines(String data) {
+    final lines = data.split('\n');
+    final out = <_Line>[];
+    var i = 0;
+    while (i < lines.length) {
+      final trimmed = lines[i].trim();
+      if (trimmed == '::box' || trimmed.startsWith('::box ')) {
+        var rest = trimmed.startsWith('::box ') ? trimmed.substring(5) : '';
+        rest = rest.trim();
+        if (rest.endsWith('::endbox')) {
+          rest = rest.substring(0, rest.length - '::endbox'.length).trim();
+        }
+        var endIndex = -1;
+        final scanLimit = math.min(lines.length, i + 1 + _maxBoxScan);
+        for (var j = i + 1; j < scanLimit; j++) {
+          if (lines[j].trim() == '::endbox') {
+            endIndex = j;
+            break;
+          }
+        }
+        final parts = <String>[if (rest.isNotEmpty) rest];
+        if (endIndex != -1) {
+          for (var j = i + 1; j < endIndex; j++) {
+            parts.add(lines[j]);
+          }
+        }
+        if (parts.isEmpty) {
+          out.add(_TextLine(lines[i]));
+          i++;
+          continue;
+        }
+        final jsonText = parts.join('\n');
+        try {
+          final box = MultifunctionBox.fromJson(
+            jsonDecode(jsonText) as Map<String, dynamic>,
+          );
+          out.add(_BoxLine(box));
+        } catch (_) {
+          if (endIndex == -1) {
+            out.add(_TextLine(lines[i]));
+          } else {
+            for (var j = i; j < endIndex; j++) {
+              out.add(_TextLine(lines[j]));
+            }
+          }
+        }
+        i = endIndex == -1 ? i + 1 : endIndex + 1;
+        continue;
+      }
+      out.add(_TextLine(lines[i]));
+      i++;
+    }
+    return out;
+  }
+
   NotesAlign _alignFrom(String value) => switch (value) {
     'center' => NotesAlign.center,
     'right' => NotesAlign.right,
@@ -98,6 +182,9 @@ class NotesText extends StatelessWidget {
   String _stripMonostyle(String line) => line.substring(1, line.length - 1);
 
   Widget _buildBlock(BuildContext context, _Block block, Color color) {
+    if (block.isBox) {
+      return MultifunctionBoxWidget(box: block.box!);
+    }
     final styleDefaults = _defaultsFor(block.type);
     final base = TextStyle(
       fontSize: styleDefaults.$1,
