@@ -107,4 +107,27 @@ Il vertice è il punto più basso (o alto) della parabola.
 }
 ::endbox
 
+::box
+{
+  "id": "formula-nascosta",
+  "box_type": "math_formula",
+  "title": "Formula nascosta",
+  "payload": {
+    "tex": "\\alpha + \\beta",
+    "hidden": true
+  }
+}
+::endbox
+
+::box
+{
+  "id": "formula-senza-titolo",
+  "box_type": "math_formula",
+  "payload": {
+    "tex": "x^2 + 1",
+    "mode": "display"
+  }
+}
+::endbox
+
 Conclusione: la *formula* risolve l'equazione **sempre**, se *b² - 4ac ≥ 0*.

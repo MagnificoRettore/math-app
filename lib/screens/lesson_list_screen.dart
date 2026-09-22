@@ -5,7 +5,7 @@ import '../data/lesson_repository.dart';
 import '../data/progress_store.dart';
 import '../models/argomento.dart';
 import '../models/course.dart';
-import '../screens/lesson_screen.dart';
+import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
@@ -45,11 +45,12 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
   void _openArgomento(Argomento argomento) {
     if (argomento.lessons.isEmpty) return;
-    final lesson = argomento.lessons.first;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            LessonScreen(lesson: lesson, levelId: argomento.levelId),
+        builder: (_) => ArgomentoLessonsScreen(
+          argomento: argomento,
+          levelId: widget.levelId ?? argomento.levelId,
+        ),
       ),
     );
   }

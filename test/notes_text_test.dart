@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/notes_text.dart';
 import 'package:math_app/widgets/multifunction_box_widget.dart';
 
@@ -247,10 +249,26 @@ void main() {
         .readAsStringSync();
     await _pump(tester, content);
     expect(tester.takeException(), isNull);
-    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(6));
+    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(8));
     expect(_richContaining(tester, 'Funzione quadratica'), isNotNull);
     expect(_richContaining(tester, 'il grafico è una'), isNotNull);
     expect(_richContaining(tester, 'Conclusione'), isNotNull);
+  });
+
+  testWidgets('formula hidden non renderizza e senza titolo compatta', (
+    tester,
+  ) async {
+    final content = File('test/fixtures/notes_mixed_content.txt')
+        .readAsStringSync();
+    await _pump(tester, content);
+
+    expect(find.byType(AppCard), findsNWidgets(7));
+    expect(
+      find.text('Formula nascosta'),
+      findsNothing,
+      reason: 'box hidden non deve rendere né titolo né card',
+    );
+    expect(find.byType(Math), findsWidgets);
   });
 
   testWidgets('box con endbox oltre la finestra resta testo', (tester) async {

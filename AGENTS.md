@@ -43,7 +43,7 @@ lib/
   screens/               # full-page widgets (home, course, exercise_feed,
                          # exercise_detail, bookmarks, search_results, splash,
                          # mission, lesson_list, lesson, lesson_topics, lesson_sections,
-                         # welcome, registration,
+                         # argomento_lessons, welcome, registration,
                          # school_picker, profile, onboarding, weak_points,
                          # weak_topic, year_exercises)
   widgets/               # reusable UI components (app_card, math_text, progress_bar,

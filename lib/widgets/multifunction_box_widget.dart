@@ -168,7 +168,7 @@ class ImageSource extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        image,
+        ClipRect(child: SizedBox(height: 200, child: image)),
         if (payload.caption.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
