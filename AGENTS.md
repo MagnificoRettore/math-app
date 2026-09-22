@@ -9,7 +9,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 - **LaTeX rendering**: `flutter_math_fork` ^0.7.4 (KaTeX pure Dart, offline, no WebView)
 - **Persistence**: `shared_preferences` ^2.5.5
 - **Inline LaTeX in content**: `$$...$$` block delimiters
-- **Riquadri multifunzione in content**: fenced syntax `::box` ... `::endbox` wrapping a `MultifunctionBox` JSON node (`box_type`: `image` | `chart` | `interactive_chart` | `math_formula`). Invalid JSON falls back to plain text. Charts render via CustomPainter, interactive charts evaluate `expression` strings over `x`/`t` with `ExpressionEvaluator`.
+- **Riquadri multifunzione in content**: fenced syntax `::box` ... `::endbox` wrapping a `MultifunctionBox` JSON node (`box_type`: `image` | `chart` | `interactive_chart` | `math_formula`). Invalid JSON falls back to plain text. Charts render via CustomPainter, interactive charts evaluate `expression` strings over `x`/`t` with `ExpressionEvaluator`. In `math_formula` payload, `"hidden": true` non mostra il blocco; `title` vuoto = niente header e padding card ridotto.
 - **Lesson `content`**: può essere stringa markdown oppure **array di segmenti** (righe di testo come stringhe, riquadri come oggetti). `LessonStep.fromJson` appiattisce entrambi in una stringa con sintassi `::box`/`::endbox`; preferisci l'array nei JSON per leggibilità.
 - **UI style**: Material 3, iOS-native-inspired minimal design
 - **No network calls, no code generation, no third-party state management**

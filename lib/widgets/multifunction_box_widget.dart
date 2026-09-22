@@ -20,12 +20,19 @@ class MultifunctionBoxWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final payload = box.payload;
+    if (payload is MathFormulaPayload && payload.hidden) {
+      return const SizedBox.shrink();
+    }
+    final hasTitle = box.title.isNotEmpty;
     return AppCard(
-      padding: const EdgeInsets.all(16),
+      padding: hasTitle
+          ? const EdgeInsets.all(16)
+          : const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (box.title.isNotEmpty) ...[
+          if (hasTitle) ...[
             Text(
               box.title,
               style: TextStyle(

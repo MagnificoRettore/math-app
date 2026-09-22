@@ -215,6 +215,29 @@ void main() {
       });
       expect((box.payload as MathFormulaPayload).mode, FormulaMode.display);
     });
+
+    test('hidden di default è false e round-trip', () {
+      final box = MultifunctionBox.fromJson({
+        'id': 'formula-3',
+        'box_type': 'math_formula',
+        'payload': {'tex': 'x + 1'},
+      });
+      final payload = box.payload as MathFormulaPayload;
+      expect(payload.hidden, isFalse);
+      expect(box.toJson()['payload'].containsKey('hidden'), isFalse);
+
+      final box2 = MultifunctionBox.fromJson({
+        'id': 'formula-4',
+        'box_type': 'math_formula',
+        'payload': {'tex': 'x + 1', 'hidden': true},
+      });
+      final payload2 = box2.payload as MathFormulaPayload;
+      expect(payload2.hidden, isTrue);
+      expect(
+        (box2.toJson()['payload'] as Map<String, dynamic>)['hidden'],
+        isTrue,
+      );
+    });
   });
 
   group('robustezza', () {

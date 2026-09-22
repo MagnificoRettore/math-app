@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_app/models/multifunction_box/multifunction_box.dart';
+import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/multifunction_box_widget.dart';
 
 Widget _host(String json) {
@@ -33,6 +34,12 @@ void main() {
   const formulaJson =
       '{"id":"f1","box_type":"math_formula","title":"Formula",'
       '"payload":{"tex":"\\\\frac{a}{b}","mode":"display"}}';
+  const hiddenFormulaJson =
+      '{"id":"f2","box_type":"math_formula","title":"Formula",'
+      '"payload":{"tex":"\\\\frac{a}{b}","hidden":true}}';
+  const untitledFormulaJson =
+      '{"id":"f3","box_type":"math_formula",'
+      '"payload":{"tex":"x + 1"}}';
   const interactiveJson =
       '{"id":"v1","box_type":"interactive_chart","title":"Interattivo",'
       '"payload":{"xLabel":"x","yLabel":"y","xMin":-2,"xMax":2,"xStep":0.5,'
@@ -63,6 +70,24 @@ void main() {
     await _pump(tester, interactiveJson);
     expect(tester.takeException(), isNull);
     expect(find.byType(Slider), findsOneWidget);
+  });
+
+  testWidgets('box formua hidden non viene mostrato', (tester) async {
+    await _pump(tester, hiddenFormulaJson);
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Math), findsNothing);
+    expect(find.byType(AppCard), findsNothing);
+    expect(find.text('Formula'), findsNothing);
+  });
+
+  testWidgets('formula senza titolo non mostra testo del titolo', (
+    tester,
+  ) async {
+    await _pump(tester, untitledFormulaJson);
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Math), findsOneWidget);
+    expect(find.byType(AppCard), findsOneWidget);
+    expect(find.text('Formula'), findsNothing);
   });
 
   testWidgets('nessuna icona di espansione', (tester) async {
