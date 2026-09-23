@@ -43,6 +43,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   String _expr = '';
   String _result = '0';
   bool _fresh = true;
+  bool _deg = false;
 
   @override
   void initState() {
@@ -165,13 +166,24 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
 
   void _evaluate() {
     if (_expr.isEmpty) return;
-    final value = ExpressionEvaluator.tryEvaluate(_toEval(_expr));
+    final closed = _autoClose(_expr);
+    if (closed != _expr) {
+      setState(() => _expr = closed);
+    }
+    final value = ExpressionEvaluator.tryEvaluate(_toEval(closed), deg: _deg);
     if (value == null) {
       _result = 'Errore';
     } else {
       _result = _format(value);
     }
     _fresh = true;
+  }
+
+  String _autoClose(String expr) {
+    final opens = '('.allMatches(expr).length;
+    final closes = ')'.allMatches(expr).length;
+    if (opens <= closes) return expr;
+    return expr + ')' * (opens - closes);
   }
 
   String _toEval(String expr) {
@@ -287,6 +299,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
 
   Widget _buildDisplay(BuildContext context, AppPalette c) {
     return Container(
+      key: const ValueKey('calc-display'),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -294,32 +307,76 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            _expr.isEmpty ? '0' : _expr,
-            key: const ValueKey('calc-expr'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 17,
-              color: c.textSecondary,
-              fontFamily: 'monospace',
-            ),
+          Row(
+            children: [
+              _buildModeChip(c),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _expr.isEmpty ? '0' : _expr,
+                  key: const ValueKey('calc-expr'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: c.textSecondary,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 2),
-          Text(
-            _result,
-            key: const ValueKey('calc-result'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              color: _result == 'Errore' ? c.hard : c.accent,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _result,
+                  key: const ValueKey('calc-result'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    color: _result == 'Errore' ? c.hard : c.accent,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildModeChip(AppPalette c) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() => _deg = !_deg);
+          HapticFeedback.selectionClick();
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          key: const ValueKey('calc-mode'),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: c.accentSoft,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            _deg ? 'DEG' : 'RAD',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: c.accent,
+            ),
+          ),
+        ),
       ),
     );
   }

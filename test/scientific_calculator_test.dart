@@ -69,6 +69,69 @@ void main() {
     expect(_result(tester), 'Errore');
   });
 
+  testWidgets('√(16 senza chiusa: la parentesi si chiude e risolve', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.text('√'));
+    await tester.tap(find.text('1'));
+    await tester.tap(find.text('6'));
+    await tester.tap(find.text('='));
+    await tester.pump();
+    expect(_result(tester), '4');
+    final expr = tester
+        .widget<Text>(find.byKey(const ValueKey('calc-expr')))
+        .data!;
+    expect(expr, '√(16)');
+  });
+
+  testWidgets('(2+3 senza chiusa: si chiude e risolve', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.text('('));
+    await tester.tap(find.text('2'));
+    await tester.tap(find.text('+'));
+    await tester.tap(find.text('3'));
+    await tester.tap(find.text('='));
+    await tester.pump();
+    expect(_result(tester), '5');
+  });
+
+  testWidgets('settaggio angoli: default RAD, tap passa a DEG', (tester) async {
+    await _pump(tester);
+    expect(find.text('RAD'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('calc-mode')));
+    await tester.pump();
+    expect(find.text('DEG'), findsOneWidget);
+    expect(find.text('RAD'), findsNothing);
+  });
+
+  testWidgets('in DEG sin(30) = 0.5', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.byKey(const ValueKey('calc-mode')));
+    await tester.pump();
+    await tester.tap(find.text('sin'));
+    await tester.tap(find.text('3').last);
+    await tester.tap(find.text('0').last);
+    await tester.tap(find.text('='));
+    await tester.pump();
+    expect(_result(tester), '0.5');
+  });
+
+  testWidgets('espressione e risultato sono allineati a destra', (tester) async {
+    await _pump(tester);
+    final displayRect = tester.getRect(find.byKey(const ValueKey('calc-display')));
+    final expr = tester.getRect(find.byKey(const ValueKey('calc-expr')));
+    final result = tester.getRect(find.byKey(const ValueKey('calc-result')));
+    expect(displayRect.right - expr.right, lessThanOrEqualTo(20));
+    expect(displayRect.right - result.right, lessThanOrEqualTo(20));
+  });
+
+  testWidgets('chip modalità e input sono sulla stessa riga', (tester) async {
+    await _pump(tester);
+    final chip = tester.getRect(find.byKey(const ValueKey('calc-mode')));
+    final expr = tester.getRect(find.byKey(const ValueKey('calc-expr')));
+    expect(chip.top < expr.bottom, isTrue);
+    expect(chip.bottom > expr.top, isTrue);
+  });
+
   testWidgets('trascinando giù la sheet si chiude', (tester) async {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
@@ -123,7 +186,7 @@ void main() {
 
     final rectBefore = tester.getRect(find.byType(ScientificCalculatorSheet));
     await tester.dragFrom(
-      Offset(400, rectBefore.top - 60),
+      Offset(400, 20),
       const Offset(0, -300),
     );
     await tester.pump();

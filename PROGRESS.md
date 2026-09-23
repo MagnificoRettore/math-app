@@ -8,7 +8,9 @@ Changelog e roadmap del progetto.
 - Nuovo `scientific_calculator.dart`: `ScientificCalculatorSheet` non modale ancorata in basso — scivola su, lascia il contenuto della lezione scrollabile in parallelo (nessuno scrim, hit test sulla sola area), si chiude trascinandola giù (>120px o velocity >800px/s). Griglia scientifica: `sin cos tan ln log`, `√ x² ( ) π`, `abs exp AC ⌫ %`, cifre, `− ± + × ÷ ^ =`.
 - `expression_evaluator.dart`: costanti `pi`/`e`, funzioni `sin cos tan ln log sqrt abs exp`; nuovo `tryEvaluate` (restituisce `null` su errore/valore non finito), `evaluate` resta a `0.0`.
 - Calcolatrice riusa `ExpressionEvaluator` per il calcolo (`=` → risultato formattato, errori → "Errore").
-- Test: +22 (funzioni/costanti evaluator, tryEvaluate, calcolatrice 6 casi, toolbar→calcolatrice→drag-close). Suite: **186 verde**.
+- Resilienza: su `=` le tonde mancanti vengono chiuse automaticamente (`_autoClose`); `sin(30` → `sin(30)`.
+- Modalità angoli: chip tappabile `DEG`/`RAD` nel display (indicazione settaggio attuale); `expression_evaluator` con flag `deg` (`sin/cos/tan` convertiti in radianti, default `false` per i chart). Icône toolbar e contorno ridotte di 1,5 (`Transform.scale`); toolbar sotto la calcolatrice quando aperta; hit-test sheet limitato alla sola area (scroll lezione libero sopra).
+- Test: +22 (funzioni/costanti evaluator, tryEvaluate, calcolatrice 6 casi, toolbar→calcolatrice→drag-close). Suite: **191 verde**.
 
 ## 2026-09-23 — fontScale per card di lezione
 

@@ -10,17 +10,17 @@ import 'dart:math' as math;
 class ExpressionEvaluator {
   const ExpressionEvaluator._();
 
-  static double evaluate(String source, {double x = 0, double t = 0}) {
-    return tryEvaluate(source, x: x, t: t) ?? 0.0;
+  static double evaluate(String source, {double x = 0, double t = 0, bool deg = false}) {
+    return tryEvaluate(source, x: x, t: t, deg: deg) ?? 0.0;
   }
 
   /// Come [evaluate] ma restituisce `null` su errore di parsing,
   /// espressione vuota o risultato non finito.
-  static double? tryEvaluate(String source, {double x = 0, double t = 0}) {
+  static double? tryEvaluate(String source, {double x = 0, double t = 0, bool deg = false}) {
     try {
       final tokens = _tokenize(source);
       if (tokens.isEmpty) return null;
-      final parser = _Parser(tokens, x: x, t: t);
+      final parser = _Parser(tokens, x: x, t: t, deg: deg);
       final value = parser.parseExpression();
       if (parser.hasMore) return null;
       return value.isFinite ? value : null;
@@ -102,9 +102,11 @@ class _Parser {
   final List<_Token> tokens;
   final double x;
   final double t;
+  final double trigFactor;
   int pos = 0;
 
-  _Parser(this.tokens, {required this.x, required this.t});
+  _Parser(this.tokens, {required this.x, required this.t, bool deg = false})
+      : trigFactor = deg ? math.pi / 180 : 1;
 
   bool get hasMore => pos < tokens.length;
 
@@ -233,17 +235,17 @@ class _Parser {
       throw const FormatException('parentesi non chiusa');
     }
     pos++;
-    return _applyFunction(name, arg);
+    return _applyFunction(name, arg, trigFactor);
   }
 
-  static double _applyFunction(String name, double arg) {
+  static double _applyFunction(String name, double arg, double trigFactor) {
     switch (name) {
       case 'sin':
-        return math.sin(arg);
+        return math.sin(arg * trigFactor);
       case 'cos':
-        return math.cos(arg);
+        return math.cos(arg * trigFactor);
       case 'tan':
-        return math.tan(arg);
+        return math.tan(arg * trigFactor);
       case 'ln':
         return math.log(arg);
       case 'log':
