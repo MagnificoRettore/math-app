@@ -2,6 +2,40 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-23 — Card Prova tu separata in Moduli
+
+- `hs-year2-moduli.json`: la sezione "Prova tu" (equazione $|x-5|=4x$) esce dalla 5ª card "Equazioni con Modulo" e diventa la nuova 6ª card della lezione `mod-equations-intro` → 6 card totali.
+- `title` "Prova tu" anche per la 5ª card: la card "Equazioni con Modulo" ora si chiude col takeaway "Verifica le soluzioni".
+- Test: "la lezione Modulo e Equazioni con Modulo ha sei card" (6 step, Prova tu non in steps[4], 4x in steps[5]); asserzione stale `steps[3] contains('Esempi pratici')` allineata al dato reale (`x = 5`).
+- Test: `fontSizeMultiplier` remove aspettativa 0.85 a livello step (il campo ora vive nei payload `math_formula`). Suite **196 verde**.
+
+## 2026-09-23 — `hidden` nei math_formula sopprime solo la card
+
+- `multifunction_box_widget.dart`: `MathFormulaPayload.hidden` non rende più `SizedBox.shrink` (box nascosto del tutto); ora esclude solo `AppCard` e header titolo e lascia la formula visibile come blocco a sé (`_FormulaView` senza contorno).
+- Allineamento col dato reale `hs-year2-moduli.json` (`mod-eq-formula` `|ax + b| = k` con `"hidden": true`): la formula ora si vede.
+- Test: "box formula hidden mostra formula senza card" (Math presente, AppCard assente, titolo assente). Suite: **196 verde**.
+
+## 2026-09-23 — Card Esempi pratici separata in Moduli
+
+- `hs-year2-moduli.json`: la card "Modulo ed Espressioni Letterali" (mod-equations-intro) dimezzata — resta teoria + formula; gli esempi con $x=5$/$x=-10$ e il takeaway spostati nella nuova card 4 "Esempi pratici".
+- Test: lezione avrà 5 card, verifica contenuto card. Suite: **196 verde**.
+
+## 2026-09-23 — Chiusura calcolatrice con tap fuori
+
+- `scientific_calculator.dart`: barrier trasparente a tutto schermo (tap fuori dalla sheet → `_dismiss()` con animazione di uscita identica al drag). Widget ora occupa full-screen nello Stack: `Align` senza faktor wrapper, gesture foglio con `ValueKey('calc-sheet')`. Scroll del contenuto lezione sopra la sheet resta libero (barrier solo `onTap`, no drag).
+- `lesson_screen.dart`: `ScientificCalculatorSheet` in `Positioned.fill` invece di `Positioned(bottom)`.
+- Test: 1 nuovo (tap fuori chiude la sheet); finder drag/fling aggiornati alla key foglio. Suite: **196 verde**.
+
+## 2026-09-23 — Fisica drag calcolatrice allineata alla sheet scelta scuola
+
+- `scientific_calculator.dart`: fisica drag della calcolatrice portata a parità con la modal sheet di scelta scuola (`BottomSheet._handleDragEnd`): fling verso il basso >700px/s (`_kMinFlingVelocity`) o trascinamento oltre metà altezza (`_kCloseProgressThreshold` 0.5) → chiude; altrimenti snap back. Follow del dito 1:1: rimosso il clamp a 360px su `_dragOffset`.
+- Test: 1 nuovo (drag lento oltre metà altezza chiude). Suite: **195 verde**.
+
+## 2026-09-23 — Chiusura drag calcolatrice meno aggressiva
+
+- `scientific_calculator.dart`: la sheet non si chiude più superando i 120px di trascinamento. Il drag verso il basso ora serve a rivelare momentaneamente il contenuto dietro: al rilascio torna in posizione (snap back) a meno che il gesto non sia volto alla chiusura — fling deciso (>800px/s) oppure trascinamento oltre ~50% dell'altezza reale del foglio (misurata a runtime via `GlobalKey`).
+- Test: 1 nuovo (drag parziale lento rivela e riporta su); 2 adattati a fling. Suite: **194 verde**.
+
 ## 2026-09-23 — Toolbar lezioni e calcolatrice scientifica
 
 - `lesson_screen.dart`: body in `Stack` con `M3EToolbar` (material_3_expressive) floating in basso a destra. FAB espande/colassa la pillola (morph 80→56); unico tool per ora: **Calcolatrice** (`M3EIcons.calculate_rounded`).
