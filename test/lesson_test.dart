@@ -97,9 +97,7 @@ void main() {
       (l) => l.id == 'mod-equations-intro',
     );
 
-    final ultimo = lesson.steps.last;
-    expect(ultimo.fontSizeMultiplier, 0.85);
-    expect(lesson.steps.first.fontSizeMultiplier, 1.0);
+    expect(lesson.steps.last.fontSizeMultiplier, 1.0);
 
     final clampLow = LessonStep.fromJson({
       'type': 'info',
@@ -205,7 +203,7 @@ void main() {
     expect(find.text('Definizione'), findsWidgets);
   });
 
-  test('la lezione Modulo e Equazioni con Modulo ha quattro card', () {
+  test('la lezione Modulo e Equazioni con Modulo ha sei card', () {
     final moduli = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Moduli',
     );
@@ -214,12 +212,14 @@ void main() {
     );
     expect(lesson.title, 'Modulo e Equazioni con Modulo');
     expect(lesson.minutes, 6);
-    expect(lesson.steps, hasLength(4));
+    expect(lesson.steps, hasLength(6));
     expect(lesson.steps.map((s) => s.title), [
       'Che cos\'è il Modulo?',
       'Esempi pratici',
       'Modulo ed Espressioni Letterali',
+      'Esempi pratici',
       'Equazioni con Modulo',
+      'Prova tu',
     ]);
     for (final step in lesson.steps) {
       expect(step.type, LessonStepType.info);
@@ -229,7 +229,12 @@ void main() {
     expect(step1.split('::box').length - 1, 1);
     expect(step1, contains(r'\begin{cases}'));
     expect(step1, isNot(contains('Esempi pratici')));
-    expect(lesson.steps[3].content, contains('x - 5'));
+    expect(lesson.steps[4].content, contains('x - 5'));
+    expect(lesson.steps[4].content, isNot(contains('Prova tu')));
+    expect(lesson.steps[5].content, contains('4x'));
+    expect(lesson.steps[2].content, contains('x-3'));
+    expect(lesson.steps[2].content, isNot(contains('Esempi pratici')));
+    expect(lesson.steps[3].content, contains('x = 5'));
   });
 
   testWidgets('la toolbar apre la calcolatrice e il drag giù la chiude', (
@@ -258,9 +263,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(ScientificCalculatorSheet), findsOneWidget);
 
-    await tester.drag(
-      find.byType(ScientificCalculatorSheet),
-      const Offset(0, 250),
+    await tester.fling(
+      find.byKey(const ValueKey('calc-sheet')),
+      const Offset(0, 300),
+      1200,
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));

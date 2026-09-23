@@ -72,10 +72,10 @@ void main() {
     expect(find.byType(Slider), findsOneWidget);
   });
 
-  testWidgets('box formua hidden non viene mostrato', (tester) async {
+  testWidgets('box formula hidden mostra formula senza card', (tester) async {
     await _pump(tester, hiddenFormulaJson);
     expect(tester.takeException(), isNull);
-    expect(find.byType(Math), findsNothing);
+    expect(find.byType(Math), findsOneWidget);
     expect(find.byType(AppCard), findsNothing);
     expect(find.text('Formula'), findsNothing);
   });

@@ -22,7 +22,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
     final c = AppColors.of(context);
     final payload = box.payload;
     if (payload is MathFormulaPayload && payload.hidden) {
-      return const SizedBox.shrink();
+      return _FormulaView(payload: payload);
     }
     final hasTitle = box.title.isNotEmpty;
     return AppCard(

@@ -72,10 +72,13 @@
                                 "mode": "display",
                                 "fontSizeMultiplier": 1.1
                             }
-                        },
-                        "",
-                        "## Esempi pratici",
-                        "",
+                        }
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Esempi pratici",
+                    "content": [
                         "- **$x = 5$**: $|5-3| = |2| = 2$ — l'argomento è **positivo**, il modulo non cambia nulla.",
                         "- **$x = -10$**: $|-10-3| = |-13| = 13$ — l'argomento è **negativo**, il modulo toglie il segno.",
                         "",
@@ -87,63 +90,53 @@
                 {
                     "type": "info",
                     "title": "Equazioni con Modulo",
-                    "fontSizeMultiplier": 0.85,
                     "content": [
-                        "Per risolvere un'equazione del tipo $|ax+b| = k$ il primo passo è lo **studio del segno dell'argomento**: da esso dipendono i casi da risolvere.",
+                        {
+                            "id": "mod-eq-formula",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "|ax + b| = k",
+                                "mode": "display",
+                                "fontSizeMultiplier": 1.5,
+                                "hidden": true
+                            }
+                        },
                         "",
+                        "Per risolvere un'equazione di questo tipo il primo passo è lo **studio del segno dell'argomento** ($$ax+b$$).",
                         "## Procedura",
                         "",
-                        "- **Chiediti**: quando l'argomento $ax+b$ è $\\ge 0$?",
                         "- **Dividi** l'equazione nei due casi corrispondenti, **senza modulo**, e risolvi separatamente.",
                         "",
                         "## Esempio guidato",
                         "",
-                        "- Equazione: $|x - 5| = 2$",
-                        "- Studio del modulo: $x - 5 \\ge 0 \\Rightarrow x \\ge 5$",
-                        "- **Caso 1** ($x \\ge 5$): $x - 5 = 2 \\Rightarrow x = 7$ — valida perché $7 \\ge 5$.",
-                        "- **Caso 2** ($x < 5$): $-(x - 5) = 2 \\Rightarrow x = 3$ — valida perché $3 < 5$.",
-                        "- Soluzioni: $x = 7$ e $x = 3$.",
-                        "",
                         {
-                            "id": "mod-eq-graph",
-                            "box_type": "interactive_chart",
-                            "title": "Vedi le soluzioni sul grafico",
+                            "id": "mod-eq-ex1",
+                            "box_type": "math_formula",
+                            "title": "",
                             "payload": {
-                                "xLabel": "x",
-                                "yLabel": "y",
-                                "xMin": -2,
-                                "xMax": 10,
-                                "xStep": 1,
-                                "yMin": -8,
-                                "yMax": 8,
-                                "toggleable": true,
-                                "series": [
-                                    {
-                                        "label": "argomento x - 5",
-                                        "expression": "x - 5",
-                                        "colorKey": "accent"
-                                    },
-                                    {
-                                        "label": "k = 2",
-                                        "expression": "2",
-                                        "colorKey": "easy"
-                                    },
-                                    {
-                                        "label": "k = -2",
-                                        "expression": "-2",
-                                        "colorKey": "hard"
-                                    }
-                                ]
+                                "tex": "|x - 5| = 2",
+                                "mode": "display",
+                                "fontSizeMultiplier": 1.5,
+                                "hidden": true
                             }
                         },
+                        "Studio del modulo: $x - 5 \\ge 0 \\Rightarrow x \\ge 5$",
+                        "- **Caso 1** ($x \\ge 5$): $x - 5 = 2 \\Rightarrow x = 7$ — valida perché $7 \\ge 5$.",
+                        "- **Caso 2** ($x < 5$): $-(x - 5) = 2 \\Rightarrow x = 3$ — valida perché $3 < 5$.",
+                        "## - Soluzioni: $x = 7$ e $x = 3$.",
+                        "",
                         "",
                         ":::takeaway",
-                        "- **Sempre due casi**: argomento $\\ge 0$ e argomento $< 0$.",
                         "- **Verifica** che le soluzioni rispettino la condizione del caso.",
-                        "",
-                        "## Prova tu",
-                        "",
-                        "- Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione."
+                        ""
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Prova tu",
+                    "content": [
+                        "Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione."
                     ]
                 }
             ]
