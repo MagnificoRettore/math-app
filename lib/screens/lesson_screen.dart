@@ -218,10 +218,7 @@ class _LessonScreenState extends State<LessonScreen> {
             ),
           ),
           if (_calcOpen)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
+            Positioned.fill(
               child: ScientificCalculatorSheet(
                 onClose: () => setState(() => _calcOpen = false),
               ),

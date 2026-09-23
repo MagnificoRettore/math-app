@@ -20,8 +20,11 @@ class ScientificCalculatorSheet extends StatefulWidget {
 
 class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     with TickerProviderStateMixin {
-  static const _dismissDrag = 120.0;
-  static const _dismissVelocity = 800.0;
+  static const _dismissFraction = 0.5;
+  static const _dismissVelocity = 700.0;
+
+  final GlobalKey _sheetKey = GlobalKey();
+  double? _sheetHeight;
 
   late final AnimationController _entrance = AnimationController(
     vsync: this,
@@ -55,6 +58,12 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
         }
       })
       ..forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final box = _sheetKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box != null && box.hasSize) {
+        setState(() => _sheetHeight = box.size.height);
+      }
+    });
   }
 
   @override
@@ -66,7 +75,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
 
   void _onDragUpdate(DragUpdateDetails details) {
     if (!_interactive || _dismissing) return;
-    _dragOffset = (_dragOffset + details.delta.dy).clamp(0, 360);
+    _dragOffset += details.delta.dy;
     _dragCtrl.value = _dragOffset;
   }
 
@@ -75,7 +84,10 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     final fast =
         details.primaryVelocity != null &&
         details.primaryVelocity! > _dismissVelocity;
-    if (_dragOffset > _dismissDrag || fast) {
+    final height = _sheetHeight;
+    final beyondThreshold =
+        height != null && _dragOffset > height * _dismissFraction;
+    if (fast || beyondThreshold) {
       _dismiss();
     } else if (_dragOffset > 0) {
       _dragCtrl
@@ -212,26 +224,35 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return Align(
-      alignment: Alignment.bottomCenter,
-      widthFactor: 1,
-      heightFactor: 1,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onVerticalDragUpdate: _onDragUpdate,
-        onVerticalDragEnd: _onDragEnd,
-        child: SlideTransition(
-          position: _slide,
-          child: AnimatedBuilder(
-            animation: _dragCtrl,
-            builder: (context, child) => Transform.translate(
-              offset: Offset(0, _dragCtrl.value),
-              child: child,
-            ),
-            child: _buildSheet(context, c),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: _dismiss,
           ),
         ),
-      ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            key: const ValueKey('calc-sheet'),
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragUpdate: _onDragUpdate,
+            onVerticalDragEnd: _onDragEnd,
+            child: SlideTransition(
+              position: _slide,
+              child: AnimatedBuilder(
+                animation: _dragCtrl,
+                builder: (context, child) => Transform.translate(
+                  offset: Offset(0, _dragCtrl.value),
+                  child: child,
+                ),
+                child: _buildSheet(context, c),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -239,6 +260,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     return Material(
       color: Colors.transparent,
       child: Container(
+        key: _sheetKey,
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         decoration: BoxDecoration(

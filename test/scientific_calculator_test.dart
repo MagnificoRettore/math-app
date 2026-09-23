@@ -9,10 +9,7 @@ Future<void> _pump(WidgetTester tester, {VoidCallback? onClose}) async {
         body: Stack(
           children: [
             SingleChildScrollView(child: Container(height: 800)),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
+            Positioned.fill(
               child: ScientificCalculatorSheet(onClose: onClose ?? () {}),
             ),
           ],
@@ -22,6 +19,8 @@ Future<void> _pump(WidgetTester tester, {VoidCallback? onClose}) async {
   );
   await tester.pump(const Duration(milliseconds: 300));
 }
+
+Finder _sheet() => find.byKey(const ValueKey('calc-sheet'));
 
 String _result(WidgetTester tester) {
   return tester.widget<Text>(find.byKey(const ValueKey('calc-result'))).data!;
@@ -132,12 +131,26 @@ void main() {
     expect(chip.bottom > expr.top, isTrue);
   });
 
-  testWidgets('trascinando giù la sheet si chiude', (tester) async {
+  testWidgets('fling veloce verso il basso chiude la sheet', (tester) async {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
+    await tester.fling(
+      _sheet(),
+      const Offset(0, 300),
+      1200,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(closed, isTrue);
+  });
+
+  testWidgets('drag lento oltre metà altezza chiude la sheet', (tester) async {
+    var closed = false;
+    await _pump(tester, onClose: () => closed = true);
+    final sheetHeight = tester.getSize(_sheet()).height;
     await tester.drag(
-      find.byType(ScientificCalculatorSheet),
-      const Offset(0, 220),
+      _sheet(),
+      Offset(0, sheetHeight * 0.8),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
@@ -148,12 +161,36 @@ void main() {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
     await tester.drag(
-      find.byType(ScientificCalculatorSheet),
+      _sheet(),
       const Offset(0, 40),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(closed, isFalse);
+  });
+
+  testWidgets('drag parziale lento rivela il contenuto e riporta la sheet su', (
+    tester,
+  ) async {
+    var closed = false;
+    await _pump(tester, onClose: () => closed = true);
+    await tester.drag(
+      _sheet(),
+      const Offset(0, 150),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(closed, isFalse);
+  });
+
+  testWidgets('tap fuori dalla sheet la chiude', (tester) async {
+    var closed = false;
+    await _pump(tester, onClose: () => closed = true);
+    final sheetRect = tester.getRect(_sheet());
+    await tester.tapAt(Offset(200, sheetRect.top - 60));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(closed, isTrue);
   });
 
   testWidgets('il contenuto sopra la sheet resta scrollabile', (tester) async {
@@ -171,10 +208,7 @@ void main() {
                     SizedBox(height: 100, child: Text('riga $i')),
                 ],
               ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
+              Positioned.fill(
                 child: ScientificCalculatorSheet(onClose: () => closed = true),
               ),
             ],
@@ -184,7 +218,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    final rectBefore = tester.getRect(find.byType(ScientificCalculatorSheet));
+    final rectBefore = tester.getRect(_sheet());
     await tester.dragFrom(
       Offset(400, 20),
       const Offset(0, -300),
@@ -194,7 +228,7 @@ void main() {
     expect(controller.offset, greaterThan(0));
     expect(closed, isFalse);
     expect(
-      tester.getRect(find.byType(ScientificCalculatorSheet)),
+      tester.getRect(_sheet()),
       rectBefore,
     );
 
