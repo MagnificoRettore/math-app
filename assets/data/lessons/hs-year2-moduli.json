@@ -87,6 +87,7 @@
                 {
                     "type": "info",
                     "title": "Equazioni con Modulo",
+                    "fontSizeMultiplier": 0.85,
                     "content": [
                         "Per risolvere un'equazione del tipo $|ax+b| = k$ il primo passo è lo **studio del segno dell'argomento**: da esso dipendono i casi da risolvere.",
                         "",

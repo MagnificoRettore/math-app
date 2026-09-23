@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
 import '../widgets/math_text.dart';
 import '../widgets/notes_text.dart';
+import '../widgets/scientific_calculator.dart';
 
 class LessonScreen extends StatefulWidget {
   final Lesson lesson;
@@ -29,6 +30,7 @@ class _LessonScreenState extends State<LessonScreen> {
   bool _solved = false;
   bool _attempted = false;
   int _attemptId = 0;
+  bool _calcOpen = false;
 
   LessonStep get _step => widget.lesson.steps[_page];
   int get _total => widget.lesson.steps.length;
@@ -95,92 +97,135 @@ class _LessonScreenState extends State<LessonScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.lesson.title)),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Column(
-              children: [
-                Row(
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                child: Column(
                   children: [
-                    Text(
-                      '${_page + 1} di $_total',
-                      style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    Row(
+                      children: [
+                        Text(
+                          '${_page + 1} di $_total',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          widget.lesson.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                    const Spacer(),
-                    Text(
-                      widget.lesson.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    const SizedBox(height: 6),
+                    M3EProgressIndicator.linearWavy(
+                      value: (_page + 1) / _total,
+                      color: c.accent,
+                      trackColor: c.border,
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                M3EProgressIndicator.linearWavy(
-                  value: (_page + 1) / _total,
-                  color: c.accent,
-                  trackColor: c.border,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _total,
-              onPageChanged: (index) {
-                setState(() => _page = index);
-                _resetStep();
-              },
-              itemBuilder: (context, index) {
-                final card = Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 12,
-                  ),
-                  child: _StepCard(
-                    step: widget.lesson.steps[index],
-                    solved: _solved,
-                    attempted: _attempted,
-                    attemptId: _attemptId,
-                    wrongOptions: _wrongOptions,
-                    selectedOption: _selectedOption,
-                    onSelectOption: _selectOption,
-                    showComplete:
-                        index == _total - 1 &&
-                        (_step.type == LessonStepType.info || _solved),
-                    onComplete: _complete,
-                  ),
-                );
-                return AnimatedBuilder(
-                  animation: _pageController,
-                  builder: (context, child) {
-                    final position = _pageController.hasClients
-                        ? _pageController.page ?? index.toDouble()
-                        : index.toDouble();
-                    final delta = (position - index).clamp(-1.0, 1.0);
-                    final abs = delta.abs();
-                    final scale = 1 - 0.07 * abs;
-                    final opacity = (1 - 0.35 * abs).clamp(0.0, 1.0);
-                    final tilt = delta * 0.05;
-                    return Opacity(
-                      opacity: opacity,
-                      child: Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.identity()
-                          ..rotateZ(tilt)
-                          ..scaleByDouble(scale, scale, 1.0, 1.0),
-                        child: child,
+              ),
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _total,
+                  onPageChanged: (index) {
+                    setState(() => _page = index);
+                    _resetStep();
+                  },
+                  itemBuilder: (context, index) {
+                    final card = Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 12,
+                      ),
+                      child: _StepCard(
+                        step: widget.lesson.steps[index],
+                        solved: _solved,
+                        attempted: _attempted,
+                        attemptId: _attemptId,
+                        wrongOptions: _wrongOptions,
+                        selectedOption: _selectedOption,
+                        onSelectOption: _selectOption,
+                        showComplete:
+                            index == _total - 1 &&
+                            (_step.type == LessonStepType.info || _solved),
+                        onComplete: _complete,
                       ),
                     );
+                    return AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, child) {
+                        final position = _pageController.hasClients
+                            ? _pageController.page ?? index.toDouble()
+                            : index.toDouble();
+                        final delta = (position - index).clamp(-1.0, 1.0);
+                        final abs = delta.abs();
+                        final scale = 1 - 0.07 * abs;
+                        final opacity = (1 - 0.35 * abs).clamp(0.0, 1.0);
+                        final tilt = delta * 0.05;
+                        return Opacity(
+                          opacity: opacity,
+                          child: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()
+                              ..rotateZ(tilt)
+                              ..scaleByDouble(scale, scale, 1.0, 1.0),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: card,
+                    );
                   },
-                  child: card,
-                );
-              },
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+          if (_calcOpen)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: ScientificCalculatorSheet(
+                onClose: () => setState(() => _calcOpen = false),
+              ),
+            ),
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: SafeArea(
+              child: Transform.scale(
+                scale: 1 / 1.5,
+                child: M3EToolbar(
+                  expanded: false,
+                  fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
+                  fabCollapseIcon: const Icon(M3EIcons.close_rounded),
+                  actions: [
+                    M3EToolbarAction(
+                      icon: M3EIcons.calculate_rounded,
+                      tooltip: 'Calcolatrice',
+                      onPressed: () => setState(() => _calcOpen = true),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
         ],
       ),
     );
@@ -213,6 +258,7 @@ class _StepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final scale = step.fontSizeMultiplier;
     return AppCard(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -226,16 +272,16 @@ class _StepCard extends StatelessWidget {
                   Text(
                     step.title,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 24 * scale,
                       fontWeight: FontWeight.w700,
                       color: c.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 16),
                   if (step.type == LessonStepType.info)
-                    NotesText(step.content)
+                    NotesText(step.content, fontScale: scale)
                   else ...[
-                    NotesText(step.content),
+                    NotesText(step.content, fontScale: scale),
                     const SizedBox(height: 24),
                     for (var i = 0; i < step.options.length; i++)
                       Padding(
@@ -245,6 +291,7 @@ class _StepCard extends StatelessWidget {
                           label: step.options[i],
                           state: _stateFor(i),
                           enabled: !solved,
+                          scale: scale,
                           onTap: () => onSelectOption(i),
                         ),
                       ),
@@ -258,6 +305,7 @@ class _StepCard extends StatelessWidget {
                               key: const ValueKey('correct'),
                               correct: true,
                               message: step.explanation,
+                              scale: scale,
                             )
                           : attempted
                           ? _ShakeWidget(
@@ -265,6 +313,7 @@ class _StepCard extends StatelessWidget {
                               child: _FeedbackCard(
                                 correct: false,
                                 message: 'Non è corretto. Riprova!',
+                                scale: scale,
                               ),
                             )
                           : const SizedBox.shrink(key: ValueKey('idle')),
@@ -315,6 +364,7 @@ class _OptionTile extends StatelessWidget {
   final String label;
   final _OptionState state;
   final bool enabled;
+  final double scale;
   final VoidCallback onTap;
 
   const _OptionTile({
@@ -322,6 +372,7 @@ class _OptionTile extends StatelessWidget {
     required this.label,
     required this.state,
     required this.enabled,
+    required this.scale,
     required this.onTap,
   });
 
@@ -365,7 +416,7 @@ class _OptionTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Expanded(child: MathText(label, fontSize: 16)),
+                Expanded(child: MathText(label, fontSize: 16 * scale)),
                 if (check != null) ...[
                   const SizedBox(width: 10),
                   Icon(check, size: 22, color: iconColor),
@@ -382,11 +433,13 @@ class _OptionTile extends StatelessWidget {
 class _FeedbackCard extends StatelessWidget {
   final bool correct;
   final String message;
+  final double scale;
 
   const _FeedbackCard({
     super.key,
     required this.correct,
     required this.message,
+    required this.scale,
   });
 
   @override
@@ -415,7 +468,7 @@ class _FeedbackCard extends StatelessWidget {
               Text(
                 correct ? 'Corretto!' : 'Non è corretto',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16 * scale,
                   fontWeight: FontWeight.w700,
                   color: color,
                 ),
@@ -424,7 +477,7 @@ class _FeedbackCard extends StatelessWidget {
           ),
           if (message.isNotEmpty) ...[
             const SizedBox(height: 8),
-            MathText(message, fontSize: 14),
+            MathText(message, fontSize: 14 * scale),
           ],
         ],
       ),

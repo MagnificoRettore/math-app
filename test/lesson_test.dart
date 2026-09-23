@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson_step.dart';
 import 'package:math_app/screens/lesson_screen.dart';
+import 'package:math_app/widgets/scientific_calculator.dart';
 
 Future<void> _swipeNext(WidgetTester tester) async {
   await tester.drag(find.byType(PageView), const Offset(-500, 0));
@@ -56,9 +58,10 @@ void main() {
   });
 
   test('la lezione parsifica passaggi info e mcq', () {
-    final lesson = LessonRepository.instance.argomenti.firstWhere(
-      (a) => a.title == 'Equazioni di primo grado',
-    ).lessons.first;
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
     expect(lesson.id, 'eq1-intro');
     expect(lesson.minutes, 5);
     expect(lesson.steps, hasLength(3));
@@ -71,9 +74,10 @@ void main() {
   });
 
   test('content come array appiattisce testo e riquadri', () {
-    final lesson = LessonRepository.instance.argomenti.firstWhere(
-      (a) => a.title == 'Equazioni di primo grado',
-    ).lessons.first;
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
     final contenuto = lesson.steps[1].content;
 
     expect(contenuto.contains('# Titolo'), isTrue);
@@ -85,12 +89,43 @@ void main() {
     expect(contenuto, contains('::left'));
   });
 
+  test('fontSizeMultiplier parsificato e clampato entro 0.5-2.0', () {
+    final moduli = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    );
+    final lesson = moduli.lessons.firstWhere(
+      (l) => l.id == 'mod-equations-intro',
+    );
+
+    final ultimo = lesson.steps.last;
+    expect(ultimo.fontSizeMultiplier, 0.85);
+    expect(lesson.steps.first.fontSizeMultiplier, 1.0);
+
+    final clampLow = LessonStep.fromJson({
+      'type': 'info',
+      'title': 'x',
+      'fontSizeMultiplier': 0.1,
+    });
+    expect(clampLow.fontSizeMultiplier, 0.5);
+
+    final clampHigh = LessonStep.fromJson({
+      'type': 'info',
+      'title': 'x',
+      'fontSizeMultiplier': 9.0,
+    });
+    expect(clampHigh.fontSizeMultiplier, 2.0);
+
+    final defaultStep = LessonStep.fromJson({'type': 'info', 'title': 'x'});
+    expect(defaultStep.fontSizeMultiplier, 1.0);
+  });
+
   testWidgets('lo schermo lezione mostra le card e avanza coi passaggi', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti.firstWhere(
-      (a) => a.title == 'Equazioni di primo grado',
-    ).lessons.first;
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
     await tester.pumpWidget(
       MaterialApp(
         home: LessonScreen(lesson: lesson, levelId: 'high-school'),
@@ -110,9 +145,10 @@ void main() {
   testWidgets('risposta sbagliata scuote, quella giusta spiega e completa', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti.firstWhere(
-      (a) => a.title == 'Equazioni di primo grado',
-    ).lessons.first;
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
     final levelId = 'high-school';
     await tester.pumpWidget(
       MaterialApp(
@@ -149,9 +185,10 @@ void main() {
   testWidgets('la lezione Definizione è una card vuota con solo il titolo', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti.firstWhere(
-      (a) => a.title == 'Moduli',
-    ).lessons.first;
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Moduli')
+        .lessons
+        .first;
     expect(lesson.title, 'Definizione');
     expect(lesson.steps, hasLength(1));
     expect(lesson.steps.single.title, 'Definizione');
@@ -193,5 +230,40 @@ void main() {
     expect(step1, contains(r'\begin{cases}'));
     expect(step1, isNot(contains('Esempi pratici')));
     expect(lesson.steps[3].content, contains('x - 5'));
+  });
+
+  testWidgets('la toolbar apre la calcolatrice e il drag giù la chiude', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(M3EToolbar), findsOneWidget);
+    expect(find.byType(ScientificCalculatorSheet), findsNothing);
+
+    await tester.tap(find.byIcon(M3EIcons.handyman_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    await tester.tap(find.byIcon(M3EIcons.calculate_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(ScientificCalculatorSheet), findsOneWidget);
+
+    await tester.drag(
+      find.byType(ScientificCalculatorSheet),
+      const Offset(0, 250),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(ScientificCalculatorSheet), findsNothing);
   });
 }

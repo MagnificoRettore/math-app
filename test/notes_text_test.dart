@@ -15,6 +15,18 @@ Future<void> _pump(WidgetTester tester, String data) {
   );
 }
 
+Future<void> _pumpScaled(WidgetTester tester, String data, double scale) {
+  return tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: NotesText(data, fontScale: scale),
+        ),
+      ),
+    ),
+  );
+}
+
 RichText _richContaining(WidgetTester tester, String text) {
   final matches = tester
       .widgetList<RichText>(find.byType(RichText))
@@ -74,6 +86,16 @@ void main() {
     final style = _spanStyle(tester, 'Testo normale');
     expect(style.fontSize, 17);
     expect(style.fontWeight, FontWeight.w400);
+  });
+
+  testWidgets('fontScale scala titolo, intestazione e corpo', (tester) async {
+    await _pumpScaled(tester, '# Titolo\n## Sezione\nTesto normale', 0.8);
+    expect(_spanStyle(tester, 'Titolo').fontSize, closeTo(22.4, 0.01));
+    expect(_spanStyle(tester, 'Titolo').fontWeight, FontWeight.w800);
+    expect(_spanStyle(tester, 'Sezione').fontSize, closeTo(17.6, 0.01));
+    expect(_spanStyle(tester, 'Sezione').fontWeight, FontWeight.w700);
+    expect(_spanStyle(tester, 'Testo normale').fontSize, closeTo(13.6, 0.01));
+    expect(_spanStyle(tester, 'Testo normale').fontWeight, FontWeight.w400);
   });
 
   testWidgets('elenco puntato mostra il pallino', (tester) async {
@@ -175,6 +197,25 @@ void main() {
     expect(find.byType(MultifunctionBoxWidget), findsOneWidget);
     expect(_richContaining(tester, 'testo prima'), isNotNull);
     expect(_richContaining(tester, 'testo dopo'), isNotNull);
+  });
+
+  testWidgets('box ha margine superiore dal testo precedente', (tester) async {
+    await _pump(
+      tester,
+      'testo prima'
+      '\n'
+      '::box'
+      '\n'
+      '{"id":"b4","box_type":"math_formula","payload":{"tex":"x^2"}}'
+      '\n'
+      '::endbox',
+    );
+    final box = find.byType(MultifunctionBoxWidget);
+    expect(box, findsOneWidget);
+    final wrapper = tester.widget<Padding>(
+      find.ancestor(of: box, matching: find.byType(Padding)).first,
+    );
+    expect(wrapper.padding, const EdgeInsets.only(top: 12));
   });
 
   testWidgets('box single-line rende il widget dedicato', (tester) async {

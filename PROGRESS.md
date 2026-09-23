@@ -2,6 +2,27 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-23 — Toolbar lezioni e calcolatrice scientifica
+
+- `lesson_screen.dart`: body in `Stack` con `M3EToolbar` (material_3_expressive) floating in basso a destra. FAB espande/colassa la pillola (morph 80→56); unico tool per ora: **Calcolatrice** (`M3EIcons.calculate_rounded`).
+- Nuovo `scientific_calculator.dart`: `ScientificCalculatorSheet` non modale ancorata in basso — scivola su, lascia il contenuto della lezione scrollabile in parallelo (nessuno scrim, hit test sulla sola area), si chiude trascinandola giù (>120px o velocity >800px/s). Griglia scientifica: `sin cos tan ln log`, `√ x² ( ) π`, `abs exp AC ⌫ %`, cifre, `− ± + × ÷ ^ =`.
+- `expression_evaluator.dart`: costanti `pi`/`e`, funzioni `sin cos tan ln log sqrt abs exp`; nuovo `tryEvaluate` (restituisce `null` su errore/valore non finito), `evaluate` resta a `0.0`.
+- Calcolatrice riusa `ExpressionEvaluator` per il calcolo (`=` → risultato formattato, errori → "Errore").
+- Test: +22 (funzioni/costanti evaluator, tryEvaluate, calcolatrice 6 casi, toolbar→calcolatrice→drag-close). Suite: **186 verde**.
+
+## 2026-09-23 — fontScale per card di lezione
+
+- Nuovo attributo opzionale `fontSizeMultiplier` sugli step JSON delle lezioni: scala il font del testo della card (titolo, contenuto, opzioni MCQ, feedback) senza toccare grafici e padding. Clamp difensivo `0.5–2.0` (default `1.0`).
+- `notes_text.dart`: nuovo parametro `fontScale` che scala tutte le dimensioni fisse (title, heading, subheading, mono, corpo, codice inline).
+- `lesson_screen.dart`: `_StepCard` applica `step.fontSizeMultiplier` a titolo, `NotesText`, `_OptionTile` e `_FeedbackCard`.
+- Demo: step "Equazioni con Modulo" (`mod-equations-intro`) con `fontSizeMultiplier: 0.85` → più contenuto a schermo.
+- Test: +2 (`fontScale` scala note, parsing/clamp `fontSizeMultiplier`). Suite: **162 verde**.
+
+## 2026-09-23 — Aria sopra i box nelle note
+
+- `notes_text.dart` `_buildBlock`: i riquadri multifunzione sono avvolti in `Padding(top: 12)` → aria dal testo precedente (il box "Definizione" nella card "Che cos'è il Modulo?" non è più attaccato al testo).
+- Test: +1 (margine superiore box). Suite: **163 verde**.
+
 ## 2026-09-22 — Box Callout in NotesText
 
 - Nuova sintassi callout `:::chiave` in `notes_text.dart`: apre un box tinto colorato, chiuso da riga vuota, heading `#`/`##`/`###`, altro `:::` o fine contenuto.

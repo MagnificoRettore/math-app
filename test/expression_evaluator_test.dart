@@ -52,6 +52,82 @@ void main() {
     });
   });
 
+  group('ExpressionEvaluator funzioni e costanti scientifiche', () {
+    test('costante pi', () {
+      expect(ExpressionEvaluator.evaluate('pi'), closeTo(3.14159, 1e-5));
+    });
+
+    test('costante e', () {
+      expect(ExpressionEvaluator.evaluate('e'), closeTo(2.71828, 1e-5));
+    });
+
+    test('sin(pi/2) = 1', () {
+      expect(ExpressionEvaluator.evaluate('sin(pi / 2)'), closeTo(1, 1e-9));
+    });
+
+    test('cos(0) = 1', () {
+      expect(ExpressionEvaluator.evaluate('cos(0)'), 1);
+    });
+
+    test('tan(0) = 0', () {
+      expect(ExpressionEvaluator.evaluate('tan(0)'), 0);
+    });
+
+    test('ln(e) = 1', () {
+      expect(ExpressionEvaluator.evaluate('ln(e)'), closeTo(1, 1e-9));
+    });
+
+    test('log(100) = 2 in base 10', () {
+      expect(ExpressionEvaluator.evaluate('log(100)'), closeTo(2, 1e-9));
+    });
+
+    test('sqrt(16) = 4', () {
+      expect(ExpressionEvaluator.evaluate('sqrt(16)'), 4);
+    });
+
+    test('abs(-3) = 3', () {
+      expect(ExpressionEvaluator.evaluate('abs(-3)'), 3);
+    });
+
+    test('exp(0) = 1', () {
+      expect(ExpressionEvaluator.evaluate('exp(0)'), 1);
+    });
+
+    test('funzioni annidate', () {
+      expect(
+        ExpressionEvaluator.evaluate('sqrt(abs(-4 * 4))'),
+        closeTo(4, 1e-9),
+      );
+    });
+
+    test('sqrt(pi)^2 = pi', () {
+      expect(
+        ExpressionEvaluator.evaluate('sqrt(pi) ^ 2'),
+        closeTo(3.14159, 1e-5),
+      );
+    });
+  });
+
+  group('ExpressionEvaluator tryEvaluate distingue errore da zero', () {
+    test('valore valido restituisce double', () {
+      expect(ExpressionEvaluator.tryEvaluate('2 + 3'), 5);
+    });
+
+    test('errore restituisce null', () {
+      expect(ExpressionEvaluator.tryEvaluate('()'), isNull);
+      expect(ExpressionEvaluator.tryEvaluate('2 +'), isNull);
+      expect(ExpressionEvaluator.tryEvaluate('sqrt('), isNull);
+    });
+
+    test('divisione per zero restituisce null', () {
+      expect(ExpressionEvaluator.tryEvaluate('1 / 0'), isNull);
+    });
+
+    test('stringa vuota restituisce null', () {
+      expect(ExpressionEvaluator.tryEvaluate(''), isNull);
+    });
+  });
+
   group('ExpressionEvaluator errori ricadono a zero', () {
     test('stringa vuota', () {
       expect(ExpressionEvaluator.evaluate(''), 0.0);

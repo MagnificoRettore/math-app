@@ -55,9 +55,16 @@ class NotesText extends StatelessWidget {
 
   final String data;
   final double baseFontSize;
+  final double fontScale;
   final Color? color;
 
-  const NotesText(this.data, {super.key, this.baseFontSize = 17, this.color});
+  const NotesText(
+    this.data, {
+    super.key,
+    this.baseFontSize = 17,
+    this.fontScale = 1.0,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -319,7 +326,10 @@ class NotesText extends StatelessWidget {
 
   Widget _buildBlock(BuildContext context, _Block block, Color color) {
     if (block.isBox) {
-      return MultifunctionBoxWidget(box: block.box!);
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: MultifunctionBoxWidget(box: block.box!),
+      );
     }
     final styleDefaults = _defaultsFor(block.type);
     final base = TextStyle(
@@ -395,12 +405,16 @@ class NotesText extends StatelessWidget {
 
   (double, FontWeight?, String?) _defaultsFor(NotesBlockType type) =>
       switch (type) {
-        NotesBlockType.title => (28, FontWeight.w800, null),
-        NotesBlockType.heading => (22, FontWeight.w700, null),
-        NotesBlockType.subheading => (17, FontWeight.w600, null),
-        NotesBlockType.body => (baseFontSize, FontWeight.w400, null),
-        NotesBlockType.mono => (14, FontWeight.w400, 'monospace'),
-        NotesBlockType.bullet => (baseFontSize, FontWeight.w400, null),
+        NotesBlockType.title => (28 * fontScale, FontWeight.w800, null),
+        NotesBlockType.heading => (22 * fontScale, FontWeight.w700, null),
+        NotesBlockType.subheading => (17 * fontScale, FontWeight.w600, null),
+        NotesBlockType.body => (baseFontSize * fontScale, FontWeight.w400, null),
+        NotesBlockType.mono => (14 * fontScale, FontWeight.w400, 'monospace'),
+        NotesBlockType.bullet => (
+          baseFontSize * fontScale,
+          FontWeight.w400,
+          null,
+        ),
       };
 
   List<InlineSpan> _inline(String raw, TextStyle base) {
@@ -463,7 +477,10 @@ class NotesText extends StatelessWidget {
       style = style.copyWith(fontStyle: FontStyle.italic);
     }
     if (stack.contains('`')) {
-      style = style.copyWith(fontFamily: 'monospace', fontSize: 14);
+      style = style.copyWith(
+        fontFamily: 'monospace',
+        fontSize: 14 * fontScale,
+      );
     }
     final decorations = <TextDecoration>[];
     if (stack.contains('__')) {

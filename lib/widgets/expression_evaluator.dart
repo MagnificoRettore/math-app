@@ -3,23 +3,31 @@ import 'dart:math' as math;
 /// Valuta espressioni aritmetiche semplici (parser recursive-descent).
 ///
 /// Sintassi supportata: `+ - * / ^ %`, parentesi, numeri decimali,
-/// variabili `x` e `t`. Qualsiasi errore o risultato non finito
-/// restituisce `0.0` (mai eccezioni in rendering).
+/// variabili `x` e `t`, costanti `pi`/`e` e funzioni
+/// `sin cos tan ln log sqrt abs exp`. Qualsiasi errore o risultato non finito
+/// in [evaluate] restituisce `0.0` (mai eccezioni in rendering);
+/// [tryEvaluate] distingue invece errore/valore non finito con `null`.
 class ExpressionEvaluator {
   const ExpressionEvaluator._();
 
   static double evaluate(String source, {double x = 0, double t = 0}) {
+    return tryEvaluate(source, x: x, t: t) ?? 0.0;
+  }
+
+  /// Come [evaluate] ma restituisce `null` su errore di parsing,
+  /// espressione vuota o risultato non finito.
+  static double? tryEvaluate(String source, {double x = 0, double t = 0}) {
     try {
       final tokens = _tokenize(source);
-      if (tokens.isEmpty) return 0.0;
+      if (tokens.isEmpty) return null;
       final parser = _Parser(tokens, x: x, t: t);
       final value = parser.parseExpression();
-      if (parser.hasMore) return 0.0;
-      return value.isFinite ? value : 0.0;
+      if (parser.hasMore) return null;
+      return value.isFinite ? value : null;
     } on FormatException {
-      return 0.0;
+      return null;
     } on StackOverflowError {
-      return 0.0;
+      return null;
     }
   }
 }
@@ -175,11 +183,7 @@ class _Parser {
       case _TokenKind.number:
         return token.value ?? 0;
       case _TokenKind.variable:
-        return switch (token.text) {
-          'x' => x,
-          't' => t,
-          _ => throw FormatException('variabile ignota: ${token.text}'),
-        };
+        return _resolveIdentifier(token.text);
       case _TokenKind.leftParen:
         final value = parseExpression();
         final closing = peek;
@@ -190,6 +194,68 @@ class _Parser {
         return value;
       default:
         throw const FormatException('token inatteso');
+    }
+  }
+
+  double _resolveIdentifier(String name) {
+    switch (name) {
+      case 'x':
+        return x;
+      case 't':
+        return t;
+      case 'pi':
+        return math.pi;
+      case 'e':
+        return math.e;
+      case 'sin':
+      case 'cos':
+      case 'tan':
+      case 'ln':
+      case 'log':
+      case 'sqrt':
+      case 'abs':
+      case 'exp':
+        return _callFunction(name);
+      default:
+        throw FormatException('variabile ignota: $name');
+    }
+  }
+
+  double _callFunction(String name) {
+    final opening = peek;
+    if (opening == null || opening.kind != _TokenKind.leftParen) {
+      throw FormatException('serve una parentesi dopo $name');
+    }
+    pos++;
+    final arg = parseExpression();
+    final closing = peek;
+    if (closing == null || closing.kind != _TokenKind.rightParen) {
+      throw const FormatException('parentesi non chiusa');
+    }
+    pos++;
+    return _applyFunction(name, arg);
+  }
+
+  static double _applyFunction(String name, double arg) {
+    switch (name) {
+      case 'sin':
+        return math.sin(arg);
+      case 'cos':
+        return math.cos(arg);
+      case 'tan':
+        return math.tan(arg);
+      case 'ln':
+        return math.log(arg);
+      case 'log':
+        return math.log(arg) / math.ln10;
+      case 'sqrt':
+        return math.sqrt(arg);
+      case 'abs':
+        return arg.abs();
+      case 'exp':
+        return math.exp(arg);
+      default:
+        throw FormatException('funzione ignota: $name');
     }
   }
 

@@ -25,6 +25,7 @@ class LessonStep {
   final List<String> options;
   final int correctIndex;
   final String explanation;
+  final double fontSizeMultiplier;
 
   const LessonStep({
     required this.type,
@@ -33,6 +34,7 @@ class LessonStep {
     this.options = const [],
     this.correctIndex = -1,
     this.explanation = '',
+    this.fontSizeMultiplier = 1.0,
   });
 
   factory LessonStep.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,11 @@ class LessonStep {
           .toList(),
       correctIndex: json['correctIndex'] as int? ?? -1,
       explanation: json['explanation'] as String? ?? '',
+      fontSizeMultiplier:
+          ((json['fontSizeMultiplier'] as num?)?.toDouble() ?? 1.0).clamp(
+            0.5,
+            2.0,
+          ),
     );
   }
 
