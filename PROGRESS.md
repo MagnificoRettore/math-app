@@ -2,6 +2,24 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-27 — Toolbar nel footer della card, stessa altezza di «Completa la lezione»
+
+- `lesson_screen.dart`: la `M3EToolbar` esce dal `Stack` della pagina (dove era un `Positioned(left: 16, bottom: 16)` con `SafeArea` e `Transform.scale(1/1.5)`) e diventa un `Positioned(left: 0, bottom: 0)` dentro la card. Compatta è alta esattamente quanto «Completa la lezione`: `Transform.scale(_kFooterControlHeight / M3EToolbarTokens.fabMedium)` con `Alignment.bottomLeft`, quindi il FAB dipinto è a filo della colonna di testo, ha lo stesso spigolo inferiore del bottone e la stessa altezza. Con `bottomCenter` il FAB (49 dipinti dentro una box di 80) restava centrato, con 15,5px di aria dal bordo.
+- Tre cose scoperte sul pacchetto, che impongono la `Positioned` invece che un figlio della `Row` del footer: il FAB **collassato** è `fabMedium` (80) e non `fabBaseline` (56) — da espanso scende a 56, quindi la scala cercata era 49/80 e non 49/56; il pacchetto riserva **136px in layout anche da collassato** (pilla sempre disposta, solo clip-paintata a zero) e dentro la `Row` avrebbe rubato 87px di contenuto a ogni card; con larghezza illimitata, come vuole una `Row`, il suo layout verticale va in `Infinity` (`RenderConstrainedOverflowBox was given an infinite size`), da qui il `width` nella `Positioned`. Un tentativo con `SizedBox`+`OverflowBox` per tagliare i 136px è stato scartato: `RenderBox.hitTest` limita il test alla propria box, quindi la pila espansa dipinta sopra risultava **intoccabile** e la calcolatrice irraggiungibile.
+- La card ora è uno `Stack`: colonna con contenuto scrollabile più fascia footer alta 49 su **ogni** step, toolbar ancorata al fondo della card sopra quella fascia.
+- «Completa la lezione» passa da piena larghezza a compatto a destra su tutti gli step, non solo sulla card di verifica.
+- Espansione lifted in `_LessonScreenState` (`_toolbarExpanded` + `onExpandedChanged`): c'è una toolbar per card costruita dal `PageView`, senza stato condiviso ognuna nascerebbe collassata a ogni swipe.
+- Tolta la `SafeArea` esterna (aveva senso per un overlay a filo schermo, dentro la card aggiungerebbe l'inset di sistema sotto il footer).
+- `minimumSize: Size.fromHeight(49)` sul `FilledButton` scartato: in `Row` dà `BoxConstraints(w=Infinity)` al bottone e il layout esplode. L'altezza 49 esce già dal padding.
+- Test: `la toolbar compatta è allineata a Completa la lezione` (nuovo, largo dipinto del pacchetto = lato del FAB quadrato = altezza del bottone, spigolo inferiore in comune, bordo sinistro allineato alla colonna di testo), `la toolbar sta nel footer della card e il FAB la espande` (rinominato: dentro la card, icona che passa da `handyman` a `close`) e `la toolbar apre la calcolatrice e il drag giù la chiude` (finder per chiave `ValueKey('lesson_toolbar_$index')`, `findsOneWidget` → `findsWidgets` per le istanze per pagina). Le rect dipinte del pacchetto non cambiano da espansa, perché i paint bounds includono la pila clip-paintata. Suite: **213 verde**.
+
+## 2026-09-27 — Toolbar lezioni ed esercizi in basso a sinistra, in verticale
+
+- `lesson_screen.dart`: `M3EToolbar` spostata da `Positioned(right: 16)` a `Positioned(left: 16, bottom: 16)`; `axis: Axis.vertical` + `fabPosition: M3EToolbarFabPosition.bottom` → il FAB comprime da 80 a 56 e la pillola degli strumenti si rivela **in alto** invece che a sinistra (`RenderM3EToolbarVerticalFabLayout`). `Transform.scale(1/1.5)` e `SafeArea` invariati.
+- `exercise_tools_bar.dart`: `axis: Axis.vertical`, stessa pila verticale in basso a sinistra su `exercise_detail_screen` e `exercise_feed_screen` (niente FAB, barra sempre espansa).
+- Appunto: in `Stack`, `Positioned` passa `BoxConstraints.tightFor` con width/height `null` quando sono specificati solo `right`/`bottom` → constraint infiniti, quindi l'`Align` interno del pacchetto già si restringe alla dimensione naturale e l'ancoraggio del `Positioned` è effettivo. Nessun wrapper extra serve.
+- Test: +2 (`la toolbar è ancorata in basso a sinistra e si espande in alto`, `la barra strumenti è ancorata in basso a sinistra e verticale` in `test/exercise_tools_bar_test.dart`), entrambi verificano posizione e orientamento geometrici. Suite: **198 verde**.
+
 ## 2026-09-23 — Card Prova tu separata in Moduli
 
 - `hs-year2-moduli.json`: la sezione "Prova tu" (equazione $|x-5|=4x$) esce dalla 5ª card "Equazioni con Modulo" e diventa la nuova 6ª card della lezione `mod-equations-intro` → 6 card totali.
@@ -134,6 +152,19 @@ Nuova feature: `MultifunctionBox` embedded nel content delle lezioni con sintass
 - Card lezione essenziale: badge numerico a sinistra (indice+1), titolo, sottotitolo, «X min», check "Completata" o chevron; `ListenableBuilder` su `ProgressStore` aggiorna i badge al ritorno.
 - `lesson_list_screen.dart` `_openArgomento`: non salta più alla prima lezione — pusha `ArgomentoLessonsScreen`; il player `LessonScreen` resta invariato (completamento → pop alla lista).
 - Test: 3 nuovi (`test/argomento_lessons_screen_test.dart`). Suite: **152 verde**.
+
+## Card practice_quiz (step di lezione)
+
+- **Nuovo tipo di step** `LessonStepType.practiceQuiz` (`"type": "practice_quiz"`), non un riquadro multifunzione: è una card a sé nel `PageView` di `LessonScreen`, insieme a `info` e `mcq`. Niente `AppCard` annidata. (Prima versione: `BoxType.practiceQuiz` con `PracticeQuizPayload`, scartata perché produceva una card dentro un'altra card.)
+- `LessonStep.exercises` parsato da `exercises[]`: `prompt`, `text?`, `options[]`, `correctIndex`, `explanation?`. Il modello `PracticeExercise` sta in `lib/models/practice_exercise.dart`, fuori dal tree dei box. `correctIndex` fuori range viene ignorato in fase di tap (`hasAnswer`).
+- `PracticeQuizView` (`lib/widgets/practice_quiz_view.dart`): **un solo esercizio per volta**, stato pubblico con `reload()`. Il bottone sta nel **footer** della card, a sinistra di «Completa la lezione» (footer che ora contiene anche la toolbar, vedi entry del 2026-09-27), ed estrae il successivo da una coda mescolata; queue svuotata = refill escludendo l'esercizio corrente, quindi niente ripetizioni prima del giro completo. Sparisce con un solo esercizio. Nessun contatore: la card non cambia aspetto. `LessonScreen` tiene una `GlobalKey<PracticeQuizViewState>` per step quiz.
+- Il footer della card quiz è allineato a destra (`Row` con `MainAxisAlignment.end`); per `info` e `mcq` il bottone «Completa la lezione» resta a piena larghezza. Con il quiz come ultimo step il bottone compare senza dover risolvere niente.
+- `PromptView` (`lib/widgets/prompt_view.dart`): auto-rileva il prompt — percorso/URL immagine (estensione o prefisso `http`) → `ImageSource`, altrimenti `MathText` (quindi matematica mista a testo OK).
+- `LessonStep.prompt` aggiunto al modello e parsato da JSON: prima gli step MCQ mostravano solo opzioni e feedback, il prompt era silenziosamente perso.
+- Estrazione da `lesson_screen.dart` a widget condivisi: `McqOptionTile` / `McqFeedbackCard` / `ShakeWidget` in `lib/widgets/mcq_option_tile.dart`, usati sia dagli step MCQ sia dalla card. `ImageSource` spostato in `lib/widgets/image_source.dart` (riuso senza ciclo di import).
+- Feedback condiviso: corretto → haptic leggero e opzioni disabilitate; sbagliato → haptic pesante e shake. `AnimatedSwitcher` con `layoutBuilder` che scarta il child uscente, così l'esercizio precedente non resta in albero durante la transizione.
+- Contenuto: 4 equazioni con modulo in `hs-year2-moduli.json`, nuovo ottavo step `Verifica` di `mod-equations-intro`.
+- Test: nuovo `test/practice_quiz_view_test.dart` (4 di modello + 6 di card, incluso il refill a coda svuotata e il tap con `correctIndex` fuori range), in `test/lesson_test.dart` il conteggio step 7 → 8 più 2 test (card di verifica a fine lezione, footer con reload a sinistra del bottone). Nota: dopo gli swipe la `PageView` assorbe i pointer finché lo scroll non è assestato, serve `pump(Duration(seconds: 3))` prima di toccare la card.
 
 ## Rimozioni
 

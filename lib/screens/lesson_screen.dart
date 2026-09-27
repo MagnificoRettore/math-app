@@ -7,9 +7,17 @@ import '../models/lesson.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
-import '../widgets/math_text.dart';
+import '../widgets/mcq_option_tile.dart';
 import '../widgets/notes_text.dart';
+import '../widgets/practice_quiz_view.dart';
+import '../widgets/prompt_view.dart';
 import '../widgets/scientific_calculator.dart';
+
+/// Altezza di «Completa la lezione» (padding 14 sopra e sotto più il
+/// contenuto). Serve a dare alla toolbar compatta la stessa altezza: il suo
+/// FAB collassato è `M3EToolbarTokens.fabMedium`, cioè 80 (da espanso scende a
+/// `fabBaseline`, 56).
+const double _kFooterControlHeight = 49;
 
 class LessonScreen extends StatefulWidget {
   final Lesson lesson;
@@ -31,6 +39,14 @@ class _LessonScreenState extends State<LessonScreen> {
   bool _attempted = false;
   int _attemptId = 0;
   bool _calcOpen = false;
+
+  /// La toolbar vive nel footer di ogni card, quindi ce n'è una per pagina
+  /// costruita: senza stato condiviso ogni nuova card nascerebbe collassata.
+  bool _toolbarExpanded = false;
+
+  /// Una chiave per step quiz: il bottone di reload sta nel footer della card,
+  /// fuori dal widget che possiede lo stato degli esercizi.
+  final Map<int, GlobalKey<PracticeQuizViewState>> _quizKeys = {};
 
   LessonStep get _step => widget.lesson.steps[_page];
   int get _total => widget.lesson.steps.length;
@@ -147,13 +163,15 @@ class _LessonScreenState extends State<LessonScreen> {
                     _resetStep();
                   },
                   itemBuilder: (context, index) {
+                    final step = widget.lesson.steps[index];
                     final card = Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 4,
                         vertical: 12,
                       ),
                       child: _StepCard(
-                        step: widget.lesson.steps[index],
+                        index: index,
+                        step: step,
                         solved: _solved,
                         attempted: _attempted,
                         attemptId: _attemptId,
@@ -162,8 +180,21 @@ class _LessonScreenState extends State<LessonScreen> {
                         onSelectOption: _selectOption,
                         showComplete:
                             index == _total - 1 &&
-                            (_step.type == LessonStepType.info || _solved),
+                            (step.type == LessonStepType.info ||
+                                step.type == LessonStepType.practiceQuiz ||
+                                _solved),
                         onComplete: _complete,
+                        toolbarExpanded: _toolbarExpanded,
+                        onToolbarExpandedChanged: (value) =>
+                            setState(() => _toolbarExpanded = value),
+                        onOpenCalculator: () =>
+                            setState(() => _calcOpen = true),
+                        practiceQuizKey: step.isPracticeQuiz
+                            ? _quizKeys.putIfAbsent(
+                                index,
+                                GlobalKey<PracticeQuizViewState>.new,
+                              )
+                            : null,
                       ),
                     );
                     return AnimatedBuilder(
@@ -196,27 +227,6 @@ class _LessonScreenState extends State<LessonScreen> {
               const SizedBox(height: 12),
             ],
           ),
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: SafeArea(
-              child: Transform.scale(
-                scale: 1 / 1.5,
-                child: M3EToolbar(
-                  expanded: false,
-                  fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
-                  fabCollapseIcon: const Icon(M3EIcons.close_rounded),
-                  actions: [
-                    M3EToolbarAction(
-                      icon: M3EIcons.calculate_rounded,
-                      tooltip: 'Calcolatrice',
-                      onPressed: () => setState(() => _calcOpen = true),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
           if (_calcOpen)
             Positioned.fill(
               child: ScientificCalculatorSheet(
@@ -230,6 +240,7 @@ class _LessonScreenState extends State<LessonScreen> {
 }
 
 class _StepCard extends StatelessWidget {
+  final int index;
   final LessonStep step;
   final bool solved;
   final bool attempted;
@@ -239,8 +250,13 @@ class _StepCard extends StatelessWidget {
   final ValueChanged<int> onSelectOption;
   final bool showComplete;
   final VoidCallback onComplete;
+  final bool toolbarExpanded;
+  final ValueChanged<bool> onToolbarExpandedChanged;
+  final VoidCallback onOpenCalculator;
+  final GlobalKey<PracticeQuizViewState>? practiceQuizKey;
 
   const _StepCard({
+    required this.index,
     required this.step,
     required this.solved,
     required this.attempted,
@@ -250,6 +266,10 @@ class _StepCard extends StatelessWidget {
     required this.onSelectOption,
     required this.showComplete,
     required this.onComplete,
+    required this.toolbarExpanded,
+    required this.onToolbarExpandedChanged,
+    required this.onOpenCalculator,
+    this.practiceQuizKey,
   });
 
   @override
@@ -258,295 +278,170 @@ class _StepCard extends StatelessWidget {
     final scale = step.fontSizeMultiplier;
     return AppCard(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    step.title,
-                    style: TextStyle(
-                      fontSize: 24 * scale,
-                      fontWeight: FontWeight.w700,
-                      color: c.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (step.type == LessonStepType.info)
-                    NotesText(step.content, fontScale: scale)
-                  else ...[
-                    NotesText(step.content, fontScale: scale),
-                    const SizedBox(height: 24),
-                    for (var i = 0; i < step.options.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _OptionTile(
-                          key: ValueKey('option_$i'),
-                          label: step.options[i],
-                          state: _stateFor(i),
-                          enabled: !solved,
-                          scale: scale,
-                          onTap: () => onSelectOption(i),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        step.title,
+                        style: TextStyle(
+                          fontSize: 24 * scale,
+                          fontWeight: FontWeight.w700,
+                          color: c.textPrimary,
                         ),
                       ),
-                    const SizedBox(height: 8),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 280),
-                      transitionBuilder: (child, animation) =>
-                          FadeTransition(opacity: animation, child: child),
-                      child: solved
-                          ? _FeedbackCard(
-                              key: const ValueKey('correct'),
-                              correct: true,
-                              message: step.explanation,
+                      const SizedBox(height: 16),
+                      if (step.type == LessonStepType.info)
+                        NotesText(step.content, fontScale: scale)
+                      else if (step.isPracticeQuiz)
+                        PracticeQuizView(
+                          key: practiceQuizKey,
+                          exercises: step.exercises,
+                          scale: scale,
+                        )
+                      else ...[
+                        NotesText(step.content, fontScale: scale),
+                        if (step.prompt.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          PromptView(prompt: step.prompt, fontSize: 18 * scale),
+                        ],
+                        const SizedBox(height: 24),
+                        for (var i = 0; i < step.options.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: McqOptionTile(
+                              key: ValueKey('option_$i'),
+                              label: step.options[i],
+                              state: _stateFor(i),
+                              enabled: !solved,
                               scale: scale,
-                            )
-                          : attempted
-                          ? _ShakeWidget(
-                              key: ValueKey('wrong-$attemptId'),
-                              child: _FeedbackCard(
-                                correct: false,
-                                message: 'Non è corretto. Riprova!',
-                                scale: scale,
-                              ),
-                            )
-                          : const SizedBox.shrink(key: ValueKey('idle')),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (showComplete) ...[
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: onComplete,
-                style: FilledButton.styleFrom(
-                  backgroundColor: c.accent,
-                  foregroundColor: c.surface,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                              onTap: () => onSelectOption(i),
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 280),
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(opacity: animation, child: child),
+                          child: solved
+                              ? McqFeedbackCard(
+                                  key: const ValueKey('correct'),
+                                  correct: true,
+                                  message: step.explanation,
+                                  scale: scale,
+                                )
+                              : attempted
+                              ? ShakeWidget(
+                                  key: ValueKey('wrong-$attemptId'),
+                                  child: McqFeedbackCard(
+                                    correct: false,
+                                    message: 'Non è corretto. Riprova!',
+                                    scale: scale,
+                                  ),
+                                )
+                              : const SizedBox.shrink(key: ValueKey('idle')),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                icon: const Icon(Icons.check_circle_outline, size: 20),
-                label: const Text(
-                  'Completa la lezione',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                ),
               ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  _OptionState _stateFor(int index) {
-    if (solved && index == step.correctIndex) return _OptionState.correct;
-    if (wrongOptions.contains(index)) return _OptionState.wrong;
-    if (selectedOption == index) return _OptionState.selected;
-    return _OptionState.idle;
-  }
-}
-
-enum _OptionState { idle, selected, correct, wrong }
-
-class _OptionTile extends StatelessWidget {
-  final String label;
-  final _OptionState state;
-  final bool enabled;
-  final double scale;
-  final VoidCallback onTap;
-
-  const _OptionTile({
-    super.key,
-    required this.label,
-    required this.state,
-    required this.enabled,
-    required this.scale,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final (borderColor, fillColor, iconColor, check) = switch (state) {
-      _OptionState.correct => (
-        c.easy,
-        c.easy.withValues(alpha: 0.12),
-        c.easy,
-        Icons.check_circle,
-      ),
-      _OptionState.wrong => (
-        c.hard,
-        c.hard.withValues(alpha: 0.10),
-        c.hard,
-        null,
-      ),
-      _OptionState.selected => (c.accent, c.accentSoft, c.accent, null),
-      _OptionState.idle => (c.border, c.surface, c.textSecondary, null),
-    };
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: fillColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: borderColor,
-          width: state == _OptionState.correct ? 1.8 : 1.2,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Expanded(child: MathText(label, fontSize: 16 * scale)),
-                if (check != null) ...[
-                  const SizedBox(width: 10),
-                  Icon(check, size: 22, color: iconColor),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FeedbackCard extends StatelessWidget {
-  final bool correct;
-  final String message;
-  final double scale;
-
-  const _FeedbackCard({
-    super.key,
-    required this.correct,
-    required this.message,
-    required this.scale,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final color = correct ? c.easy : c.hard;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                correct ? Icons.check_circle : Icons.cancel_outlined,
-                color: color,
-                size: 22,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                correct ? 'Corretto!' : 'Non è corretto',
-                style: TextStyle(
-                  fontSize: 16 * scale,
-                  fontWeight: FontWeight.w700,
-                  color: color,
+              const SizedBox(height: 16),
+              // Fascia footer alta quanto «Completa la lezione»: la toolbar ci
+              // sta sopra (vedi `_toolsBar`), dentro solo reload e bottone.
+              SizedBox(
+                height: _kFooterControlHeight,
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    if (step.isPracticeQuiz && step.exercises.length > 1)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: IconButton(
+                          onPressed: () =>
+                              practiceQuizKey?.currentState?.reload(),
+                          icon: const Icon(Icons.refresh_rounded),
+                          tooltip: 'Altro esercizio',
+                          color: c.textSecondary,
+                        ),
+                      ),
+                    if (showComplete) _completeButton(c),
+                  ],
                 ),
               ),
             ],
           ),
-          if (message.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            MathText(message, fontSize: 14 * scale),
-          ],
+          Positioned(
+            left: 0,
+            bottom: 0,
+            width: M3EToolbarTokens.fabMedium,
+            child: _toolsBar(),
+          ),
         ],
       ),
     );
   }
-}
 
-class _ShakeWidget extends StatefulWidget {
-  final Widget child;
-
-  const _ShakeWidget({super.key, required this.child});
-
-  @override
-  State<_ShakeWidget> createState() => _ShakeWidgetState();
-}
-
-class _ShakeWidgetState extends State<_ShakeWidget>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 420),
-  );
-  late final Animation<double> _shake = TweenSequence<double>([
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 0.0,
-        end: -12.0,
-      ).chain(CurveTween(curve: Curves.easeOut)),
-      weight: 2,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: -12.0,
-        end: 12.0,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 4,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 12.0,
-        end: -8.0,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 3,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: -8.0,
-        end: 0.0,
-      ).chain(CurveTween(curve: Curves.easeOut)),
-      weight: 3,
-    ),
-  ]).animate(_controller);
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) =>
-          Transform.translate(offset: Offset(_shake.value, 0), child: child),
-      child: widget.child,
+  /// Toolbar della lezione: overlay dentro la card, ancorato al suo fondo, con
+  /// il FAB compatto della stessa altezza di «Completa la lezione».
+  ///
+  /// Non sta nella `Row` del footer perché `M3EToolbar` riserva in layout
+  /// l'altezza della pila anche da collassato (136px, di cui 80 di FAB) pur
+  /// clip-paintandola a zero: in layout ruberebbe 87px a ogni card. E con
+  /// larghezza illimitata, come vuole una `Row`, il suo layout verticale va in
+  /// `Infinity`: da qui il `width` nella `Positioned`. La scala parte dal basso
+  /// a sinistra, così il FAB dipinto è a filo del padding della card e ha lo
+  /// stesso spigolo inferiore del bottone, e la pila si rivela in alto.
+  Widget _toolsBar() {
+    return Transform.scale(
+      alignment: Alignment.bottomLeft,
+      scale: _kFooterControlHeight / M3EToolbarTokens.fabMedium,
+      child: M3EToolbar(
+        key: ValueKey('lesson_toolbar_$index'),
+        axis: Axis.vertical,
+        fabPosition: M3EToolbarFabPosition.bottom,
+        expanded: toolbarExpanded,
+        onExpandedChanged: onToolbarExpandedChanged,
+        fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
+        fabCollapseIcon: const Icon(M3EIcons.close_rounded),
+        actions: [
+          M3EToolbarAction(
+            icon: M3EIcons.calculate_rounded,
+            tooltip: 'Calcolatrice',
+            onPressed: onOpenCalculator,
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _completeButton(AppPalette c) {
+    return FilledButton.icon(
+      onPressed: onComplete,
+      style: FilledButton.styleFrom(
+        backgroundColor: c.accent,
+        foregroundColor: c.surface,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      icon: const Icon(Icons.check_circle_outline, size: 20),
+      label: const Text(
+        'Completa la lezione',
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  McqOptionState _stateFor(int index) {
+    if (solved && index == step.correctIndex) return McqOptionState.correct;
+    if (wrongOptions.contains(index)) return McqOptionState.wrong;
+    if (selectedOption == index) return McqOptionState.selected;
+    return McqOptionState.idle;
   }
 }

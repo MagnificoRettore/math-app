@@ -8,7 +8,7 @@ class ExerciseToolsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return M3EToolbar(
       colorStyle: M3EToolbarColorStyle.standard,
-      axis: Axis.horizontal,
+      axis: Axis.vertical,
       expanded: true,
       activeIndex: null,
       fabExpandIcon: null,

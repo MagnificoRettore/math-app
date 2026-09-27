@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import 'app_card.dart';
 import 'chart_colors.dart';
 import 'chart_widgets.dart';
+import 'image_source.dart';
 import 'interactive_chart_view.dart';
 import 'math_text.dart';
 
@@ -127,58 +128,8 @@ class _ImageView extends StatelessWidget {
       child: Container(
         color: c.accentSoft,
         constraints: const BoxConstraints(maxHeight: 240),
-        child: ImageSource(payload: payload),
+        child: ImageSource(source: payload.source, caption: payload.caption),
       ),
-    );
-  }
-}
-
-class ImageSource extends StatelessWidget {
-  final ImageBoxPayload payload;
-
-  const ImageSource({super.key, required this.payload});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final isUrl =
-        payload.source.startsWith('http://') ||
-        payload.source.startsWith('https://');
-    final fit = BoxFit.cover;
-    final placeholder = Container(
-      height: 180,
-      width: double.infinity,
-      color: c.accentSoft,
-      alignment: Alignment.center,
-      child: Icon(Icons.image_outlined, size: 44, color: c.textSecondary),
-    );
-    final image = isUrl
-        ? Image.network(
-            payload.source,
-            fit: fit,
-            errorBuilder: (_, _, _) => placeholder,
-            loadingBuilder: (context, child, progress) =>
-                progress == null ? child : placeholder,
-          )
-        : Image.asset(
-            payload.source,
-            fit: fit,
-            errorBuilder: (_, _, _) => placeholder,
-          );
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipRect(child: SizedBox(height: 200, child: image)),
-        if (payload.caption.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(
-              payload.caption,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: c.textSecondary),
-            ),
-          ),
-      ],
     );
   }
 }

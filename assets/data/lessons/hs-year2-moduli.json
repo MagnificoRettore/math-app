@@ -106,8 +106,13 @@
                         "Per risolvere un'equazione di questo tipo il primo passo è lo **studio del segno dell'argomento** ($$ax+b$$).",
                         "## Procedura",
                         "",
-                        "- **Dividi** l'equazione nei due casi corrispondenti, **senza modulo**, e risolvi separatamente.",
-                        "",
+                        "- **Dividi** l'equazione nei due casi corrispondenti, **senza modulo**, e risolvi separatamente."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Esempio guidato",
+                    "content": [
                         "## Esempio guidato",
                         "",
                         {
@@ -137,6 +142,60 @@
                     "title": "Prova tu",
                     "content": [
                         "Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione."
+                    ]
+                },
+                {
+                    "type": "practice_quiz",
+                    "title": "Verifica",
+                    "exercises": [
+                        {
+                            "prompt": "$$|x - 5| = 4x$$",
+                            "text": "Qual è l'insieme delle soluzioni reali?",
+                            "options": [
+                                "$$x = 1$$",
+                                "$$x = 5$$",
+                                "$$x = \\frac{4}{5}$$",
+                                "$$x = -1$$"
+                            ],
+                            "correctIndex": 0,
+                            "explanation": "Il secondo membro impone $4x \\ge 0$, cioè $x \\ge 0$. Il caso $x \\ge 5$ porta a $x - 5 = 4x$, da cui $x = -5/3$, che contraddice $x \\ge 5$. Resta $5 - x = 4x$, cioè $x = 1$."
+                        },
+                        {
+                            "prompt": "$$|x - 3| = 5$$",
+                            "text": "Quante soluzioni reali ha l'equazione?",
+                            "options": [
+                                "Due soluzioni",
+                                "Una sola soluzione",
+                                "Nessuna soluzione",
+                                "Tre soluzioni"
+                            ],
+                            "correctIndex": 0,
+                            "explanation": "Il secondo membro è positivo, quindi i due casi sono entrambi ammissibili: $x - 3 = 5$ dà $x = 8$ e $x - 3 = -5$ dà $x = -2$. Le soluzioni sono due: $8$ e $-2$."
+                        },
+                        {
+                            "prompt": "$$|x| = x + 3$$",
+                            "text": "Scegli l'affermazione corretta.",
+                            "options": [
+                                "Esiste una sola soluzione reale",
+                                "Esistono due soluzioni reali",
+                                "Non esistono soluzioni reali",
+                                "Esistono infinite soluzioni reali"
+                            ],
+                            "correctIndex": 0,
+                            "explanation": "Per $x \\ge 0$ si ottiene $x = x + 3$, che è un assurdo. Per $x < 0$ invece $-x = x + 3$, da cui $x = -3/2$, che rispetta $x < 0$. Quindi una sola soluzione: $x = -3/2$."
+                        },
+                        {
+                            "prompt": "$$|x + 2| = 2x - 4$$",
+                            "text": "Scegli la soluzione che verifica l'equazione.",
+                            "options": [
+                                "$$x = 6$$",
+                                "$$x = -6$$",
+                                "$$x = 3$$",
+                                "$$x = 2$$"
+                            ],
+                            "correctIndex": 0,
+                            "explanation": "Il secondo membro non può essere negativo: $2x - 4 \\ge 0 \\Rightarrow x \\ge 2$. In quel range $|x + 2| = x + 2$, quindi $x + 2 = 2x - 4 \\Rightarrow x = 6$, che rispetta $x \\ge 2$."
+                        }
                     ]
                 }
             ]

@@ -7,6 +7,9 @@ import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson_step.dart';
 import 'package:math_app/screens/lesson_screen.dart';
+import 'package:math_app/widgets/app_card.dart';
+import 'package:math_app/widgets/mcq_option_tile.dart';
+import 'package:math_app/widgets/practice_quiz_view.dart';
 import 'package:math_app/widgets/scientific_calculator.dart';
 
 Future<void> _swipeNext(WidgetTester tester) async {
@@ -71,6 +74,9 @@ void main() {
     expect(lesson.steps[2].options, hasLength(3));
     expect(lesson.steps[2].correctIndex, 0);
     expect(lesson.steps[2].explanation, isNotEmpty);
+    expect(lesson.steps[2].prompt, contains('3x - 1 = 5'));
+    expect(lesson.steps[0].prompt, isEmpty);
+    expect(LessonStep.fromJson(const {'type': 'info'}).prompt, isEmpty);
   });
 
   test('content come array appiattisce testo e riquadri', () {
@@ -138,6 +144,10 @@ void main() {
 
     await _swipeNext(tester);
     expect(find.text('Verifica'), findsOneWidget);
+    expect(
+      find.textContaining('Qual è la soluzione di', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   testWidgets('risposta sbagliata scuote, quella giusta spiega e completa', (
@@ -180,6 +190,80 @@ void main() {
     );
   });
 
+  testWidgets("l'ultimo step di Moduli mostra la card di verifica", (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Moduli')
+        .lessons
+        .firstWhere((l) => l.id == 'mod-equations-intro');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    for (var i = 0; i < lesson.steps.length - 1; i++) {
+      await _swipeNext(tester);
+    }
+    // la PageView assorbe i pointer finché lo scroll non è assestato
+    await tester.pump(const Duration(seconds: 3));
+
+    expect(find.byType(PracticeQuizView), findsOneWidget);
+    expect(find.text('Verifica'), findsOneWidget);
+    // solo il primo esercizio dell'array, con le sue quattro risposte
+    expect(find.byType(McqOptionTile), findsNWidgets(4));
+    expect(tester.takeException(), isNull);
+
+    // il reload del footer estrae un altro esercizio
+    final before = tester
+        .widget<McqOptionTile>(find.byKey(const ValueKey('quiz_option_0')))
+        .label;
+    await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      tester
+          .widget<McqOptionTile>(find.byKey(const ValueKey('quiz_option_0')))
+          .label,
+      isNot(before),
+    );
+  });
+
+  testWidgets('il footer della card quiz mette il reload a sinistra', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Moduli')
+        .lessons
+        .firstWhere((l) => l.id == 'mod-equations-intro');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    for (var i = 0; i < lesson.steps.length - 1; i++) {
+      await _swipeNext(tester);
+    }
+    await tester.pump(const Duration(seconds: 3));
+
+    final reload = tester.getTopLeft(find.byIcon(Icons.refresh_rounded));
+    final complete = tester.getTopLeft(
+      find.widgetWithText(FilledButton, 'Completa la lezione'),
+    );
+    expect(reload.dx, lessThan(complete.dx));
+    // il bottone è ancorato al padding interno della card, non a piena larghezza
+    final card = tester.widget<AppCard>(find.byType(AppCard).last);
+    final padding = (card.padding as EdgeInsets).right;
+    final cardRight = tester.getTopRight(find.byType(AppCard).last).dx;
+    final completeSize = tester.getSize(
+      find.widgetWithText(FilledButton, 'Completa la lezione'),
+    );
+    expect(complete.dx + completeSize.width, closeTo(cardRight - padding, 1));
+  });
+
   testWidgets('la lezione Definizione è una card vuota con solo il titolo', (
     tester,
   ) async {
@@ -203,7 +287,7 @@ void main() {
     expect(find.text('Definizione'), findsWidgets);
   });
 
-  test('la lezione Modulo e Equazioni con Modulo ha sei card', () {
+  test('la lezione Modulo e Equazioni con Modulo ha otto card', () {
     final moduli = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Moduli',
     );
@@ -212,29 +296,125 @@ void main() {
     );
     expect(lesson.title, 'Modulo e Equazioni con Modulo');
     expect(lesson.minutes, 6);
-    expect(lesson.steps, hasLength(6));
+    expect(lesson.steps, hasLength(8));
     expect(lesson.steps.map((s) => s.title), [
       'Che cos\'è il Modulo?',
       'Esempi pratici',
       'Modulo ed Espressioni Letterali',
       'Esempi pratici',
       'Equazioni con Modulo',
+      'Esempio guidato',
       'Prova tu',
+      'Verifica',
     ]);
-    for (final step in lesson.steps) {
+    for (final step in lesson.steps.take(7)) {
       expect(step.type, LessonStepType.info);
       expect(step.content, isNotEmpty);
+    }
+    final quiz = lesson.steps.last;
+    expect(quiz.type, LessonStepType.practiceQuiz);
+    expect(quiz.exercises, hasLength(4));
+    expect(quiz.content, isEmpty);
+    for (final exercise in quiz.exercises) {
+      expect(exercise.hasAnswer, isTrue);
     }
     final step1 = lesson.steps[0].content;
     expect(step1.split('::box').length - 1, 1);
     expect(step1, contains(r'\begin{cases}'));
     expect(step1, isNot(contains('Esempi pratici')));
-    expect(lesson.steps[4].content, contains('x - 5'));
+    expect(lesson.steps[4].content, isNot(contains('Esempio guidato')));
     expect(lesson.steps[4].content, isNot(contains('Prova tu')));
-    expect(lesson.steps[5].content, contains('4x'));
+    expect(lesson.steps[5].content, contains('x - 5'));
+    expect(lesson.steps[5].content, isNot(contains('Prova tu')));
+    expect(lesson.steps[6].content, contains('4x'));
     expect(lesson.steps[2].content, contains('x-3'));
     expect(lesson.steps[2].content, isNot(contains('Esempi pratici')));
     expect(lesson.steps[3].content, contains('x = 5'));
+  });
+
+  testWidgets('la toolbar compatta è allineata a Completa la lezione', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Moduli')
+        .lessons
+        .firstWhere((l) => l.id == 'mod-equations-intro');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    for (var i = 0; i < lesson.steps.length - 1; i++) {
+      await _swipeNext(tester);
+    }
+    await tester.pump(const Duration(seconds: 3));
+
+    // `getRect` ritorna i bordi dipinti: il pacchetto include la pila
+    // clip-paintata a zero, quindi la larghezza è il lato del FAB compatto,
+    // che è quadrato, e l'altezza è quella del bottone.
+    final toolbar = tester.getRect(
+      find.byKey(ValueKey('lesson_toolbar_${lesson.steps.length - 1}')),
+    );
+    final complete = tester.getRect(
+      find.widgetWithText(FilledButton, 'Completa la lezione'),
+    );
+    expect(toolbar.width, closeTo(complete.height, 1));
+    expect(toolbar.bottom, closeTo(complete.bottom, 0.5));
+    // ancorata a sinistra: il FAB dipinto è a filo della colonna di testo
+    final textLeft = tester.getTopLeft(find.text('Verifica')).dx;
+    expect(toolbar.left, closeTo(textLeft, 0.5));
+    // bottone ben a destra
+    expect(complete.left, greaterThan(toolbar.left + 100));
+  });
+
+  testWidgets('la toolbar sta nel footer della card e il FAB la espande', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+    const key = ValueKey('lesson_toolbar_0');
+    final bar = tester.getRect(find.byKey(key));
+    expect(bar.center.dx, lessThan(screen.width / 2));
+    expect(bar.bottom, greaterThan(screen.height / 2));
+
+    // dentro la card, non più ancorata allo Stack della pagina
+    final card = tester.getRect(find.byType(AppCard).first);
+    expect(bar.left, greaterThan(card.left));
+    expect(bar.bottom, lessThanOrEqualTo(card.bottom));
+
+    // il tap va sull'icona del FAB: il centro del pacchetto include la pila
+    // clip-paintata a zero e non sarebbe hittable
+    final fabIcon = find.descendant(
+      of: find.byKey(key),
+      matching: find.byIcon(M3EIcons.handyman_rounded),
+    );
+    expect(fabIcon, findsOneWidget);
+    await tester.tap(fabIcon);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+
+    // il FAB passa all'icona di chiusura e il pacchetto si espande: le rect
+    // dipinte non cambiano, perché i paint bounds includono la pila
+    // clip-paintata a zero
+    expect(tester.widget<M3EToolbar>(find.byKey(key)).expanded, isTrue);
+    expect(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byIcon(M3EIcons.close_rounded),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('la toolbar apre la calcolatrice e il drag giù la chiude', (
@@ -251,14 +431,26 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byType(M3EToolbar), findsOneWidget);
+    // una toolbar per ogni card costruita dal PageView
+    expect(find.byType(M3EToolbar), findsWidgets);
     expect(find.byType(ScientificCalculatorSheet), findsNothing);
 
-    await tester.tap(find.byIcon(M3EIcons.handyman_rounded));
+    const key = ValueKey('lesson_toolbar_0');
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byIcon(M3EIcons.handyman_rounded),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    await tester.tap(find.byIcon(M3EIcons.calculate_rounded));
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(key),
+        matching: find.byIcon(M3EIcons.calculate_rounded),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(ScientificCalculatorSheet), findsOneWidget);
