@@ -9,7 +9,6 @@ Applicazione Flutter per **studenti italiani** con esercizi di matematica **riso
 - Ogni esercizio include: problema, **formule chiave** (LaTeX), **suggerimenti** espandibili e **soluzione passo-passo**.
 - **Filtri per difficoltà** (Tutti, Facile, Medio, Difficile) nei feed e nell'elenco degli esercizi dell'anno.
 - **Stato di avanzamento** per esercizio: *Assimilato* / *Da ripassare* (con feedback tattile), barre di progresso per corso/argomento.
-- **Segnalibri**: esercizi salvati e accessibili dalla schermata dedicata o dall'app bar della Home.
 
 ### Lezioni guidate interattive
 - **3 lezioni** passo-passo con **card didattiche** (informative) e **card a quiz** (multiple choice), per un totale di 10 passaggi.
@@ -43,11 +42,12 @@ Applicazione Flutter per **studenti italiani** con esercizi di matematica **riso
 - **Onboarding** a 3 slide al primo avvio.
 - **Registrazione**: account locale (nome, email, password, con validazione) o **Google** (demo locale senza credenziali), entrambi con **scelta del livello scolastico**.
 - **Selezione scuola** anche in un secondo momento dal Profilo; profilo con avatar a iniziali, metadati e **tema scuro** (chiaro / scuro / sistema).
-- Vista ospite in Home e Profilo con invito alla creazione del profilo.
+- Vista ospite in Home e Profilo con invito alla creazione del profilo, raggiungibile anche dall'icona in alto a destra.
 
 ### UI
 - **Material 3**, design minimalista ispirato a iOS, palette determinata per tema (chiaro/scuro).
-- **Barra di navigazione "Liquid Glass"** flottante a 4 voci (Home, Lezioni, Esercizi, Profilo) con effetto vetro sfocato, navigazione a **tap e drag**, indicatore animato; se assente un profilo, apre il bottom sheet di scelta scuola.
+- **Barra di navigazione "Liquid Glass"** flottante a 3 voci (Home, Lezioni, Esercizi) con effetto vetro sfocato, compatta e centrata (max 320px, non a filo con i bordi), navigazione a **tap e drag**, indicatore animato; se assente un profilo, apre il bottom sheet di scelta scuola.
+- **Header delle pagine principali**: icona del profilo in alto a destra (alla creazione del profilo se non si è fatto il login), saluto variabile in alto a sinistra nella Home, barra di testo sotto l'header in Lezioni ed Esercizi.
 - **LaTeX offline**: testo matematico renderizzato con `flutter_math_fork` (KaTeX in Dart puro, nessun WebView). Delimitatori `$...$` (inline) e `$$...$$` (blocco) nei contenuti.
 - Animazioni: splash/onboarding con fade, transizioni in fade tra le tab, card animate, shake sugli errori.
 - **Tab annuali**: i cerchi delle tab anni mostrano i numeri romani (I–V). Le label degli anni usano i nomi ordinali (*prima, seconda, terza, quarta, quinta*).
@@ -90,7 +90,7 @@ assets/
 - **Level** → Livello scolastico (`id`, `title`, `subtitle`, `icon`, `dataFile`) che punta al JSON del corso.
 - **Course / Section / Topic / Exercise** → gerarchia corso-anno → sezione → argomento → esercizio (con `difficulty`, `tags`, `formulas`, `hints`, `steps`). `Course` e `Topic` hanno un campo opzionale `image` per i cerchi degli anni / le copertine.
 - **Difficulty** → enum `easy` / `medium` / `hard` con `fromString()` e label italiane (Facile / Medio / Difficile).
-- **ExerciseProgress** → stato (`ExerciseStatus`: `none` / `mastered` / `needsReview`) + segnalibro per esercizio, con **chiave composita** `levelId::exerciseId`.
+- **ExerciseProgress** → stato (`ExerciseStatus`: `none` / `mastered` / `needsReview`) per esercizio, con **chiave composita** `levelId::exerciseId`.
 - **Argomento / Lesson / LessonStep** → lezione guidata: `Argomento` collega un gruppo di lezioni a un argomento del corso; `LessonStep` può essere `info` o `mcq` (vedi [Struttura del JSON delle lezioni](#struttura-del-json-delle-lezioni)).
 - **MultifunctionBox** → riquadro embedded nel content (`BoxType`: image / chart / interactive_chart / math_formula) con payload tipizzati.
 - **UserProfile** → profilo locale (`AuthMethod` manual o google), salvato su dispositivo.
@@ -101,7 +101,7 @@ assets/
 |---|---|---|
 | `ContentRepository` | — | Carica livelli + corsi/argomenti/esercizi dai JSON (`assets/data/`) |
 | `LessonRepository` | — | Carica le lezioni da `lessons/index.json` + file argomento |
-| `ProgressStore` | `exercise_progress_v1`, `lessons_completed_v1` | Stato esercizi, segnalibri, lezioni completate |
+| `ProgressStore` | `exercise_progress_v1`, `lessons_completed_v1` | Stato esercizi, lezioni completate |
 | `AuthStore` | `user_profile_v1` | Profilo utente locale |
 | `SettingsStore` | `settings_v1` | Tema + flag onboarding visto |
 | `StudyStore` | `study_stats_v1` | Streak, obiettivi giornalieri, minuti di studio |
@@ -380,13 +380,13 @@ Parser recursive-descent usato dai grafici interattivi (esprime `x`/`t`) e dalla
 
 - **Splash** → carica store e contenuti, poi avvia Home o Onboarding.
 - **Onboarding** → 3 slide + scelta scuola implicita al primo accesso.
-- **Home** → missione, ricerca, streak, consigli, punti deboli, segnalibri.
+- **Home** → missione, ricerca, streak, consigli, punti deboli. In alto a destra l'icona del profilo.
 - **Corso (Esercizi)** → tab annuali con argomenti e "Tutti gli esercizi".
 - **Exercise feed / Anno / Dettaglio** → esercizi di un argomento o dell'intero anno, con filtri e soluzione passo-passo.
 - **Lezioni** → elenco per argomento (lista argomenti e lista lezioni per argomento) e player interattivo.
 - **Risultati ricerca** → argomenti, esercizi e lezioni trovate.
 - **Punti deboli** → elenco e dettaglio con lezioni consigliate ed esercizi da ripassare.
-- **Mission / Bookmark / Profilo / Registrazione / Scuola** → schermate di supporto.
+- **Mission / Profilo / Registrazione / Scuola** → schermate di supporto.
 
 ## Test
 

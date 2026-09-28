@@ -49,6 +49,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 - **Dart SDK**: 3.13.2
 - **LaTeX rendering**: `flutter_math_fork` ^0.7.4 (KaTeX pure Dart, offline, no WebView)
 - **Persistence**: `shared_preferences` ^2.5.5
+- **Animazioni Lottie**: `lottie` ^3.6.1 legge **solo JSON**: i file `.lottie` (dotLottie, zip con state machine) non sono supportati, né le state machine o le interazioni interne. I segmenti di una timeline si guidano con i **marker** (`composition.getMarker(nome)` dà `start`/`end` normalizzati 0..1) pilotando un `AnimationController` con `repeat(min:, max:, count:)` e `animateTo`; `LottieBuilder.controller` è un `Animation<double>`, non esiste `LottieController`.
 - **Inline LaTeX in content**: `$$...$$` block delimiters
 - **Riquadri multifunzione in content**: fenced syntax `::box` ... `::endbox` wrapping a `MultifunctionBox` JSON node (`box_type`: `image` | `chart` | `interactive_chart` | `math_formula`). Invalid JSON falls back to plain text. Charts render via CustomPainter, interactive charts evaluate `expression` strings over `x`/`t` with `ExpressionEvaluator`. In `math_formula` payload, `"hidden": true` sopprime card di contorno (`AppCard`) e titolo, la formula resta visibile come blocco a sé; `title` vuoto = niente header e padding card ridotto.
 - **Step lezione `type`**: `info` | `mcq` | `practice_quiz` (`LessonStepType`). Ogni step è una card a sé nel `PageView` di `LessonScreen`, non un riquadro annidato.
@@ -56,6 +57,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 - **Step `practice_quiz`**: card di verifica con `title` e `exercises[]` (`prompt`, `text?`, `options[]`, `correctIndex`, `explanation?`); `content` non viene renderizzato. Mostra **un solo esercizio per volta** (`PracticeQuizView`, stato pubblico `PracticeQuizViewState.reload()`). Il bottone `Icons.refresh_rounded` sta nel footer della card, a sinistra di «Completa la lezione», ed estrae il successivo da una coda mescolata senza ripetizioni; sparisce se c'è un solo esercizio. Il prompt passa da `PromptView`, che auto-rileva: percorso/URL immagine (estensione immagine o prefisso `http`) → `ImageSource`, altrimenti `MathText` (quindi anche matematica mista a testo). Opzioni, feedback e shake sono condivisi con gli step MCQ via `McqOptionTile` / `McqFeedbackCard`.
 - **Lesson `content`**: può essere stringa markdown oppure **array di segmenti** (righe di testo come stringhe, riquadri come oggetti). `LessonStep.fromJson` appiattisce entrambi in una stringa con sintassi `::box`/`::endbox`; preferisci l'array nei JSON per leggibilità.
 - **Step `mcq`**: `prompt` (la traccia, resa da `PromptView`), `options[]`, `correctIndex`, `explanation?`; risolvendolo compare «Completa la lezione».
+- **Toggle del tema**: nel card «Tema scuro» di `ProfileScreen` (ospite e loggato) il controllo è l'animazione sole/luna `assets/animations/toggle.json`, non uno `Switch`. Toccarla cambia tema e guida la transizione sui marker `Day to Night` / `Night to Day` (1.0s e 1.33s, durata calcolata dalla composizione), poi si ferma sul segmento idle del nuovo tema. Finché la composizione non è caricata resta lo `Switch` di fallback, così la card non ha buchi.
 - **UI style**: Material 3, iOS-native-inspired minimal design
 - **Architectural Constraints**: No network calls, no code generation (`build_runner`, `freezed`, or `json_serializable`), no third-party state management (Riverpod/Bloc/Provider).
 
@@ -67,7 +69,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 |---|---|
 | `flutter run` | Run the app (dev) |
 | `flutter analyze` | Static analysis — **must stay at 0 issues** |
-| `flutter test` | Run all unit + widget tests (193 tests / 19 files) |
+| `flutter test` | Run all unit + widget tests (225 tests / 23 files) |
 | `flutter test --coverage` | Generate coverage report |
 | `dart format .` | Format code |
 | `flutter pub get` | Install dependencies |
@@ -107,7 +109,8 @@ assets/data/              # levels.json, middle_school.json, high_school.json,
 - **Navigation**: imperative Navigator 1.0 — `Navigator.of(context).push(MaterialPageRoute(...))`, `pushReplacement`, `pop()`. No named routes, no GoRouter.
   - Reset the stack before pushing main screens: `popUntil((route) => route.isFirst)`.
   - Splash → home/onboarding transition uses `pushReplacement` with a fade `PageRouteBuilder`.
-- **PillNavBar**: visible only on the 4 main screens (Home, Lezioni, Esercizi, Profile). It routes to the user's school level if logged in with a profile, otherwise shows the school-choice bottom sheet.
+- **PillNavBar**: `PillTab` = `home` | `lessons` | `exercises` (3 voci), visible only on the 3 main screens (Home, Lezioni, Esercizi). It routes to the user's school level if logged in with a profile, otherwise shows the school-choice bottom sheet. `ProfileScreen` is a pushed sub-page: no pill, back button in its AppBar.
+- **Header delle pagine principali**: `ProfileButton` (`lib/widgets/profile_button.dart`) in `AppBar.actions` of Home/Lezioni/Esercizi — avatar with photo or initials if logged in, `RegistrationScreen` if guest. Home keeps `HomeGreeting` as title (left, `titleSpacing: 20`); Lezioni/Esercizi put a `Row` in `AppBar.title` a `HeaderTextBar` (`lib/widgets/header_text_bar.dart`) in `Expanded` plus `ProfileButton`, separated by 6px, with `toolbarHeight: kHeaderToolbarHeight` (80) and `titleSpacing: kHeaderHorizontalMargin` (12) — with an empty `actions` the `AppBar` uses `titleSpacing` as right margin too, so one constant governs both sides and the field takes the difference: the field is a 56px `TextField` (search icon, radius 28) that accepts text and does nothing, the avatar is `kProfileAvatarSize` (56). Field and icon live in `title` and not in `actions` on purpose: `AppBar` puts 16px between the title and the actions, and 8px reads much closer. Home has no field, so its icon stays in `actions` and it only borrows `toolbarHeight` to fit the 56px avatar. `YearTabs` stays alone in `AppBar.bottom` (88).
 
 ---
 
@@ -126,7 +129,7 @@ assets/data/              # levels.json, middle_school.json, high_school.json,
 
 | Key | Content |
 |---|---|
-| `exercise_progress_v1` | Exercise status (`none`/`mastered`/`needsReview`) + bookmarks (JSON list) |
+| `exercise_progress_v1` | Exercise status (`none`/`mastered`/`needsReview`) (JSON list) |
 | `lessons_completed_v1` | Completed lesson IDs (StringList) |
 | `user_profile_v1` | User profile (JSON) |
 | `settings_v1` | `themeMode` + onboarding flag (JSON) |
@@ -141,7 +144,7 @@ Version the key when the schema changes (e.g. `settings_v2`), keep a migration p
   - Wrong answer → `HapticFeedback.heavyImpact()`
   - Lesson complete → `HapticFeedback.mediumImpact()`
   - Exercise status change → `HapticFeedback.selectionClick()`
-- **Feedback UI**: shake animation on wrong answer, confetti celebration on lesson completion.
+- **Feedback UI**: shake animation on wrong answer, celebrazione a schermo intero al termine della lezione: overlay `Positioned.fill` con il trofeo Lottie `assets/animations/Trophy.json` a 240px (`repeat: false`), il titolo «Lezione completata!» e la scritta «Tocca per continuare». Il tap ovunque chiude l'overlay e fa pop; se non si tocca, un `Timer` di 2400ms (i 71 frame a 30fps durano 2.37s) fa pop da solo. Il `pop` non parte più al tap su «Completa la lezione».
 - **Animations**: `AnimatedContainer`, `AnimatedSwitcher`, `TweenAnimationBuilder`, or custom `AnimationController`.
 - **String-based icons**: JSON stores icon name strings; map them via a private `_iconFor()` method in the widget.
 
