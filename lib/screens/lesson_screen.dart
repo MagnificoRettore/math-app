@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../data/progress_store.dart';
@@ -18,6 +21,10 @@ import '../widgets/scientific_calculator.dart';
 /// FAB collassato è `M3EToolbarTokens.fabMedium`, cioè 80 (da espanso scende a
 /// `fabBaseline`, 56).
 const double _kFooterControlHeight = 49;
+
+/// Quanto dura la celebrazione a schermo intero: i 71 frame del trofeo a
+/// 30fps durano 2.37s, quindi si chiude poco dopo l'ultimo fotogramma.
+const Duration _kCelebrationDuration = Duration(milliseconds: 2400);
 
 class LessonScreen extends StatefulWidget {
   final Lesson lesson;
@@ -39,6 +46,8 @@ class _LessonScreenState extends State<LessonScreen> {
   bool _attempted = false;
   int _attemptId = 0;
   bool _calcOpen = false;
+  bool _celebrating = false;
+  Timer? _celebrationTimer;
 
   /// La toolbar vive nel footer di ogni card, quindi ce n'è una per pagina
   /// costruita: senza stato condiviso ogni nuova card nascerebbe collassata.
@@ -59,6 +68,7 @@ class _LessonScreenState extends State<LessonScreen> {
 
   @override
   void dispose() {
+    _celebrationTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -87,14 +97,15 @@ class _LessonScreenState extends State<LessonScreen> {
     }
     HapticFeedback.mediumImpact();
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Lezione completata!'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    setState(() => _celebrating = true);
+    _celebrationTimer?.cancel();
+    _celebrationTimer = Timer(_kCelebrationDuration, _closeCelebration);
+  }
+
+  void _closeCelebration() {
+    _celebrationTimer?.cancel();
+    _celebrationTimer = null;
+    if (!mounted) return;
     Navigator.of(context).pop();
   }
 
@@ -233,7 +244,61 @@ class _LessonScreenState extends State<LessonScreen> {
                 onClose: () => setState(() => _calcOpen = false),
               ),
             ),
+          if (_celebrating)
+            Positioned.fill(
+              child: _TrophyCelebration(onDismiss: _closeCelebration),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _TrophyCelebration extends StatelessWidget {
+  final VoidCallback onDismiss;
+
+  const _TrophyCelebration({required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onDismiss,
+      child: ColoredBox(
+        color: c.background,
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.asset(
+                  'assets/animations/Trophy.json',
+                  width: 240,
+                  height: 240,
+                  fit: BoxFit.contain,
+                  repeat: false,
+                  errorBuilder: (_, _, _) =>
+                      const SizedBox(width: 240, height: 240),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Lezione completata!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: c.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tocca per continuare',
+                  style: TextStyle(fontSize: 15, color: c.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

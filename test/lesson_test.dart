@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lottie/lottie.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
+import 'package:math_app/models/lesson.dart';
 import 'package:math_app/models/lesson_step.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/app_card.dart';
@@ -14,6 +16,52 @@ import 'package:math_app/widgets/scientific_calculator.dart';
 
 Future<void> _swipeNext(WidgetTester tester) async {
   await tester.drag(find.byType(PageView), const Offset(-500, 0));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 500));
+}
+
+const _kCelebrationTestDuration = Duration(milliseconds: 2500);
+
+/// Apre la prima lezione di «Equazioni di primo grado» sopra una schermata
+/// vuota: al completamento la lezione fa pop, e serve una pagina sotto per
+/// vedere com'è andata.
+Future<Lesson> _apriPrimaLezione(WidgetTester tester) async {
+  final lesson = LessonRepository.instance.argomenti
+      .firstWhere((a) => a.title == 'Equazioni di primo grado')
+      .lessons
+      .first;
+  await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox())));
+  tester
+      .state<NavigatorState>(find.byType(Navigator))
+      .push(
+        MaterialPageRoute(
+          builder: (_) => LessonScreen(lesson: lesson, levelId: 'high-school'),
+        ),
+      );
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 300));
+  return lesson;
+}
+
+/// Porta la lezione aperta fino alla celebrazione: sbaglio, poi risposta
+/// giusta, poi «Completa la lezione».
+Future<void> _completa(WidgetTester tester) async {
+  await _swipeNext(tester);
+  await _swipeNext(tester);
+
+  await tester.ensureVisible(find.byKey(const ValueKey('option_1')));
+  await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.byKey(const ValueKey('option_1')));
+  await tester.pump(const Duration(milliseconds: 450));
+  expect(find.text('Non è corretto'), findsOneWidget);
+
+  await tester.ensureVisible(find.byKey(const ValueKey('option_0')));
+  await tester.pump(const Duration(milliseconds: 300));
+  await tester.tap(find.byKey(const ValueKey('option_0')));
+  await tester.pump(const Duration(milliseconds: 350));
+  expect(find.text('Corretto!'), findsOneWidget);
+
+  await tester.tap(find.text('Completa la lezione'));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));
 }
@@ -153,41 +201,35 @@ void main() {
   testWidgets('risposta sbagliata scuote, quella giusta spiega e completa', (
     tester,
   ) async {
-    final lesson = LessonRepository.instance.argomenti
-        .firstWhere((a) => a.title == 'Equazioni di primo grado')
-        .lessons
-        .first;
     final levelId = 'high-school';
-    await tester.pumpWidget(
-      MaterialApp(
-        home: LessonScreen(lesson: lesson, levelId: levelId),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-
-    await _swipeNext(tester);
-    await _swipeNext(tester);
-
-    await tester.ensureVisible(find.byKey(const ValueKey('option_1')));
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.byKey(const ValueKey('option_1')));
-    await tester.pump(const Duration(milliseconds: 450));
-    expect(find.text('Non è corretto'), findsOneWidget);
-
-    await tester.ensureVisible(find.byKey(const ValueKey('option_0')));
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.byKey(const ValueKey('option_0')));
-    await tester.pump(const Duration(milliseconds: 350));
-    expect(find.text('Corretto!'), findsOneWidget);
-
-    await tester.tap(find.text('Completa la lezione'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    final lesson = await _apriPrimaLezione(tester);
+    await _completa(tester);
 
     expect(
       ProgressStore.instance.isLessonCompleted(levelId, lesson.id),
       isTrue,
     );
+    expect(find.text('Lezione completata!'), findsOneWidget);
+    expect(find.byType(Lottie), findsOneWidget);
+    expect(find.text('Tocca per continuare'), findsOneWidget);
+    expect(find.byType(LessonScreen), findsOneWidget);
+
+    await tester.tap(find.text('Lezione completata!'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LessonScreen), findsNothing);
+  });
+
+  testWidgets('la celebrazione del trofeo si chiude da sola', (tester) async {
+    await _apriPrimaLezione(tester);
+    await _completa(tester);
+
+    expect(find.byType(Lottie), findsOneWidget);
+
+    await tester.pump(_kCelebrationTestDuration);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LessonScreen), findsNothing);
   });
 
   testWidgets("l'ultimo step di Moduli mostra la card di verifica", (
