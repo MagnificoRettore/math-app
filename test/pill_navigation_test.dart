@@ -30,6 +30,38 @@ Future<void> _pumpHome(WidgetTester tester) async {
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
 
+/// Ascissa dell'indicatore della pillola: dice su quale segmento è.
+/// Le icone non bastano: per HOME il glifo outlined e il filled sono
+/// lo stesso simbolo, quindi l'evidenziazione si controlla solo qui.
+double _indicatorX(WidgetTester tester) =>
+    tester.getCenter(find.byKey(const ValueKey('pill-indicator'))).dx;
+
+/// Ascissa del centro del segmento con la label data: la label sta al
+/// centro del suo segmento, quindi è il riferimento per capire dove
+/// dovrebbe essere l'indicatore.
+double _segmentX(WidgetTester tester, String label) =>
+    tester.getCenter(find.text(label)).dx;
+
+/// Come [_segmentX], ma limitata a una pillola precisa: durante un pop
+/// schermate diverse hanno la loro copia della barra in albero.
+double _segmentXIn(WidgetTester tester, Finder pill, String label) =>
+    tester.getCenter(find.descendant(of: pill, matching: find.text(label))).dx;
+
+/// Ascissa dell'indicatore della pillola dentro [pill], che va cercata in
+/// una schermata precisa: durante un pop la schermata sotto è ancora in
+/// albero e ha la sua copia.
+double _indicatorXIn(WidgetTester tester, Finder pill) => tester
+    .getCenter(
+      find.descendant(
+        of: pill,
+        matching: find.byKey(const ValueKey('pill-indicator')),
+      ),
+    )
+    .dx;
+
+Finder _pillIn(Finder screen) =>
+    find.descendant(of: screen, matching: find.byType(PillNavBar));
+
 /// Registra gli eventi di navigazione: serve a distinguere un ritorno
 /// animato alla home (`didPop`) dalla sostituzione atomica dello stack
 /// (`didRemove` + `didPush` nello stesso aggiornamento).
@@ -242,6 +274,118 @@ void main() {
     expect(find.byType(LessonListScreen), findsNothing);
   });
 
+  testWidgets('la pillola resta su HOME durante il ritorno animato', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+    await tester.tap(find.text('PROFILO'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ProfileScreen), findsOneWidget);
+
+    await tester.tap(find.text('HOME'));
+    // Lo scorrimento dell'indicatore dura 260ms: a fine snap parte il pop,
+    // che tiene il profilo in vista per altri 220ms. I due pump dopo il
+    // primo campano dentro il ritorno, quando un eventuale ritorno
+    // dell'indicatore su PROFILO si sarebbe già mosso.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 260));
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.pump(const Duration(milliseconds: 60));
+
+    // Il profilo è ancora in vista, ma l'indicatore deve essere già su
+    // HOME: tornare indietro su PROFILO per un istante è il difetto.
+    // La pillola va cercata dentro il profilo: durante il pop anche quella
+    // della home è in albero.
+    expect(find.byType(ProfileScreen), findsOneWidget);
+    final profilePill = _pillIn(find.byType(ProfileScreen));
+    expect(
+      (_indicatorXIn(tester, profilePill) -
+              _segmentXIn(tester, profilePill, 'HOME'))
+          .abs(),
+      lessThan(1),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(
+      (_indicatorX(tester) - _segmentX(tester, 'HOME')).abs(),
+      lessThan(1),
+    );
+  });
+
+  testWidgets('trascinando verso HOME la pillola non torna indietro', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+    await tester.tap(find.text('PROFILO'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ProfileScreen), findsOneWidget);
+
+    final barRect = tester.getRect(find.byType(PillNavBar));
+    // larghezza del segmento: la barra ha 24px di margine per lato
+    final seg = (barRect.width - 48) / 4;
+    final gesture = await tester.startGesture(
+      Offset(barRect.center.dx + barRect.width * 3 / 8, barRect.center.dy),
+    );
+    await tester.pump();
+    // Tre segmenti esatti: si arriva su HOME, ma l'indicatore resta
+    // disallineato di qualche pixel, quindi lo scorrimento c'è e la
+    // navigazione parte a fine assestamento.
+    await gesture.moveBy(Offset(-3 * seg, 0));
+    await tester.pump();
+    await gesture.up();
+
+    // Il rilascio avvia l'assestamento dell'indicatore (260ms): il primo
+    // pump è il frame che lo avvia, il secondo lo porta a fine e avvia il
+    // ritorno animato, gli ultimi due campano dentro il ritorno.
+    await tester.pump(const Duration(milliseconds: 260));
+    await tester.pump(const Duration(milliseconds: 260));
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.pump(const Duration(milliseconds: 60));
+
+    final profilePill = _pillIn(find.byType(ProfileScreen));
+    expect(profilePill, findsOneWidget);
+    expect(
+      (_indicatorXIn(tester, profilePill) -
+              _segmentXIn(tester, profilePill, 'HOME'))
+          .abs(),
+      lessThan(1),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(
+      (_indicatorX(tester) - _segmentX(tester, 'HOME')).abs(),
+      lessThan(1),
+    );
+  });
+
+  testWidgets('ospite: la pillola resta su LEZIONI col foglio scuola aperto', (
+    tester,
+  ) async {
+    await _pumpHome(tester);
+
+    await tester.tap(find.text('LEZIONI'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lezioni per scuola'), findsOneWidget);
+
+    // Il foglio aspetta una scelta: la pillola non deve tornare su HOME
+    // mentre l'utente è ancora lì.
+    expect(
+      (_indicatorX(tester) - _segmentX(tester, 'LEZIONI')).abs(),
+      lessThan(1),
+    );
+
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LessonListScreen), findsOneWidget);
+    expect(
+      (_indicatorX(tester) - _segmentX(tester, 'LEZIONI')).abs(),
+      lessThan(1),
+    );
+  });
+
   testWidgets('la pillola compare solo sulle schermate principali', (
     tester,
   ) async {
@@ -440,14 +584,12 @@ void main() {
       expect(find.text('Lezioni per scuola'), findsNothing);
       expect(find.byType(HomeScreen), findsOneWidget);
 
-      final pill = find.byType(PillNavBar);
+      // Le icone non distinguono la sezione attiva (per HOME il glifo
+      // outlined e il filled coincidono), quindi la posizione
+      // dell'indicatore è la verifica vera.
       expect(
-        find.descendant(of: pill, matching: find.byIcon(Symbols.home_rounded)),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: pill, matching: find.byIcon(Icons.home_outlined)),
-        findsNothing,
+        (_indicatorX(tester) - _segmentX(tester, 'HOME')).abs(),
+        lessThan(1),
       );
     },
   );

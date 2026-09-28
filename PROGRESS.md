@@ -2,6 +2,13 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-28 — La pillola non torna più sulla sezione precedente
+
+- **Bug**: cambiando sezione l'indicatore della pillola scivolava indietro sulla sezione da cui si partiva e poi scattava avanti. `_onSnapComplete` azzerava `_pendingTabIndex` prima di navigare, quindi la schermata uscente — che resta dipinta ancora un po' — si ricostruiva con l'indicatore di nuovo sulla sezione di partenza. Due casi: il ritorno animato alla home (`popUntil` tiene la rotta uscente in vista per i 220ms del reverse) e il foglio «Scegli la tua scuola» da ospite (`PopupRoute`, la schermata sotto resta viva). I `pushAndRemoveUntil` non ne soffrivano: la rotta sparisce nello stesso frame, il rebuild non arriva mai.
+- **Fix**: la sezione richiesta resta in carico alla pillola finché la schermata da cui si parte non è sparita. `_resetTo` azzera il pending prima di pushare (la rotta sparisce subito, ma la home resta viva: senza azzeramento il back mostrerebbe la pillola sulla sezione richiesta invece di quella dello schermo), il percorso HOME non lo azzera (la rotta esce e muore con la pillola dentro), l'annullamento del foglio sì (la pillola torna scivolando sulla sezione corrente).
+- Il rilascio del trascinamento ora mette la sezione come «richiesta» e lascia navigare a fine assestamento, identico al tap: un solo punto di uscita per la navigazione. Se l'indicatore è già allineato al segmento non c'è scorrimento e `AnimatedPositioned.onEnd` non parte, quindi in quel caso si naviga al rilascio: in entrambi i rami la navigazione parte una volta sola. Con `disableAnimations` l'assestamento è a durata zero e si naviga subito.
+- Test: tre nuovi casi in `pill_navigation_test.dart` che misurano la posizione dell'indicatore contro il centro del segmento (le icone non bastano: per HOME il glifo outlined e il filled coincidono) campando dentro la transizione — tap verso HOME, drag verso HOME, foglio scuola aperto. Sostituito nel test sull'annullamento l'assert sulle icone, che non verificava niente, con quello sulla posizione.
+
 ## 2026-09-27 — Cambio sezione dalla pillola senza lampeggio della home
 
 - **Bug**: con un profilo collegato, il tap su LEZIONI o ESERCIZI mostrava la home per un istante e poi la pagina giusta. In `_performNavigation` il `popUntil((route) => route.isFirst)` e il `push` erano due animazioni in sequenza: prima il ritorno animato alla home (reverse 220ms della rotta precedente), e solo al termine la sfumatura della pagina nuova (280ms). La home era la rotta in cima per tutto il reverse, quindi dipinta a pieno per oltre 100ms.

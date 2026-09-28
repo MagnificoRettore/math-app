@@ -101,6 +101,14 @@ class _PillNavBarState extends State<PillNavBar> {
   bool _dragging = false;
   double? _dragLeft;
   int? _activeIndex;
+
+  // Sezione richiesta dall'utente, in carico alla pillola finché la
+  // schermata da cui si parte non è sparita. Non azzerarla alla fine dello
+  // scorrimento: [_PillNavBarState._performNavigation] può lasciare questa
+  // schermata in vista ancora un po' (il ritorno animato alla home, il
+  // foglio della scelta scuola) e in quel tratto l'indicatore deve restare
+  // sulla sezione richiesta, altrimenti torna su quella di partenza e poi
+  // scatta avanti.
   int? _pendingTabIndex;
 
   int get _selectedIndex => widget.selected.index;
@@ -128,18 +136,25 @@ class _PillNavBarState extends State<PillNavBar> {
     if (!mounted) return;
     final pending = _pendingTabIndex;
     if (pending == null) return;
-    setState(() => _pendingTabIndex = null);
     _performNavigation(pending);
   }
 
-  /// Esegue la navigazione esattamente una volta per interazione: per il tap
-  /// parte dallo snap completato (`_onSnapComplete`), per il drag dal rilascio.
+  void _clearPending() {
+    if (!mounted || _pendingTabIndex == null) return;
+    setState(() => _pendingTabIndex = null);
+  }
+
+  /// Esegue la navigazione esattamente una volta per interazione: parte
+  /// sempre a scorrimento finito, sia per il tap sia per il drag.
   void _performNavigation(int index) {
     final tab = PillTab.values[index];
     final navigator = Navigator.of(context);
 
     if (tab == PillTab.home) {
-      // Qui il ritorno alla home è voluto e deve restare animato.
+      // Qui il ritorno alla home è voluto e deve restare animato. Il pending
+      // resta: la schermata uscente è ancora in vista per la durata del
+      // ritorno e deve mostrarsi con la pillola già su HOME. Non serve
+      // azzerarlo, la rotta che esce viene rimossa insieme alla pillola.
       navigator.popUntil((route) => route.isFirst);
       return;
     }
@@ -174,6 +189,10 @@ class _PillNavBarState extends State<PillNavBar> {
   /// operazione la rotta nuova entra nello stesso aggiornamento che rimuove
   /// le precedenti, quindi la home non viene mai riportata in cima.
   void _resetTo(NavigatorState navigator, Widget page) {
+    // La schermata che chiama sparisce subito, ma la home resta viva: senza
+    // azzerare qui la pillola della root mostrerebbe la sezione appena
+    // richiesta quando il back riporta in vista quella schermata.
+    _clearPending();
     navigator.pushAndRemoveUntil<void>(
       _fadeRoute<void>(page),
       (route) => route.isFirst,
@@ -196,6 +215,7 @@ class _PillNavBarState extends State<PillNavBar> {
         _dragging = false;
         _dragLeft = null;
         _activeIndex = null;
+        _pendingTabIndex = null;
       });
       return;
     }
@@ -441,19 +461,35 @@ class _PillNavBarState extends State<PillNavBar> {
                             });
                             return;
                           }
-                          // Al rilascio avviene la selezione: l'indicatore è già
-                          // sul segmento, quindi si naviga subito (il movimento
-                          // è stato mostrato durante il trascinamento). Tutto lo
-                          // stato transitorio viene azzerato qui, così quando la
-                          // schermata tornerà visibile l'evidenziazione e
-                          // l'indicatore saranno di nuovo sulla sezione corrente.
+                          // Al rilascio avviene la selezione: [_activeIndex]
+                          // è già sul segmento scelto, quindi basta passarlo
+                          // come sezione richiesta e lasciare che
+                          // [_onSnapComplete] navighi a fine assestamento
+                          // (identico al tap, e con un solo punto di uscita
+                          // per la navigazione). Lo stato di trascinamento
+                          // viene azzerato qui, così quando la schermata
+                          // tornerà visibile l'evidenziazione e l'indicatore
+                          // saranno di nuovo sulla sezione corrente.
                           HapticFeedback.selectionClick();
+                          // Se l'indicatore è già allineato al segmento
+                          // scelto non c'è scorrimento da aspettare e
+                          // `AnimatedPositioned.onEnd` non parte: in quel caso
+                          // si naviga qui. Nei due rami la navigazione parte
+                          // una volta sola.
+                          final alreadySettled =
+                              clampLeft(
+                                _dragLeft ?? indicatorLeft(_selectedIndex),
+                              ) ==
+                              indicatorLeft(releasedIndex);
                           setState(() {
                             _dragging = false;
                             _dragLeft = null;
                             _activeIndex = null;
+                            _pendingTabIndex = releasedIndex;
                           });
-                          _performNavigation(releasedIndex);
+                          if (alreadySettled) {
+                            _performNavigation(releasedIndex);
+                          }
                         },
                         onHorizontalDragCancel: () {
                           setState(() {
