@@ -9,7 +9,9 @@ import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
+import '../widgets/header_text_bar.dart';
 import '../widgets/pill_nav_bar.dart';
+import '../widgets/profile_button.dart';
 import '../widgets/year_tabs.dart';
 
 class LessonListScreen extends StatefulWidget {
@@ -60,7 +62,18 @@ class _LessonListScreenState extends State<LessonListScreen> {
     final levelId = widget.levelId;
     if (levelId == null) {
       return Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: kHeaderToolbarHeight,
+          titleSpacing: kHeaderHorizontalMargin,
+          title: const Row(
+            children: [
+              Expanded(child: HeaderTextBar()),
+              SizedBox(width: 6),
+              ProfileButton(),
+            ],
+          ),
+        ),
         body: _wrapBody(
           const _EmptyLessons(
             title: 'Nessuna lezione disponibile',
@@ -74,7 +87,18 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     if (courses.isEmpty) {
       return Scaffold(
-        appBar: AppBar(automaticallyImplyLeading: false),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: kHeaderToolbarHeight,
+          titleSpacing: kHeaderHorizontalMargin,
+          title: const Row(
+            children: [
+              Expanded(child: HeaderTextBar()),
+              SizedBox(width: 6),
+              ProfileButton(),
+            ],
+          ),
+        ),
         body: _wrapBody(
           const _EmptyLessons(
             title: 'Nessuna lezione disponibile',
@@ -87,6 +111,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        toolbarHeight: kHeaderToolbarHeight,
+        titleSpacing: kHeaderHorizontalMargin,
+        title: const Row(
+          children: [
+            Expanded(child: HeaderTextBar()),
+            SizedBox(width: 6),
+            ProfileButton(),
+          ],
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(

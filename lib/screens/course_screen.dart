@@ -6,7 +6,9 @@ import '../models/level.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
+import '../widgets/header_text_bar.dart';
 import '../widgets/pill_nav_bar.dart';
+import '../widgets/profile_button.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/topic_row.dart';
 import '../widgets/year_tabs.dart';
@@ -51,6 +53,15 @@ class _CourseScreenState extends State<CourseScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        toolbarHeight: kHeaderToolbarHeight,
+        titleSpacing: kHeaderHorizontalMargin,
+        title: const Row(
+          children: [
+            Expanded(child: HeaderTextBar()),
+            SizedBox(width: 6),
+            ProfileButton(),
+          ],
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(

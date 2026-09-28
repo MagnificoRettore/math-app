@@ -8,14 +8,15 @@ import '../data/progress_store.dart';
 import '../data/search_index.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
+import '../widgets/header_text_bar.dart';
 import '../widgets/home_greeting.dart';
 import '../widgets/image_carousel.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
+import '../widgets/profile_button.dart';
 import '../widgets/recommended_section.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
-import 'bookmarks_screen.dart';
 import 'mission_screen.dart';
 import 'search_results_screen.dart';
 import 'welcome_screen.dart';
@@ -40,22 +41,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        toolbarHeight: kHeaderToolbarHeight,
         titleSpacing: 20,
         centerTitle: false,
         title: const HomeGreeting(),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.bookmark_outline, color: c.textPrimary),
-            tooltip: 'Segnalibri',
-            onPressed: () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const BookmarksScreen())),
-          ),
-        ],
+        actionsPadding: const EdgeInsets.only(right: kHeaderHorizontalMargin),
+        actions: const [ProfileButton()],
       ),
       body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),
     );

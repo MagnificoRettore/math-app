@@ -10,21 +10,23 @@ import '../data/content_repository.dart';
 import '../models/level.dart';
 import '../screens/course_screen.dart';
 import '../screens/lesson_list_screen.dart';
-import '../screens/profile_screen.dart';
 import '../theme/app_colors.dart';
 import 'school_choice_sheet.dart';
 
-enum PillTab { home, lessons, exercises, profile }
+enum PillTab { home, lessons, exercises }
 
 const _pillLabels = {
   PillTab.home: 'HOME',
   PillTab.lessons: 'LEZIONI',
   PillTab.exercises: 'ESERCIZI',
-  PillTab.profile: 'PROFILO',
 };
 
 /// Spazio riservato sotto il contenuto per la pillola in overlay.
 const double kPillBottomReserve = 96;
+
+/// Larghezza massima della pillola: non deve stare a filo con i bordi dello
+/// schermo, resta una barra compatta e centrata anche sui tablet.
+const double kPillMaxWidth = 320;
 
 /// Transizione sobria per il cambio sezione: la pagina nuova sfuma sopra
 /// quella attuale, così la pillola resta visivamente in sovraimpressione
@@ -89,7 +91,7 @@ class PillNavBar extends StatefulWidget {
 }
 
 class _PillNavBarState extends State<PillNavBar> {
-  static const _itemCount = 4;
+  static final int _itemCount = PillTab.values.length;
 
   // La sezione selezionata è derivata da [PillNavBar.selected]: la barra
   // riflette sempre la schermata corrente, quindi l'indicatore non può
@@ -156,11 +158,6 @@ class _PillNavBarState extends State<PillNavBar> {
       // ritorno e deve mostrarsi con la pillola già su HOME. Non serve
       // azzerarlo, la rotta che esce viene rimossa insieme alla pillola.
       navigator.popUntil((route) => route.isFirst);
-      return;
-    }
-
-    if (tab == PillTab.profile) {
-      _resetTo(navigator, const ProfileScreen());
       return;
     }
 
@@ -246,291 +243,313 @@ class _PillNavBarState extends State<PillNavBar> {
 
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-      child: Container(
-        height: 64,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            // Ombra di profondità molto morbida: stacca la pillola dallo sfondo.
-            BoxShadow(
-              color: c.shadow,
-              blurRadius: 28,
-              offset: const Offset(0, 12),
-            ),
-            // Ombra di contatto più corta per "ancorare" il vetro.
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
-          // Un unico BackdropFilter ristretto al "buco" della pillola: sfoca in
-          // tempo reale ciò che scorre sotto, con sigma moderato per non pesare
-          // sul framerate.
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Stack(
-              children: [
-                // 1) Corpo di vetro: gradiente verticale semi-trasparente.
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [glassTop, glassBottom],
-                      ),
-                    ),
-                  ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: kPillMaxWidth),
+          child: Container(
+            key: const ValueKey('pill-surface'),
+            height: 64,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                // Ombra di profondità molto morbida: stacca la pillola dallo sfondo.
+                BoxShadow(
+                  color: c.shadow,
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
                 ),
-                // 2) Tinta "liquida": leggera sfumatura d'accento che simula
-                //    lo spessore e la rifrazione del vetro.
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0.25, 1],
-                        colors: [
-                          c.accent.withValues(alpha: 0.05),
-                          c.accent.withValues(alpha: 0.015),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // 3) Bordo esterno sottile e nitido.
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32),
-                      border: Border.all(
-                        color: Colors.white.withValues(
-                          alpha: isDark ? 0.14 : 0.55,
-                        ),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                // 4) Riflesso superiore: linea di luce sul bordo alto.
-                Positioned(
-                  left: 4,
-                  right: 4,
-                  top: 0,
-                  height: 22,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(28),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: rim),
-                          Colors.white.withValues(alpha: 0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                // 5) Riflessi laterali: bordi verticali del vetro.
-                Positioned(
-                  left: 0,
-                  top: 8,
-                  bottom: 8,
-                  width: 12,
-                  child: _EdgeGlare(alpha: glare),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 8,
-                  bottom: 8,
-                  width: 12,
-                  child: _EdgeGlare(alpha: glare, flip: true),
-                ),
-                // 6) Bagliore diagonale: rifrazione "liquida" sulla superficie.
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          stops: const [0, 0.45, 1],
-                          colors: [
-                            Colors.white.withValues(alpha: glare),
-                            Colors.white.withValues(alpha: 0),
-                            Colors.white.withValues(alpha: glare * 0.6),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                // 7) Ombra interna al fondo: spessore percepito del vetro.
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 18,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(28),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: isDark ? 0.22 : 0.06),
-                          Colors.black.withValues(alpha: 0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 6,
-                  ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final segWidth = (constraints.maxWidth / _itemCount)
-                          .clamp(1.0, double.infinity);
-                      final maxLeft = constraints.maxWidth - segWidth;
-
-                      double clampLeft(double left) => left.clamp(0.0, maxLeft);
-                      int segmentAt(double x) =>
-                          (x / segWidth).floor().clamp(0, _itemCount - 1);
-                      double indicatorLeft(int index) => index * segWidth;
-
-                      final draggingFrom =
-                          _dragLeft ??
-                          indicatorLeft(_pendingTabIndex ?? _selectedIndex);
-                      final activeIndex =
-                          _activeIndex ?? _pendingTabIndex ?? _selectedIndex;
-                      final snapDuration = (!_dragging && !reduceMotion)
-                          ? const Duration(milliseconds: 260)
-                          : Duration.zero;
-                      final snapCurve = Curves.easeOutCubic;
-
-                      return GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onHorizontalDragStart: (details) {
-                          final x = details.localPosition.dx;
-                          setState(() {
-                            _dragging = true;
-                            _dragLeft = clampLeft(x - segWidth / 2);
-                            _activeIndex = segmentAt(x);
-                            _pendingTabIndex = null;
-                          });
-                        },
-                        onHorizontalDragUpdate: (details) {
-                          setState(() {
-                            _dragLeft = clampLeft(
-                              (_dragLeft ?? indicatorLeft(_selectedIndex)) +
-                                  details.delta.dx,
-                            );
-                            final index = segmentAt(_dragLeft! + segWidth / 2);
-                            if (index != _activeIndex) {
-                              HapticFeedback.selectionClick();
-                              _activeIndex = index;
-                            }
-                          });
-                        },
-                        onHorizontalDragEnd: (_) {
-                          final releasedIndex =
-                              _activeIndex ??
-                              segmentAt(
-                                indicatorLeft(_selectedIndex) + segWidth / 2,
-                              );
-                          if (releasedIndex == _selectedIndex) {
-                            // Rilascio sulla sezione attuale: niente navigazione,
-                            // l'indicatore torna centrato sul segmento.
-                            setState(() {
-                              _dragging = false;
-                              _dragLeft = null;
-                              _activeIndex = null;
-                            });
-                            return;
-                          }
-                          // Al rilascio avviene la selezione: [_activeIndex]
-                          // è già sul segmento scelto, quindi basta passarlo
-                          // come sezione richiesta e lasciare che
-                          // [_onSnapComplete] navighi a fine assestamento
-                          // (identico al tap, e con un solo punto di uscita
-                          // per la navigazione). Lo stato di trascinamento
-                          // viene azzerato qui, così quando la schermata
-                          // tornerà visibile l'evidenziazione e l'indicatore
-                          // saranno di nuovo sulla sezione corrente.
-                          HapticFeedback.selectionClick();
-                          // Se l'indicatore è già allineato al segmento
-                          // scelto non c'è scorrimento da aspettare e
-                          // `AnimatedPositioned.onEnd` non parte: in quel caso
-                          // si naviga qui. Nei due rami la navigazione parte
-                          // una volta sola.
-                          final alreadySettled =
-                              clampLeft(
-                                _dragLeft ?? indicatorLeft(_selectedIndex),
-                              ) ==
-                              indicatorLeft(releasedIndex);
-                          setState(() {
-                            _dragging = false;
-                            _dragLeft = null;
-                            _activeIndex = null;
-                            _pendingTabIndex = releasedIndex;
-                          });
-                          if (alreadySettled) {
-                            _performNavigation(releasedIndex);
-                          }
-                        },
-                        onHorizontalDragCancel: () {
-                          setState(() {
-                            _dragging = false;
-                            _dragLeft = null;
-                            _activeIndex = null;
-                            _pendingTabIndex = null;
-                          });
-                        },
-                        child: Stack(
-                          children: [
-                            AnimatedPositioned(
-                              key: const ValueKey('pill-indicator'),
-                              duration: snapDuration,
-                              curve: snapCurve,
-                              onEnd: _onSnapComplete,
-                              left: clampLeft(draggingFrom) + 3,
-                              top: 0,
-                              bottom: 0,
-                              width: segWidth - 6,
-                              child: _GlassIndicator(),
-                            ),
-                            Row(
-                              children: [
-                                for (var i = 0; i < _itemCount; i++)
-                                  Expanded(
-                                    child: _PillButton(
-                                      tab: PillTab.values[i],
-                                      active: i == activeIndex,
-                                      onTap: () => _commit(i),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                // Ombra di contatto più corta per "ancorare" il vetro.
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
                 ),
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              // Un unico BackdropFilter ristretto al "buco" della pillola: sfoca in
+              // tempo reale ciò che scorre sotto, con sigma moderato per non pesare
+              // sul framerate.
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Stack(
+                  children: [
+                    // 1) Corpo di vetro: gradiente verticale semi-trasparente.
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [glassTop, glassBottom],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 2) Tinta "liquida": leggera sfumatura d'accento che simula
+                    //    lo spessore e la rifrazione del vetro.
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: const [0.25, 1],
+                            colors: [
+                              c.accent.withValues(alpha: 0.05),
+                              c.accent.withValues(alpha: 0.015),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 3) Bordo esterno sottile e nitido.
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(32),
+                          border: Border.all(
+                            color: Colors.white.withValues(
+                              alpha: isDark ? 0.14 : 0.55,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 4) Riflesso superiore: linea di luce sul bordo alto.
+                    Positioned(
+                      left: 4,
+                      right: 4,
+                      top: 0,
+                      height: 22,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white.withValues(alpha: rim),
+                              Colors.white.withValues(alpha: 0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 5) Riflessi laterali: bordi verticali del vetro.
+                    Positioned(
+                      left: 0,
+                      top: 8,
+                      bottom: 8,
+                      width: 12,
+                      child: _EdgeGlare(alpha: glare),
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 8,
+                      bottom: 8,
+                      width: 12,
+                      child: _EdgeGlare(alpha: glare, flip: true),
+                    ),
+                    // 6) Bagliore diagonale: rifrazione "liquida" sulla superficie.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              stops: const [0, 0.45, 1],
+                              colors: [
+                                Colors.white.withValues(alpha: glare),
+                                Colors.white.withValues(alpha: 0),
+                                Colors.white.withValues(alpha: glare * 0.6),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // 7) Ombra interna al fondo: spessore percepito del vetro.
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 18,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(28),
+                          ),
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withValues(
+                                alpha: isDark ? 0.22 : 0.06,
+                              ),
+                              Colors.black.withValues(alpha: 0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 6,
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final segWidth = (constraints.maxWidth / _itemCount)
+                              .clamp(1.0, double.infinity);
+                          final maxLeft = constraints.maxWidth - segWidth;
+
+                          double clampLeft(double left) =>
+                              left.clamp(0.0, maxLeft);
+                          int segmentAt(double x) =>
+                              (x / segWidth).floor().clamp(0, _itemCount - 1);
+                          double indicatorLeft(int index) => index * segWidth;
+
+                          final draggingFrom =
+                              _dragLeft ??
+                              indicatorLeft(_pendingTabIndex ?? _selectedIndex);
+                          final activeIndex =
+                              _activeIndex ??
+                              _pendingTabIndex ??
+                              _selectedIndex;
+                          final snapDuration = (!_dragging && !reduceMotion)
+                              ? const Duration(milliseconds: 260)
+                              : Duration.zero;
+                          final snapCurve = Curves.easeOutCubic;
+
+                          return GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onHorizontalDragStart: (details) {
+                              final x = details.localPosition.dx;
+                              setState(() {
+                                _dragging = true;
+                                _dragLeft = clampLeft(x - segWidth / 2);
+                                _activeIndex = segmentAt(x);
+                                _pendingTabIndex = null;
+                              });
+                            },
+                            onHorizontalDragUpdate: (details) {
+                              setState(() {
+                                _dragLeft = clampLeft(
+                                  (_dragLeft ?? indicatorLeft(_selectedIndex)) +
+                                      details.delta.dx,
+                                );
+                                final index = segmentAt(
+                                  _dragLeft! + segWidth / 2,
+                                );
+                                if (index != _activeIndex) {
+                                  HapticFeedback.selectionClick();
+                                  _activeIndex = index;
+                                }
+                              });
+                            },
+                            onHorizontalDragEnd: (_) {
+                              final releasedIndex =
+                                  _activeIndex ??
+                                  segmentAt(
+                                    indicatorLeft(_selectedIndex) +
+                                        segWidth / 2,
+                                  );
+                              if (releasedIndex == _selectedIndex) {
+                                // Rilascio sulla sezione attuale: niente navigazione,
+                                // l'indicatore torna centrato sul segmento.
+                                setState(() {
+                                  _dragging = false;
+                                  _dragLeft = null;
+                                  _activeIndex = null;
+                                });
+                                return;
+                              }
+                              // Al rilascio avviene la selezione: [_activeIndex]
+                              // è già sul segmento scelto, quindi basta passarlo
+                              // come sezione richiesta e lasciare che
+                              // [_onSnapComplete] navighi a fine assestamento
+                              // (identico al tap, e con un solo punto di uscita
+                              // per la navigazione). Lo stato di trascinamento
+                              // viene azzerato qui, così quando la schermata
+                              // tornerà visibile l'evidenziazione e l'indicatore
+                              // saranno di nuovo sulla sezione corrente.
+                              HapticFeedback.selectionClick();
+                              // Se l'indicatore è già allineato al segmento
+                              // scelto non c'è scorrimento da aspettare e
+                              // `AnimatedPositioned.onEnd` non parte: in quel caso
+                              // si naviga qui. Nei due rami la navigazione parte
+                              // una volta sola.
+                              // Tolleranza di mezzo pixel: il confronto
+                              // esatto sbaglia per arrotondamento e
+                              // l'indicatore, già fermo sul segmento, non
+                              // ripartirebbe: `onEnd` non chiamerebbe nessuno
+                              // e la navigazione non partirebbe mai.
+                              final alreadySettled =
+                                  (clampLeft(
+                                            _dragLeft ??
+                                                indicatorLeft(_selectedIndex),
+                                          ) -
+                                          indicatorLeft(releasedIndex))
+                                      .abs() <
+                                  0.5;
+                              setState(() {
+                                _dragging = false;
+                                _dragLeft = null;
+                                _activeIndex = null;
+                                _pendingTabIndex = releasedIndex;
+                              });
+                              if (alreadySettled) {
+                                _performNavigation(releasedIndex);
+                              }
+                            },
+                            onHorizontalDragCancel: () {
+                              setState(() {
+                                _dragging = false;
+                                _dragLeft = null;
+                                _activeIndex = null;
+                                _pendingTabIndex = null;
+                              });
+                            },
+                            child: Stack(
+                              children: [
+                                AnimatedPositioned(
+                                  key: const ValueKey('pill-indicator'),
+                                  duration: snapDuration,
+                                  curve: snapCurve,
+                                  onEnd: _onSnapComplete,
+                                  left: clampLeft(draggingFrom) + 3,
+                                  top: 0,
+                                  bottom: 0,
+                                  width: segWidth - 6,
+                                  child: _GlassIndicator(),
+                                ),
+                                Row(
+                                  children: [
+                                    for (var i = 0; i < _itemCount; i++)
+                                      Expanded(
+                                        child: _PillButton(
+                                          tab: PillTab.values[i],
+                                          active: i == activeIndex,
+                                          onTap: () => _commit(i),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -686,8 +705,6 @@ class _PillButton extends StatelessWidget {
         return Symbols.book_2_rounded;
       case PillTab.exercises:
         return Icons.calculate_outlined;
-      case PillTab.profile:
-        return Icons.person_outline;
     }
   }
 
@@ -699,8 +716,6 @@ class _PillButton extends StatelessWidget {
         return Symbols.book_2_rounded;
       case PillTab.exercises:
         return Icons.calculate;
-      case PillTab.profile:
-        return Icons.person;
     }
   }
 }

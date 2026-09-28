@@ -7,7 +7,6 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/home_screen.dart';
-import 'package:math_app/screens/profile_screen.dart';
 
 const _greetingKey = Key('home-greeting');
 const _avatarKey = Key('home-profile-avatar');
@@ -52,21 +51,6 @@ void main() {
     expect(find.byKey(_avatarKey), findsOneWidget);
     expect(find.byKey(_greetingKey), findsOneWidget);
     expect(find.text('AR'), findsOneWidget);
-  });
-
-  testWidgets('toccando il cerchio si apre il profilo', (tester) async {
-    await AuthStore.instance.registerManual(
-      name: 'Anna Rossi',
-      email: 'anna@example.com',
-      password: 'segreta1',
-      schoolLevelId: 'high-school',
-    );
-
-    await _pumpHome(tester);
-    await tester.tap(find.byKey(_avatarKey));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ProfileScreen), findsOneWidget);
   });
 
   testWidgets('nome molto lungo: il saluto resta su una sola riga', (
