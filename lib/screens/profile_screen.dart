@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:lottie/lottie.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
@@ -6,7 +10,6 @@ import '../data/settings_store.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
-import '../widgets/pill_nav_bar.dart';
 import 'school_picker_screen.dart';
 import 'welcome_screen.dart';
 
@@ -16,19 +19,16 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
-      body: PillNavOverlay(
-        selected: PillTab.profile,
-        child: ListenableBuilder(
-          listenable: AuthStore.instance,
-          builder: (context, _) {
-            final user = AuthStore.instance.currentUser;
-            if (user == null) {
-              return _GuestProfile(onCreate: () => _openWelcome(context));
-            }
-            return _ProfileContent(user: user);
-          },
-        ),
+      appBar: AppBar(),
+      body: ListenableBuilder(
+        listenable: AuthStore.instance,
+        builder: (context, _) {
+          final user = AuthStore.instance.currentUser;
+          if (user == null) {
+            return _GuestProfile(onCreate: () => _openWelcome(context));
+          }
+          return _ProfileContent(user: user);
+        },
       ),
     );
   }
@@ -317,8 +317,84 @@ class _AuthChip extends StatelessWidget {
   }
 }
 
-class _ThemeToggle extends StatelessWidget {
+class _ThemeToggle extends StatefulWidget {
   const _ThemeToggle();
+
+  @override
+  State<_ThemeToggle> createState() => _ThemeToggleState();
+}
+
+class _ThemeToggleState extends State<_ThemeToggle>
+    with SingleTickerProviderStateMixin {
+  static const _asset = 'assets/animations/toggle.json';
+  static const _dayIdle = 'Day Idle';
+  static const _nightIdle = 'Night Idle';
+  static const _toNight = 'Day to Night';
+  static const _toDay = 'Night to Day';
+  static const _idleLoops = 3;
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 400),
+  );
+
+  LottieComposition? _composition;
+  bool _animating = false;
+
+  bool get _isDark => SettingsStore.instance.themeMode == ThemeMode.dark;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final composition = await AssetLottie(_asset).load();
+    if (!mounted) return;
+    setState(() {
+      _composition = composition;
+      _controller.duration = composition.duration;
+    });
+    _playIdle();
+  }
+
+  Marker? _marker(String name) => _composition?.getMarker(name);
+
+  void _playIdle() {
+    final idle = _marker(_isDark ? _nightIdle : _dayIdle);
+    if (idle == null) return;
+    _controller.repeat(min: idle.start, max: idle.end, count: _idleLoops);
+  }
+
+  void _onToggle() {
+    if (_animating) return;
+    HapticFeedback.selectionClick();
+    final next = _isDark ? ThemeMode.light : ThemeMode.dark;
+    unawaited(SettingsStore.instance.setThemeMode(next));
+    final transition = _marker(next == ThemeMode.dark ? _toNight : _toDay);
+    if (transition == null) return;
+    _animating = true;
+    final total = _controller.duration!.inMilliseconds;
+    _controller
+        .animateTo(
+          transition.end,
+          duration: Duration(
+            milliseconds: ((transition.end - transition.start) * total).round(),
+          ),
+        )
+        .whenComplete(() {
+          if (!mounted) return;
+          _animating = false;
+          _playIdle();
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +402,8 @@ class _ThemeToggle extends StatelessWidget {
     return ListenableBuilder(
       listenable: SettingsStore.instance,
       builder: (context, _) {
-        final isDark = SettingsStore.instance.themeMode == ThemeMode.dark;
+        final isDark = _isDark;
+        final composition = _composition;
         return AppCard(
           child: Row(
             children: [
@@ -342,13 +419,32 @@ class _ThemeToggle extends StatelessWidget {
                   ),
                 ),
               ),
-              Switch(
-                value: isDark,
-                activeThumbColor: c.accent,
-                onChanged: (_) => SettingsStore.instance.setThemeMode(
-                  isDark ? ThemeMode.light : ThemeMode.dark,
+              if (composition == null)
+                Switch(
+                  value: isDark,
+                  activeThumbColor: c.accent,
+                  onChanged: (_) => _onToggle(),
+                )
+              else
+                Semantics(
+                  label: 'Tema scuro',
+                  button: true,
+                  toggled: isDark,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _onToggle,
+                    child: SizedBox(
+                      key: const Key('theme-toggle-animation'),
+                      width: 88,
+                      height: 48,
+                      child: Lottie(
+                        composition: composition,
+                        controller: _controller,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
         );

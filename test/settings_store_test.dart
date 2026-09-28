@@ -5,20 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:math_app/data/settings_store.dart';
 
 void main() {
-  setUp(() {
+  setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    SettingsStore.instance.reload();
+    await SettingsStore.instance.resetForTest();
   });
 
   test('stato iniziale: onboarding non visto e tema chiaro', () async {
-    await SettingsStore.instance.load();
-
     expect(SettingsStore.instance.onboardingSeen, isFalse);
     expect(SettingsStore.instance.themeMode, ThemeMode.light);
   });
 
   test('completeOnboarding persiste il flag visto', () async {
-    await SettingsStore.instance.load();
     await SettingsStore.instance.completeOnboarding();
 
     await SettingsStore.instance.reload();
@@ -26,7 +23,6 @@ void main() {
   });
 
   test('setThemeMode persiste il tema scuro', () async {
-    await SettingsStore.instance.load();
     await SettingsStore.instance.setThemeMode(ThemeMode.dark);
 
     await SettingsStore.instance.reload();
