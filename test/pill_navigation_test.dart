@@ -7,11 +7,11 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
-import 'package:math_app/screens/bookmarks_screen.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
+import 'package:math_app/screens/registration_screen.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
@@ -36,6 +36,10 @@ Future<void> _systemBack(WidgetTester tester) async {
 
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
+
+/// Superficie di vetto della pillola: il widget `PillNavBar` occupa tutta la
+/// larghezza, la barra visibile e' invece compatta e centrata.
+Finder _pillSurface() => find.byKey(const ValueKey('pill-surface'));
 
 /// Ascissa dell'indicatore della pillola: dice su quale segmento è.
 /// Le icone non bastano: per HOME il glifo outlined e il filled sono
@@ -193,20 +197,29 @@ void main() {
     },
   );
 
-  testWidgets('segnalibri: si può tornare indietro con il pulsante back', (
+  testWidgets('icona profilo: dalla home si apre il profilo e si torna', (
     tester,
   ) async {
+    await AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      password: 'segreta1',
+      schoolLevelId: 'high-school',
+    );
     await _pumpHome(tester);
 
-    await tester.tap(find.byTooltip('Segnalibri'));
+    await tester.tap(find.byKey(const Key('home-profile-avatar')));
     await tester.pumpAndSettle();
-    expect(find.byType(BookmarksScreen), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsOneWidget);
     expect(find.byType(HomeScreen), findsNothing);
+    // il profilo non è più una sezione della pillola
+    expect(find.byType(PillNavBar), findsNothing);
+    expect(find.byType(BackButton), findsOneWidget);
 
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.byType(BookmarksScreen), findsNothing);
+    expect(find.byType(ProfileScreen), findsNothing);
   });
 
   testWidgets('loggato: cambiare sezione non torna animando alla home', (
@@ -224,9 +237,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('PROFILO'));
+    await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileScreen), findsOneWidget);
+    expect(find.byType(LessonListScreen), findsOneWidget);
 
     rec.events.clear();
     await tester.tap(find.text('ESERCIZI'));
@@ -237,17 +250,24 @@ void main() {
     expect(rec.events, contains('remove'));
     expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(CourseScreen), findsOneWidget);
-    expect(find.byType(ProfileScreen), findsNothing);
+    expect(find.byType(LessonListScreen), findsNothing);
     // la home resta la radice dello stack ma non è dipinta
     expect(find.byType(HomeScreen), findsNothing);
 
+    // il profilo è una sotto-pagina spinta sopra la sezione corrente
     rec.events.clear();
-    await tester.tap(find.text('PROFILO'));
+    await tester.tap(find.byKey(const Key('home-profile-avatar')));
     await tester.pumpAndSettle();
     expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(ProfileScreen), findsOneWidget);
+    expect(find.byType(CourseScreen), findsNothing);
 
     await _systemBack(tester);
+    expect(find.byType(CourseScreen), findsOneWidget);
+    expect(find.byType(HomeScreen), findsNothing);
+
+    await tester.tap(find.text('HOME'));
+    await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
@@ -284,29 +304,31 @@ void main() {
     tester,
   ) async {
     await _pumpHome(tester);
-    await tester.tap(find.text('PROFILO'));
+    await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileScreen), findsOneWidget);
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(LessonListScreen), findsOneWidget);
 
     await tester.tap(find.text('HOME'));
     // Lo scorrimento dell'indicatore dura 260ms: a fine snap parte il pop,
-    // che tiene il profilo in vista per altri 220ms. I due pump dopo il
+    // che tiene le lezioni in vista per altri 220ms. I due pump dopo il
     // primo campano dentro il ritorno, quando un eventuale ritorno
-    // dell'indicatore su PROFILO si sarebbe già mosso.
+    // dell'indicatore su LEZIONI si sarebbe già mosso.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 260));
     await tester.pump(const Duration(milliseconds: 60));
     await tester.pump(const Duration(milliseconds: 60));
 
-    // Il profilo è ancora in vista, ma l'indicatore deve essere già su
-    // HOME: tornare indietro su PROFILO per un istante è il difetto.
-    // La pillola va cercata dentro il profilo: durante il pop anche quella
+    // Le lezioni sono ancora in vista, ma l'indicatore deve essere già su
+    // HOME: tornare indietro su LEZIONI per un istante è il difetto.
+    // La pillola va cercata dentro le lezioni: durante il pop anche quella
     // della home è in albero.
-    expect(find.byType(ProfileScreen), findsOneWidget);
-    final profilePill = _pillIn(find.byType(ProfileScreen));
+    expect(find.byType(LessonListScreen), findsOneWidget);
+    final lessonsPill = _pillIn(find.byType(LessonListScreen));
     expect(
-      (_indicatorXIn(tester, profilePill) -
-              _segmentXIn(tester, profilePill, 'HOME'))
+      (_indicatorXIn(tester, lessonsPill) -
+              _segmentXIn(tester, lessonsPill, 'HOME'))
           .abs(),
       lessThan(1),
     );
@@ -323,21 +345,23 @@ void main() {
     tester,
   ) async {
     await _pumpHome(tester);
-    await tester.tap(find.text('PROFILO'));
+    await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileScreen), findsOneWidget);
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(LessonListScreen), findsOneWidget);
 
-    final barRect = tester.getRect(find.byType(PillNavBar));
-    // larghezza del segmento: la barra ha 24px di margine per lato
-    final seg = (barRect.width - 48) / 4;
+    final barRect = tester.getRect(_pillSurface());
+    // larghezza del segmento: dentro la barra restano 6px per lato
+    final seg = (barRect.width - 12) / 3;
     final gesture = await tester.startGesture(
-      Offset(barRect.center.dx + barRect.width * 3 / 8, barRect.center.dy),
+      Offset(barRect.left + barRect.width * 5 / 6, barRect.center.dy),
     );
     await tester.pump();
     // Tre segmenti esatti: si arriva su HOME, ma l'indicatore resta
     // disallineato di qualche pixel, quindi lo scorrimento c'è e la
     // navigazione parte a fine assestamento.
-    await gesture.moveBy(Offset(-3 * seg, 0));
+    await gesture.moveBy(Offset(-2 * seg, 0));
     await tester.pump();
     await gesture.up();
 
@@ -349,11 +373,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 60));
     await tester.pump(const Duration(milliseconds: 60));
 
-    final profilePill = _pillIn(find.byType(ProfileScreen));
-    expect(profilePill, findsOneWidget);
+    final lessonsPill = _pillIn(find.byType(LessonListScreen));
+    expect(lessonsPill, findsOneWidget);
     expect(
-      (_indicatorXIn(tester, profilePill) -
-              _segmentXIn(tester, profilePill, 'HOME'))
+      (_indicatorXIn(tester, lessonsPill) -
+              _segmentXIn(tester, lessonsPill, 'HOME'))
           .abs(),
       lessThan(1),
     );
@@ -400,7 +424,7 @@ void main() {
     expect(find.text('HOME'), findsOneWidget);
     expect(find.text('LEZIONI'), findsOneWidget);
     expect(find.text('ESERCIZI'), findsOneWidget);
-    expect(find.text('PROFILO'), findsOneWidget);
+    expect(find.text('PROFILO'), findsNothing);
 
     await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
@@ -411,29 +435,12 @@ void main() {
     expect(find.text('HOME'), findsOneWidget);
   });
 
-  testWidgets('PROFILO apre il profilo e HOME ritorna alla home', (
-    tester,
-  ) async {
-    await _pumpHome(tester);
-
-    await tester.tap(find.text('PROFILO'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ProfileScreen), findsOneWidget);
-
-    await tester.tap(find.text('HOME'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(HomeScreen), findsOneWidget);
-  });
-
   testWidgets('trascinando la pillola si cambia sezione', (tester) async {
     await _pumpHome(tester);
 
-    expect(find.byType(ProfileScreen), findsNothing);
     expect(find.text('HOME'), findsOneWidget);
 
-    final bar = find.byType(PillNavBar);
+    final bar = _pillSurface();
     final barSize = tester.getSize(bar);
     final center = tester.getCenter(bar);
 
@@ -446,13 +453,15 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.byType(ProfileScreen), findsOneWidget);
+    // la sezione più a destra è ESERCIZI, non più il profilo
+    expect(find.text('Esercizi per scuola'), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsNothing);
   });
 
   testWidgets('la pillola parte centrata sulla HOME', (tester) async {
     await _pumpHome(tester);
 
-    final barRect = tester.getRect(find.byType(PillNavBar));
+    final barRect = tester.getRect(_pillSurface());
     final indicator = tester.getRect(
       find.byKey(const ValueKey('pill-indicator')),
     );
@@ -460,11 +469,25 @@ void main() {
     // L'indicatore deve partire centrato sul primo segmento (HOME),
     // non sul confine HOME/LEZIONI.
     expect(indicator.left - barRect.left, lessThan(60));
-    expect(indicator.center.dx - barRect.left, lessThan(barRect.width * 0.2));
     expect(
-      indicator.center.dx - barRect.left,
-      greaterThan(barRect.width * 0.05),
+      (indicator.center.dx - tester.getCenter(find.text('HOME')).dx).abs(),
+      lessThan(2),
     );
+  });
+
+  testWidgets('la pillola è compatta e centrata nello schermo', (tester) async {
+    await _pumpHome(tester);
+
+    final barRect = tester.getRect(_pillSurface());
+    final screenWidth =
+        tester.view.physicalSize.width / tester.view.devicePixelRatio;
+
+    // Non sta a filo con i bordi e ha il tetto di larghezza.
+    expect(barRect.width, lessThanOrEqualTo(320));
+    expect(barRect.width, lessThan(screenWidth - 48));
+
+    // È centrata: i due spazi laterali sono uguali.
+    expect((barRect.left - (screenWidth - barRect.right)).abs(), lessThan(1));
   });
 
   testWidgets(
@@ -472,7 +495,7 @@ void main() {
     (tester) async {
       await _pumpHome(tester);
 
-      final bar = find.byType(PillNavBar);
+      final bar = _pillSurface();
       final barSize = tester.getSize(bar);
       final center = tester.getCenter(bar);
 
@@ -514,9 +537,9 @@ void main() {
   ) async {
     await _pumpHome(tester);
 
-    await tester.tap(find.text('PROFILO'));
+    await tester.tap(find.byKey(const Key('profile-button-guest')));
     await tester.pumpAndSettle();
-    expect(find.byType(ProfileScreen), findsOneWidget);
+    expect(find.byType(RegistrationScreen), findsOneWidget);
 
     await _systemBack(tester);
 
@@ -546,7 +569,7 @@ void main() {
     (tester) async {
       await _pumpHome(tester);
 
-      final bar = find.byType(PillNavBar);
+      final bar = _pillSurface();
       final barSize = tester.getSize(bar);
       final center = tester.getCenter(bar);
 

@@ -121,6 +121,9 @@ void main() {
     expect(find.text('Definizione'), findsNothing);
     expect(find.text('Equazioni con i moduli'), findsNothing);
 
+    // la barra di testo dell'header spinge l'argomento sotto il bordo
+    await tester.ensureVisible(find.text('Moduli'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Moduli'));
     await tester.pumpAndSettle();
 

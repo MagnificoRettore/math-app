@@ -14,18 +14,63 @@ Widget _host(Widget child) {
 void main() {
   final palette = [const Color(0xFF007AFF), const Color(0xFF9C27B0)];
 
-  testWidgets('istogramma con due serie non va in errore', (tester) async {
+  testWidgets('grafici con dati normali non vanno in errore', (tester) async {
     await tester.pumpWidget(
       _host(
-        CustomPaint(
-          painter: BarChartPainter(
-            series: const [
-              ChartSeries(label: 'Serie A', values: [3, 5, 2]),
-              ChartSeries(label: 'Serie B', values: [1, 4, 7]),
-            ],
-            xLabels: const ['Gen', 'Feb', 'Mar'],
-            colors: palette,
-          ),
+        Column(
+          children: [
+            SizedBox(
+              height: 70,
+              child: CustomPaint(
+                painter: BarChartPainter(
+                  series: const [
+                    ChartSeries(label: 'Serie A', values: [3, 5, 2]),
+                    ChartSeries(label: 'Serie B', values: [1, 4, 7]),
+                  ],
+                  xLabels: const ['Gen', 'Feb', 'Mar'],
+                  colors: palette,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 70,
+              child: CustomPaint(
+                painter: LineChartPainter(
+                  series: const [
+                    ChartSeries(label: 'Crescita', values: [1, 2, 4, 8]),
+                  ],
+                  xLabels: const ['A', 'B', 'C', 'D'],
+                  colors: palette,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 70,
+              child: CustomPaint(
+                painter: BarChartPainter(
+                  series: const [
+                    ChartSeries(
+                      label: 'S',
+                      values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                    ),
+                  ],
+                  xLabels: const [
+                    'Gen',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'Mag',
+                    'Giu',
+                    'Lug',
+                    'Ago',
+                    'Set',
+                    'Ott',
+                  ],
+                  colors: palette,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -51,23 +96,6 @@ void main() {
             series: const [
               ChartSeries(label: 'Leggera', values: [0, 0, 0]),
             ],
-            colors: palette,
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('grafico a linee non va in errore', (tester) async {
-    await tester.pumpWidget(
-      _host(
-        CustomPaint(
-          painter: LineChartPainter(
-            series: const [
-              ChartSeries(label: 'Crescita', values: [1, 2, 4, 8]),
-            ],
-            xLabels: const ['A', 'B', 'C', 'D'],
             colors: palette,
           ),
         ),
@@ -115,36 +143,6 @@ void main() {
           painter: PieChartPainter(
             values: const [10, -5, 20],
             labels: const ['A', 'B', 'C'],
-            colors: palette,
-          ),
-        ),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('istogramma con molte categorie non va in errore', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _host(
-        CustomPaint(
-          painter: BarChartPainter(
-            series: const [
-              ChartSeries(label: 'S', values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
-            ],
-            xLabels: const [
-              'Gen',
-              'Feb',
-              'Mar',
-              'Apr',
-              'Mag',
-              'Giu',
-              'Lug',
-              'Ago',
-              'Set',
-              'Ott',
-            ],
             colors: palette,
           ),
         ),

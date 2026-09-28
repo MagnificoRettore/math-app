@@ -17,8 +17,6 @@ void main() {
   });
 
   test('carica i contenuti dal JSON bundled', () async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    await ContentRepository.instance.load();
     SearchIndex.instance.build(ContentRepository.instance.levels);
 
     expect(ContentRepository.instance.levels.length, 3);
@@ -27,8 +25,6 @@ void main() {
   });
 
   test('indice di ricerca trova esercizi per tags e formule', () async {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    await ContentRepository.instance.load();
     SearchIndex.instance.build(ContentRepository.instance.levels);
 
     final perParti = SearchIndex.instance.search('integrazione per parti');
@@ -43,11 +39,10 @@ void main() {
     expect(quadratic, isNotEmpty);
   });
 
-  testWidgets('Home screen renderizza il contenuto principale', (tester) async {
-    await ContentRepository.instance.load();
+  testWidgets('avvio: dallo splash si arriva alla sezione missione', (
+    tester,
+  ) async {
     SearchIndex.instance.build(ContentRepository.instance.levels);
-    await ProgressStore.instance.load();
-    await SettingsStore.instance.load();
     await SettingsStore.instance.completeOnboarding();
 
     await tester.pumpWidget(const MathApp());

@@ -103,10 +103,6 @@ void main() {
   testWidgets('home mostra la card ospite e poi i consigli per la scuola', (
     tester,
   ) async {
-    await ContentRepository.instance.load();
-    await ProgressStore.instance.load();
-    await AuthStore.instance.load();
-
     await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
     await tester.pumpAndSettle();
 
