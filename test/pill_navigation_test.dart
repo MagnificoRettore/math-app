@@ -30,6 +30,31 @@ Future<void> _pumpHome(WidgetTester tester) async {
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
 
+/// Registra gli eventi di navigazione: serve a distinguere un ritorno
+/// animato alla home (`didPop`) dalla sostituzione atomica dello stack
+/// (`didRemove` + `didPush` nello stesso aggiornamento).
+class _NavRecorder extends NavigatorObserver {
+  final List<String> events = [];
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    events.add('push');
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    // il foglio modale della scelta scuola si chiude con un pop: non
+    // interessa, il lampo da cercare è il ritorno alla home
+    if (route is PopupRoute) return;
+    events.add('pop');
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    events.add('remove');
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -143,6 +168,78 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.byType(BookmarksScreen), findsNothing);
+  });
+
+  testWidgets('loggato: cambiare sezione non torna animando alla home', (
+    tester,
+  ) async {
+    final rec = _NavRecorder();
+    await AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      password: 'segreta1',
+      schoolLevelId: 'high-school',
+    );
+    await tester.pumpWidget(
+      MaterialApp(navigatorObservers: [rec], home: const HomeScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('PROFILO'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ProfileScreen), findsOneWidget);
+
+    rec.events.clear();
+    await tester.tap(find.text('ESERCIZI'));
+    await tester.pumpAndSettle();
+
+    // La sezione nuova prende il posto delle precedenti in un colpo solo:
+    // nessun ritorno alla home nel mezzo, altrimenti la home lampeggerebbe.
+    expect(rec.events, contains('remove'));
+    expect(rec.events.where((e) => e == 'pop'), isEmpty);
+    expect(find.byType(CourseScreen), findsOneWidget);
+    expect(find.byType(ProfileScreen), findsNothing);
+    // la home resta la radice dello stack ma non è dipinta
+    expect(find.byType(HomeScreen), findsNothing);
+
+    rec.events.clear();
+    await tester.tap(find.text('PROFILO'));
+    await tester.pumpAndSettle();
+    expect(rec.events.where((e) => e == 'pop'), isEmpty);
+    expect(find.byType(ProfileScreen), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('ospite: la scelta della scuola non torna animando alla home', (
+    tester,
+  ) async {
+    final rec = _NavRecorder();
+    await tester.pumpWidget(
+      MaterialApp(navigatorObservers: [rec], home: const HomeScreen()),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('LEZIONI'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+    expect(find.byType(LessonListScreen), findsOneWidget);
+
+    rec.events.clear();
+    await tester.tap(find.text('ESERCIZI'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Scuola Media').last);
+    await tester.pumpAndSettle();
+
+    expect(rec.events.where((e) => e == 'pop'), isEmpty);
+    expect(find.byType(CourseScreen), findsOneWidget);
+    expect(find.text('prima'), findsWidgets);
+    // il foglio di scelta è chiuso e la pagina delle lezioni non c'è più
+    expect(find.text('Esercizi per scuola'), findsNothing);
+    expect(find.byType(LessonListScreen), findsNothing);
   });
 
   testWidgets('la pillola compare solo sulle schermate principali', (

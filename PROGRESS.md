@@ -2,6 +2,13 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-27 — Cambio sezione dalla pillola senza lampeggio della home
+
+- **Bug**: con un profilo collegato, il tap su LEZIONI o ESERCIZI mostrava la home per un istante e poi la pagina giusta. In `_performNavigation` il `popUntil((route) => route.isFirst)` e il `push` erano due animazioni in sequenza: prima il ritorno animato alla home (reverse 220ms della rotta precedente), e solo al termine la sfumatura della pagina nuova (280ms). La home era la rotta in cima per tutto il reverse, quindi dipinta a pieno per oltre 100ms.
+- **Fix**: unica `Navigator.pushAndRemoveUntil(_fadeRoute(page), (route) => route.isFirst)` nei tre punti che aprono una sezione (PROFILO, lezione/esercizi con scuola dal profilo, scelta della scuola da ospite). La rotta nuova entra nello stesso aggiornamento di history che rimuove le precedenti, quindi la home non viene mai riportata in cima. `PillTab.home` tiene il `popUntil`: lì il ritorno animato è voluto. La home resta la radice dello stack, il back continua a tornare a casa.
+- Le rotte di `_fadeRoute` sono opache: durante la sfumatura le schermate sotto non vengono costruite, e il passaggio avviene sul `scaffoldBackgroundColor` (identico a quello degli `Scaffold`), quindi nessun lampo di colore. La schermata uscente non sfuma più: viene coperta.
+- Test: due nuovi test in `pill_navigation_test.dart` con un `NavigatorObserver` che registra gli eventi — nessun `didPop` (niente ritorno animato alla home), `didRemove` della sezione precedente, schermata nuova in cima e back che torna alla home. I `didPop` del foglio modale della scelta scuola sono ignorati (`PopupRoute`).
+
 ## 2026-09-27 — Toolbar nel footer della card, stessa altezza di «Completa la lezione»
 
 - `lesson_screen.dart`: la `M3EToolbar` esce dal `Stack` della pagina (dove era un `Positioned(left: 16, bottom: 16)` con `SafeArea` e `Transform.scale(1/1.5)`) e diventa un `Positioned(left: 0, bottom: 0)` dentro la card. Compatta è alta esattamente quanto «Completa la lezione`: `Transform.scale(_kFooterControlHeight / M3EToolbarTokens.fabMedium)` con `Alignment.bottomLeft`, quindi il FAB dipinto è a filo della colonna di testo, ha lo stesso spigolo inferiore del bottone e la stessa altezza. Con `bottomCenter` il FAB (49 dipinti dentro una box di 80) restava centrato, con 15,5px di aria dal bordo.

@@ -29,6 +29,9 @@ const double kPillBottomReserve = 96;
 /// Transizione sobria per il cambio sezione: la pagina nuova sfuma sopra
 /// quella attuale, così la pillola resta visivamente in sovraimpressione
 /// mentre il contenuto cambia sotto di essa.
+///
+/// La rotta è opaca: durante la sfumatura le schermate sotto non vengono
+/// nemmeno costruite, quindi il passaggio non può mostrarne una per sbaglio.
 Route<T> _fadeRoute<T>(Widget page) {
   return PageRouteBuilder<T>(
     transitionDuration: const Duration(milliseconds: 280),
@@ -136,13 +139,13 @@ class _PillNavBarState extends State<PillNavBar> {
     final navigator = Navigator.of(context);
 
     if (tab == PillTab.home) {
+      // Qui il ritorno alla home è voluto e deve restare animato.
       navigator.popUntil((route) => route.isFirst);
       return;
     }
 
     if (tab == PillTab.profile) {
-      navigator.popUntil((route) => route.isFirst);
-      navigator.push(_fadeRoute(const ProfileScreen()));
+      _resetTo(navigator, const ProfileScreen());
       return;
     }
 
@@ -154,12 +157,27 @@ class _PillNavBarState extends State<PillNavBar> {
         ? null
         : ContentRepository.instance.levelById(levelId);
     if (level != null) {
-      navigator.popUntil((route) => route.isFirst);
-      navigator.push(_fadeRoute(_screenFor(tab, level)));
+      _resetTo(navigator, _screenFor(tab, level));
       return;
     }
 
     unawaited(_openSchoolChoice(tab));
+  }
+
+  /// Mette [page] in cima allo stack azzerando tutto quello che c'è sotto,
+  /// tranne la home (che resta la radice, così il back torna a casa).
+  ///
+  /// [`Navigator.pushAndRemoveUntil`] e non `popUntil` + `push`: le due
+  /// chiamate sarebbero due animazioni in sequenza — prima il ritorno
+  /// animato alla home, poi la sfumatura della pagina nuova — e la home
+  /// resterebbe dipinta a pieno per qualche decimo di secondo. Con un'unica
+  /// operazione la rotta nuova entra nello stesso aggiornamento che rimuove
+  /// le precedenti, quindi la home non viene mai riportata in cima.
+  void _resetTo(NavigatorState navigator, Widget page) {
+    navigator.pushAndRemoveUntil<void>(
+      _fadeRoute<void>(page),
+      (route) => route.isFirst,
+    );
   }
 
   Future<void> _openSchoolChoice(PillTab tab) async {
@@ -181,8 +199,7 @@ class _PillNavBarState extends State<PillNavBar> {
       });
       return;
     }
-    Navigator.of(context).popUntil((route) => route.isFirst);
-    Navigator.of(context).push(_fadeRoute(_screenFor(tab, chosen)));
+    _resetTo(Navigator.of(context), _screenFor(tab, chosen));
   }
 
   Widget _screenFor(PillTab tab, Level level) {
