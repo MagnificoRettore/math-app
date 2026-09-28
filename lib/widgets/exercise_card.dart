@@ -9,17 +9,13 @@ import 'difficulty_badge.dart';
 class ExerciseCard extends StatelessWidget {
   final Exercise exercise;
   final VoidCallback onTap;
-  final bool bookmarked;
   final ExerciseStatus status;
-  final ValueChanged<bool> onToggleBookmark;
 
   const ExerciseCard({
     super.key,
     required this.exercise,
     required this.onTap,
-    required this.bookmarked,
     required this.status,
-    required this.onToggleBookmark,
   });
 
   @override
@@ -72,15 +68,6 @@ class ExerciseCard extends StatelessWidget {
                   style: TextStyle(fontSize: 13, color: c.textSecondary),
                 ),
               ],
-            ),
-          ),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            onPressed: () => onToggleBookmark(!bookmarked),
-            icon: Icon(
-              bookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: bookmarked ? c.accent : c.textSecondary,
-              size: 24,
             ),
           ),
         ],

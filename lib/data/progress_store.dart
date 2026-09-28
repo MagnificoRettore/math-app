@@ -67,9 +67,6 @@ class ProgressStore extends ChangeNotifier {
   ExerciseStatus statusOf(String levelId, String exerciseId) =>
       _progress[scopedKey(levelId, exerciseId)]?.status ?? ExerciseStatus.none;
 
-  bool isBookmarked(String levelId, String exerciseId) =>
-      _progress[scopedKey(levelId, exerciseId)]?.bookmarked ?? false;
-
   Future<void> setStatus(
     String levelId,
     String exerciseId,
@@ -78,36 +75,11 @@ class ProgressStore extends ChangeNotifier {
     final key = scopedKey(levelId, exerciseId);
     final current =
         _progress[key] ??
-        ExerciseProgress(
-          exerciseId: exerciseId,
-          status: ExerciseStatus.none,
-          bookmarked: false,
-        );
+        ExerciseProgress(exerciseId: exerciseId, status: ExerciseStatus.none);
     _progress[key] = current.copyWith(status: status);
     notifyListeners();
     await _persist();
   }
-
-  Future<void> toggleBookmark(String levelId, String exerciseId) async {
-    final current =
-        _progress[scopedKey(levelId, exerciseId)] ??
-        ExerciseProgress(
-          exerciseId: exerciseId,
-          status: ExerciseStatus.none,
-          bookmarked: false,
-        );
-    _progress[scopedKey(levelId, exerciseId)] = current.copyWith(
-      bookmarked: !current.bookmarked,
-    );
-    notifyListeners();
-    await _persist();
-  }
-
-  /// Id dei segnalibri del livello scolastico indicato (esercizi marcati).
-  List<String> bookmarkedIdsFor(String levelId) => _progress.entries
-      .where((e) => e.key.startsWith('$levelId::') && e.value.bookmarked)
-      .map((e) => e.value.exerciseId)
-      .toList();
 
   /// Completeness (mastered + needsReview) per il livello indicato.
   double completionFor(String levelId, Iterable<String> exerciseIds) {

@@ -65,16 +65,10 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
                   padding: const EdgeInsets.only(bottom: 10),
                   child: ExerciseCard(
                     exercise: location.exercise,
-                    bookmarked: ProgressStore.instance.isBookmarked(
-                      current.level.id,
-                      location.exercise.id,
-                    ),
                     status: ProgressStore.instance.statusOf(
                       current.level.id,
                       location.exercise.id,
                     ),
-                    onToggleBookmark: (_) => ProgressStore.instance
-                        .toggleBookmark(current.level.id, location.exercise.id),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => ExerciseDetailScreen(

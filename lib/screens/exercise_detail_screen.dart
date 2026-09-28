@@ -38,32 +38,8 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          ListenableBuilder(
-            listenable: ProgressStore.instance,
-            builder: (context, _) {
-              final bookmarked = ProgressStore.instance.isBookmarked(
-                widget.level.id,
-                widget.exercise.id,
-              );
-              return IconButton(
-                icon: Icon(
-                  bookmarked ? Icons.bookmark : Icons.bookmark_border,
-                  color: bookmarked ? c.accent : null,
-                ),
-                tooltip: 'Segnalibro',
-                onPressed: () => ProgressStore.instance.toggleBookmark(
-                  widget.level.id,
-                  widget.exercise.id,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(),
       body: Stack(
         children: [
           ListenableBuilder(

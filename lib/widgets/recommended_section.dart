@@ -44,15 +44,7 @@ class RecommendedSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: ExerciseCard(
               exercise: location.exercise,
-              bookmarked: ProgressStore.instance.isBookmarked(
-                level.id,
-                location.exercise.id,
-              ),
               status: ProgressStore.instance.statusOf(
-                level.id,
-                location.exercise.id,
-              ),
-              onToggleBookmark: (_) => ProgressStore.instance.toggleBookmark(
                 level.id,
                 location.exercise.id,
               ),

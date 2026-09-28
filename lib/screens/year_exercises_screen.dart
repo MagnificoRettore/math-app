@@ -50,16 +50,10 @@ class _YearExercisesScreenState extends State<YearExercisesScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ExerciseCard(
                     exercise: entry.exercise,
-                    bookmarked: ProgressStore.instance.isBookmarked(
-                      widget.level.id,
-                      entry.exercise.id,
-                    ),
                     status: ProgressStore.instance.statusOf(
                       widget.level.id,
                       entry.exercise.id,
                     ),
-                    onToggleBookmark: (val) => ProgressStore.instance
-                        .toggleBookmark(widget.level.id, entry.exercise.id),
                     onTap: () => _openExercise(entry),
                   ),
                 ),
