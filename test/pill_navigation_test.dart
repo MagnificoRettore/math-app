@@ -27,6 +27,13 @@ Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+/// Back di sistema: le schermate principali non hanno più il tasto
+/// indietro, ma il gesture del sistema deve comunque tornare alla home.
+Future<void> _systemBack(WidgetTester tester) async {
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+}
+
 Finder _pillIcon(IconData icon) =>
     find.descendant(of: find.byType(PillNavBar), matching: find.byIcon(icon));
 
@@ -240,8 +247,7 @@ void main() {
     expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(ProfileScreen), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _systemBack(tester);
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
@@ -493,9 +499,10 @@ void main() {
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
     expect(find.byType(LessonListScreen), findsOneWidget);
+    // schermata principale: niente tasto indietro, si torna con la pillola
+    expect(find.byType(BackButton), findsNothing);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _systemBack(tester);
 
     expect(find.byType(HomeScreen), findsOneWidget);
     expect(_pillIcon(Symbols.home_rounded), findsOneWidget);
@@ -511,8 +518,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ProfileScreen), findsOneWidget);
 
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _systemBack(tester);
 
     expect(find.byType(HomeScreen), findsOneWidget);
     expect(_pillIcon(Symbols.home_rounded), findsOneWidget);
@@ -528,8 +534,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _systemBack(tester);
 
     await tester.tap(find.text('ESERCIZI'));
     await tester.pumpAndSettle();
@@ -559,8 +564,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(LessonListScreen), findsOneWidget);
 
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      await _systemBack(tester);
 
       expect(find.byType(HomeScreen), findsOneWidget);
       expect(_pillIcon(Symbols.home_rounded), findsOneWidget);

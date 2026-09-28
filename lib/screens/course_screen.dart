@@ -50,6 +50,7 @@ class _CourseScreenState extends State<CourseScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(

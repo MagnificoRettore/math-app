@@ -60,7 +60,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
     final levelId = widget.levelId;
     if (levelId == null) {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(automaticallyImplyLeading: false),
         body: _wrapBody(
           const _EmptyLessons(
             title: 'Nessuna lezione disponibile',
@@ -74,7 +74,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     if (courses.isEmpty) {
       return Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(automaticallyImplyLeading: false),
         body: _wrapBody(
           const _EmptyLessons(
             title: 'Nessuna lezione disponibile',
@@ -86,6 +86,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
