@@ -26,6 +26,11 @@ const double _kFooterControlHeight = 49;
 /// 30fps durano 2.37s, quindi si chiude poco dopo l'ultimo fotogramma.
 const Duration _kCelebrationDuration = Duration(milliseconds: 2400);
 
+/// Quanto si deve trascinare a sinistra sull'ultima card per completare la
+/// lezione. Sotto questa soglia niente succede, così il gesto non parte
+/// mentre si sta ancora scorrendo il testo o le opzioni.
+const double _kSwipeCompleteThreshold = 56;
+
 class LessonScreen extends StatefulWidget {
   final Lesson lesson;
   final String? levelId;
@@ -53,6 +58,13 @@ class _LessonScreenState extends State<LessonScreen> {
   /// costruita: senza stato condiviso ogni nuova card nascerebbe collassata.
   bool _toolbarExpanded = false;
 
+  /// Quanto la card è tirata a sinistra dal dito, da 0 a 1: a 1 la lezione è
+  /// completata. Va in un `ValueNotifier` perché il trascinamento arriva a
+  /// ogni `pointerMove` e non deve ricostruire la pagina a ogni frame.
+  final ValueNotifier<double> _swipeProgress = ValueNotifier<double>(0);
+  late final Listenable _pageAnimations;
+  Offset? _swipeStart;
+
   /// Una chiave per step quiz: il bottone di reload sta nel footer della card,
   /// fuori dal widget che possiede lo stato degli esercizi.
   final Map<int, GlobalKey<PracticeQuizViewState>> _quizKeys = {};
@@ -64,11 +76,13 @@ class _LessonScreenState extends State<LessonScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.92);
+    _pageAnimations = Listenable.merge([_pageController, _swipeProgress]);
   }
 
   @override
   void dispose() {
     _celebrationTimer?.cancel();
+    _swipeProgress.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -89,7 +103,43 @@ class _LessonScreenState extends State<LessonScreen> {
     });
   }
 
+  /// Se sulla card `index` si può chiudere la lezione. Vale per il bottone
+  /// «Completa la lezione» e per lo swipe verso sinistra: sull'ultima card
+  /// serve il vincolo dell'esercizio risolto, sulle altre mai.
+  bool _canCompleteAt(int index) {
+    final step = widget.lesson.steps[index];
+    return index == _total - 1 &&
+        (step.type == LessonStepType.info ||
+            step.type == LessonStepType.practiceQuiz ||
+            _solved);
+  }
+
+  /// Trascinamento a sinistra sull'ultima card. Lo guarda un `Listener` e non
+  /// un `GestureDetector`: il drag orizzontale della `PageView` vince l'arena
+  /// dei gesture, quindi un recognizer esterno non riceverebbe mai il gesto.
+  void _trackSwipe(PointerMoveEvent event) {
+    final start = _swipeStart;
+    if (start == null || _page != _total - 1) return;
+    final dx = event.position.dx - start.dx;
+    // scorrimento del testo o della card: non è il gesto che completa
+    if ((event.position.dy - start.dy).abs() > dx.abs()) return;
+    if (dx >= 0) {
+      _swipeProgress.value = 0;
+      return;
+    }
+    _swipeProgress.value = (-dx / _kSwipeCompleteThreshold).clamp(0.0, 1.0);
+    if (-dx >= _kSwipeCompleteThreshold && _canCompleteAt(_page)) {
+      _complete();
+    }
+  }
+
+  void _endSwipe() {
+    _swipeStart = null;
+    _swipeProgress.value = 0;
+  }
+
   Future<void> _complete() async {
+    if (_celebrating) return;
     final levelId = widget.levelId;
     if (levelId != null &&
         !ProgressStore.instance.isLessonCompleted(levelId, widget.lesson.id)) {
@@ -166,73 +216,85 @@ class _LessonScreenState extends State<LessonScreen> {
                 ),
               ),
               Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: _total,
-                  onPageChanged: (index) {
-                    setState(() => _page = index);
-                    _resetStep();
+                child: Listener(
+                  onPointerDown: (event) {
+                    _swipeStart = event.position;
+                    _swipeProgress.value = 0;
                   },
-                  itemBuilder: (context, index) {
-                    final step = widget.lesson.steps[index];
-                    final card = Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 12,
-                      ),
-                      child: _StepCard(
-                        index: index,
-                        step: step,
-                        solved: _solved,
-                        attempted: _attempted,
-                        attemptId: _attemptId,
-                        wrongOptions: _wrongOptions,
-                        selectedOption: _selectedOption,
-                        onSelectOption: _selectOption,
-                        showComplete:
-                            index == _total - 1 &&
-                            (step.type == LessonStepType.info ||
-                                step.type == LessonStepType.practiceQuiz ||
-                                _solved),
-                        onComplete: _complete,
-                        toolbarExpanded: _toolbarExpanded,
-                        onToolbarExpandedChanged: (value) =>
-                            setState(() => _toolbarExpanded = value),
-                        onOpenCalculator: () =>
-                            setState(() => _calcOpen = true),
-                        practiceQuizKey: step.isPracticeQuiz
-                            ? _quizKeys.putIfAbsent(
-                                index,
-                                GlobalKey<PracticeQuizViewState>.new,
-                              )
-                            : null,
-                      ),
-                    );
-                    return AnimatedBuilder(
-                      animation: _pageController,
-                      builder: (context, child) {
-                        final position = _pageController.hasClients
-                            ? _pageController.page ?? index.toDouble()
-                            : index.toDouble();
-                        final delta = (position - index).clamp(-1.0, 1.0);
-                        final abs = delta.abs();
-                        final scale = 1 - 0.07 * abs;
-                        final opacity = (1 - 0.35 * abs).clamp(0.0, 1.0);
-                        final tilt = delta * 0.05;
-                        return Opacity(
-                          opacity: opacity,
-                          child: Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()
-                              ..rotateZ(tilt)
-                              ..scaleByDouble(scale, scale, 1.0, 1.0),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: card,
-                    );
-                  },
+                  onPointerMove: _trackSwipe,
+                  onPointerUp: (_) => _endSwipe(),
+                  onPointerCancel: (_) => _endSwipe(),
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _total,
+                    onPageChanged: (index) {
+                      setState(() => _page = index);
+                      _resetStep();
+                    },
+                    itemBuilder: (context, index) {
+                      final step = widget.lesson.steps[index];
+                      final card = Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 12,
+                        ),
+                        child: _StepCard(
+                          index: index,
+                          step: step,
+                          solved: _solved,
+                          attempted: _attempted,
+                          attemptId: _attemptId,
+                          wrongOptions: _wrongOptions,
+                          selectedOption: _selectedOption,
+                          onSelectOption: _selectOption,
+                          showComplete: _canCompleteAt(index),
+                          onComplete: _complete,
+                          toolbarExpanded: _toolbarExpanded,
+                          onToolbarExpandedChanged: (value) =>
+                              setState(() => _toolbarExpanded = value),
+                          onOpenCalculator: () =>
+                              setState(() => _calcOpen = true),
+                          practiceQuizKey: step.isPracticeQuiz
+                              ? _quizKeys.putIfAbsent(
+                                  index,
+                                  GlobalKey<PracticeQuizViewState>.new,
+                                )
+                              : null,
+                        ),
+                      );
+                      return AnimatedBuilder(
+                        animation: _pageAnimations,
+                        builder: (context, child) {
+                          final position = _pageController.hasClients
+                              ? _pageController.page ?? index.toDouble()
+                              : index.toDouble();
+                          final delta = (position - index).clamp(-1.0, 1.0);
+                          final abs = delta.abs();
+                          final scale = 1 - 0.07 * abs;
+                          final opacity = (1 - 0.35 * abs).clamp(0.0, 1.0);
+                          final tilt = delta * 0.05;
+                          return Opacity(
+                            opacity: opacity,
+                            child: Transform.translate(
+                              offset: Offset(
+                                -_kSwipeCompleteThreshold *
+                                    _swipeProgress.value,
+                                0,
+                              ),
+                              child: Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..rotateZ(tilt)
+                                  ..scaleByDouble(scale, scale, 1.0, 1.0),
+                                child: child,
+                              ),
+                            ),
+                          );
+                        },
+                        child: card,
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

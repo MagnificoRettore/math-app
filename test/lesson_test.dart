@@ -43,9 +43,9 @@ Future<Lesson> _apriPrimaLezione(WidgetTester tester) async {
   return lesson;
 }
 
-/// Porta la lezione aperta fino alla celebrazione: sbaglio, poi risposta
-/// giusta, poi «Completa la lezione».
-Future<void> _completa(WidgetTester tester) async {
+/// Porta la lezione aperta all'ultima card con la verifica risolta: sbaglio,
+/// poi risposta giusta. Da qui si completa col bottone o collo swipe.
+Future<void> _risolviVerifica(WidgetTester tester) async {
   await _swipeNext(tester);
   await _swipeNext(tester);
 
@@ -60,7 +60,10 @@ Future<void> _completa(WidgetTester tester) async {
   await tester.tap(find.byKey(const ValueKey('option_0')));
   await tester.pump(const Duration(milliseconds: 350));
   expect(find.text('Corretto!'), findsOneWidget);
+}
 
+Future<void> _completa(WidgetTester tester) async {
+  await _risolviVerifica(tester);
   await tester.tap(find.text('Completa la lezione'));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));
@@ -230,6 +233,76 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonScreen), findsNothing);
+  });
+
+  testWidgets('lo swipe verso sinistra sull\'ultima card completa la lezione', (
+    tester,
+  ) async {
+    const levelId = 'high-school';
+    final lesson = await _apriPrimaLezione(tester);
+    await _risolviVerifica(tester);
+
+    // sotto soglia la card segue il dito ma la lezione resta aperta
+    await tester.drag(find.byType(PageView), const Offset(-40, 0));
+    await tester.pump();
+    expect(find.byType(LessonScreen), findsOneWidget);
+    expect(find.byType(Lottie), findsNothing);
+    expect(
+      ProgressStore.instance.isLessonCompleted(levelId, lesson.id),
+      isFalse,
+    );
+
+    await tester.drag(find.byType(PageView), const Offset(-200, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(Lottie), findsOneWidget);
+    expect(find.text('Lezione completata!'), findsOneWidget);
+    expect(
+      ProgressStore.instance.isLessonCompleted(levelId, lesson.id),
+      isTrue,
+    );
+  });
+
+  testWidgets('lo swipe verso sinistra su una card non ultima cambia pagina', (
+    tester,
+  ) async {
+    final lesson = await _apriPrimaLezione(tester);
+    await _swipeNext(tester);
+    expect(find.text('2 di 3'), findsOneWidget);
+
+    await tester.drag(find.byType(PageView), const Offset(-500, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('3 di 3'), findsOneWidget);
+    expect(find.byType(Lottie), findsNothing);
+    expect(
+      ProgressStore.instance.isLessonCompleted('high-school', lesson.id),
+      isFalse,
+    );
+  });
+
+  testWidgets('lo swipe non completa una verifica non risolta', (tester) async {
+    final lesson = await _apriPrimaLezione(tester);
+    await _swipeNext(tester);
+    await _swipeNext(tester);
+    expect(find.text('Verifica'), findsOneWidget);
+
+    await tester.drag(find.byType(PageView), const Offset(-200, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(LessonScreen), findsOneWidget);
+    expect(find.byType(Lottie), findsNothing);
+    expect(
+      find.widgetWithText(FilledButton, 'Completa la lezione'),
+      findsNothing,
+    );
+    expect(
+      ProgressStore.instance.isLessonCompleted('high-school', lesson.id),
+      isFalse,
+    );
   });
 
   testWidgets("l'ultimo step di Moduli mostra la card di verifica", (
