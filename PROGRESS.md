@@ -2,6 +2,14 @@
 
 Changelog e roadmap del progetto.
 
+## 2026-09-29 — Swipe a sinistra per completare la lezione
+
+- Sull'ultima card la lezione si completa anche scorrendo col dito verso sinistra, senza toccare il bottone. Il gesto lo guarda un `Listener` attorno alla `PageView`: un `GestureDetector` esterno non riceverebbe mai il drag, perché lo vince lo scroll della `PageView`. Contano solo le mosse più orizzontali che verticali, così scorrere il testo o le opzioni non fa partire niente.
+- La card segue il dito verso sinistra fino a `_kSwipeCompleteThreshold` (56px) e a quel punto parte `_complete()`. Il progresso del trascinamento sta in un `ValueNotifier` e non in `setState`: arriva a ogni `pointerMove` e ricostruire la pagina a ogni frame non serve, la posizione la dipinge il solo `AnimatedBuilder`.
+- Il vincolo dell'esercizio resta: il gesto chiama `_canCompleteAt(index)`, la stessa condizione che mostra il bottone, quindi su una verifica non risolta lo swipe non fa niente (e il bottone non c'è). «Completa la lezione» resta al suo posto: lo swipe è un'alternativa, non l'unico modo.
+- `_complete()` ora esce subito se `_celebrating` è già vero: i `pointerMove` dopo la soglia continuano ad arrivare e senza guardia riarmerebbero il timer della celebrazione.
+- Test: sotto soglia la lezione resta aperta, oltre soglia arriva il trofeo e il progresso è salvato; su una card non ultima lo swipe cambia pagina e non completa; su una verifica non risolta non succede nulla. Il percorso di risoluzione della verifica è ora in `_risolviVerifica`, condiviso fra il completamento col bottone e quello col gesto.
+
 ## 2026-09-28 — Trofeo di fine lezione a schermo intero
 
 - Finita la lezione non compare più uno SnackBar in basso: si copre tutta la lezione con un overlay `Positioned.fill` (dentro lo `Stack` del body, sopra la calcolatrice se fosse aperta) con `Trophy.json` a 240px al centro, il titolo «Lezione completata!» e la scritta «Tocca per continuare». Il fondo è opaco (`c.background`), quindi niente lezione che si vede sotto.
