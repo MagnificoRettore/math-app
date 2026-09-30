@@ -37,42 +37,44 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          Text(
-            onboarding
-                ? 'Scegli la tua scuola per ricevere lezioni ed esercizi '
-                      'pensati per te. Potrai cambiarla in qualsiasi momento.'
-                : level == null
-                ? 'Seleziona il tuo livello scolastico.'
-                : 'Ora frequenti ${level.title}. Puoi cambiarlo quando vuoi.',
-            style: TextStyle(fontSize: 14, color: c.textSecondary),
-          ),
-          const SizedBox(height: 16),
-          for (final item in levels)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: SchoolLevelTile(
-                level: item,
-                selected: _selectedId == item.id,
-                onTap: () => setState(() => _selectedId = item.id),
-              ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: [
+            Text(
+              onboarding
+                  ? 'Scegli la tua scuola per ricevere lezioni ed esercizi '
+                        'pensati per te. Potrai cambiarla in qualsiasi momento.'
+                  : level == null
+                  ? 'Seleziona il tuo livello scolastico.'
+                  : 'Ora frequenti ${level.title}. Puoi cambiarlo quando vuoi.',
+              style: TextStyle(fontSize: 14, color: c.textSecondary),
             ),
-          const SizedBox(height: 8),
-          FilledButton(
-            onPressed: _selectedId.isEmpty ? null : _save,
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-              backgroundColor: c.accent,
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            const SizedBox(height: 16),
+            for (final item in levels)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SchoolLevelTile(
+                  level: item,
+                  selected: _selectedId == item.id,
+                  onTap: () => setState(() => _selectedId = item.id),
+                ),
               ),
+            const SizedBox(height: 8),
+            FilledButton(
+              onPressed: _selectedId.isEmpty ? null : _save,
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: c.accent,
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: Text(onboarding ? 'Crea il mio profilo' : 'Salva'),
             ),
-            child: Text(onboarding ? 'Crea il mio profilo' : 'Salva'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

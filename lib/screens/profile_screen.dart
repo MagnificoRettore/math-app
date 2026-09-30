@@ -20,15 +20,17 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListenableBuilder(
-        listenable: AuthStore.instance,
-        builder: (context, _) {
-          final user = AuthStore.instance.currentUser;
-          if (user == null) {
-            return _GuestProfile(onCreate: () => _openWelcome(context));
-          }
-          return _ProfileContent(user: user);
-        },
+      body: SafeArea(
+        child: ListenableBuilder(
+          listenable: AuthStore.instance,
+          builder: (context, _) {
+            final user = AuthStore.instance.currentUser;
+            if (user == null) {
+              return _GuestProfile(onCreate: () => _openWelcome(context));
+            }
+            return _ProfileContent(user: user);
+          },
+        ),
       ),
     );
   }

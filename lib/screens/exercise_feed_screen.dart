@@ -35,6 +35,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -54,7 +55,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
                         .toList();
 
               return ListView(
-                padding: const EdgeInsets.only(bottom: 112),
+                padding: EdgeInsets.only(bottom: 112 + bottomInset),
                 children: [
                   TopicHeader(
                     title: widget.topic.title,
@@ -90,7 +91,11 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
               );
             },
           ),
-          Positioned(left: 16, bottom: 16, child: ExerciseToolsBar()),
+          Positioned(
+            left: 16,
+            bottom: 16 + bottomInset,
+            child: ExerciseToolsBar(),
+          ),
         ],
       ),
     );

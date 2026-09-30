@@ -13,67 +13,73 @@ class WelcomeScreen extends StatelessWidget {
     final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(backgroundColor: c.background, actions: const []),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        children: [
-          const _WelcomeHero(),
-          const SizedBox(height: 28),
-          Text(
-            'Crea il tuo profilo',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: c.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Raccontaci quale scuola frequenti e ti proponiamo le lezioni '
-            'guidate e gli esercizi più adatti a te.',
-            style: TextStyle(fontSize: 15, color: c.textSecondary, height: 1.4),
-          ),
-          const SizedBox(height: 24),
-          _GoogleButton(onTap: () => _continueWithGoogle(context)),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const RegistrationScreen()),
-            ),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-              backgroundColor: c.accent,
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          children: [
+            const _WelcomeHero(),
+            const SizedBox(height: 28),
+            Text(
+              'Crea il tuo profilo',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: c.textPrimary,
               ),
             ),
-            child: const Text('Registrati con email'),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Scopri come ospite',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: c.textSecondary,
-                  fontWeight: FontWeight.w500,
+            const SizedBox(height: 8),
+            Text(
+              'Raccontaci quale scuola frequenti e ti proponiamo le lezioni '
+              'guidate e gli esercizi più adatti a te.',
+              style: TextStyle(
+                fontSize: 15,
+                color: c.textSecondary,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            _GoogleButton(onTap: () => _continueWithGoogle(context)),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const RegistrationScreen()),
+              ),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: c.accent,
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              child: const Text('Registrati con email'),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Scopri come ospite',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: c.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
-              'Il tuo profilo è salvato solo su questo dispositivo.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: c.textSecondary),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Il tuo profilo è salvato solo su questo dispositivo.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: c.textSecondary),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

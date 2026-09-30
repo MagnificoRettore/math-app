@@ -403,6 +403,7 @@ class _StepCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final scale = step.fontSizeMultiplier;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return AppCard(
       padding: const EdgeInsets.all(24),
       child: Stack(
@@ -482,31 +483,69 @@ class _StepCard extends StatelessWidget {
               const SizedBox(height: 16),
               // Fascia footer alta quanto «Completa la lezione»: la toolbar ci
               // sta sopra (vedi `_toolsBar`), dentro solo reload e bottone.
-              SizedBox(
-                height: _kFooterControlHeight,
-                child: Row(
-                  children: [
-                    const Spacer(),
-                    if (step.isPracticeQuiz && step.exercises.length > 1)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: IconButton(
-                          onPressed: () =>
-                              practiceQuizKey?.currentState?.reload(),
-                          icon: const Icon(Icons.refresh_rounded),
-                          tooltip: 'Altro esercizio',
-                          color: c.textSecondary,
+              Padding(
+                padding: EdgeInsets.only(bottom: bottomInset),
+                // Altezza minima quella di «Completa la lezione», ma la fascia
+                // cresce se il bottone con una font scale più grande la supera.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: _kFooterControlHeight,
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Larghezza già occupata a sinistra: la toolbar dipinta,
+                      // il reload (48 più 8 di padding) quando c'è, più un
+                      // piccolo scarto perché il bottone non tocchi il FAB.
+                      final taken =
+                          _kFooterControlHeight +
+                          (step.isPracticeQuiz && step.exercises.length > 1
+                              ? 56
+                              : 0) +
+                          8;
+                      // «Completa la lezione» per intero: 20 di padding per
+                      // lato, icona da 20, 8 di scarto, più il testo misurato.
+                      final labelWidth = (TextPainter(
+                        text: const TextSpan(
+                          text: 'Completa la lezione',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    if (showComplete) _completeButton(c),
-                  ],
+                        textDirection: Directionality.of(context),
+                        textScaler: MediaQuery.textScalerOf(context),
+                      )..layout()).width;
+                      final full = 40 + 20 + 8 + labelWidth;
+                      return Row(
+                        children: [
+                          const Spacer(),
+                          if (step.isPracticeQuiz && step.exercises.length > 1)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: IconButton(
+                                onPressed: () =>
+                                    practiceQuizKey?.currentState?.reload(),
+                                icon: const Icon(Icons.refresh_rounded),
+                                tooltip: 'Altro esercizio',
+                                color: c.textSecondary,
+                              ),
+                            ),
+                          if (showComplete)
+                            _completeButton(
+                              c,
+                              compact: constraints.maxWidth - taken < full,
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
           ),
           Positioned(
             left: 0,
-            bottom: 0,
+            bottom: bottomInset,
             width: M3EToolbarTokens.fabMedium,
             child: _toolsBar(),
           ),
@@ -548,15 +587,27 @@ class _StepCard extends StatelessWidget {
     );
   }
 
-  Widget _completeButton(AppPalette c) {
+  Widget _completeButton(AppPalette c, {required bool compact}) {
+    final style = FilledButton.styleFrom(
+      backgroundColor: c.accent,
+      foregroundColor: c.surface,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    );
+    if (compact) {
+      // Niente spazio per il testo: resta solo l'icona, col testo nel tooltip.
+      return Tooltip(
+        message: 'Completa la lezione',
+        child: FilledButton(
+          onPressed: onComplete,
+          style: style,
+          child: const Icon(Icons.check_circle_outline, size: 20),
+        ),
+      );
+    }
     return FilledButton.icon(
       onPressed: onComplete,
-      style: FilledButton.styleFrom(
-        backgroundColor: c.accent,
-        foregroundColor: c.surface,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
+      style: style,
       icon: const Icon(Icons.check_circle_outline, size: 20),
       label: const Text(
         'Completa la lezione',

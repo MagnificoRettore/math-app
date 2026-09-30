@@ -27,63 +27,65 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListenableBuilder(
-        listenable: ProgressStore.instance,
-        builder: (context, _) {
-          final current = WeakTopicEngine.weakTopicFor(
-            widget.weakTopic.topic.id,
-          );
+      body: SafeArea(
+        child: ListenableBuilder(
+          listenable: ProgressStore.instance,
+          builder: (context, _) {
+            final current = WeakTopicEngine.weakTopicFor(
+              widget.weakTopic.topic.id,
+            );
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted || _celebrated) return;
-            if (current == null && widget.weakTopic.needsReviewCount > 0) {
-              _celebrated = true;
-              HapticFeedback.mediumImpact();
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                    content: Text('Punto debole risolto!'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-            }
-          });
-
-          if (current == null) return const _AllMasteredView();
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-            children: [
-              _buildBreadcrumb(current),
-              const SizedBox(height: 12),
-              _buildProgressCard(current),
-              const SizedBox(height: 8),
-              SectionHeader('Da ripassare'),
-              for (final location in current.weakExercises)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: ExerciseCard(
-                    exercise: location.exercise,
-                    status: ProgressStore.instance.statusOf(
-                      current.level.id,
-                      location.exercise.id,
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted || _celebrated) return;
+              if (current == null && widget.weakTopic.needsReviewCount > 0) {
+                _celebrated = true;
+                HapticFeedback.mediumImpact();
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text('Punto debole risolto!'),
+                      behavior: SnackBarBehavior.floating,
                     ),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ExerciseDetailScreen(
-                          level: current.level,
-                          course: current.course,
-                          topic: current.topic,
-                          exercise: location.exercise,
+                  );
+              }
+            });
+
+            if (current == null) return const _AllMasteredView();
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              children: [
+                _buildBreadcrumb(current),
+                const SizedBox(height: 12),
+                _buildProgressCard(current),
+                const SizedBox(height: 8),
+                SectionHeader('Da ripassare'),
+                for (final location in current.weakExercises)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: ExerciseCard(
+                      exercise: location.exercise,
+                      status: ProgressStore.instance.statusOf(
+                        current.level.id,
+                        location.exercise.id,
+                      ),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ExerciseDetailScreen(
+                            level: current.level,
+                            course: current.course,
+                            topic: current.topic,
+                            exercise: location.exercise,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

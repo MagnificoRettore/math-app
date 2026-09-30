@@ -62,11 +62,15 @@ class PillNavOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Inset di sistema in basso: con la barra di navigazione Android
+    // persistente il contenuto deve restare sopra, non dietro.
+    final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
+
     return Stack(
       children: [
         Positioned.fill(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: kPillBottomReserve),
+            padding: EdgeInsets.only(bottom: kPillBottomReserve + systemBottom),
             child: child,
           ),
         ),

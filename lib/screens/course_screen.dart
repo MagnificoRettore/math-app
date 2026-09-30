@@ -84,7 +84,7 @@ class _CourseScreenState extends State<CourseScreen> {
           _CourseSectionsView(level: widget.level, course: course),
       ],
     );
-    if (!widget.showPill) return pageView;
+    if (!widget.showPill) return SafeArea(child: pageView);
     return PillNavOverlay(selected: PillTab.exercises, child: pageView);
   }
 }

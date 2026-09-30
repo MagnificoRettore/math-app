@@ -38,6 +38,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return Scaffold(
       appBar: AppBar(),
       body: Stack(
@@ -50,7 +51,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 widget.exercise.id,
               );
               return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 112),
+                padding: EdgeInsets.fromLTRB(20, 8, 20, 112 + bottomInset),
                 children: [
                   _buildMetaRow(),
                   const SizedBox(height: 16),
@@ -71,7 +72,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
               );
             },
           ),
-          Positioned(left: 16, bottom: 16, child: ExerciseToolsBar()),
+          Positioned(
+            left: 16,
+            bottom: 16 + bottomInset,
+            child: ExerciseToolsBar(),
+          ),
         ],
       ),
     );

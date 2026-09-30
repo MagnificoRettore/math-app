@@ -31,35 +31,37 @@ class _YearExercisesScreenState extends State<YearExercisesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListenableBuilder(
-        listenable: ProgressStore.instance,
-        builder: (context, _) {
-          final entries = _filter == null
-              ? _allEntries()
-              : _allEntries()
-                    .where((e) => e.exercise.difficulty == _filter)
-                    .toList();
+      body: SafeArea(
+        child: ListenableBuilder(
+          listenable: ProgressStore.instance,
+          builder: (context, _) {
+            final entries = _filter == null
+                ? _allEntries()
+                : _allEntries()
+                      .where((e) => e.exercise.difficulty == _filter)
+                      .toList();
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              _buildFilterChips(),
-              const SizedBox(height: 12),
-              for (final entry in entries)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ExerciseCard(
-                    exercise: entry.exercise,
-                    status: ProgressStore.instance.statusOf(
-                      widget.level.id,
-                      entry.exercise.id,
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              children: [
+                _buildFilterChips(),
+                const SizedBox(height: 12),
+                for (final entry in entries)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: ExerciseCard(
+                      exercise: entry.exercise,
+                      status: ProgressStore.instance.statusOf(
+                        widget.level.id,
+                        entry.exercise.id,
+                      ),
+                      onTap: () => _openExercise(entry),
                     ),
-                    onTap: () => _openExercise(entry),
                   ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -24,17 +24,19 @@ class SearchResultsScreen extends StatelessWidget {
     final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(),
-      body: results.isEmpty
-          ? Center(
-              child: Text(
-                'Nessun risultato trovato.',
-                style: TextStyle(color: c.textSecondary),
+      body: SafeArea(
+        child: results.isEmpty
+            ? Center(
+                child: Text(
+                  'Nessun risultato trovato.',
+                  style: TextStyle(color: c.textSecondary),
+                ),
+              )
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                children: _buildSections(context),
               ),
-            )
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              children: _buildSections(context),
-            ),
+      ),
     );
   }
 

@@ -14,26 +14,28 @@ class WeakPointsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: ListenableBuilder(
-        listenable: ProgressStore.instance,
-        builder: (context, _) {
-          final weakTopics = WeakTopicEngine.weakTopics();
-          if (weakTopics.isEmpty) return const _AllResolved();
+      body: SafeArea(
+        child: ListenableBuilder(
+          listenable: ProgressStore.instance,
+          builder: (context, _) {
+            final weakTopics = WeakTopicEngine.weakTopics();
+            if (weakTopics.isEmpty) return const _AllResolved();
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            children: [
-              for (final weak in weakTopics)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: WeakTopicRow(
-                    weakTopic: weak,
-                    onTap: () => _openWeakTopic(context, weak),
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              children: [
+                for (final weak in weakTopics)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: WeakTopicRow(
+                      weakTopic: weak,
+                      onTap: () => _openWeakTopic(context, weak),
+                    ),
                   ),
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -44,43 +44,45 @@ class ArgomentoLessonsScreen extends StatelessWidget {
                 ),
               ),
       ),
-      body: lessons.isEmpty
-          ? _EmptyArgomento(
-              title: 'Nessuna lezione in ${argomento.title}',
-              subtitle:
-                  'Le lezioni guidate per questo capitolo sono in arrivo.',
-            )
-          : ListenableBuilder(
-              listenable: ProgressStore.instance,
-              builder: (context, _) => ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                children: [
-                  for (var i = 0; i < lessons.length; i++)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _LessonCard(
-                        lesson: lessons[i],
-                        number: i + 1,
-                        color: color,
-                        completed: ProgressStore.instance.isLessonCompleted(
-                          argomento.levelId,
-                          lessons[i].id,
-                        ),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => LessonScreen(
-                                lesson: lessons[i],
-                                levelId: levelId ?? argomento.levelId,
+      body: SafeArea(
+        child: lessons.isEmpty
+            ? _EmptyArgomento(
+                title: 'Nessuna lezione in ${argomento.title}',
+                subtitle:
+                    'Le lezioni guidate per questo capitolo sono in arrivo.',
+              )
+            : ListenableBuilder(
+                listenable: ProgressStore.instance,
+                builder: (context, _) => ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  children: [
+                    for (var i = 0; i < lessons.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _LessonCard(
+                          lesson: lessons[i],
+                          number: i + 1,
+                          color: color,
+                          completed: ProgressStore.instance.isLessonCompleted(
+                            argomento.levelId,
+                            lessons[i].id,
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => LessonScreen(
+                                  lesson: lessons[i],
+                                  levelId: levelId ?? argomento.levelId,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 }

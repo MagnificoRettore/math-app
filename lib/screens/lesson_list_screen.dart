@@ -147,7 +147,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
   }
 
   Widget _wrapBody(Widget body) {
-    if (!widget.showPill) return body;
+    if (!widget.showPill) return SafeArea(child: body);
     return PillNavOverlay(selected: PillTab.lessons, child: body);
   }
 }
