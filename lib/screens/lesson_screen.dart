@@ -7,6 +7,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../data/progress_store.dart';
 import '../models/lesson.dart';
+import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
@@ -35,7 +36,16 @@ class LessonScreen extends StatefulWidget {
   final Lesson lesson;
   final String? levelId;
 
-  const LessonScreen({super.key, required this.lesson, this.levelId});
+  /// Card da cui aprire la lezione: la sezione «Jump Back In» passa qui il
+  /// passo lasciato in sospeso. Fuori zero, cioè dal primo passo.
+  final int initialStep;
+
+  const LessonScreen({
+    super.key,
+    required this.lesson,
+    this.levelId,
+    this.initialStep = 0,
+  });
 
   @override
   State<LessonScreen> createState() => _LessonScreenState();
@@ -43,7 +53,7 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   late final PageController _pageController;
-  int _page = 0;
+  late int _page;
 
   int? _selectedOption;
   final Set<int> _wrongOptions = {};
@@ -75,8 +85,37 @@ class _LessonScreenState extends State<LessonScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.92);
+    _page = _clampStep(widget.initialStep);
+    _pageController = PageController(
+      viewportFraction: 0.92,
+      initialPage: _page,
+    );
     _pageAnimations = Listenable.merge([_pageController, _swipeProgress]);
+    // Scrive dopo il frame: dalla `initState` la notifica arriverebbe durante
+    // la build della nuova rotta e le sezioni in ascolto del progresso si
+    // rimarrebbero da costruire mentre il framework sta già costruendo.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _rememberResume());
+  }
+
+  /// Il passo salvato può eccedere la lunghezza se il contenuto è cambiato
+  /// nel frattempo.
+  int _clampStep(int step) {
+    final total = widget.lesson.steps.length;
+    if (total == 0) return 0;
+    return step.clamp(0, total - 1);
+  }
+
+  /// Scrive il punto di ripresa a ogni cambio di card, non solo all'uscita:
+  /// così un kill dell'app non lo perde. Senza `levelId` il completamento non
+  /// viene registrato, quindi non ha senso ricordare nulla.
+  void _rememberResume() {
+    final levelId = widget.levelId;
+    if (levelId == null) return;
+    unawaited(
+      ProgressStore.instance.saveLessonResume(
+        LessonResume(levelId: levelId, lessonId: widget.lesson.id, step: _page),
+      ),
+    );
   }
 
   @override
@@ -144,6 +183,9 @@ class _LessonScreenState extends State<LessonScreen> {
     if (levelId != null &&
         !ProgressStore.instance.isLessonCompleted(levelId, widget.lesson.id)) {
       await ProgressStore.instance.completeLesson(levelId, widget.lesson.id);
+      // Completata: non c'è più niente da riprendere, altrimenti la sezione
+      // riproporrebbe la stessa lezione appena finita.
+      await ProgressStore.instance.clearLessonResume();
     }
     HapticFeedback.mediumImpact();
     if (!mounted) return;
@@ -230,6 +272,7 @@ class _LessonScreenState extends State<LessonScreen> {
                     onPageChanged: (index) {
                       setState(() => _page = index);
                       _resetStep();
+                      _rememberResume();
                     },
                     itemBuilder: (context, index) {
                       final step = widget.lesson.steps[index];

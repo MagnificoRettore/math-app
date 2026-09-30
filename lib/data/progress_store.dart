@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/lesson_resume.dart';
 import '../models/progress.dart';
 
 class ProgressStore extends ChangeNotifier {
@@ -11,9 +12,11 @@ class ProgressStore extends ChangeNotifier {
 
   static const _progressKey = 'exercise_progress_v1';
   static const _lessonsKey = 'lessons_completed_v1';
+  static const _resumeKey = 'lessons_in_progress_v1';
 
   final Map<String, ExerciseProgress> _progress = {};
   final Set<String> _completedLessons = {};
+  LessonResume? _resume;
   bool _loaded = false;
   Object? _loadError;
 
@@ -37,6 +40,12 @@ class ProgressStore extends ChangeNotifier {
       if (done != null) {
         _completedLessons.addAll(done);
       }
+      final rawResume = prefs.getString(_resumeKey);
+      if (rawResume != null) {
+        _resume = LessonResume.fromJson(
+          jsonDecode(rawResume) as Map<String, dynamic>,
+        );
+      }
       _loaded = true;
       notifyListeners();
     } catch (error) {
@@ -48,6 +57,7 @@ class ProgressStore extends ChangeNotifier {
     _loaded = false;
     _progress.clear();
     _completedLessons.clear();
+    _resume = null;
     await load();
   }
 
@@ -56,6 +66,7 @@ class ProgressStore extends ChangeNotifier {
     _loaded = false;
     _progress.clear();
     _completedLessons.clear();
+    _resume = null;
     _loadError = null;
     await load();
   }
@@ -107,6 +118,27 @@ class ProgressStore extends ChangeNotifier {
     return mastered / ids.length;
   }
 
+  /// La lezione lasciata aperta, se l'utente ne ha abbandonata una senza
+  /// completarla. È il punto da cui ripartire la sezione «Jump Back In».
+  LessonResume? get lessonResume => _resume;
+
+  /// Ricorda la lezione aperta e il passo raggiunto: scritta a ogni cambio di
+  /// card, così un kill dell'app non perde il punto di ripresa.
+  Future<void> saveLessonResume(LessonResume resume) async {
+    _resume = resume;
+    notifyListeners();
+    await _persistResume();
+  }
+
+  /// Chiamata quando la lezione è completata: non c'è più niente da
+  /// riprendere, quindi la sezione deve tornare a puntare alla prossima.
+  Future<void> clearLessonResume() async {
+    if (_resume == null) return;
+    _resume = null;
+    notifyListeners();
+    await _persistResume();
+  }
+
   bool isLessonCompleted(String levelId, String lessonId) =>
       _completedLessons.contains(scopedKey(levelId, lessonId));
 
@@ -121,6 +153,16 @@ class ProgressStore extends ChangeNotifier {
   Future<void> _persistLessons() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_lessonsKey, _completedLessons.toList());
+  }
+
+  Future<void> _persistResume() async {
+    final prefs = await SharedPreferences.getInstance();
+    final resume = _resume;
+    if (resume == null) {
+      await prefs.remove(_resumeKey);
+      return;
+    }
+    await prefs.setString(_resumeKey, jsonEncode(resume.toJson()));
   }
 
   Future<void> _persist() async {

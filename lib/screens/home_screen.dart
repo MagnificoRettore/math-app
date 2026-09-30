@@ -11,6 +11,7 @@ import '../widgets/app_card.dart';
 import '../widgets/header_text_bar.dart';
 import '../widgets/home_greeting.dart';
 import '../widgets/image_carousel.dart';
+import '../widgets/jump_back_in_section.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/profile_button.dart';
@@ -71,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               children: [
+                const JumpBackInSection(),
                 const ImageCarousel(),
                 const SizedBox(height: 20),
                 MissionHero(

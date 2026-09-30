@@ -18,12 +18,37 @@ class LessonRepository {
   bool get loaded => _loaded;
   Object? get loadError => _loadError;
 
-  List<Lesson> lessonsInYear(String levelId, String yearId) {
+  /// Gli argomenti di un anno scolastico, nell'ordine in cui arrivano dal
+  /// contenuto: `lessonsInYear` li appiattisce e perde l'argomento di
+  /// appartenenza, questa no.
+  List<Argomento> argomentiInYear(String levelId, String yearId) {
     return [
       for (final argomento in _argomenti)
         if (argomento.levelId == levelId && argomento.yearId == yearId)
-          ...argomento.lessons,
+          argomento,
     ];
+  }
+
+  /// Le lezioni di un anno in ordine: perdono l'argomento di appartenenza,
+  /// per elencare i titoli non serve. Per sapere a quale argomento
+  /// appartiene una lezione usa `argomentoFor`.
+  List<Lesson> lessonsInYear(String levelId, String yearId) {
+    return [
+      for (final argomento in argomentiInYear(levelId, yearId))
+        ...argomento.lessons,
+    ];
+  }
+
+  /// L'argomento che contiene la lezione data, o null se nel contenuto non
+  /// c'è più: serve a ritrovare dove riprendere una lezione.
+  Argomento? argomentoFor(String levelId, String lessonId) {
+    for (final argomento in _argomenti) {
+      if (argomento.levelId != levelId) continue;
+      for (final lesson in argomento.lessons) {
+        if (lesson.id == lessonId) return argomento;
+      }
+    }
+    return null;
   }
 
   static const _indexPath = 'assets/data/lessons/index.json';

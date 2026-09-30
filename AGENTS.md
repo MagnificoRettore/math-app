@@ -58,6 +58,9 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 - **Lesson `content`**: può essere stringa markdown oppure **array di segmenti** (righe di testo come stringhe, riquadri come oggetti). `LessonStep.fromJson` appiattisce entrambi in una stringa con sintassi `::box`/`::endbox`; preferisci l'array nei JSON per leggibilità.
 - **Step `mcq`**: `prompt` (la traccia, resa da `PromptView`), `options[]`, `correctIndex`, `explanation?`; risolvendolo compare «Completa la lezione».
 - **Toggle del tema**: nel card «Tema scuro» di `ProfileScreen` (ospite e loggato) il controllo è l'animazione sole/luna `assets/animations/toggle.json`, non uno `Switch`. Toccarla cambia tema e guida la transizione sui marker `Day to Night` / `Night to Day` (1.0s e 1.33s, durata calcolata dalla composizione), poi si ferma sul segmento idle del nuovo tema. Finché la composizione non è caricata resta lo `Switch` di fallback, così la card non ha buchi.
+- **Sezione «Jump Back In»**: prima sezione di `HomeScreen` (`JumpBackInSection`, prima di `ImageCarousel`). Esiste solo per l'utente registrato con `schoolLevelId` non vuota, e solo se `ProgressStore.lessonResume` punta a qualcosa: senza una lezione mai aperta non esce niente, non si propone mai un argomento a caso. Il tap apre `LessonScreen(initialStep: ...)`. Il `SizedBox(height: 20)` sotto la card sta **dentro** la sezione, non nella lista di `HomeScreen`: quando la sezione non esiste non deve restare un buco davanti al carousel. La card ha il topic (`argomento.title`) come titolo grande e la lezione come sottotitolo, e sotto un `ProgressBar` senza numeri. La risoluzione è in `LessonResumeEngine` (logica pura, niente `instance`): `target()` sceglie la lezione (quella lasciata aperta all'ultimo passo clampato, altrimenti la non completata più vicina cercando prima nel suo argomento e poi nei successivi dello stesso anno, anno finito ⇒ `null`; se la lezione in pausa è stata completata altrove la si salta e si torna anche indietro nell'argomento, così l'utente vede che gli resta qualcosa). Il resume vale solo per il `levelId` dell'utente.
+- **Barra di avanzamento del topic**: `LessonResumeEngine.topicProgress(target)` è **posizionale, non di merito**: conta le card superate della lezione corrente (`target.step`, la card aperta non conta) più tutte le card delle lezioni che la precedono nell'argomento, **anche se non sono mai state aperte**. Il denominatore sono tutte le card dell'argomento, comprese quelle dopo. Motivo: un argomento si affronta in ordine, quindi la barra dice dove si è, non cosa si è fatto; se contasse solo il lavoro fatto, saltare una lezione azzererebbe la barra e l'utente leggerebbe un regresso mentre sta avanzando.
+- **Ripresa lezione**: `LessonScreen(initialStep: 0)` riparte da uno step preciso e **non** ripristina le risposte già date (`_solved`, `_selectedOption`, `_wrongOptions` restano puliti). `LessonScreen` salva il punto in `initState` e a ogni `onPageChanged`, così il punto resta valido anche se l'app viene uccisa; `_complete()` chiama `clearLessonResume()`, altrimenti la sezione riproporrebbe la lezione appena finita. La scrittura iniziale è differita al primo frame con `addPostFrameCallback`: dalla `initState` la notifica arriverebbe durante la build della nuova rotta e le sezioni in ascolto di `ProgressStore` si rimarrebbero da costruire mentre il framework sta già costruendo.
 - **UI style**: Material 3, iOS-native-inspired minimal design
 - **Architectural Constraints**: No network calls, no code generation (`build_runner`, `freezed`, or `json_serializable`), no third-party state management (Riverpod/Bloc/Provider).
 
@@ -69,7 +72,7 @@ Flutter application for **Italian students** with solved math exercises (Scuola 
 |---|---|
 | `flutter run` | Run the app (dev) |
 | `flutter analyze` | Static analysis — **must stay at 0 issues** |
-| `flutter test` | Run all unit + widget tests (228 tests / 23 files) |
+| `flutter test` | Run all unit + widget tests (248 tests / 25 files) |
 | `flutter test --coverage` | Generate coverage report |
 | `dart format .` | Format code |
 | `flutter pub get` | Install dependencies |
@@ -131,6 +134,7 @@ assets/data/              # levels.json, middle_school.json, high_school.json,
 |---|---|
 | `exercise_progress_v1` | Exercise status (`none`/`mastered`/`needsReview`) (JSON list) |
 | `lessons_completed_v1` | Completed lesson IDs (StringList) |
+| `lessons_in_progress_v1` | Last opened lesson: `levelId` + `lessonId` + `step` (JSON) |
 | `user_profile_v1` | User profile (JSON) |
 | `settings_v1` | `themeMode` + onboarding flag (JSON) |
 | `study_stats_v1` | Streak, daily counters, study minutes (JSON) |
