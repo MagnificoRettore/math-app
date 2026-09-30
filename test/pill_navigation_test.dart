@@ -358,16 +358,16 @@ void main() {
       Offset(barRect.left + barRect.width * 5 / 6, barRect.center.dy),
     );
     await tester.pump();
-    // Tre segmenti esatti: si arriva su HOME, ma l'indicatore resta
-    // disallineato di qualche pixel, quindi lo scorrimento c'è e la
-    // navigazione parte a fine assestamento.
-    await gesture.moveBy(Offset(-2 * seg, 0));
+    // Si parte dall'ultimo segmento e si trascina di un segmento verso
+    // sinistra: si arriva su HOME, che è il segmento di mezzo, e il
+    // rilascio seleziona la home.
+    await gesture.moveBy(Offset(-seg, 0));
     await tester.pump();
     await gesture.up();
 
-    // Il rilascio avvia l'assestamento dell'indicatore (260ms): il primo
-    // pump è il frame che lo avvia, il secondo lo porta a fine e avvia il
-    // ritorno animato, gli ultimi due campano dentro il ritorno.
+    // Il rilascio sulla sezione scelta avvia il ritorno animato: i pump
+    // seguenti campano dentro il ritorno, con le lezioni ancora in vista e
+    // l'indicatore già su HOME.
     await tester.pump(const Duration(milliseconds: 260));
     await tester.pump(const Duration(milliseconds: 260));
     await tester.pump(const Duration(milliseconds: 60));
@@ -462,17 +462,18 @@ void main() {
     await _pumpHome(tester);
 
     final barRect = tester.getRect(_pillSurface());
-    final indicator = tester.getRect(
-      find.byKey(const ValueKey('pill-indicator')),
-    );
+    // larghezza di un segmento: dentro la barra restano 6px per lato
+    final seg = (barRect.width - 12) / 3;
+    final homeOffset = _segmentX(tester, 'HOME') - barRect.left;
 
-    // L'indicatore deve partire centrato sul primo segmento (HOME),
-    // non sul confine HOME/LEZIONI.
-    expect(indicator.left - barRect.left, lessThan(60));
+    // L'indicatore deve partire centrato sul segmento di HOME, che è il
+    // segmento di mezzo, non sul confine con LEZIONI o con ESERCIZI.
     expect(
-      (indicator.center.dx - tester.getCenter(find.text('HOME')).dx).abs(),
-      lessThan(2),
+      (_indicatorX(tester) - _segmentX(tester, 'HOME')).abs(),
+      lessThan(1),
     );
+    expect(homeOffset, greaterThan(seg - 1));
+    expect(homeOffset, lessThan(2 * seg + 1));
   });
 
   testWidgets('la pillola è compatta e centrata nello schermo', (tester) async {
@@ -499,11 +500,13 @@ void main() {
       final barSize = tester.getSize(bar);
       final center = tester.getCenter(bar);
 
+      // Si parte da HOME (segmento di mezzo) e si trascina a sinistra di un
+      // segmento: LEZIONI è il segmento alla sua sinistra.
       final gesture = await tester.startGesture(
-        Offset(center.dx - barSize.width * 3 / 8, center.dy),
+        Offset(center.dx, center.dy),
       );
       await tester.pump();
-      await gesture.moveBy(Offset(barSize.width / 4, 0));
+      await gesture.moveBy(Offset(-barSize.width / 6, 0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
@@ -573,11 +576,13 @@ void main() {
       final barSize = tester.getSize(bar);
       final center = tester.getCenter(bar);
 
+      // Si parte da HOME (segmento di mezzo) e si trascina a sinistra di un
+      // segmento: LEZIONI è il segmento alla sua sinistra.
       final gesture = await tester.startGesture(
-        Offset(center.dx - barSize.width * 3 / 8, center.dy),
+        Offset(center.dx, center.dy),
       );
       await tester.pump();
-      await gesture.moveBy(Offset(barSize.width / 4, 0));
+      await gesture.moveBy(Offset(-barSize.width / 6, 0));
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();

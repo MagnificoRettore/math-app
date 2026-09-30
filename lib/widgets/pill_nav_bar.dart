@@ -13,7 +13,7 @@ import '../screens/lesson_list_screen.dart';
 import '../theme/app_colors.dart';
 import 'school_choice_sheet.dart';
 
-enum PillTab { home, lessons, exercises }
+enum PillTab { lessons, home, exercises }
 
 const _pillLabels = {
   PillTab.home: 'HOME',
