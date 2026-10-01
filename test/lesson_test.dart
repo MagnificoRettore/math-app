@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lottie/lottie.dart';
@@ -8,6 +10,9 @@ import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson.dart';
 import 'package:math_app/models/lesson_step.dart';
+import 'package:math_app/models/multifunction_box/box_payload.dart';
+import 'package:math_app/models/multifunction_box/box_type.dart';
+import 'package:math_app/models/multifunction_box/multifunction_box.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/mcq_option_tile.dart';
@@ -80,7 +85,7 @@ void main() {
 
   test('il repository carica gli argomenti e filtra per anno', () {
     expect(LessonRepository.instance.loaded, isTrue);
-    expect(LessonRepository.instance.argomenti, hasLength(2));
+    expect(LessonRepository.instance.argomenti, hasLength(3));
 
     final argomento = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Equazioni di primo grado',
@@ -110,6 +115,43 @@ void main() {
       isEmpty,
     );
   });
+
+  test(
+    'le rette sono il primo argomento di terza con l\'immagine iniziale',
+    () {
+      final rettes = LessonRepository.instance.argomenti.firstWhere(
+        (a) => a.title == 'Le rette',
+      );
+      expect(rettes.levelId, 'high-school');
+      expect(rettes.yearId, 'year3');
+      expect(rettes.topicId, 'year3-rettes');
+      expect(rettes.lessons, hasLength(1));
+
+      final lezione = rettes.lessons.single;
+      expect(lezione.title, 'Introduzione');
+      expect(lezione.steps, hasLength(1));
+      final step = lezione.steps.single;
+      expect(step.title, 'Definizione');
+      expect(step.type, LessonStepType.info);
+      final box = MultifunctionBox.fromJson(
+        jsonDecode(
+          RegExp(
+            r'::box\n(.*?)\n::endbox',
+            dotAll: true,
+          ).firstMatch(step.content)!.group(1)!,
+        ) as Map<String, dynamic>,
+      );
+      expect(box.boxType, BoxType.image);
+      expect(
+        (box.payload as ImageBoxPayload).source,
+        'assets/images/retta.png',
+      );
+
+      expect(LessonRepository.instance.lessonsInYear('high-school', 'year3'), [
+        lezione,
+      ]);
+    },
+  );
 
   test('la lezione parsifica passaggi info e mcq', () {
     final lesson = LessonRepository.instance.argomenti

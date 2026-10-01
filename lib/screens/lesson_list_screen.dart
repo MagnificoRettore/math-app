@@ -9,7 +9,7 @@ import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
-import '../widgets/header_text_bar.dart';
+import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/profile_button.dart';
 import '../widgets/year_tabs.dart';
@@ -66,13 +66,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
           automaticallyImplyLeading: false,
           toolbarHeight: kHeaderToolbarHeight,
           titleSpacing: kHeaderHorizontalMargin,
-          title: const Row(
-            children: [
-              Expanded(child: HeaderTextBar()),
-              SizedBox(width: 6),
-              ProfileButton(),
-            ],
+          // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
+          // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
+          // alla sua misura, così resta a filo del margine sinistro.
+          title: const SizedBox(
+            width: kProfileAvatarSize,
+            child: ProfileButton(),
           ),
+          actionsPadding: kHeaderActionsPadding,
+          actions: const [HeaderSearchButton()],
         ),
         body: _wrapBody(
           const _EmptyLessons(
@@ -91,13 +93,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
           automaticallyImplyLeading: false,
           toolbarHeight: kHeaderToolbarHeight,
           titleSpacing: kHeaderHorizontalMargin,
-          title: const Row(
-            children: [
-              Expanded(child: HeaderTextBar()),
-              SizedBox(width: 6),
-              ProfileButton(),
-            ],
+          // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
+          // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
+          // alla sua misura, così resta a filo del margine sinistro.
+          title: const SizedBox(
+            width: kProfileAvatarSize,
+            child: ProfileButton(),
           ),
+          actionsPadding: kHeaderActionsPadding,
+          actions: const [HeaderSearchButton()],
         ),
         body: _wrapBody(
           const _EmptyLessons(
@@ -113,13 +117,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
         automaticallyImplyLeading: false,
         toolbarHeight: kHeaderToolbarHeight,
         titleSpacing: kHeaderHorizontalMargin,
-        title: const Row(
-          children: [
-            Expanded(child: HeaderTextBar()),
-            SizedBox(width: 6),
-            ProfileButton(),
-          ],
+        // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
+        // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
+        // alla sua misura, così resta a filo del margine sinistro.
+        title: const SizedBox(
+          width: kProfileAvatarSize,
+          child: ProfileButton(),
         ),
+        actionsPadding: kHeaderActionsPadding,
+        actions: const [HeaderSearchButton()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(

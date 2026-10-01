@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
+import '../haptics.dart';
 import 'expression_evaluator.dart';
 
 /// Calcolatrice scientifica non modale, ancorata al basso della lezione.
@@ -99,7 +99,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   void _dismiss() {
     if (_dismissing) return;
     _dismissing = true;
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     _entrance.reverse().whenComplete(widget.onClose);
   }
 
@@ -380,7 +380,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
       child: InkWell(
         onTap: () {
           setState(() => _deg = !_deg);
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
         },
         borderRadius: BorderRadius.circular(8),
         child: Container(
@@ -538,7 +538,7 @@ class _CalcKey extends StatelessWidget {
       child: InkWell(
         onTap: () {
           onTap();
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
         },
         borderRadius: BorderRadius.circular(14),
         child: Container(

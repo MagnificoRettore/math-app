@@ -15,6 +15,10 @@ void main() {
     expect(SettingsStore.instance.themeMode, ThemeMode.light);
   });
 
+  test('stato iniziale: vibrazioni accese', () {
+    expect(SettingsStore.instance.hapticsEnabled, isTrue);
+  });
+
   test('completeOnboarding persiste il flag visto', () async {
     await SettingsStore.instance.completeOnboarding();
 
@@ -28,4 +32,14 @@ void main() {
     await SettingsStore.instance.reload();
     expect(SettingsStore.instance.themeMode, ThemeMode.dark);
   });
+
+  test(
+    'setHapticsEnabled persiste la scelta di spegnere le vibrazioni',
+    () async {
+      await SettingsStore.instance.setHapticsEnabled(false);
+
+      await SettingsStore.instance.reload();
+      expect(SettingsStore.instance.hapticsEnabled, isFalse);
+    },
+  );
 }

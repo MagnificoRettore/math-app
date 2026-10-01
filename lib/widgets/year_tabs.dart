@@ -161,7 +161,9 @@ class _CircleText extends StatelessWidget {
       style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w700,
-        color: selected ? Colors.white : c.textSecondary,
+        color: selected
+            ? Theme.of(context).colorScheme.onPrimary
+            : c.textSecondary,
       ),
     );
   }

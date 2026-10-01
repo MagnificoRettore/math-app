@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../data/progress_store.dart';
 import '../data/weak_topic_engine.dart';
+import '../haptics.dart';
 import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
@@ -39,7 +39,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
               if (!mounted || _celebrated) return;
               if (current == null && widget.weakTopic.needsReviewCount > 0) {
                 _celebrated = true;
-                HapticFeedback.mediumImpact();
+                AppHaptics.mediumImpact();
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(

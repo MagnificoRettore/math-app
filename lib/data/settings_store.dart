@@ -14,11 +14,13 @@ class SettingsStore extends ChangeNotifier {
   Object? _loadError;
   bool _onboardingSeen = false;
   ThemeMode _themeMode = ThemeMode.light;
+  bool _hapticsEnabled = true;
 
   bool get loaded => _loaded;
   Object? get loadError => _loadError;
   bool get onboardingSeen => _onboardingSeen;
   ThemeMode get themeMode => _themeMode;
+  bool get hapticsEnabled => _hapticsEnabled;
 
   Future<void> load() async {
     if (_loaded) return;
@@ -35,6 +37,7 @@ class SettingsStore extends ChangeNotifier {
           'system' => ThemeMode.system,
           _ => ThemeMode.light,
         };
+        _hapticsEnabled = json['hapticsEnabled'] as bool? ?? true;
       }
       _loaded = true;
       notifyListeners();
@@ -47,6 +50,7 @@ class SettingsStore extends ChangeNotifier {
     _loaded = false;
     _onboardingSeen = false;
     _themeMode = ThemeMode.light;
+    _hapticsEnabled = true;
     await load();
   }
 
@@ -55,6 +59,7 @@ class SettingsStore extends ChangeNotifier {
     _loaded = false;
     _onboardingSeen = false;
     _themeMode = ThemeMode.light;
+    _hapticsEnabled = true;
     _loadError = null;
     await load();
   }
@@ -72,6 +77,13 @@ class SettingsStore extends ChangeNotifier {
     await _persist();
   }
 
+  Future<void> setHapticsEnabled(bool enabled) async {
+    if (_hapticsEnabled == enabled) return;
+    _hapticsEnabled = enabled;
+    notifyListeners();
+    await _persist();
+  }
+
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -79,6 +91,7 @@ class SettingsStore extends ChangeNotifier {
       jsonEncode({
         'onboardingSeen': _onboardingSeen,
         'themeMode': _themeMode.name,
+        'hapticsEnabled': _hapticsEnabled,
       }),
     );
   }

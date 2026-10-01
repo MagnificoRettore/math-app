@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
+import '../haptics.dart';
 import '../models/level.dart';
 import '../screens/course_screen.dart';
 import '../screens/lesson_list_screen.dart';
@@ -134,7 +134,7 @@ class _PillNavBarState extends State<PillNavBar> {
   /// posizione, poi (a fine snap) la pagina viene caricata sotto la pillola.
   void _commit(int index) {
     if (_pendingTabIndex != null || index == _selectedIndex) return;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     setState(() => _pendingTabIndex = index);
   }
 
@@ -452,7 +452,7 @@ class _PillNavBarState extends State<PillNavBar> {
                                   _dragLeft! + segWidth / 2,
                                 );
                                 if (index != _activeIndex) {
-                                  HapticFeedback.selectionClick();
+                                  AppHaptics.selectionClick();
                                   _activeIndex = index;
                                 }
                               });
@@ -483,7 +483,7 @@ class _PillNavBarState extends State<PillNavBar> {
                               // viene azzerato qui, così quando la schermata
                               // tornerà visibile l'evidenziazione e l'indicatore
                               // saranno di nuovo sulla sezione corrente.
-                              HapticFeedback.selectionClick();
+                              AppHaptics.selectionClick();
                               // Se l'indicatore è già allineato al segmento
                               // scelto non c'è scorrimento da aspettare e
                               // `AnimatedPositioned.onEnd` non parte: in quel caso

@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../haptics.dart';
 import '../models/practice_exercise.dart';
 import 'math_text.dart';
 import 'mcq_option_tile.dart';
@@ -64,13 +64,13 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
   void _select(PracticeExercise exercise, int index) {
     if (_solved || !exercise.hasAnswer) return;
     if (index == exercise.correctIndex) {
-      HapticFeedback.lightImpact();
+      AppHaptics.lightImpact();
       setState(() {
         _selected = index;
         _solved = true;
       });
     } else {
-      HapticFeedback.heavyImpact();
+      AppHaptics.heavyImpact();
       setState(() {
         _wrong.add(index);
         _attemptId++;

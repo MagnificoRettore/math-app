@@ -9,6 +9,16 @@ class MathSegment {
   const MathSegment(this.text, {required this.isMath});
 }
 
+/// Fattore di scala del testo in vigore, letto dal [MediaQuery].
+///
+/// `RichText` non applica il `textScaler` (di default `TextScaler.noScaling`)
+/// e dentro `flutter_math_fork` le formule sono `RichText` costruite a mano,
+/// quindi il corpo delle lezioni crescerebbe da solo ma la matematica no.
+/// Chi rende testo con dimensioni esplicite moltiplica per questo fattore e
+/// così segue l'impostazione «Dimensione del testo» di Personalizzazione.
+double textScaleFactorOf(BuildContext context) =>
+    MediaQuery.textScalerOf(context).scale(16) / 16;
+
 /// Divide un testo in segmenti matematici (`$$..$$`, block) e inline (`$..$`)
 /// e segmenti di testo puro.
 List<MathSegment> splitMath(String data) {
@@ -107,6 +117,7 @@ class MathText extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final effectiveColor = color ?? c.textPrimary;
+    final size = fontSize * textScaleFactorOf(context);
     final segments = splitMath(data);
     if (segments.length == 1 && segments.first.isMath) {
       return Align(
@@ -116,12 +127,12 @@ class MathText extends StatelessWidget {
           child: Math.tex(
             stripMathDelimiters(segments.first.text),
             textStyle: TextStyle(
-              fontSize: fontSize * 1.1,
+              fontSize: size * 1.1,
               color: effectiveColor,
               fontWeight: fontWeight,
             ),
             options: MathOptions(
-              fontSize: fontSize * 1.1,
+              fontSize: size * 1.1,
               color: effectiveColor,
               mathFontOptions: fontWeight == null
                   ? null
@@ -141,12 +152,12 @@ class MathText extends StatelessWidget {
             if (seg.isMath)
               mathSpan(
                 seg.text,
-                fontSize: fontSize,
+                fontSize: size,
                 color: effectiveColor,
                 fontWeight: fontWeight,
               )
             else
-              ..._plainSpans(seg.text, effectiveColor, fontSize),
+              ..._plainSpans(seg.text, effectiveColor, size),
         ],
       ),
     );

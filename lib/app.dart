@@ -20,6 +20,7 @@ class MathApp extends StatelessWidget {
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
+          themeAnimationStyle: AppTheme.transitionStyle,
           builder: (context, child) => AppSessionObserver(child: child!),
           home: const SplashScreen(),
         );

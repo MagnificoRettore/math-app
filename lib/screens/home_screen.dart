@@ -1,14 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/progress_store.dart';
-import '../data/search_index.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
-import '../widgets/header_text_bar.dart';
+import '../widgets/main_header.dart';
 import '../widgets/home_greeting.dart';
 import '../widgets/image_carousel.dart';
 import '../widgets/jump_back_in_section.dart';
@@ -18,27 +15,12 @@ import '../widgets/profile_button.dart';
 import '../widgets/recommended_section.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
+import 'customization_screen.dart';
 import 'mission_screen.dart';
-import 'search_results_screen.dart';
 import 'welcome_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  Timer? _debounce;
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +28,34 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: kHeaderToolbarHeight,
-        titleSpacing: 20,
+        titleSpacing: kHeaderHorizontalMargin,
         centerTitle: false,
-        title: const HomeGreeting(),
-        actionsPadding: const EdgeInsets.only(right: kHeaderHorizontalMargin),
-        actions: const [ProfileButton()],
+        title: const Row(
+          children: [
+            ProfileButton(),
+            SizedBox(width: 12),
+            Expanded(child: HomeGreeting()),
+          ],
+        ),
+        // Le due righe del saluto riempiono la riga da sinistra: a destra ci
+        // sono la lente e le impostazioni, non una seconda copia del profilo
+        // che sta già a sinistra. La lente viene prima dell'icona di
+        // Personalizzazione perché cercare è l'azione più frequente.
+        actionsPadding: kHeaderActionsPadding,
+        actions: [
+          const HeaderSearchButton(),
+          IconButton(
+            key: const Key('home-customization'),
+            icon: Icon(
+              Icons.tune_rounded,
+              color: AppColors.of(context).textPrimary,
+            ),
+            tooltip: 'Personalizzazione',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const CustomizationScreen()),
+            ),
+          ),
+        ],
       ),
       body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),
     );
@@ -81,15 +86,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildSearchBar(),
-                const SizedBox(height: 12),
                 const StreakCard(),
                 if (user != null) ...[
                   const SizedBox(height: 16),
                   RecommendedSection(user: user),
                 ] else ...[
                   const SizedBox(height: 16),
-                  _buildGuestCard(),
+                  _buildGuestCard(context),
                 ],
                 const SizedBox(height: 8),
                 const WeakTopicsSection(),
@@ -101,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGuestCard() {
+  Widget _buildGuestCard(BuildContext context) {
     final c = AppColors.of(context);
     return AppCard(
       onTap: () =>
@@ -131,56 +134,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildSearchBar() {
-    final c = AppColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: TextField(
-        controller: _searchController,
-        onChanged: _onSearchChanged,
-        onSubmitted: _performSearch,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: 'Cerca argomenti, formule, esercizi…',
-          prefixIcon: Icon(Icons.search, color: c.textSecondary),
-          filled: true,
-          fillColor: c.surface,
-          hintStyle: TextStyle(color: c.textSecondary),
-          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(color: c.border),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    if (value.trim().length < 2) return;
-    _debounce = Timer(
-      const Duration(milliseconds: 300),
-      () => _performSearch(value),
-    );
-  }
-
-  void _performSearch(String query) {
-    _debounce?.cancel();
-    if (query.trim().isEmpty) return;
-    final result = SearchIndex.instance.search(query);
-    if (result.isEmpty) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SearchResultsScreen(query: query, results: result),
-      ),
-    );
-    _searchController.clear();
   }
 }

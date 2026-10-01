@@ -6,7 +6,7 @@ import '../models/level.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_card.dart';
-import '../widgets/header_text_bar.dart';
+import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/profile_button.dart';
 import '../widgets/progress_bar.dart';
@@ -55,13 +55,15 @@ class _CourseScreenState extends State<CourseScreen> {
         automaticallyImplyLeading: false,
         toolbarHeight: kHeaderToolbarHeight,
         titleSpacing: kHeaderHorizontalMargin,
-        title: const Row(
-          children: [
-            Expanded(child: HeaderTextBar()),
-            SizedBox(width: 6),
-            ProfileButton(),
-          ],
+        // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
+        // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
+        // alla sua misura, così resta a filo del margine sinistro.
+        title: const SizedBox(
+          width: kProfileAvatarSize,
+          child: ProfileButton(),
         ),
+        actionsPadding: kHeaderActionsPadding,
+        actions: const [HeaderSearchButton()],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(

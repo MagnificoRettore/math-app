@@ -1,0 +1,32 @@
+{
+    "level": "high-school",
+    "year": "year3",
+    "section": "year3-rettes",
+    "topic": "year3-rettes",
+    "title": "Le rette",
+    "subtitle": "",
+    "icon": "show_chart",
+    "lessons": [
+        {
+            "id": "rette-intro",
+            "title": "Introduzione",
+            "subtitle": "",
+            "minutes": 0,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Definizione",
+                    "content": [
+                        {
+                            "id": "img-retta",
+                            "box_type": "image",
+                            "payload": {
+                                "source": "assets/images/retta.png"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

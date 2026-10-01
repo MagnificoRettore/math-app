@@ -36,25 +36,6 @@ Future<void> _pumpHome(WidgetTester tester) async {
 double _schermo(WidgetTester tester) =>
     tester.view.physicalSize.width / tester.view.devicePixelRatio;
 
-/// Stessa riga del campo e dell'avatar, con la spaziatura minima laterale.
-void _stessaRiga(WidgetTester tester) {
-  final field = tester.getRect(find.byKey(const Key('header-text-field')));
-  final icon = tester.getRect(find.byKey(const Key('home-profile-avatar')));
-
-  // stessa riga: i due centri verticali coincidono
-  expect((field.center.dy - icon.center.dy).abs(), lessThan(1));
-  // la riga occupa il minimo di spazio laterale: 12px per lato, 6px
-  // fra campo e icona
-  expect(field.left, lessThanOrEqualTo(12));
-  expect(_schermo(tester) - icon.right, lessThanOrEqualTo(12));
-  expect(icon.left - field.right, lessThanOrEqualTo(6));
-  // il campo si allarga per riempire quello che resta
-  expect(field.width, greaterThan(600));
-  // campo e avatar sono cresciuti insieme
-  expect(field.height, greaterThanOrEqualTo(56));
-  expect(icon.height, greaterThanOrEqualTo(56));
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -102,6 +83,39 @@ void main() {
     expect(find.byType(CourseScreen), findsNothing);
   });
 
+  testWidgets('home: l\'avatar sta a sinistra del saluto, sulla stessa riga', (
+    tester,
+  ) async {
+    await _register();
+    await _pumpHome(tester);
+
+    final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
+    final hello = tester.getRect(find.byKey(const Key('home-greeting-hello')));
+    final name = tester.getRect(find.byKey(const Key('home-greeting-name')));
+
+    // ordine: avatar, poi le due righe del saluto
+    expect(avatar.left, lessThan(hello.left));
+    expect(hello.left, closeTo(name.left, 1));
+    // e stanno sulla stessa riga: l'altezza dell'header li contiene tutti e
+    // tre senza dividerli in due piani
+    expect((avatar.center.dy - name.center.dy).abs(), lessThan(avatar.height));
+    expect(name.bottom, lessThanOrEqualTo(avatar.bottom));
+  });
+
+  testWidgets('home: l\'icona delle impostazioni sta a destra del saluto', (
+    tester,
+  ) async {
+    await _register();
+    await _pumpHome(tester);
+
+    final name = tester.getRect(find.byKey(const Key('home-greeting-name')));
+    final icon = tester.getRect(find.byKey(const Key('home-customization')));
+
+    // in alto a destra, sulla stessa riga del saluto
+    expect(icon.left, greaterThan(name.right));
+    expect((icon.center.dy - name.center.dy).abs(), lessThan(icon.height));
+  });
+
   testWidgets('ospite: l\'icona profilo porta alla creazione del profilo', (
     tester,
   ) async {
@@ -113,20 +127,26 @@ void main() {
     expect(find.byType(RegistrationScreen), findsOneWidget);
   });
 
-  testWidgets('lezioni: la barra di testo accetta di scrivere', (tester) async {
+  testWidgets('home: la lente sta in alto a destra, prima delle impostazioni', (
+    tester,
+  ) async {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('LEZIONI'));
-    await tester.pumpAndSettle();
+    final lens = tester.getRect(find.byKey(const Key('header-search')));
+    final tune = tester.getRect(find.byKey(const Key('home-customization')));
+    final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
 
-    await tester.enterText(find.byKey(const Key('header-text-field')), 'somme');
-    await tester.pumpAndSettle();
-
-    expect(find.text('somme'), findsOneWidget);
+    // a destra della riga dell'avatar, e nella stessa riga: l'AppBar centra
+    // verticalmente title e actions nello stesso toolbar
+    expect(lens.left, greaterThan(avatar.right));
+    expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
+    // e la lente sta prima dell'icona delle impostazioni
+    expect(lens.right, lessThanOrEqualTo(tune.left));
+    expect(_schermo(tester) - tune.right, lessThanOrEqualTo(12));
   });
 
-  testWidgets('lezioni: il campo sta sulla stessa riga dell\'icona profilo', (
+  testWidgets('lezioni: la lente sta sulla stessa riga dell\'avatar', (
     tester,
   ) async {
     await _register();
@@ -135,10 +155,15 @@ void main() {
     await tester.tap(find.text('LEZIONI'));
     await tester.pumpAndSettle();
 
-    _stessaRiga(tester);
+    final lens = tester.getRect(find.byKey(const Key('header-search')));
+    final icon = tester.getRect(find.byKey(const Key('home-profile-avatar')));
+
+    expect((lens.center.dy - icon.center.dy).abs(), lessThan(1));
+    expect(icon.left, closeTo(30, 1));
+    expect(_schermo(tester) - lens.right, lessThanOrEqualTo(12));
   });
 
-  testWidgets('esercizi: il campo sta sulla stessa riga dell\'icona profilo', (
+  testWidgets('esercizi: la lente sta sulla stessa riga dell\'avatar', (
     tester,
   ) async {
     await _register();
@@ -147,24 +172,11 @@ void main() {
     await tester.tap(find.text('ESERCIZI'));
     await tester.pumpAndSettle();
 
-    _stessaRiga(tester);
-  });
+    final lens = tester.getRect(find.byKey(const Key('header-search')));
+    final icon = tester.getRect(find.byKey(const Key('home-profile-avatar')));
 
-  testWidgets('esercizi: la barra di testo accetta di scrivere', (
-    tester,
-  ) async {
-    await _register();
-    await _pumpHome(tester);
-
-    await tester.tap(find.text('ESERCIZI'));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.byKey(const Key('header-text-field')),
-      'equazioni',
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('equazioni'), findsOneWidget);
+    expect((lens.center.dy - icon.center.dy).abs(), lessThan(1));
+    expect(icon.left, closeTo(30, 1));
+    expect(_schermo(tester) - lens.right, lessThanOrEqualTo(12));
   });
 }

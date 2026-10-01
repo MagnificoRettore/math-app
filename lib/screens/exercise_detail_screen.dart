@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../data/progress_store.dart';
 import '../data/study_store.dart';
+import '../haptics.dart';
 import '../models/course.dart';
 import '../models/exercise.dart';
 import '../models/level.dart';
@@ -273,7 +273,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
   }
 
   Future<void> _markStatus(ExerciseStatus status) async {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     ProgressStore.instance.setStatus(
       widget.level.id,
       widget.exercise.id,

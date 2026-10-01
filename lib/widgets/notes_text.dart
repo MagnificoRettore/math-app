@@ -70,6 +70,7 @@ class NotesText extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final effectiveColor = color ?? c.textPrimary;
+    final scale = fontScale * textScaleFactorOf(context);
     final nodes = _parseBlocks(data);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,7 +78,7 @@ class NotesText extends StatelessWidget {
         for (var i = 0; i < nodes.length; i++)
           Padding(
             padding: EdgeInsets.only(bottom: i == nodes.length - 1 ? 0 : 8),
-            child: _buildNode(context, nodes[i], effectiveColor),
+            child: _buildNode(context, nodes[i], effectiveColor, scale),
           ),
       ],
     );
@@ -109,9 +110,8 @@ class NotesText extends StatelessWidget {
         continue;
       }
 
-      final calloutMatch = RegExp(
-        r'^:::(?<word>[A-Za-z]+)\b\s*(?<rest>.*)$',
-      ).firstMatch(trimmed);
+      final calloutMatch = RegExp(r'^:::(?<word>[A-Za-z]+)\b\s*(?<rest>.*)$')
+          .firstMatch(trimmed);
       if (calloutMatch != null) {
         final kind = _calloutKindFrom(calloutMatch.group(1)!);
         if (kind != null) {
@@ -198,15 +198,21 @@ class NotesText extends StatelessWidget {
     }
   }
 
-  Widget _buildNode(BuildContext context, _Node node, Color color) {
-    if (node is _Callout) return _buildCallout(context, node, color);
-    return _buildBlock(context, node as _Block, color);
+  Widget _buildNode(
+    BuildContext context,
+    _Node node,
+    Color color,
+    double scale,
+  ) {
+    if (node is _Callout) return _buildCallout(context, node, color, scale);
+    return _buildBlock(context, node as _Block, color, scale);
   }
 
   Widget _buildCallout(
     BuildContext context,
     _Callout callout,
     Color baseColor,
+    double scale,
   ) {
     final c = AppColors.of(context);
     final (calloutColor, icon, label) = switch (callout.kind) {
@@ -215,11 +221,7 @@ class NotesText extends StatelessWidget {
         Icons.warning_amber_rounded,
         'Attenzione',
       ),
-      _CalloutKind.takeaway => (
-        c.accent,
-        Icons.lightbulb_outline,
-        'Takeaway',
-      ),
+      _CalloutKind.takeaway => (c.accent, Icons.lightbulb_outline, 'Takeaway'),
     };
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -251,7 +253,12 @@ class NotesText extends StatelessWidget {
               padding: EdgeInsets.only(
                 bottom: i == callout.children.length - 1 ? 0 : 6,
               ),
-              child: _buildBlock(context, callout.children[i], baseColor),
+              child: _buildBlock(
+                context,
+                callout.children[i],
+                baseColor,
+                scale,
+              ),
             ),
         ],
       ),
@@ -324,14 +331,19 @@ class NotesText extends StatelessWidget {
 
   String _stripMonostyle(String line) => line.substring(1, line.length - 1);
 
-  Widget _buildBlock(BuildContext context, _Block block, Color color) {
+  Widget _buildBlock(
+    BuildContext context,
+    _Block block,
+    Color color,
+    double scale,
+  ) {
     if (block.isBox) {
       return Padding(
         padding: const EdgeInsets.only(top: 12),
         child: MultifunctionBoxWidget(box: block.box!),
       );
     }
-    final styleDefaults = _defaultsFor(block.type);
+    final styleDefaults = _defaultsFor(block.type, scale);
     final base = TextStyle(
       fontSize: styleDefaults.$1,
       fontWeight: styleDefaults.$2,
@@ -339,7 +351,7 @@ class NotesText extends StatelessWidget {
       color: color,
       height: 1.35,
     );
-    final spans = _inline(block.text, base);
+    final spans = _inline(block.text, base, scale);
 
     final align = _textAlignFor(block.align);
     final wrapAlign = _wrapAlignFor(block.align);
@@ -403,21 +415,19 @@ class NotesText extends StatelessWidget {
     NotesAlign.left => Alignment.centerLeft,
   };
 
-  (double, FontWeight?, String?) _defaultsFor(NotesBlockType type) =>
-      switch (type) {
-        NotesBlockType.title => (28 * fontScale, FontWeight.w800, null),
-        NotesBlockType.heading => (22 * fontScale, FontWeight.w700, null),
-        NotesBlockType.subheading => (17 * fontScale, FontWeight.w600, null),
-        NotesBlockType.body => (baseFontSize * fontScale, FontWeight.w400, null),
-        NotesBlockType.mono => (14 * fontScale, FontWeight.w400, 'monospace'),
-        NotesBlockType.bullet => (
-          baseFontSize * fontScale,
-          FontWeight.w400,
-          null,
-        ),
-      };
+  (double, FontWeight?, String?) _defaultsFor(
+    NotesBlockType type,
+    double scale,
+  ) => switch (type) {
+    NotesBlockType.title => (28 * scale, FontWeight.w800, null),
+    NotesBlockType.heading => (22 * scale, FontWeight.w700, null),
+    NotesBlockType.subheading => (17 * scale, FontWeight.w600, null),
+    NotesBlockType.body => (baseFontSize * scale, FontWeight.w400, null),
+    NotesBlockType.mono => (14 * scale, FontWeight.w400, 'monospace'),
+    NotesBlockType.bullet => (baseFontSize * scale, FontWeight.w400, null),
+  };
 
-  List<InlineSpan> _inline(String raw, TextStyle base) {
+  List<InlineSpan> _inline(String raw, TextStyle base, double scale) {
     final segments = splitMath(raw);
     final spans = <InlineSpan>[];
     for (final seg in segments) {
@@ -431,13 +441,13 @@ class NotesText extends StatelessWidget {
           ),
         );
       } else {
-        spans.addAll(_stylized(seg.text, base));
+        spans.addAll(_stylized(seg.text, base, scale));
       }
     }
     return spans;
   }
 
-  List<InlineSpan> _stylized(String text, TextStyle base) {
+  List<InlineSpan> _stylized(String text, TextStyle base, double scale) {
     if (text.isEmpty) return const [];
     final spans = <InlineSpan>[];
     final regex = RegExp(r'(\*\*|__|~~|\*|`)');
@@ -449,7 +459,7 @@ class NotesText extends StatelessWidget {
       spans.add(
         TextSpan(
           text: text.substring(lastIndex, end),
-          style: _applyFlags(stack, base),
+          style: _applyFlags(stack, base, scale),
         ),
       );
     }
@@ -468,7 +478,7 @@ class NotesText extends StatelessWidget {
     return spans;
   }
 
-  TextStyle _applyFlags(List<String> stack, TextStyle base) {
+  TextStyle _applyFlags(List<String> stack, TextStyle base, double scale) {
     var style = base;
     if (stack.contains('**')) {
       style = style.copyWith(fontWeight: FontWeight.w700);
@@ -477,10 +487,7 @@ class NotesText extends StatelessWidget {
       style = style.copyWith(fontStyle: FontStyle.italic);
     }
     if (stack.contains('`')) {
-      style = style.copyWith(
-        fontFamily: 'monospace',
-        fontSize: 14 * fontScale,
-      );
+      style = style.copyWith(fontFamily: 'monospace', fontSize: 14 * scale);
     }
     final decorations = <TextDecoration>[];
     if (stack.contains('__')) {

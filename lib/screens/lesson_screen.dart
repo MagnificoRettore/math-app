@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../data/progress_store.dart';
+import '../haptics.dart';
 import '../models/lesson.dart';
 import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
@@ -133,11 +133,11 @@ class _LessonScreenState extends State<LessonScreen> {
       if (index == _step.correctIndex) {
         _selectedOption = index;
         _solved = true;
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
       } else {
         _wrongOptions.add(index);
         _attemptId++;
-        HapticFeedback.heavyImpact();
+        AppHaptics.heavyImpact();
       }
     });
   }
@@ -187,7 +187,7 @@ class _LessonScreenState extends State<LessonScreen> {
       // riproporrebbe la stessa lezione appena finita.
       await ProgressStore.instance.clearLessonResume();
     }
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     if (!mounted) return;
     setState(() => _celebrating = true);
     _celebrationTimer?.cancel();
