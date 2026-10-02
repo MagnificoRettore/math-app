@@ -212,9 +212,11 @@ class _SearchOverlayState extends State<SearchOverlay> {
   }
 }
 
-/// Riga di risultato: il titolo in grassetto e sotto il contesto — da quale
-/// argomento arriva e a che livello — perché la ricerca guarda tutti i livelli
-/// e «Moduli» da solo non dice a chi appartiene il risultato.
+/// Riga di risultato: sopra il titolo la pillola che dice il tipo, poi il titolo
+/// in grassetto e sotto il contesto — da quale argomento arriva e a che livello.
+/// La pillola serve perché «Moduli» e «Modulo e Equazioni con Modulo» sono due
+/// titoli e senza etichetta non si sa quale dei due si sta aprendo; il contesto
+/// non basta, perché è informazione e non dichiarazione di tipo.
 class _ResultCard extends StatelessWidget {
   final SearchResult result;
   final VoidCallback onTap;
@@ -242,6 +244,8 @@ class _ResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _TipoBadge(tipo: result.type),
+          const SizedBox(height: 8),
           Text(
             titolo,
             style: TextStyle(
@@ -275,6 +279,51 @@ class _ResultCard extends StatelessWidget {
       parti.map((p) => p.trim()).where((p) => p.isNotEmpty).join(' · ');
 
   String _minuti(int minuti) => minuti > 0 ? '$minuti min' : '';
+}
+
+/// La dichiarazione di tipo del risultato, sopra il titolo.
+///
+/// Sta **sopra** e non accanto al titolo: il titolo va in ellissi e la riga è
+/// già alta, quindi un vicino nella stessa `Row` si mangerebbe la larghezza
+/// proprio dove il testo è più a rischio di troncarsi.
+///
+/// Due colori dalla palette, non uno, perché due tipi che si somigliano vengono
+/// letti come uno: `accent` per l'argomento e `indigo` per la lezione. Il teal
+/// sembrava la scelta giusta ed è la sbagliata: sul `surface` chiaro sta a
+/// 2.33:1 e una scritta a 12px sotto i 4.5:1 non si legge. `indigo` sta a 4.86:1
+/// in chiaro e 6.69:1 in scuro. Entrambi animano da soli con `AppPalette.lerp`,
+/// quindi seguono la transizione fra i temi senza altro codice.
+class _TipoBadge extends StatelessWidget {
+  final ResultType tipo;
+
+  const _TipoBadge({required this.tipo});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final color = switch (tipo) {
+      ResultType.argomento => c.accent,
+      ResultType.lesson => c.indigo,
+      ResultType.topic => c.pink,
+      ResultType.exercise => c.medium,
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        tipo.label,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
 }
 
 /// Escape chiude l'overlay, come il tocco fuori.

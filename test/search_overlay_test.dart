@@ -135,6 +135,10 @@ void main() {
     // «Moduli» compare due volte: come titolo dell'argomento e come contesto
     // della lezione che gli appartiene
     expect(find.text('Moduli'), findsNWidgets(2));
+    // e ogni riga dice che tipo è: senza, «Moduli» e «Modulo e Equazioni con
+    // Modulo» sono due titoli e basta, e non si sa quale si apre
+    expect(find.text('Argomento'), findsOneWidget);
+    expect(find.text('Lezione'), findsOneWidget);
   });
 
   testWidgets(

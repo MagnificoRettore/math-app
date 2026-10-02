@@ -7,9 +7,30 @@ import '../models/section.dart';
 import '../models/topic.dart';
 import 'lesson_repository.dart';
 
-/// Ordine dicome: gli argomenti e le lezioni sono ciò che la ricerca mostra,
+/// Ordine di come: gli argomenti e le lezioni sono ciò che la ricerca mostra,
 /// i topic e gli esercizi restano indicizzati per il ramo esercizi.
-enum ResultType { argomento, lesson, topic, exercise }
+enum ResultType {
+  argomento,
+  lesson,
+  topic,
+  exercise;
+
+  /// Come si chiama il tipo per l'utente. Sta sull'enum e non nella riga che lo
+  /// mostra: il tipo è un fatto del dato, quindi ogni punto dell'app che lo
+  /// mostra dice la stessa parola.
+  String get label {
+    switch (this) {
+      case ResultType.argomento:
+        return 'Argomento';
+      case ResultType.lesson:
+        return 'Lezione';
+      case ResultType.topic:
+        return 'Topic';
+      case ResultType.exercise:
+        return 'Esercizio';
+    }
+  }
+}
 
 class SearchResult {
   final ResultType type;

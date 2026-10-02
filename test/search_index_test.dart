@@ -112,4 +112,15 @@ void main() {
     expect(SearchIndex.instance.search('', types: _scelti), isEmpty);
     expect(SearchIndex.instance.search('   ', types: _scelti), isEmpty);
   });
+
+  test('ogni tipo sa dichiarare come si chiama in italiano', () {
+    // L'etichetta è il dato, non la sua rappresentazione: la riga del risultato
+    // la mostra e ogni altro posto che mostra un tipo dirà la stessa parola.
+    expect(ResultType.argomento.label, 'Argomento');
+    expect(ResultType.lesson.label, 'Lezione');
+    // Il ramo esercizi non ha punti d'ingresso nell'app, ma l'enum è completo e
+    // le sue etichette non devono inventare parole nuove.
+    expect(ResultType.topic.label, 'Topic');
+    expect(ResultType.exercise.label, 'Esercizio');
+  });
 }
