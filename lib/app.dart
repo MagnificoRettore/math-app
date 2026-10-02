@@ -4,6 +4,7 @@ import 'data/settings_store.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'widgets/app_session_observer.dart';
+import 'widgets/dismiss_keyboard.dart';
 
 class MathApp extends StatelessWidget {
   const MathApp({super.key});
@@ -21,7 +22,8 @@ class MathApp extends StatelessWidget {
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
           themeAnimationStyle: AppTheme.transitionStyle,
-          builder: (context, child) => AppSessionObserver(child: child!),
+          builder: (context, child) =>
+              DismissKeyboard(child: AppSessionObserver(child: child!)),
           home: const SplashScreen(),
         );
       },
