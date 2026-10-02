@@ -67,46 +67,9 @@
                             "title": "Soluzione generale",
                             "payload": {
                                 "tex": "ax + b = 0 \\quad\\Rightarrow\\quad x = -\\frac{b}{a}",
-                                "mode": "display",
                                 "fontSizeMultiplier": 1.2
                             }
-                        },
-                        "",
-                        {
-                            "id": "eq1-radice",
-                            "box_type": "interactive_chart",
-                            "title": "La radice al variare di t",
-                            "payload": {
-                                "xLabel": "x",
-                                "yLabel": "y",
-                                "xMin": -6,
-                                "xMax": 6,
-                                "xStep": 1,
-                                "yMin": -8,
-                                "yMax": 8,
-                                "parameter": {
-                                    "name": "t",
-                                    "min": -3,
-                                    "max": 3,
-                                    "step": 0.1,
-                                    "default": 1
-                                },
-                                "toggleable": true,
-                                "series": [
-                                    {
-                                        "label": "y = 2x + t",
-                                        "expression": "2 * x + t",
-                                        "colorKey": "accent"
-                                    },
-                                    {
-                                        "label": "asse x (y = 0)",
-                                        "expression": "0",
-                                        "colorKey": "medium"
-                                    }
-                                ]
-                            }
-                        },
-                        ""
+                        }
                     ]
                 },
                 {

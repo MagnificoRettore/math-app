@@ -31,8 +31,6 @@ class MultifunctionBox {
     final data = json ?? const <String, dynamic>{};
     return switch (type) {
       BoxType.image => ImageBoxPayload.fromJson(data),
-      BoxType.chart => ChartBoxPayload.fromJson(data),
-      BoxType.interactiveChart => InteractiveChartPayload.fromJson(data),
       BoxType.mathFormula => MathFormulaPayload.fromJson(data),
     };
   }

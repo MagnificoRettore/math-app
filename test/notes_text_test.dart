@@ -19,9 +19,7 @@ Future<void> _pumpScaled(WidgetTester tester, String data, double scale) {
   return tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
-        body: SingleChildScrollView(
-          child: NotesText(data, fontScale: scale),
-        ),
+        body: SingleChildScrollView(child: NotesText(data, fontScale: scale)),
       ),
     ),
   );
@@ -247,7 +245,7 @@ void main() {
     expect(find.byType(MultifunctionBoxWidget), findsNothing);
   });
 
-  testWidgets('box formula e grafico insieme al testo legacy', (tester) async {
+  testWidgets('box formula e immagine insieme al testo legacy', (tester) async {
     await _pump(
       tester,
       '# Spiegazione'
@@ -262,7 +260,7 @@ void main() {
       '\n'
       '::box'
       '\n'
-      '{"id":"c","box_type":"chart","payload":{"kind":"bar","series":[{"label":"S","values":[1,2]}]}}'
+      '{"id":"i","box_type":"image","payload":{"source":"assets/images/figura.png"}}'
       '\n'
       '::endbox',
     );
@@ -290,7 +288,7 @@ void main() {
         .readAsStringSync();
     await _pump(tester, content);
     expect(tester.takeException(), isNull);
-    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(8));
+    expect(find.byType(MultifunctionBoxWidget), findsNWidgets(4));
     expect(_richContaining(tester, 'Funzione quadratica'), isNotNull);
     expect(_richContaining(tester, 'il grafico è una'), isNotNull);
     expect(_richContaining(tester, 'Conclusione'), isNotNull);
@@ -305,9 +303,9 @@ void main() {
 
     expect(
       find.byType(AppCard),
-      findsNWidgets(6),
+      findsNWidgets(2),
       reason:
-          '8 box, meno la formula hidden e meno l\'immagine che è senza card',
+          '4 box: 3 formule meno quella hidden, e l\'immagine che è senza card',
     );
     expect(
       find.text('Formula nascosta'),

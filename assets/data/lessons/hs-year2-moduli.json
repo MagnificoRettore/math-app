@@ -39,7 +39,6 @@
                             "title": "Definizione",
                             "payload": {
                                 "tex": "|x| = \\begin{cases} x & \\text{se } x \\ge 0 \\\\ -x & \\text{se } x < 0 \\end{cases}",
-                                "mode": "display",
                                 "fontSizeMultiplier": 1.2
                             }
                         }
@@ -69,7 +68,6 @@
                             "title": "Espressione letterale",
                             "payload": {
                                 "tex": "|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}",
-                                "mode": "display",
                                 "fontSizeMultiplier": 1.1
                             }
                         }
@@ -97,7 +95,6 @@
                             "title": "",
                             "payload": {
                                 "tex": "|ax + b| = k",
-                                "mode": "display",
                                 "fontSizeMultiplier": 1.5,
                                 "hidden": true
                             }
@@ -121,7 +118,6 @@
                             "title": "",
                             "payload": {
                                 "tex": "|x - 5| = 2",
-                                "mode": "display",
                                 "fontSizeMultiplier": 1.5,
                                 "hidden": true
                             }

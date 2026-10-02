@@ -16,13 +16,11 @@ class ImageSource extends StatelessWidget {
   static const double _placeholderHeight = 180;
 
   final String source;
-  final String caption;
   final bool naturalSize;
 
   const ImageSource({
     super.key,
     required this.source,
-    this.caption = '',
     this.naturalSize = false,
   });
 
@@ -54,17 +52,6 @@ class ImageSource extends StatelessWidget {
             errorBuilder: (_, _, _) => placeholder(),
           );
 
-    final captionWidget = caption.isEmpty
-        ? null
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(
-              caption,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: c.textSecondary),
-            ),
-          );
-
     if (naturalSize) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -74,17 +61,10 @@ class ImageSource extends StatelessWidget {
             constraints: const BoxConstraints(maxHeight: maxHeight),
             child: image,
           ),
-          ?captionWidget,
         ],
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipRect(child: SizedBox(height: 200, child: image)),
-        ?captionWidget,
-      ],
-    );
+    return ClipRect(child: SizedBox(height: 200, child: image));
   }
 }

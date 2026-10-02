@@ -181,10 +181,9 @@ void main() {
 
     expect(contenuto.contains('# Titolo'), isTrue);
     expect(contenuto.contains('Blocco monostile:'), isTrue);
-    expect(contenuto.split('::box').length - 1, 2);
-    expect(contenuto.split('::endbox').length - 1, 2);
+    expect(contenuto.split('::box').length - 1, 1);
+    expect(contenuto.split('::endbox').length - 1, 1);
     expect(contenuto, contains(r'\frac{b}{a}'));
-    expect(contenuto, contains('2 * x + t'));
     expect(contenuto, contains('::left'));
   });
 

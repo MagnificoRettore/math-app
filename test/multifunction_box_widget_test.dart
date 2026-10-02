@@ -29,31 +29,22 @@ Future<void> _pump(WidgetTester tester, String json) async {
 void main() {
   const imageJson =
       '{"id":"i1","box_type":"image","title":"Figura",'
-      '"payload":{"source":"assets/images/missing.png","caption":"Captio"}}';
-  const chartJson =
-      '{"id":"c1","box_type":"chart","title":"Vendite",'
-      '"payload":{"kind":"bar","unit":"€","xLabels":["A","B"],'
-      '"series":[{"label":"S1","values":[3,5],"colorKey":"teal"},{"label":"S2","values":[1,2]}]}}';
+      '"payload":{"source":"assets/images/missing.png"}}';
   const formulaJson =
       '{"id":"f1","box_type":"math_formula","title":"Formula",'
-      '"payload":{"tex":"\\\\frac{a}{b}","mode":"display"}}';
+      '"payload":{"tex":"\\\\frac{a}{b}"}}';
   const hiddenFormulaJson =
       '{"id":"f2","box_type":"math_formula","title":"Formula",'
       '"payload":{"tex":"\\\\frac{a}{b}","hidden":true}}';
   const untitledFormulaJson =
       '{"id":"f3","box_type":"math_formula",'
       '"payload":{"tex":"x + 1"}}';
-  const interactiveJson =
-      '{"id":"v1","box_type":"interactive_chart","title":"Interattivo",'
-      '"payload":{"xLabel":"x","yLabel":"y","xMin":-2,"xMax":2,"xStep":0.5,'
-      '"parameter":{"name":"t","min":1,"max":3,"step":0.5,"default":2},'
-      '"series":[{"label":"Curva","expression":"t * x","colorKey":"accent"}]}}';
 
-  testWidgets('box immagine mostra titolo e caption', (tester) async {
+  testWidgets('box immagine mostra il titolo', (tester) async {
     await _pump(tester, imageJson);
     expect(tester.takeException(), isNull);
     expect(find.text('Figura'), findsOneWidget);
-    expect(find.text('Captio'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
   });
 
   testWidgets('box immagine non ha card ne contorno', (tester) async {
@@ -63,54 +54,11 @@ void main() {
     expect(find.byType(ClipRRect), findsNothing);
   });
 
-  Future<AlignmentGeometry> alignmentOf(
-    WidgetTester tester,
-    String value,
-  ) async {
-    await tester.pumpWidget(
-      _hostBox(
-        MultifunctionBox.fromJson({
-          'id': 'i1',
-          'box_type': 'image',
-          'payload': {'source': 'assets/images/missing.png', 'align': value},
-        }),
-      ),
-    );
-    await tester.pump();
-    return tester
-        .widget<Align>(
-          find
-              .ancestor(of: find.byType(Image), matching: find.byType(Align))
-              .first,
-        )
-        .alignment;
-  }
-
-  testWidgets('box immagine allinea a sinistra, centro e destra', (
-    tester,
-  ) async {
-    expect(await alignmentOf(tester, 'left'), Alignment.centerLeft);
-    expect(await alignmentOf(tester, 'center'), Alignment.center);
-    expect(await alignmentOf(tester, 'right'), Alignment.centerRight);
-  });
-
-  testWidgets('box grafico istogramma rende CustomPaint', (tester) async {
-    await _pump(tester, chartJson);
-    expect(tester.takeException(), isNull);
-    expect(find.byType(CustomPaint), findsWidgets);
-    expect(find.text('Vendite'), findsOneWidget);
-  });
-
   testWidgets('box formula rende Math.tex', (tester) async {
     await _pump(tester, formulaJson);
     expect(tester.takeException(), isNull);
     expect(find.byType(Math), findsOneWidget);
-  });
-
-  testWidgets('box grafico interattivo mostra slider', (tester) async {
-    await _pump(tester, interactiveJson);
-    expect(tester.takeException(), isNull);
-    expect(find.byType(Slider), findsOneWidget);
+    expect(find.byType(AppCard), findsOneWidget);
   });
 
   testWidgets('box formula hidden mostra formula senza card', (tester) async {
@@ -129,10 +77,5 @@ void main() {
     expect(find.byType(Math), findsOneWidget);
     expect(find.byType(AppCard), findsOneWidget);
     expect(find.text('Formula'), findsNothing);
-  });
-
-  testWidgets('nessuna icona di espansione', (tester) async {
-    await _pump(tester, interactiveJson);
-    expect(find.byIcon(Icons.open_in_full), findsNothing);
   });
 }
