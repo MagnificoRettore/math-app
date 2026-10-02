@@ -11,7 +11,7 @@ import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
-import 'package:math_app/screens/registration_screen.dart';
+import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
@@ -535,14 +535,14 @@ void main() {
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
 
-  testWidgets('dopo il back dal profilo la pillola torna su HOME', (
+  testWidgets('dopo il back dal login la pillola torna su HOME', (
     tester,
   ) async {
     await _pumpHome(tester);
 
     await tester.tap(find.byKey(const Key('profile-button-guest')));
     await tester.pumpAndSettle();
-    expect(find.byType(RegistrationScreen), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
 
     await _systemBack(tester);
 

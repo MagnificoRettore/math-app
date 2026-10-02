@@ -10,7 +10,7 @@ import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
-import 'package:math_app/screens/registration_screen.dart';
+import 'package:math_app/screens/login_screen.dart';
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -116,7 +116,7 @@ void main() {
     expect((icon.center.dy - name.center.dy).abs(), lessThan(icon.height));
   });
 
-  testWidgets('ospite: l\'icona profilo porta alla creazione del profilo', (
+  testWidgets('ospite: l\'icona profilo porta al login', (
     tester,
   ) async {
     await _pumpHome(tester);
@@ -124,7 +124,7 @@ void main() {
     await tester.tap(find.byKey(const Key('profile-button-guest')));
     await tester.pumpAndSettle();
 
-    expect(find.byType(RegistrationScreen), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 
   testWidgets('home: la lente sta in alto a destra, prima delle impostazioni', (

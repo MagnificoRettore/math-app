@@ -7,9 +7,20 @@ import '../widgets/school_level_tile.dart';
 
 class SchoolPickerScreen extends StatefulWidget {
   final String initialLevelId;
-  final VoidCallback? onSaved;
 
-  const SchoolPickerScreen({super.key, this.initialLevelId = '', this.onSaved});
+  /// `true` se la schermata chiude l'onboarding: salva e torna alla home
+  /// azzerando lo stack. Dal profilo è `false` e basta tornare indietro.
+  ///
+  /// Il flag, non un callback: le schermate che aprono questa pagina la
+  /// sostituiscono con `pushReplacement`, quindi il loro `BuildContext` è
+  /// già morto quando l'utente preme il bottone.
+  final bool onboarding;
+
+  const SchoolPickerScreen({
+    super.key,
+    this.initialLevelId = '',
+    this.onboarding = false,
+  });
 
   @override
   State<SchoolPickerScreen> createState() => _SchoolPickerScreenState();
@@ -33,7 +44,7 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
             AuthStore.instance.currentUser!.schoolLevelId,
           );
     final levels = ContentRepository.instance.levels;
-    final onboarding = widget.onSaved != null;
+    final onboarding = widget.onboarding;
 
     return Scaffold(
       appBar: AppBar(),
@@ -82,10 +93,11 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
   Future<void> _save() async {
     await AuthStore.instance.updateSchool(_selectedId);
     if (!mounted) return;
-    if (widget.onSaved != null) {
-      widget.onSaved!();
+    final navigator = Navigator.of(context);
+    if (widget.onboarding) {
+      navigator.popUntil((route) => route.isFirst);
       return;
     }
-    Navigator.of(context).pop();
+    navigator.pop();
   }
 }
