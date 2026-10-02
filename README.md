@@ -40,9 +40,13 @@ Applicazione Flutter per **studenti italiani** con esercizi di matematica **riso
 
 ### Profilo e onboarding
 - **Onboarding** a 3 slide al primo avvio.
-- **Registrazione**: account locale (nome, email, password, con validazione) o **Google** (demo locale senza credenziali), entrambi con **scelta del livello scolastico**.
-- **Selezione scuola** anche in un secondo momento dal Profilo; profilo con avatar a iniziali, metadati e **tema scuro** (chiaro / scuro / sistema).
-- Vista ospite in Home e Profilo con invito alla creazione del profilo, raggiungibile anche dall'icona in alto a destra.
+- **Accesso**: `LoginScreen` con ID account o email, password con occhio, «Accedi», «Password dimenticata?» (dialog: il recupero non esiste perché non c'è server) e «Non hai un account? Registrati».
+- **Registrazione**: nome, email, ID account (unico sul dispositivo, derivato dall'email se non scelto), password con **indicatore di forza**, conferma in tempo reale, Termini e Privacy. Poi **scelta del livello scolastico**.
+- **Più account sul dispositivo**: la registrazione crea un account e apre la sessione; uscire chiude la sessione e **l'account resta**, così si rientra col login. Le password sono derivate con PBKDF2-HMAC-SHA256 e sale casuale: nessuna password in chiaro, ma `shared_preferences` **non è una barriera di sicurezza** (su web è `localStorage`).
+- **Google è una demo locale**, non un OAuth: il dialog chiede nome ed email e crea l'account in locale. Lo stesso bottone sta su welcome, login e registrazione.
+- **Profilo modificabile**: nome, ID account (con controllo di unicità), email in sola lettura, **avatar a scelta** fra dodici simboli dell'app o iniziali, «Salva modifiche» con spinner e avviso di successo o errore.
+- **Selezione scuola** anche in un secondo momento dal Profilo; **tema scuro** (chiaro / scuro / sistema).
+- Vista ospite in Home e Profilo con invito all'accesso o alla registrazione, raggiungibile anche dall'icona in alto a destra.
 
 ### UI
 - **Material 3**, design minimalista ispirato a iOS, palette determinata per tema (chiaro/scuro).
@@ -60,6 +64,7 @@ Applicazione Flutter per **studenti italiani** con esercizi di matematica **riso
 | Framework | Flutter 3.47.2 (stable), Dart SDK 3.13.2 |
 | Renderer LaTeX | `flutter_math_fork` ^0.7.4 (offline, no WebView) |
 | Persistenza | `shared_preferences` ^2.5.5 |
+| Hash password | `crypto` ^3.0.7 → PBKDF2-HMAC-SHA256 in Dart puro (nessuna rete) |
 | State management | `ChangeNotifier` + `ListenableBuilder` (niente Riverpod/Bloc/Provider) |
 
 Nessuna chiamata di rete, nessun code generation, nessuna dipendenza di gestione stato di terze parti.
@@ -73,13 +78,13 @@ lib/
   theme/                 # app_theme.dart, app_colors.dart, topic_style.dart
   models/                # plain Dart class: level, course, section, topic, exercise,
                          # difficulty, progress, lesson, lesson_step, argomento,
-                         # user_profile, weak_topic, multifunction_box/
+                         # user_profile, local_account, weak_topic, multifunction_box/
   data/                  # repository + store singleton:
                          # content_repository, lesson_repository, progress_store,
                          # auth_store, settings_store, study_store, search_index,
                          # recommendation_engine, weak_topic_engine
   screens/               # 19 schermate (full-page)
-  widgets/               # 29 widget riutilizzabili
+  widgets/               # 44 widget riutilizzabili
 assets/
   data/                  # levels.json, middle_school.json, high_school.json,
                          # university.json, lessons/index.json + argomenti lessons/*.json
@@ -93,7 +98,8 @@ assets/
 - **ExerciseProgress** → stato (`ExerciseStatus`: `none` / `mastered` / `needsReview`) per esercizio, con **chiave composita** `levelId::exerciseId`.
 - **Argomento / Lesson / LessonStep** → lezione guidata: `Argomento` collega un gruppo di lezioni a un argomento del corso; `LessonStep` può essere `info` o `mcq` (vedi [Struttura del JSON delle lezioni](#struttura-del-json-delle-lezioni)).
 - **MultifunctionBox** → riquadro embedded nel content (`BoxType`: image / chart / interactive_chart / math_formula) con payload tipizzati.
-- **UserProfile** → profilo locale (`AuthMethod` manual o google), salvato su dispositivo.
+- **UserProfile** → il profilo della sessione (`AuthMethod` manual o google, `accountId`, `avatarId`), salvato su dispositivo.
+- **LocalAccount** → un account dell'elenco: profilo + hash e sale della password.
 - **WeakTopic** → argomento debole calcolato dal `WeakTopicEngine`.
 
 ### Repository e store (singleton `ChangeNotifier`)
@@ -102,7 +108,7 @@ assets/
 | `ContentRepository` | — | Carica livelli + corsi/argomenti/esercizi dai JSON (`assets/data/`) |
 | `LessonRepository` | — | Carica le lezioni da `lessons/index.json` + file argomento |
 | `ProgressStore` | `exercise_progress_v1`, `lessons_completed_v1` | Stato esercizi, lezioni completate |
-| `AuthStore` | `user_profile_v1` | Profilo utente locale |
+| `AuthStore` | `user_profile_v1`, `accounts_v1` | Sessione (profilo mostrato) + account del dispositivo con credenziali |
 | `SettingsStore` | `settings_v1` | Tema + flag onboarding visto |
 | `StudyStore` | `study_stats_v1` | Streak, obiettivi giornalieri, minuti di studio |
 | `SearchIndex` | — | Indice full-text su argomenti/esercizi/lezioni |
@@ -386,11 +392,11 @@ Parser recursive-descent usato dai grafici interattivi (esprime `x`/`t`) e dalla
 - **Lezioni** → elenco per argomento (lista argomenti e lista lezioni per argomento) e player interattivo.
 - **Risultati ricerca** → argomenti, esercizi e lezioni trovate.
 - **Punti deboli** → elenco e dettaglio con lezioni consigliate ed esercizi da ripassare.
-- **Mission / Profilo / Registrazione / Scuola** → schermate di supporto.
+- **Accesso / Registrazione / Profilo / Scuola** → schermate di supporto; l'Accesso accetta ID account o email e spiega che la password non è recuperabile perché non c'è server.
 
 ## Test
 
-20 file di test (`flutter_test`, nessuna libreria esterna, **196 test**) con mock di `SharedPreferences` e reset singloton via `resetForTest()`. Le descrizioni dei test sono in italiano, coerenti con la lingua dell'app. Nei `testWidgets` i reset/load asset vanno fatti in `setUp` (zona reale), mai awaitati nel corpo del test.
+Test con `flutter_test` (nessuna libreria esterna), mock di `SharedPreferences` e reset singloton via `resetForTest()`; stato della suite e numero di test vivono in [PROGRESS.md](PROGRESS.md). Le descrizioni dei test sono in italiano, coerenti con la lingua dell'app. Nei `testWidgets` i reset/load asset vanno fatti in `setUp` (zona reale), mai awaitati nel corpo del test.
 
 ## Piattaforme
 

@@ -68,7 +68,9 @@ void main() {
     expect(_result(tester), 'Errore');
   });
 
-  testWidgets('√(16 senza chiusa: la parentesi si chiude e risolve', (tester) async {
+  testWidgets('√(16 senza chiusa: la parentesi si chiude e risolve', (
+    tester,
+  ) async {
     await _pump(tester);
     await tester.tap(find.text('√'));
     await tester.tap(find.text('1'));
@@ -114,9 +116,13 @@ void main() {
     expect(_result(tester), '0.5');
   });
 
-  testWidgets('espressione e risultato sono allineati a destra', (tester) async {
+  testWidgets('espressione e risultato sono allineati a destra', (
+    tester,
+  ) async {
     await _pump(tester);
-    final displayRect = tester.getRect(find.byKey(const ValueKey('calc-display')));
+    final displayRect = tester.getRect(
+      find.byKey(const ValueKey('calc-display')),
+    );
     final expr = tester.getRect(find.byKey(const ValueKey('calc-expr')));
     final result = tester.getRect(find.byKey(const ValueKey('calc-result')));
     expect(displayRect.right - expr.right, lessThanOrEqualTo(20));
@@ -134,11 +140,7 @@ void main() {
   testWidgets('fling veloce verso il basso chiude la sheet', (tester) async {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
-    await tester.fling(
-      _sheet(),
-      const Offset(0, 300),
-      1200,
-    );
+    await tester.fling(_sheet(), const Offset(0, 300), 1200);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
     expect(closed, isTrue);
@@ -148,10 +150,7 @@ void main() {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
     final sheetHeight = tester.getSize(_sheet()).height;
-    await tester.drag(
-      _sheet(),
-      Offset(0, sheetHeight * 0.8),
-    );
+    await tester.drag(_sheet(), Offset(0, sheetHeight * 0.8));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
     expect(closed, isTrue);
@@ -160,10 +159,7 @@ void main() {
   testWidgets('drag piccolo riporta la sheet su', (tester) async {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
-    await tester.drag(
-      _sheet(),
-      const Offset(0, 40),
-    );
+    await tester.drag(_sheet(), const Offset(0, 40));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(closed, isFalse);
@@ -174,10 +170,7 @@ void main() {
   ) async {
     var closed = false;
     await _pump(tester, onClose: () => closed = true);
-    await tester.drag(
-      _sheet(),
-      const Offset(0, 150),
-    );
+    await tester.drag(_sheet(), const Offset(0, 150));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(closed, isFalse);
@@ -219,18 +212,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     final rectBefore = tester.getRect(_sheet());
-    await tester.dragFrom(
-      Offset(400, 20),
-      const Offset(0, -300),
-    );
+    await tester.dragFrom(Offset(400, 20), const Offset(0, -300));
     await tester.pump();
 
     expect(controller.offset, greaterThan(0));
     expect(closed, isFalse);
-    expect(
-      tester.getRect(_sheet()),
-      rectBefore,
-    );
+    expect(tester.getRect(_sheet()), rectBefore);
 
     controller.dispose();
   });

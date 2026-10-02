@@ -10,13 +10,23 @@ import 'dart:math' as math;
 class ExpressionEvaluator {
   const ExpressionEvaluator._();
 
-  static double evaluate(String source, {double x = 0, double t = 0, bool deg = false}) {
+  static double evaluate(
+    String source, {
+    double x = 0,
+    double t = 0,
+    bool deg = false,
+  }) {
     return tryEvaluate(source, x: x, t: t, deg: deg) ?? 0.0;
   }
 
   /// Come [evaluate] ma restituisce `null` su errore di parsing,
   /// espressione vuota o risultato non finito.
-  static double? tryEvaluate(String source, {double x = 0, double t = 0, bool deg = false}) {
+  static double? tryEvaluate(
+    String source, {
+    double x = 0,
+    double t = 0,
+    bool deg = false,
+  }) {
     try {
       final tokens = _tokenize(source);
       if (tokens.isEmpty) return null;
@@ -106,7 +116,7 @@ class _Parser {
   int pos = 0;
 
   _Parser(this.tokens, {required this.x, required this.t, bool deg = false})
-      : trigFactor = deg ? math.pi / 180 : 1;
+    : trigFactor = deg ? math.pi / 180 : 1;
 
   bool get hasMore => pos < tokens.length;
 

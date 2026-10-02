@@ -53,10 +53,7 @@ void main() {
   });
 
   testWidgets('lezione completata mostra il badge', (tester) async {
-    await ProgressStore.instance.completeLesson(
-      'high-school',
-      'eq1-intro',
-    );
+    await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
     await tester.pumpWidget(host('high-school'));
     await tester.pump();
 
@@ -71,7 +68,10 @@ void main() {
     );
     await tester.pumpWidget(
       MaterialApp(
-        home: ArgomentoLessonsScreen(argomento: argomento, levelId: 'high-school'),
+        home: ArgomentoLessonsScreen(
+          argomento: argomento,
+          levelId: 'high-school',
+        ),
       ),
     );
     await tester.pump();
