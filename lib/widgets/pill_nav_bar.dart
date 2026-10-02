@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../data/auth_store.dart';
+import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../haptics.dart';
 import '../models/level.dart';
@@ -166,9 +167,12 @@ class _PillNavBarState extends State<PillNavBar> {
     }
 
     final user = AuthStore.instance.currentUser;
-    final levelId = (user?.schoolLevelId ?? '').isNotEmpty
-        ? user!.schoolLevelId
-        : null;
+    // La scuola in visita viene prima di quella del profilo: cambiando sezione
+    // non si deve ripartire da capo su un'altra scuola, altrimenti la visita
+    // finirebbe al primo tocco della pillola.
+    final levelId =
+        BrowseStore.instance.levelId ??
+        ((user?.schoolLevelId ?? '').isNotEmpty ? user!.schoolLevelId : null);
     final level = levelId == null
         ? null
         : ContentRepository.instance.levelById(levelId);

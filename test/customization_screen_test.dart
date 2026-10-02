@@ -9,7 +9,7 @@ import 'package:math_app/data/settings_store.dart';
 import 'package:math_app/screens/customization_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 
-const _icon = Key('home-customization');
+const _icon = Key('header-customization');
 const _hapticsSwitch = Key('haptics-switch');
 
 Future<void> _prepare() async {

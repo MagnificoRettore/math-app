@@ -9,9 +9,9 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
-import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
@@ -502,9 +502,7 @@ void main() {
 
       // Si parte da HOME (segmento di mezzo) e si trascina a sinistra di un
       // segmento: LEZIONI è il segmento alla sua sinistra.
-      final gesture = await tester.startGesture(
-        Offset(center.dx, center.dy),
-      );
+      final gesture = await tester.startGesture(Offset(center.dx, center.dy));
       await tester.pump();
       await gesture.moveBy(Offset(-barSize.width / 6, 0));
       await tester.pump();
@@ -535,7 +533,7 @@ void main() {
     expect(_pillIcon(Icons.home_outlined), findsNothing);
   });
 
-  testWidgets('dopo il back dal login la pillola torna su HOME', (
+  testWidgets('dopo il back dal profilo la pillola torna su HOME', (
     tester,
   ) async {
     await _pumpHome(tester);
@@ -578,9 +576,7 @@ void main() {
 
       // Si parte da HOME (segmento di mezzo) e si trascina a sinistra di un
       // segmento: LEZIONI è il segmento alla sua sinistra.
-      final gesture = await tester.startGesture(
-        Offset(center.dx, center.dy),
-      );
+      final gesture = await tester.startGesture(Offset(center.dx, center.dy));
       await tester.pump();
       await gesture.moveBy(Offset(-barSize.width / 6, 0));
       await tester.pump();

@@ -7,9 +7,18 @@ import 'school_level_tile.dart';
 
 enum SchoolChoiceDestination { lessons, exercises }
 
+/// Sceglie la scuola da cui guardare.
+///
+/// Due usi, e la differenza è nel testo più che nelle scelte: da ospite il
+/// foglio chiede la scuola ed è definitivo, da utente collegato apre le altre
+/// scuole per una visita e lascia quella del profilo dov'è. Il footer da ospite
+/// promette «questa scelta non ti verrà più richiesta», quindi non può
+/// comparire nel secondo caso.
 Future<Level?> showSchoolChoiceSheet(
   BuildContext context, {
   required SchoolChoiceDestination destination,
+  bool signedIn = false,
+  String currentLevelId = '',
 }) async {
   final levels = ContentRepository.instance.levels;
   final isLessons = destination == SchoolChoiceDestination.lessons;
@@ -44,7 +53,13 @@ Future<Level?> showSchoolChoiceSheet(
               ),
               const SizedBox(height: 12),
               Text(
-                isLessons ? 'Lezioni per scuola' : 'Esercizi per scuola',
+                signedIn
+                    ? (isLessons
+                          ? 'Altre scuole, lezioni'
+                          : 'Altre scuole, esercizi')
+                    : (isLessons
+                          ? 'Lezioni per scuola'
+                          : 'Esercizi per scuola'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -53,7 +68,10 @@ Future<Level?> showSchoolChoiceSheet(
               ),
               const SizedBox(height: 6),
               Text(
-                isLessons
+                signedIn
+                    ? 'Dai un\'occhiata a un\'altra scuola. Quella del tuo '
+                          'profilo e i tuoi progressi restano dove sono.'
+                    : isLessons
                     ? 'Scegli la tua scuola per vedere le lezioni guidate '
                           'pensate per te.'
                     : 'Scegli la tua scuola per accedere agli esercizi '
@@ -70,22 +88,23 @@ Future<Level?> showSchoolChoiceSheet(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: SchoolLevelTile(
                     level: level,
-                    selected: false,
+                    selected: signedIn && level.id == currentLevelId,
                     onTap: () => Navigator.of(sheetContext).pop(level),
                   ),
                 ),
-              Center(
-                child: Text(
-                  'Se crei un profilo, la tua scuola viene ricordata e questa '
-                  'scelta non ti verrà più richiesta.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: c.textSecondary,
-                    height: 1.4,
+              if (!signedIn)
+                Center(
+                  child: Text(
+                    'Se crei un profilo, la tua scuola viene ricordata e '
+                    'questa scelta non ti verrà più richiesta.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: c.textSecondary,
+                      height: 1.4,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

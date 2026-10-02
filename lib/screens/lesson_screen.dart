@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 
+import '../data/auth_store.dart';
 import '../data/progress_store.dart';
 import '../haptics.dart';
 import '../models/lesson.dart';
@@ -105,12 +106,25 @@ class _LessonScreenState extends State<LessonScreen> {
     return step.clamp(0, total - 1);
   }
 
+  /// Se la lezione è della scuola che l'utente ha scelto come propria.
+  ///
+  /// Il punto di ripresa è uno solo (`lessons_in_progress_v1`) e vale per il
+  /// profilo: una lezione aperta per dare un'occhiata a un'altra scuola non
+  /// deve cancellare la ripresa di quella di casa, sennò «Jump Back In»
+  /// sparisce dalla home e l'utente non sa più dove era.
+  bool get _isOwnLevel {
+    final levelId = widget.levelId;
+    if (levelId == null) return false;
+    return AuthStore.instance.currentUser?.schoolLevelId == levelId;
+  }
+
   /// Scrive il punto di ripresa a ogni cambio di card, non solo all'uscita:
   /// così un kill dell'app non lo perde. Senza `levelId` il completamento non
-  /// viene registrato, quindi non ha senso ricordare nulla.
+  /// viene registrato, quindi non ha senso ricordare nulla, e su una scuola in
+  /// visita il ricordo toccherebbe quello della scuola del profilo.
   void _rememberResume() {
     final levelId = widget.levelId;
-    if (levelId == null) return;
+    if (levelId == null || !_isOwnLevel) return;
     unawaited(
       ProgressStore.instance.saveLessonResume(
         LessonResume(levelId: levelId, lessonId: widget.lesson.id, step: _page),
@@ -182,10 +196,16 @@ class _LessonScreenState extends State<LessonScreen> {
     final levelId = widget.levelId;
     if (levelId != null &&
         !ProgressStore.instance.isLessonCompleted(levelId, widget.lesson.id)) {
+      // Il completamento si registra anche per una scuola in visita: la
+      // progressione è già scoping per livello (`ProgressStore.scopedKey`) e
+      // quella lezione è davvero stata fatta. La ripresa invece no, perché è
+      // una sola e appartiene alla scuola del profilo.
       await ProgressStore.instance.completeLesson(levelId, widget.lesson.id);
-      // Completata: non c'è più niente da riprendere, altrimenti la sezione
-      // riproporrebbe la stessa lezione appena finita.
-      await ProgressStore.instance.clearLessonResume();
+      if (_isOwnLevel) {
+        // Completata: non c'è più niente da riprendere, altrimenti la sezione
+        // riproporrebbe la stessa lezione appena finita.
+        await ProgressStore.instance.clearLessonResume();
+      }
     }
     AppHaptics.mediumImpact();
     if (!mounted) return;

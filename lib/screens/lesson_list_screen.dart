@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../data/lesson_repository.dart';
 import '../data/progress_store.dart';
@@ -12,6 +13,7 @@ import '../widgets/app_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/profile_button.dart';
+import '../widgets/school_choice_sheet.dart';
 import '../widgets/year_tabs.dart';
 
 class LessonListScreen extends StatefulWidget {
@@ -25,19 +27,37 @@ class LessonListScreen extends StatefulWidget {
 }
 
 class _LessonListScreenState extends State<LessonListScreen> {
-  late final PageController _pageController;
+  late PageController _pageController;
   int _selectedIndex = 0;
+
+  /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
+  /// ne ha aperta un'altra, altrimenti quello con cui la pagina è nata.
+  String? get _levelId => BrowseStore.instance.levelId ?? widget.levelId;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    BrowseStore.instance.addListener(_onBrowseChanged);
   }
 
   @override
   void dispose() {
+    BrowseStore.instance.removeListener(_onBrowseChanged);
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// Cambiando scuola cambia il numero di corsi, quindi l'indice dell'anno
+  /// corrente può finire fuori range: si torna al primo e si rifà il
+  /// `PageController`, che altrimenti resterebbe sulla pagina vecchia.
+  void _onBrowseChanged() {
+    if (!mounted) return;
+    setState(() {
+      _selectedIndex = 0;
+      _pageController.dispose();
+      _pageController = PageController();
+    });
   }
 
   void _selectYear(int index) {
@@ -51,7 +71,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
       MaterialPageRoute<void>(
         builder: (_) => ArgomentoLessonsScreen(
           argomento: argomento,
-          levelId: widget.levelId ?? argomento.levelId,
+          levelId: _levelId ?? argomento.levelId,
         ),
       ),
     );
@@ -59,7 +79,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final levelId = widget.levelId;
+    final levelId = _levelId;
     if (levelId == null) {
       return Scaffold(
         appBar: AppBar(
@@ -74,7 +94,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
             child: ProfileButton(),
           ),
           actionsPadding: kHeaderActionsPadding,
-          actions: const [HeaderSearchButton()],
+          actions: _actions(),
         ),
         body: _wrapBody(
           const _EmptyLessons(
@@ -101,7 +121,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
             child: ProfileButton(),
           ),
           actionsPadding: kHeaderActionsPadding,
-          actions: const [HeaderSearchButton()],
+          actions: _actions(),
         ),
         body: _wrapBody(
           const _EmptyLessons(
@@ -125,7 +145,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
           child: ProfileButton(),
         ),
         actionsPadding: kHeaderActionsPadding,
-        actions: const [HeaderSearchButton()],
+        actions: _actions(),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
@@ -151,6 +171,16 @@ class _LessonListScreenState extends State<LessonListScreen> {
       ),
     );
   }
+
+  /// Le azioni dell'header: le altre scuole per primo, poi la lente e la
+  /// personalizzazione, che è l'ultima a destra come sulla Home. Anche negli
+  /// stati vuoti i bottoni ci sono, perché è proprio da lì che si sceglie
+  /// un'altra scuola quando questa non ha lezioni.
+  List<Widget> _actions() => const [
+    SchoolBrowseButton(destination: SchoolChoiceDestination.lessons),
+    HeaderSearchButton(),
+    HeaderCustomizationButton(),
+  ];
 
   Widget _wrapBody(Widget body) {
     if (!widget.showPill) return SafeArea(child: body);

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../data/browse_store.dart';
+import '../data/content_repository.dart';
 import '../data/progress_store.dart';
 import '../models/course.dart';
 import '../models/level.dart';
@@ -10,6 +12,7 @@ import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/profile_button.dart';
 import '../widgets/progress_bar.dart';
+import '../widgets/school_choice_sheet.dart';
 import '../widgets/topic_row.dart';
 import '../widgets/year_tabs.dart';
 import 'exercise_feed_screen.dart';
@@ -26,19 +29,40 @@ class CourseScreen extends StatefulWidget {
 }
 
 class _CourseScreenState extends State<CourseScreen> {
-  late final PageController _pageController;
+  late PageController _pageController;
   int _selectedIndex = 0;
+
+  /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
+  /// ne ha aperta un'altra, altrimenti quello con cui la pagina è nata.
+  Level get _level =>
+      ContentRepository.instance.levelById(
+        BrowseStore.instance.levelId ?? '',
+      ) ??
+      widget.level;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    BrowseStore.instance.addListener(_onBrowseChanged);
   }
 
   @override
   void dispose() {
+    BrowseStore.instance.removeListener(_onBrowseChanged);
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// Cambiando scuola cambia il numero di corsi, quindi l'anno corrente può
+  /// finire fuori range: si torna al primo e si rifà il `PageController`.
+  void _onBrowseChanged() {
+    if (!mounted) return;
+    setState(() {
+      _selectedIndex = 0;
+      _pageController.dispose();
+      _pageController = PageController();
+    });
   }
 
   void _selectYear(int index) {
@@ -48,7 +72,8 @@ class _CourseScreenState extends State<CourseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final courses = widget.level.courses;
+    final level = _level;
+    final courses = level.courses;
 
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +88,11 @@ class _CourseScreenState extends State<CourseScreen> {
           child: ProfileButton(),
         ),
         actionsPadding: kHeaderActionsPadding,
-        actions: const [HeaderSearchButton()],
+        actions: const [
+          SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
+          HeaderSearchButton(),
+          HeaderCustomizationButton(),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
@@ -73,17 +102,17 @@ class _CourseScreenState extends State<CourseScreen> {
           ),
         ),
       ),
-      body: _buildPages(courses),
+      body: _buildPages(level, courses),
     );
   }
 
-  Widget _buildPages(List<Course> courses) {
+  Widget _buildPages(Level level, List<Course> courses) {
     final pageView = PageView(
       controller: _pageController,
       onPageChanged: (index) => setState(() => _selectedIndex = index),
       children: [
         for (final course in courses)
-          _CourseSectionsView(level: widget.level, course: course),
+          _CourseSectionsView(level: level, course: course),
       ],
     );
     if (!widget.showPill) return SafeArea(child: pageView);

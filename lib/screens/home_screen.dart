@@ -15,7 +15,6 @@ import '../widgets/profile_button.dart';
 import '../widgets/recommended_section.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
-import 'customization_screen.dart';
 import 'mission_screen.dart';
 import 'welcome_screen.dart';
 
@@ -42,20 +41,7 @@ class HomeScreen extends StatelessWidget {
         // che sta già a sinistra. La lente viene prima dell'icona di
         // Personalizzazione perché cercare è l'azione più frequente.
         actionsPadding: kHeaderActionsPadding,
-        actions: [
-          const HeaderSearchButton(),
-          IconButton(
-            key: const Key('home-customization'),
-            icon: Icon(
-              Icons.tune_rounded,
-              color: AppColors.of(context).textPrimary,
-            ),
-            tooltip: 'Personalizzazione',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const CustomizationScreen()),
-            ),
-          ),
-        ],
+        actions: const [HeaderSearchButton(), HeaderCustomizationButton()],
       ),
       body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),
     );
