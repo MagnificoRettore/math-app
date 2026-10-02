@@ -49,6 +49,41 @@ void main() {
       expect(payload.caption, '');
       expect(box.toJson().containsKey('caption'), isFalse);
     });
+
+    test('align assente ricade su center e non viene emesso', () {
+      final box = MultifunctionBox.fromJson({
+        'id': 'img-3',
+        'box_type': 'image',
+        'payload': {'source': 'assets/images/x.jpg'},
+      });
+      expect((box.payload as ImageBoxPayload).align, BoxAlign.center);
+      expect(
+        (box.toJson()['payload'] as Map<String, dynamic>).containsKey('align'),
+        isFalse,
+      );
+    });
+
+    test('align letto e riportato nel json', () {
+      for (final entry in {
+        'left': BoxAlign.left,
+        'right': BoxAlign.right,
+        'center': BoxAlign.center,
+        'SINISTRA': BoxAlign.left,
+        'video': BoxAlign.center,
+      }.entries) {
+        final box = MultifunctionBox.fromJson({
+          'id': 'img-4',
+          'box_type': 'image',
+          'payload': {'source': 'assets/images/x.jpg', 'align': entry.key},
+        });
+        expect((box.payload as ImageBoxPayload).align, entry.value);
+        final json = box.toJson()['payload'] as Map<String, dynamic>;
+        expect(
+          json['align'],
+          entry.value == BoxAlign.center ? isNull : entry.value.key,
+        );
+      }
+    });
   });
 
   group('MultifunctionBox chart', () {

@@ -25,6 +25,9 @@ class MultifunctionBoxWidget extends StatelessWidget {
     if (payload is MathFormulaPayload && payload.hidden) {
       return _FormulaView(payload: payload);
     }
+    if (payload is ImageBoxPayload) {
+      return _ImageView(box: box, payload: payload);
+    }
     final hasTitle = box.title.isNotEmpty;
     return AppCard(
       padding: hasTitle
@@ -52,7 +55,10 @@ class MultifunctionBoxWidget extends StatelessWidget {
 
   Widget _buildContent(BuildContext context) {
     return switch (box.boxType) {
-      BoxType.image => _ImageView(payload: box.payload as ImageBoxPayload),
+      BoxType.image => _ImageView(
+        box: box,
+        payload: box.payload as ImageBoxPayload,
+      ),
       BoxType.mathFormula => _FormulaView(
         payload: box.payload as MathFormulaPayload,
       ),
@@ -115,20 +121,47 @@ class MultifunctionBoxWidget extends StatelessWidget {
   }
 }
 
+/// Immagine senza card: nessun bordo, nessuna ombra, nessuna piastra di
+/// sfondo e nessun ritaglio degli angoli. La foto sta nella colonna di testo
+/// della lezione e si allinea come dice il payload.
 class _ImageView extends StatelessWidget {
+  final MultifunctionBox box;
   final ImageBoxPayload payload;
 
-  const _ImageView({required this.payload});
+  const _ImageView({required this.box, required this.payload});
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        color: c.accentSoft,
-        constraints: const BoxConstraints(maxHeight: 240),
-        child: ImageSource(source: payload.source, caption: payload.caption),
+    final align = switch (payload.align) {
+      BoxAlign.left => Alignment.centerLeft,
+      BoxAlign.center => Alignment.center,
+      BoxAlign.right => Alignment.centerRight,
+    };
+    return Align(
+      alignment: align,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (box.title.isNotEmpty) ...[
+            Text(
+              box.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: c.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          ImageSource(
+            source: payload.source,
+            caption: payload.caption,
+            naturalSize: true,
+          ),
+        ],
       ),
     );
   }

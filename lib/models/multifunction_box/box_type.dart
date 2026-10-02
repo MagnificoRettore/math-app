@@ -63,6 +63,37 @@ enum ChartKind {
   };
 }
 
+enum BoxAlign {
+  left,
+  center,
+  right;
+
+  static BoxAlign fromString(String value) {
+    switch (value.toLowerCase()) {
+      case 'left':
+      case 'sinistra':
+        return BoxAlign.left;
+      case 'right':
+      case 'destra':
+        return BoxAlign.right;
+      default:
+        return BoxAlign.center;
+    }
+  }
+
+  String get key => switch (this) {
+    BoxAlign.left => 'left',
+    BoxAlign.center => 'center',
+    BoxAlign.right => 'right',
+  };
+
+  String get label => switch (this) {
+    BoxAlign.left => 'Sinistra',
+    BoxAlign.center => 'Centro',
+    BoxAlign.right => 'Destra',
+  };
+}
+
 enum FormulaMode {
   display,
   inline;

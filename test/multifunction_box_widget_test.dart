@@ -7,14 +7,17 @@ import 'package:math_app/models/multifunction_box/multifunction_box.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/multifunction_box_widget.dart';
 
-Widget _host(String json) {
-  final box = MultifunctionBox.fromJson(
-    jsonDecode(json) as Map<String, dynamic>,
-  );
+Widget _hostBox(MultifunctionBox box) {
   return MaterialApp(
     home: Scaffold(
       body: SingleChildScrollView(child: MultifunctionBoxWidget(box: box)),
     ),
+  );
+}
+
+Widget _host(String json) {
+  return _hostBox(
+    MultifunctionBox.fromJson(jsonDecode(json) as Map<String, dynamic>),
   );
 }
 
@@ -51,6 +54,44 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('Figura'), findsOneWidget);
     expect(find.text('Captio'), findsOneWidget);
+  });
+
+  testWidgets('box immagine non ha card ne contorno', (tester) async {
+    await _pump(tester, imageJson);
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AppCard), findsNothing);
+    expect(find.byType(ClipRRect), findsNothing);
+  });
+
+  Future<AlignmentGeometry> alignmentOf(
+    WidgetTester tester,
+    String value,
+  ) async {
+    await tester.pumpWidget(
+      _hostBox(
+        MultifunctionBox.fromJson({
+          'id': 'i1',
+          'box_type': 'image',
+          'payload': {'source': 'assets/images/missing.png', 'align': value},
+        }),
+      ),
+    );
+    await tester.pump();
+    return tester
+        .widget<Align>(
+          find
+              .ancestor(of: find.byType(Image), matching: find.byType(Align))
+              .first,
+        )
+        .alignment;
+  }
+
+  testWidgets('box immagine allinea a sinistra, centro e destra', (
+    tester,
+  ) async {
+    expect(await alignmentOf(tester, 'left'), Alignment.centerLeft);
+    expect(await alignmentOf(tester, 'center'), Alignment.center);
+    expect(await alignmentOf(tester, 'right'), Alignment.centerRight);
   });
 
   testWidgets('box grafico istogramma rende CustomPaint', (tester) async {

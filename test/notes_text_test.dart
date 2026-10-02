@@ -303,7 +303,12 @@ void main() {
         .readAsStringSync();
     await _pump(tester, content);
 
-    expect(find.byType(AppCard), findsNWidgets(7));
+    expect(
+      find.byType(AppCard),
+      findsNWidgets(6),
+      reason:
+          '8 box, meno la formula hidden e meno l\'immagine che è senza card',
+    );
     expect(
       find.text('Formula nascosta'),
       findsNothing,
