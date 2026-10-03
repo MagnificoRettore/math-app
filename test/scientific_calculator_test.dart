@@ -22,6 +22,18 @@ Future<void> _pump(WidgetTester tester, {VoidCallback? onClose}) async {
 
 Finder _sheet() => find.byKey(const ValueKey('calc-sheet'));
 
+/// Tocca un tasto: l'ultimo testo uguale, perché il display può mostrare lo
+/// stesso testo (un `5` scritto è anche il tasto `5`).
+Future<void> _keys(WidgetTester tester, List<String> labels) async {
+  for (final label in labels) {
+    await tester.tap(find.text(label).last);
+    await tester.pump();
+  }
+}
+
+String _expr(WidgetTester tester) =>
+    tester.widget<Text>(find.byKey(const ValueKey('calc-expr'))).data!;
+
 String _result(WidgetTester tester) {
   return tester.widget<Text>(find.byKey(const ValueKey('calc-result'))).data!;
 }
@@ -220,5 +232,119 @@ void main() {
     expect(tester.getRect(_sheet()), rectBefore);
 
     controller.dispose();
+  });
+
+  group('come una calcolatrice classica', () {
+    testWidgets('divisione: 8 ÷ 2 = 4', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['8', '÷', '2', '=']);
+      expect(_result(tester), '4');
+    });
+
+    testWidgets('± due volte torna al numero di partenza', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['5', '±']);
+      expect(_expr(tester), '−5');
+      await _keys(tester, ['±']);
+      expect(_expr(tester), '5');
+    });
+
+    testWidgets('un solo punto per numero', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['1', '.', '.', '5', '=']);
+      expect(_result(tester), '1.5');
+    });
+
+    testWidgets('dopo = un operatore continua dal risultato', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2', '+', '3', '=', '×', '2', '=']);
+      expect(_result(tester), '10');
+    });
+
+    testWidgets('dopo = un numero comincia da capo', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2', '+', '3', '=', '7', '=']);
+      expect(_result(tester), '7');
+    });
+
+    testWidgets('il meno dopo × è il segno: 5 × −3 = −15', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['5', '×', '−', '3', '=']);
+      expect(_result(tester), '-15');
+    });
+
+    testWidgets('moltiplicazione implicita: 2π e 2(3)', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2', 'π', '=']);
+      expect(_result(tester), startsWith('6.28318'));
+      await _keys(tester, ['AC', '2', '(', '3', ')', '=']);
+      expect(_result(tester), '6');
+    });
+
+    testWidgets('percentuale: 50% = 0.5 e 200 × 10% = 20', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['5', '0', '%', '=']);
+      expect(_result(tester), '0.5');
+      await _keys(tester, ['AC', '2', '0', '0', '×', '1', '0', '%', '=']);
+      expect(_result(tester), '20');
+    });
+
+    testWidgets('x², x⁻¹ e n! sul numero scritto', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['3', 'x²', '=']);
+      expect(_result(tester), '9');
+      await _keys(tester, ['AC', '4', 'x⁻¹', '=']);
+      expect(_result(tester), '0.25');
+      await _keys(tester, ['AC', '5', 'n!', '=']);
+      expect(_result(tester), '120');
+    });
+
+    testWidgets('2nd dà le inverse e si spegne dopo l\'uso', (tester) async {
+      await _pump(tester);
+      await tester.tap(find.byKey(const ValueKey('calc-mode')));
+      await tester.pump();
+      await _keys(tester, ['2nd']);
+      expect(find.text('sin⁻¹'), findsOneWidget);
+      await _keys(tester, ['sin⁻¹', '1', '=']);
+      expect(_result(tester), '90');
+      expect(find.text('sin'), findsOneWidget);
+      expect(find.text('sin⁻¹'), findsNothing);
+    });
+
+    testWidgets('2nd su log dà 10ˣ', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2nd', '10ˣ', '3', '=']);
+      expect(_result(tester), '1000');
+    });
+
+    testWidgets('memoria: M+, MR e MC', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['5', 'M+']);
+      expect(find.byKey(const ValueKey('calc-memory')), findsOneWidget);
+      await _keys(tester, ['AC', 'MR', '+', '1', '=']);
+      expect(_result(tester), '6');
+      await _keys(tester, ['MC']);
+      expect(find.byKey(const ValueKey('calc-memory')), findsNothing);
+    });
+
+    testWidgets('Ans richiama l\'ultimo risultato', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2', '+', '3', '=', 'AC', 'Ans', '×', '2', '=']);
+      expect(_result(tester), '10');
+    });
+
+    testWidgets('⌫ toglie una funzione intera', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['2', '+', 'sin']);
+      expect(_expr(tester), '2+sin(');
+      await _keys(tester, ['⌫']);
+      expect(_expr(tester), '2+');
+    });
+
+    testWidgets('0 elevato a −1 è un errore, non zero', (tester) async {
+      await _pump(tester);
+      await _keys(tester, ['0', 'xʸ', '−', '1', '=']);
+      expect(_result(tester), 'Errore');
+    });
   });
 }

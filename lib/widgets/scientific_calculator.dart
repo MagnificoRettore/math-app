@@ -44,10 +44,25 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   bool _interactive = false;
   bool _dismissing = false;
 
-  String _expr = '';
+  /// L'espressione come lista di token, non come stringa: ⌫ toglie `sin(` in
+  /// un colpo, e la moltiplicazione implicita si decide fra token interi.
+  final List<String> _tokens = [];
   String _result = '0';
-  bool _fresh = true;
+
+  /// `true` subito dopo `=`: un numero comincia un'espressione nuova, un
+  /// operatore continua da `Ans`.
+  bool _fresh = false;
   bool _deg = false;
+
+  /// Il tasto 2nd: cambia le etichette dei tasti che hanno una seconda
+  /// funzione e si spegne dopo averne usata una, come sulle calcolatrici.
+  bool _second = false;
+
+  /// L'ultimo risultato valido (`Ans`) e la memoria (`M`).
+  double _ans = 0;
+  double _memory = 0;
+
+  String get _expr => _tokens.join();
 
   @override
   void initState() {
@@ -104,108 +119,254 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     _entrance.reverse().whenComplete(widget.onClose);
   }
 
-  void _append(String part) {
+  static const _binary = ['+', '−', '×', '÷', '^'];
+  static const _postfix = ['²', '⁻¹', '!', '%'];
+
+  static bool _isNumberPart(String t) => t == '.' || _isDigit(t);
+  static bool _isDigit(String t) =>
+      t.length == 1 && t.codeUnitAt(0) >= 0x30 && t.codeUnitAt(0) <= 0x39;
+
+  /// Un token dopo cui un valore è completo: `2`, `)`, `π`, `Ans`, `5!`…
+  static bool _endsValue(String t) =>
+      _isNumberPart(t) ||
+      t == ')' ||
+      t == 'π' ||
+      t == 'e' ||
+      t == 'Ans' ||
+      t == 'M' ||
+      _postfix.contains(t);
+
+  /// Un token che comincia un valore: numeri, costanti, `(` e funzioni.
+  static bool _startsValue(String t) =>
+      _isNumberPart(t) ||
+      t.endsWith('(') ||
+      t == 'π' ||
+      t == 'e' ||
+      t == 'Ans' ||
+      t == 'M';
+
+  String? get _last => _tokens.isEmpty ? null : _tokens.last;
+
+  /// Le cifre (e il punto) in coda: il numero che si sta scrivendo.
+  int get _numberStart {
+    var i = _tokens.length;
+    while (i > 0 && _isNumberPart(_tokens[i - 1])) {
+      i--;
+    }
+    return i;
+  }
+
+  /// Un valore nuovo: dopo `=` comincia un'espressione da capo.
+  void _value(String token) {
     setState(() {
-      if (_fresh &&
-          part != '(' &&
-          part != 'sin(' &&
-          part != 'cos(' &&
-          part != 'tan(' &&
-          part != 'ln(' &&
-          part != 'log(' &&
-          part != 'sqrt(' &&
-          part != 'abs(' &&
-          part != 'exp(') {
-        _expr = '';
-      }
-      _expr += part;
+      if (_fresh) _tokens.clear();
+      _tokens.add(token);
       _fresh = false;
+      _second = false;
     });
+  }
+
+  void _dot() {
+    setState(() {
+      if (_fresh) _tokens.clear();
+      _fresh = false;
+      final start = _numberStart;
+      // Un punto solo per numero: `1.2.3` non è un numero.
+      if (_tokens.sublist(start).contains('.')) return;
+      if (start == _tokens.length) _tokens.add('0');
+      _tokens.add('.');
+    });
+  }
+
+  /// Dopo `=` o su un'espressione vuota, l'operatore parte dal risultato di
+  /// prima, come sulle calcolatrici: `2 + 3 =` e poi `× 2` fa 10.
+  bool _continueFromAns() {
+    if (_fresh || _tokens.isEmpty) {
+      _tokens
+        ..clear()
+        ..add('Ans');
+      _fresh = false;
+      return true;
+    }
+    return false;
+  }
+
+  void _operator(String op) {
+    setState(() {
+      _second = false;
+      final last = _last;
+      // Il meno all'inizio, dopo `(` o dopo un altro operatore è il segno.
+      if (op == '−' &&
+          !_fresh &&
+          (last == null || last.endsWith('(') || '×÷^'.contains(last))) {
+        _tokens.add(op);
+        return;
+      }
+      _continueFromAns();
+      if (_binary.contains(_last)) {
+        _tokens.removeLast();
+        if (_tokens.isEmpty) return;
+      }
+      if (_last!.endsWith('(')) return;
+      _tokens.add(op);
+    });
+  }
+
+  /// `x²`, `x⁻¹`, `n!` e `%` si applicano al valore che li precede.
+  void _postfixOp(String op) {
+    setState(() {
+      _second = false;
+      _continueFromAns();
+      if (!_endsValue(_last!)) return;
+      _tokens.add(op);
+    });
+  }
+
+  void _open() => _value('(');
+
+  void _close() {
+    final opens = _tokens.where((t) => t.endsWith('(')).length;
+    final closes = _tokens.where((t) => t == ')').length;
+    if (opens <= closes || _last == null || !_endsValue(_last!)) return;
+    setState(() => _tokens.add(')'));
   }
 
   void _clear() {
     setState(() {
-      _expr = '';
+      _tokens.clear();
       _result = '0';
-      _fresh = true;
+      _fresh = false;
+      _second = false;
     });
   }
 
   void _delete() {
-    if (_expr.isEmpty) return;
+    if (_tokens.isEmpty) return;
     setState(() {
-      _expr = _expr.substring(0, _expr.length - 1);
-      if (_expr.isEmpty) _result = '0';
+      _tokens.removeLast();
+      _fresh = false;
+      if (_tokens.isEmpty) _result = '0';
     });
   }
 
-  void _operator(String op) {
-    if (_expr.isEmpty && op != '−') return;
-    setState(() {
-      final last = _expr.isNotEmpty ? _expr[_expr.length - 1] : '';
-      if ('+−×÷^%'.contains(last)) {
-        _expr = _expr.substring(0, _expr.length - 1);
-      }
-      if (op == '=') {
-        _evaluate();
-      } else {
-        _expr += op;
-        _fresh = false;
-      }
-    });
-  }
-
+  /// ± cambia il segno del numero che si sta scrivendo; senza numero in coda
+  /// mette il meno, che è il segno del valore che segue.
   void _toggleSign() {
     setState(() {
-      if (_expr.isEmpty) {
-        _expr = '−';
+      _second = false;
+      if (_fresh) {
+        _tokens
+          ..clear()
+          ..add('Ans');
         _fresh = false;
+      }
+      final start = _numberStart;
+      if (start == _tokens.length) {
+        if (_last == null || !_endsValue(_last!)) _tokens.add('−');
         return;
       }
-      final match = RegExp(r'[0-9.]+$').firstMatch(_expr);
-      if (match != null) {
-        final value = match.group(0)!;
-        final prefix = _expr.substring(0, match.start);
-        _expr =
-            prefix + (value.startsWith('−') ? value.substring(1) : '−$value');
-      } else if (_expr.startsWith('−')) {
-        _expr = _expr.substring(1);
+      final before = start > 0 ? _tokens[start - 1] : null;
+      final unary =
+          before == '−' &&
+          (start < 2 ||
+              !_endsValue(_tokens[start - 2]) ||
+              _tokens[start - 2] == '(');
+      if (unary) {
+        _tokens.removeAt(start - 1);
       } else {
-        _expr = '−$_expr';
+        _tokens.insert(start, '−');
       }
-      _fresh = false;
     });
   }
 
-  void _evaluate() {
-    if (_expr.isEmpty) return;
-    final closed = _autoClose(_expr);
-    if (closed != _expr) {
-      setState(() => _expr = closed);
-    }
-    final value = ExpressionEvaluator.tryEvaluate(_toEval(closed), deg: _deg);
-    if (value == null) {
-      _result = 'Errore';
-    } else {
-      _result = _format(value);
-    }
-    _fresh = true;
+  void _equals() {
+    if (_tokens.isEmpty) return;
+    setState(() {
+      _closeAll();
+      final value = _evaluate();
+      if (value == null) {
+        _result = 'Errore';
+      } else {
+        _ans = value;
+        _result = _format(value);
+      }
+      _fresh = true;
+      _second = false;
+    });
   }
 
-  String _autoClose(String expr) {
-    final opens = '('.allMatches(expr).length;
-    final closes = ')'.allMatches(expr).length;
-    if (opens <= closes) return expr;
-    return expr + ')' * (opens - closes);
+  /// M+ e M− calcolano l'espressione e la sommano alla memoria, come un `=`.
+  void _memoryAdd(double sign) {
+    if (_tokens.isEmpty) return;
+    setState(() {
+      _closeAll();
+      final value = _evaluate();
+      if (value == null) {
+        _result = 'Errore';
+      } else {
+        _ans = value;
+        _memory += sign * value;
+        _result = _format(value);
+      }
+      _fresh = true;
+      _second = false;
+    });
   }
 
-  String _toEval(String expr) {
-    return expr
-        .replaceAll('×', '*')
-        .replaceAll('÷', '/')
-        .replaceAll('−', '-')
-        .replaceAll('π', 'pi')
-        .replaceAll('√(', 'sqrt(');
+  void _memoryClear() => setState(() {
+    _memory = 0;
+    _second = false;
+  });
+
+  void _closeAll() {
+    final opens = _tokens.where((t) => t.endsWith('(')).length;
+    final closes = _tokens.where((t) => t == ')').length;
+    for (var i = closes; i < opens; i++) {
+      _tokens.add(')');
+    }
+  }
+
+  double? _evaluate() =>
+      ExpressionEvaluator.tryEvaluate(_toEval(_tokens), deg: _deg);
+
+  /// I token in sintassi dell'[ExpressionEvaluator], con il `*` della
+  /// moltiplicazione implicita (`2π`, `2(3)`, `)(`) fra un valore che finisce
+  /// e uno che comincia.
+  String _toEval(List<String> tokens) {
+    final out = StringBuffer();
+    for (var i = 0; i < tokens.length; i++) {
+      final t = tokens[i];
+      if (i > 0) {
+        final prev = tokens[i - 1];
+        final sameNumber = _isNumberPart(prev) && _isNumberPart(t);
+        if (!sameNumber && _endsValue(prev) && _startsValue(t)) out.write('*');
+      }
+      out.write(switch (t) {
+        '×' => '*',
+        '÷' => '/',
+        '−' => '-',
+        'π' => 'pi',
+        '√(' => 'sqrt(',
+        'sin⁻¹(' => 'asin(',
+        'cos⁻¹(' => 'acos(',
+        'tan⁻¹(' => 'atan(',
+        '²' => '^2',
+        '⁻¹' => '^(-1)',
+        '%' => '/100',
+        'Ans' => _literal(_ans),
+        'M' => _literal(_memory),
+        _ => t,
+      });
+    }
+    return out.toString();
+  }
+
+  /// Un double scritto per il parser, che non legge la notazione `1e-7`.
+  static String _literal(double v) {
+    final s = v.toString();
+    final e = s.indexOf('e');
+    if (e < 0) return '($s)';
+    return '(${s.substring(0, e)}*10^(${s.substring(e + 1)}))';
   }
 
   String _format(double value) {
@@ -337,6 +498,19 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
           Row(
             children: [
               _buildModeChip(c),
+              // Come sul display di una calcolatrice: la memoria piena si vede.
+              if (_memory != 0) ...[
+                const SizedBox(width: 6),
+                Text(
+                  'M',
+                  key: const ValueKey('calc-memory'),
+                  style: TextStyle(
+                    fontSize: AppText.micro,
+                    fontWeight: FontWeight.w700,
+                    color: c.accent,
+                  ),
+                ),
+              ],
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -408,54 +582,68 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   }
 
   Widget _buildKeypad(BuildContext context, AppPalette c) {
+    final second = _second;
     return Column(
       children: [
         _row(context, c, [
-          _fn('sin', 'sin('),
-          _fn('cos', 'cos('),
-          _fn('tan', 'tan('),
-          _fn('ln', 'ln('),
-          _fn('log', 'log('),
+          _key(
+            '2nd',
+            () => setState(() => _second = !_second),
+            primary: second,
+            accent: !second,
+          ),
+          _fn(second ? 'sin⁻¹' : 'sin', second ? 'sin⁻¹(' : 'sin('),
+          _fn(second ? 'cos⁻¹' : 'cos', second ? 'cos⁻¹(' : 'cos('),
+          _fn(second ? 'tan⁻¹' : 'tan', second ? 'tan⁻¹(' : 'tan('),
+          _key(second ? 'e' : 'π', () => _value(second ? 'e' : 'π')),
         ]),
         _row(context, c, [
+          _key('x²', () => _postfixOp('²'), accent: true),
+          _key('xʸ', () => _operator('^'), accent: true),
           _fn('√', '√('),
-          _key('x²', () => _append('^2'), accent: true),
-          _key('(', () => _append('(')),
-          _key(')', () => _append(')')),
-          _key('π', () => _append('π')),
+          _key('x⁻¹', () => _postfixOp('⁻¹'), accent: true),
+          _key('n!', () => _postfixOp('!'), accent: true),
         ]),
         _row(context, c, [
-          _fn('abs', 'abs('),
-          _fn('exp', 'exp('),
-          _key('AC', _clear, destructive: true),
+          _fn(second ? 'eˣ' : 'ln', second ? 'e^(' : 'ln('),
+          _fn(second ? '10ˣ' : 'log', second ? '10^(' : 'log('),
+          _key('(', _open),
+          _key(')', _close),
+          _key('%', () => _postfixOp('%')),
+        ]),
+        _row(context, c, [
+          _key('MC', _memoryClear),
+          _key('MR', () => _value('M')),
+          _key('M+', () => _memoryAdd(1)),
+          _key('M−', () => _memoryAdd(-1)),
+          _key('Ans', () => _value('Ans')),
+        ]),
+        _row(context, c, [
+          _key('7', () => _value('7')),
+          _key('8', () => _value('8')),
+          _key('9', () => _value('9')),
           _key('⌫', _delete, destructive: true),
-          _key('%', () => _operator('%')),
+          _key('AC', _clear, destructive: true),
         ]),
         _row(context, c, [
-          _key('e', () => _append('e')),
-          _key('7', () => _append('7')),
-          _key('8', () => _append('8')),
-          _key('9', () => _append('9')),
+          _key('4', () => _value('4')),
+          _key('5', () => _value('5')),
+          _key('6', () => _value('6')),
           _key('×', () => _operator('×'), accent: true),
+          _key('÷', () => _operator('÷'), accent: true),
         ]),
         _row(context, c, [
-          _key('4', () => _append('4')),
-          _key('5', () => _append('5')),
-          _key('6', () => _append('6')),
-          _key('−', () => _operator('−'), accent: true),
-          _key('±', _toggleSign, accent: true),
-        ]),
-        _row(context, c, [
-          _key('1', () => _append('1')),
-          _key('2', () => _append('2')),
-          _key('3', () => _append('3')),
+          _key('1', () => _value('1')),
+          _key('2', () => _value('2')),
+          _key('3', () => _value('3')),
           _key('+', () => _operator('+'), accent: true),
-          _key('^', () => _append('^')),
+          _key('−', () => _operator('−'), accent: true),
         ]),
         _row(context, c, [
-          _key('0', () => _append('0'), flex: 3),
-          _key('.', () => _append('.')),
-          _key('=', () => _operator('='), primary: true, flex: 3),
+          _key('0', () => _value('0')),
+          _key('.', _dot),
+          _key('±', _toggleSign),
+          _key('=', _equals, primary: true, flex: 2),
         ]),
       ],
     );
@@ -475,8 +663,8 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     );
   }
 
-  Widget _fn(String label, String tex) =>
-      _key(label, () => _append(tex), accent: true);
+  Widget _fn(String label, String token) =>
+      _key(label, () => _value(token), accent: true);
 
   Widget _key(
     String label,
@@ -546,7 +734,8 @@ class _CalcKey extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          height: 46,
+          // 40 e non 46: le righe sono 8, e il foglio non deve crescere.
+          height: 40,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: background,

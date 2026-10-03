@@ -2,9 +2,10 @@ import 'dart:math' as math;
 
 /// Valuta espressioni aritmetiche semplici (parser recursive-descent).
 ///
-/// Sintassi supportata: `+ - * / ^ %`, parentesi, numeri decimali,
-/// variabili `x` e `t`, costanti `pi`/`e` e funzioni
-/// `sin cos tan ln log sqrt abs exp`. Qualsiasi errore o risultato non finito
+/// Sintassi supportata: `+ - * / ^ %`, il fattoriale postfisso `!`,
+/// parentesi, numeri decimali, variabili `x` e `t`, costanti `pi`/`e` e
+/// funzioni `sin cos tan asin acos atan ln log sqrt abs exp`. In gradi le
+/// inverse restituiscono gradi. Qualsiasi errore o risultato non finito
 /// in [evaluate] restituisce `0.0` (mai eccezioni in rendering);
 /// [tryEvaluate] distingue invece errore/valore non finito con `null`.
 class ExpressionEvaluator {
@@ -83,7 +84,7 @@ List<_Token> _tokenize(String source) {
       tokens.add(_Token(_TokenKind.variable, s.substring(start, i)));
       continue;
     }
-    if ('+-*/^%'.contains(ch)) {
+    if ('+-*/^%!'.contains(ch)) {
       tokens.add(_Token(_TokenKind.operator, ch));
       i++;
       continue;
@@ -186,7 +187,17 @@ class _Parser {
     if (_matchOperator('+')) {
       return parseUnary();
     }
-    return parsePrimary();
+    return parsePostfix();
+  }
+
+  /// Il fattoriale lega più stretto del segno e della potenza: `-3!` è
+  /// `-(3!)` e `2^3!` è `2^(3!)`, come sulle calcolatrici.
+  double parsePostfix() {
+    var value = parsePrimary();
+    while (_matchOperator('!')) {
+      value = _factorial(value);
+    }
+    return value;
   }
 
   double parsePrimary() {
@@ -222,6 +233,9 @@ class _Parser {
       case 'sin':
       case 'cos':
       case 'tan':
+      case 'asin':
+      case 'acos':
+      case 'atan':
       case 'ln':
       case 'log':
       case 'sqrt':
@@ -256,6 +270,12 @@ class _Parser {
         return math.cos(arg * trigFactor);
       case 'tan':
         return math.tan(arg * trigFactor);
+      case 'asin':
+        return math.asin(arg) / trigFactor;
+      case 'acos':
+        return math.acos(arg) / trigFactor;
+      case 'atan':
+        return math.atan(arg) / trigFactor;
       case 'ln':
         return math.log(arg);
       case 'log':
@@ -271,8 +291,19 @@ class _Parser {
     }
   }
 
-  static double _pow(double base, double exponent) {
-    final result = math.pow(base, exponent).toDouble();
-    return result.isFinite ? result : 0;
+  /// Un risultato non finito resta tale, così [tryEvaluate] lo dà come
+  /// errore: `0^-1` non è zero.
+  static double _pow(double base, double exponent) =>
+      math.pow(base, exponent).toDouble();
+
+  /// Solo interi da 0 a 170: oltre, il double va a infinito; fuori dagli interi
+  /// non è definito senza la funzione gamma.
+  static double _factorial(double n) {
+    if (n < 0 || n > 170 || n != n.roundToDouble()) return double.nan;
+    var result = 1.0;
+    for (var i = 2; i <= n; i++) {
+      result *= i;
+    }
+    return result;
   }
 }

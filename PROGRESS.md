@@ -2,7 +2,16 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **464 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **484 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — La calcolatrice diventa una scientifica classica
+
+- **Difetti corretti**: mancava il tasto ÷; ± premuto due volte dava `−−5`; due punti nello stesso numero; dopo `=` l'operatore non ripartiva dal risultato; `5 × −3` sostituiva il × col −; `2π` e `2(3)` erano un errore; `%` era il resto della divisione; `0^-1` e `10^400` davano 0.
+- **Tasti nuovi**: 2nd (sin⁻¹, cos⁻¹, tan⁻¹, eˣ, 10ˣ, e), x⁻¹, n!, xʸ, Ans e la memoria (MC, MR, M+, M−, con «M» sul display). Via `abs` ed `exp` come tasti: `exp` è eˣ sotto 2nd.
+- 8 righe da 5 tasti alti 40 invece di 7 da 46: il foglio resta alto uguale.
+- L'espressione è una lista di token: ⌫ toglie `sin(` in un colpo e la moltiplicazione implicita si decide fra token interi.
+- `ExpressionEvaluator` aggiunge `asin acos atan` (in gradi danno gradi), il fattoriale `!` e tratta le potenze non finite come errore. Sono aggiunte, quindi le espressioni dei grafici valgono come prima.
+- Test: 5 casi nuovi in `test/expression_evaluator_test.dart` (inverse, fattoriale, potenze) e 15 in `test/scientific_calculator_test.dart` (÷, ±, punto, continuazione da Ans, segno dopo ×, implicita, percentuale, x² x⁻¹ n!, 2nd, 10ˣ, memoria, Ans, ⌫, errore di 0^-1). Suite a **484 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — La banda dell'header anche nella pagina di un argomento
 

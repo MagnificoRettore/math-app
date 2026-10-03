@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:math_app/widgets/expression_evaluator.dart';
 
@@ -176,6 +178,48 @@ void main() {
     test('parentesi estreme non vanno in errore', () {
       final deep = '${'(' * 100000}1${')' * 100000}';
       expect(() => ExpressionEvaluator.evaluate(deep), returnsNormally);
+    });
+  });
+
+  group('ExpressionEvaluator inverse, fattoriale e potenze', () {
+    test('asin(1) = pi/2 in radianti', () {
+      expect(
+        ExpressionEvaluator.tryEvaluate('asin(1)'),
+        closeTo(pi / 2, 1e-12),
+      );
+    });
+
+    test('in gradi le inverse danno gradi', () {
+      expect(
+        ExpressionEvaluator.tryEvaluate('asin(1)', deg: true),
+        closeTo(90, 1e-9),
+      );
+      expect(
+        ExpressionEvaluator.tryEvaluate('acos(0)', deg: true),
+        closeTo(90, 1e-9),
+      );
+      expect(
+        ExpressionEvaluator.tryEvaluate('atan(1)', deg: true),
+        closeTo(45, 1e-9),
+      );
+    });
+
+    test('fattoriale: 5! = 120 e lega più stretto di segno e potenza', () {
+      expect(ExpressionEvaluator.tryEvaluate('5!'), 120);
+      expect(ExpressionEvaluator.tryEvaluate('-3!'), -6);
+      expect(ExpressionEvaluator.tryEvaluate('2^3!'), 64);
+      expect(ExpressionEvaluator.tryEvaluate('0!'), 1);
+    });
+
+    test('fattoriale fuori dagli interi non negativi è un errore', () {
+      expect(ExpressionEvaluator.tryEvaluate('3.5!'), isNull);
+      expect(ExpressionEvaluator.tryEvaluate('(-1)!'), isNull);
+      expect(ExpressionEvaluator.tryEvaluate('171!'), isNull);
+    });
+
+    test('una potenza non finita è un errore, non zero', () {
+      expect(ExpressionEvaluator.tryEvaluate('0 ^ -1'), isNull);
+      expect(ExpressionEvaluator.tryEvaluate('10 ^ 400'), isNull);
     });
   });
 }
