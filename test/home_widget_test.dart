@@ -11,6 +11,7 @@ import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
 import 'package:math_app/models/lesson_resume.dart';
 import 'package:math_app/models/progress.dart';
+import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/screens/mission_screen.dart';
@@ -21,7 +22,7 @@ import 'package:math_app/theme/app_colors.dart';
 import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_card.dart';
-import 'package:math_app/widgets/image_carousel.dart';
+import 'package:math_app/widgets/argomento_carousel.dart';
 import 'package:math_app/widgets/recommendation_row.dart';
 import 'package:math_app/widgets/section_header.dart';
 import 'package:math_app/widgets/streak_card.dart';
@@ -291,22 +292,68 @@ void main() {
     });
   });
 
-  group('carosello', () {
-    testWidgets('l\'altezza è fissa e i pallini sono tanti quante le slide', (
+  group('carosello degli argomenti', () {
+    final carousel = find.byType(ArgomentoCarousel);
+    Finder pallini() =>
+        find.descendant(of: carousel, matching: find.byType(AnimatedContainer));
+    const titoli = ['Equazioni di primo grado', 'Moduli', 'Le rette'];
+
+    testWidgets('con la scuola: tutti gli argomenti della scuola', (
       tester,
     ) async {
+      await _registra();
       await _pumpHome(tester);
 
-      final carousel = find.byType(ImageCarousel);
-      expect(tester.getSize(carousel).height, 180);
-
-      // I pallini sono i `AnimatedContainer` dei soli indicatori: la card di
-      // ogni slide è dentro il `PageView` e non ha indicatori.
-      final pallini = find.descendant(
-        of: carousel,
-        matching: find.byType(AnimatedContainer),
+      // La striscia resta alta 180, come quella delle foto.
+      expect(
+        tester
+            .getSize(
+              find.descendant(of: carousel, matching: find.byType(PageView)),
+            )
+            .height,
+        180,
       );
-      expect(pallini, findsNWidgets(ImageCarousel.images.length));
+      // La Superiore ha un argomento per anno, tre in tutto: tre pallini.
+      expect(pallini(), findsNWidgets(3));
+      expect(find.text('Equazioni di primo grado'), findsOneWidget);
+    });
+
+    testWidgets('da ospite: gli argomenti di un anno a caso', (tester) async {
+      await _pumpHome(tester);
+
+      // Ogni anno con argomenti ne ha uno: una slide, quindi niente pallini.
+      expect(pallini(), findsNothing);
+      final mostrati = titoli.where(
+        (t) => find
+            .descendant(of: carousel, matching: find.text(t))
+            .evaluate()
+            .isNotEmpty,
+      );
+      expect(mostrati, hasLength(1));
+    });
+
+    testWidgets('una scuola senza argomenti non mostra il carosello', (
+      tester,
+    ) async {
+      await _registra(levelId: 'middle-school');
+      await _pumpHome(tester);
+
+      expect(
+        find.descendant(of: carousel, matching: find.byType(PageView)),
+        findsNothing,
+      );
+    });
+
+    testWidgets('il tap su una slide apre le lezioni dell\'argomento', (
+      tester,
+    ) async {
+      await _registra();
+      await _pumpHome(tester);
+
+      await tester.tap(find.text('Equazioni di primo grado'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ArgomentoLessonsScreen), findsOneWidget);
     });
   });
 

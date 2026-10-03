@@ -11,7 +11,7 @@ import 'package:math_app/models/lesson_resume.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
-import 'package:math_app/widgets/image_carousel.dart';
+import 'package:math_app/widgets/argomento_carousel.dart';
 import 'package:math_app/widgets/progress_bar.dart';
 
 Future<void> _resetStores() async {
@@ -97,8 +97,18 @@ void main() {
     await _pumpHome(tester);
 
     expect(find.text('Jump Back In'), findsOneWidget);
-    expect(find.text('Moduli'), findsOneWidget);
-    expect(find.text('Modulo e Equazioni con Modulo'), findsOneWidget);
+    // Dentro la card: il carosello sotto ha anche lui una slide «Moduli».
+    expect(
+      find.descendant(of: _card, matching: find.text('Moduli')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: _card,
+        matching: find.text('Modulo e Equazioni con Modulo'),
+      ),
+      findsOneWidget,
+    );
     // il contatore numerico non c'è più
     expect(find.textContaining('Step'), findsNothing);
     // 1 card di Definizione + 3 superate, su 10
@@ -130,7 +140,7 @@ void main() {
     await _pumpHome(tester);
 
     final cardBottom = tester.getBottomLeft(_card).dy;
-    final carouselTop = tester.getTopLeft(find.byType(ImageCarousel)).dy;
+    final carouselTop = tester.getTopLeft(find.byType(ArgomentoCarousel)).dy;
     expect(carouselTop - cardBottom, greaterThanOrEqualTo(12));
   });
 

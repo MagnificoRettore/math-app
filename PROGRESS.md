@@ -2,7 +2,13 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **458 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **461 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — In Home il carosello degli argomenti
+
+- **Il carosello delle foto lascia il posto a quello degli argomenti** (`ArgomentoCarousel`, `lib/widgets/argomento_carousel.dart`; via `image_carousel.dart`). Con la scuola nel profilo mostra tutti gli argomenti della scuola; da ospite o senza scuola quelli di un anno a caso fra gli anni che hanno argomenti. Il tap apre le lezioni dell'argomento.
+- Stessa meccanica del carosello di prima (180 di altezza, slide all'85%, scala e opacità delle vicine); le slide sono il gradiente di `TopicBackground` nel colore dell'argomento, con titolo e «anno · N lezioni». I pallini sono bianchi e spariscono con una slide sola.
+- Test: in `test/home_widget_test.dart` il gruppo del carosello diventa quello degli argomenti (scuola, ospite, scuola senza argomenti, tap). `jump_back_in_test.dart` e `search_overlay_test.dart` cercano «Moduli» dentro la card e dentro l'overlay, perché ora c'è anche una slide con quel titolo. Suite a **461 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — Sotto la banda lo sfondo, gli anni fuori dal blu
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/progress_store.dart';
-import '../widgets/image_carousel.dart';
+import '../widgets/argomento_carousel.dart';
 import '../widgets/jump_back_in_section.dart';
 import '../widgets/main_header.dart';
 import '../widgets/mission_hero.dart';
@@ -47,8 +47,7 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
                 const JumpBackInSection(),
-                const ImageCarousel(),
-                const SizedBox(height: 24),
+                const ArgomentoCarousel(),
                 MissionHero(
                   showShortcuts: true,
                   onTap: () => Navigator.of(context).push(

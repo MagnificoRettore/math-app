@@ -17,7 +17,7 @@ Il vertice è il punto più basso (o alto) della parabola.
   "box_type": "image",
   "title": "Grafico della parabola",
   "payload": {
-    "source": "assets/images/img 1.jpg"
+    "source": "assets/images/moduli.jpg"
   }
 }
 ::endbox

@@ -16,6 +16,11 @@ import 'package:math_app/widgets/search_overlay.dart';
 const _lente = Key('header-search');
 const _campo = Key('search-overlay-field');
 
+/// Un testo dentro l'overlay: sotto c'è la Home, e il suo carosello ha le
+/// slide con gli stessi titoli degli argomenti.
+Finder _nellOverlay(String testo) =>
+    find.descendant(of: find.byType(SearchOverlay), matching: find.text(testo));
+
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
@@ -117,7 +122,7 @@ void main() {
     await _cerca(tester, 'm');
 
     expect(find.text('Scrivi almeno due lettere.'), findsOneWidget);
-    expect(find.text('Moduli'), findsNothing);
+    expect(_nellOverlay('Moduli'), findsNothing);
   });
 
   testWidgets('«modul» elenca l\'argomento e la lezione', (tester) async {
@@ -134,7 +139,7 @@ void main() {
     );
     // «Moduli» compare due volte: come titolo dell'argomento e come contesto
     // della lezione che gli appartiene
-    expect(find.text('Moduli'), findsNWidgets(2));
+    expect(_nellOverlay('Moduli'), findsNWidgets(2));
     // e ogni riga dice che tipo è: senza, «Moduli» e «Modulo e Equazioni con
     // Modulo» sono due titoli e basta, e non si sa quale si apre
     expect(find.text('Argomento'), findsOneWidget);
