@@ -11,6 +11,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/school_choice_sheet.dart';
@@ -87,7 +88,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
           actions: _actions(),
         ),
         body: _wrapBody(
-          const _EmptyLessons(
+          const EmptyState(
             title: 'Nessuna lezione disponibile',
             subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
           ),
@@ -104,7 +105,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
           actions: _actions(),
         ),
         body: _wrapBody(
-          const _EmptyLessons(
+          const EmptyState(
             title: 'Nessuna lezione disponibile',
             subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
           ),
@@ -176,7 +177,7 @@ class _YearArgumenti extends StatelessWidget {
         .toList();
 
     if (argomenti.isEmpty) {
-      return _EmptyLessons(
+      return EmptyState(
         title: 'Nessuna lezione in ${course.title}',
         subtitle: 'Le lezioni guidate per ${course.title} sono in arrivo.',
       );
@@ -342,44 +343,5 @@ class _ArgomentoCard extends StatelessWidget {
       default:
         return Icons.menu_book;
     }
-  }
-}
-
-class _EmptyLessons extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _EmptyLessons({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.menu_book_outlined, size: 52, color: c.textSecondary),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppText.titleMedium,
-                fontWeight: FontWeight.w600,
-                color: c.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

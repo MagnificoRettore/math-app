@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
+import '../widgets/empty_state.dart';
 
 /// Elenco delle lezioni di un argomento (capitolo).
 /// Passo intermedio fra il livello anno e il player a passi [LessonScreen].
@@ -50,7 +51,7 @@ class ArgomentoLessonsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: lessons.isEmpty
-            ? _EmptyArgomento(
+            ? EmptyState(
                 title: 'Nessuna lezione in ${argomento.title}',
                 subtitle:
                     'Le lezioni guidate per questo capitolo sono in arrivo.',
@@ -165,45 +166,6 @@ class _LessonCard extends StatelessWidget {
           else
             Icon(Icons.chevron_right, color: c.textSecondary),
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyArgomento extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _EmptyArgomento({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.menu_book_outlined, size: 52, color: c.textSecondary),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppText.titleMedium,
-                fontWeight: FontWeight.w600,
-                color: c.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
-            ),
-          ],
-        ),
       ),
     );
   }

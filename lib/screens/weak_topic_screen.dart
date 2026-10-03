@@ -7,6 +7,7 @@ import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
+import '../widgets/empty_state.dart';
 import '../widgets/exercise_card.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/section_header.dart';
@@ -52,7 +53,15 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
               }
             });
 
-            if (current == null) return const _AllMasteredView();
+            if (current == null) {
+              return EmptyState(
+                icon: Icons.task_alt,
+                iconColor: AppColors.of(context).easy,
+                title: 'Punto debole risolto!',
+                subtitle:
+                    'Tutti gli esercizi di questo argomento sono assimilati.',
+              );
+            }
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -144,42 +153,6 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
             style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _AllMasteredView extends StatelessWidget {
-  const _AllMasteredView();
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.task_alt, size: 52, color: c.easy),
-            const SizedBox(height: 12),
-            Text(
-              'Punto debole risolto!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppText.titleMedium,
-                fontWeight: FontWeight.w700,
-                color: c.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Tutti gli esercizi di questo argomento sono assimilati.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
-            ),
-          ],
-        ),
       ),
     );
   }
