@@ -13,6 +13,12 @@
 /// `docBody`, `docMono`): è un testo lungo e non un'interfaccia, e deve poter
 /// restare più grande della UI senza pestare i nomi dei ruoli.
 class AppText {
+  /// Titoli e bottoni: il carattere tondo del design.
+  static const String headingFont = 'Fredoka';
+
+  /// Il testo: il font di base del tema.
+  static const String bodyFont = 'Nunito';
+
   // Interfaccia.
   static const double display = 26;
   static const double hero = 23;

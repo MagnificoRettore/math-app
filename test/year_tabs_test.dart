@@ -36,12 +36,6 @@ void main() {
     (tester) async {
       await _pumpTabs(tester, AppTheme.light);
       expect(_circleTextColor(tester), AppTheme.light.colorScheme.onPrimary);
-
-      // In tema scuro l'accent è un lavanda chiaro: un bianco hardcoded qui
-      // renderebbe il numero illeggibile.
-      await _pumpTabs(tester, AppTheme.dark);
-      expect(_circleTextColor(tester), isNot(Colors.white));
-      expect(_circleTextColor(tester), AppTheme.dark.colorScheme.onPrimary);
     },
   );
 }

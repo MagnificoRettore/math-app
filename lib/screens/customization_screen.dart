@@ -5,11 +5,10 @@ import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
-import '../widgets/theme_toggle.dart';
 
 const _hapticsSwitch = Key('haptics-switch');
 
-/// Personalizzazione: tema e vibrazioni.
+/// Personalizzazione: le vibrazioni. Il tema è uno solo, quello del design.
 ///
 /// Si apre dall'icona in alto a destra della Home, quindi è a portata di mano
 /// per l'ospite come per l'utente registrato: sono impostazioni dell'app, non
@@ -27,12 +26,7 @@ class CustomizationScreen extends StatelessWidget {
           builder: (context, _) {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              children: const [
-                _Label('Aspetto'),
-                ThemeToggle(),
-                _Label('Risposta'),
-                _HapticsCard(),
-              ],
+              children: const [_Label('Risposta'), _HapticsCard()],
             );
           },
         ),

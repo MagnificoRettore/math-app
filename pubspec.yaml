@@ -66,6 +66,27 @@ flutter:
    - assets/images/
    - assets/animations/
 
+  # Fredoka per titoli e bottoni, Nunito per il testo: i font del design
+  # (canvas «Illustrazioni App Educativa»). Statici e in locale, perché l'app
+  # non va in rete; licenze OFL accanto ai file.
+  fonts:
+    - family: Fredoka
+      fonts:
+        - asset: assets/fonts/Fredoka-500.ttf
+          weight: 500
+        - asset: assets/fonts/Fredoka-600.ttf
+          weight: 600
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-400.ttf
+          weight: 400
+        - asset: assets/fonts/Nunito-600.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-700.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-800.ttf
+          weight: 800
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

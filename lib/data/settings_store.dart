@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,13 +12,11 @@ class SettingsStore extends ChangeNotifier {
   bool _loaded = false;
   Object? _loadError;
   bool _onboardingSeen = false;
-  ThemeMode _themeMode = ThemeMode.light;
   bool _hapticsEnabled = true;
 
   bool get loaded => _loaded;
   Object? get loadError => _loadError;
   bool get onboardingSeen => _onboardingSeen;
-  ThemeMode get themeMode => _themeMode;
   bool get hapticsEnabled => _hapticsEnabled;
 
   Future<void> load() async {
@@ -31,12 +28,7 @@ class SettingsStore extends ChangeNotifier {
       if (raw != null) {
         final json = jsonDecode(raw) as Map<String, dynamic>;
         _onboardingSeen = json['onboardingSeen'] as bool? ?? false;
-        final mode = json['themeMode'] as String?;
-        _themeMode = switch (mode) {
-          'dark' => ThemeMode.dark,
-          'system' => ThemeMode.system,
-          _ => ThemeMode.light,
-        };
+        // `themeMode` dei salvataggi di prima si ignora: il tema è uno solo.
         _hapticsEnabled = json['hapticsEnabled'] as bool? ?? true;
       }
       _loaded = true;
@@ -49,7 +41,6 @@ class SettingsStore extends ChangeNotifier {
   Future<void> reload() async {
     _loaded = false;
     _onboardingSeen = false;
-    _themeMode = ThemeMode.light;
     _hapticsEnabled = true;
     await load();
   }
@@ -58,7 +49,6 @@ class SettingsStore extends ChangeNotifier {
   Future<void> resetForTest() async {
     _loaded = false;
     _onboardingSeen = false;
-    _themeMode = ThemeMode.light;
     _hapticsEnabled = true;
     _loadError = null;
     await load();
@@ -66,13 +56,6 @@ class SettingsStore extends ChangeNotifier {
 
   Future<void> completeOnboarding() async {
     _onboardingSeen = true;
-    notifyListeners();
-    await _persist();
-  }
-
-  Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) return;
-    _themeMode = mode;
     notifyListeners();
     await _persist();
   }
@@ -90,7 +73,6 @@ class SettingsStore extends ChangeNotifier {
       _key,
       jsonEncode({
         'onboardingSeen': _onboardingSeen,
-        'themeMode': _themeMode.name,
         'hapticsEnabled': _hapticsEnabled,
       }),
     );

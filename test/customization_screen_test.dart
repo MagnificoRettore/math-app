@@ -48,10 +48,13 @@ void main() {
     expect(find.byType(CustomizationScreen), findsOneWidget);
   });
 
-  testWidgets('la pagina offre tema e vibrazioni', (tester) async {
+  testWidgets('la pagina offre le vibrazioni e niente tema scuro', (
+    tester,
+  ) async {
     await _pumpCustomization(tester);
 
-    expect(find.text('Tema scuro'), findsOneWidget);
+    // Il tema è uno solo, quello chiaro del design.
+    expect(find.text('Tema scuro'), findsNothing);
     expect(find.text('Vibrazioni'), findsOneWidget);
     // La scelta della dimensione del testo non c'è più: si legge da soli con
     // le Impostazioni di Accessibilità del telefono.
@@ -67,8 +70,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(SettingsStore.instance.hapticsEnabled, isFalse);
-    // Lo switch deve seguire lo store da solo: il tema non è stato toccato e
-    // non deve servire a farlo girare.
+    // Lo switch deve seguire lo store da solo, senza un rebuild della pagina.
     expect(_switch(tester).value, isFalse);
     await SettingsStore.instance.reload();
     expect(SettingsStore.instance.hapticsEnabled, isFalse);

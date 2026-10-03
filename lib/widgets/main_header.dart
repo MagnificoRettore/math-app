@@ -31,7 +31,7 @@ const double kHeaderBottomRadius = 28;
 /// Il `title` degli header delle tre pagine principali: l'identità a sinistra,
 /// con l'avatar e il suo badge, e il nome e la scuola che occupano il resto.
 ///
-/// Il blu non è qui ma sull'`AppBar` che contiene questa riga: è una banda di
+/// L'indaco non è qui ma sull'`AppBar` che contiene questa riga: è una banda di
 /// marca che parte dai due bordi dello schermo e li attraversa tutti, non una
 /// pilla con i bordi curvi dentro una pagina colorata. Le icone sono nella stessa
 /// banda, nelle `actions`, e quindi bianche come il testo.
@@ -66,12 +66,12 @@ class MainHeaderTitle extends StatelessWidget {
 
 /// L'`AppBar` dei tre header principali.
 ///
-/// Il blu è dell'`AppBar`, che parte dai due bordi dello schermo e li attraversa
+/// L'indaco è dell'`AppBar`, che parte dai due bordi dello schermo e li attraversa
 /// tutti, e i due angoli in basso sono smussati dal suo `shape`: sotto gli
 /// angoli si vede lo sfondo della pagina.
 ///
 /// [bottom] (i `YearTabs` di Lezioni ed Esercizi) sta **sotto** la banda e non
-/// nell'`AppBar.bottom`, che lo dipingerebbe di blu: il colore è solo della
+/// nell'`AppBar.bottom`, che lo dipingerebbe d'indaco: il colore è solo della
 /// riga dell'header. L'`AppBar` sta in un `Expanded` perché dentro una `Column`
 /// senza limite di altezza il suo layout non si chiude.
 ///
@@ -107,12 +107,12 @@ class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             automaticallyImplyLeading: false,
             toolbarHeight: kHeaderToolbarHeight,
-            leading: showBack ? BackButton(color: c.headerOnBlue) : null,
+            leading: showBack ? BackButton(color: c.onHeaderBand) : null,
             // Con la freccia il margine lo dà già lei: 30 in più staccherebbero
             // l'avatar dalla freccia come se fossero due cose diverse.
             titleSpacing: showBack ? 0 : kHeaderHorizontalMargin,
-            backgroundColor: c.headerBlue,
-            foregroundColor: c.headerOnBlue,
+            backgroundColor: c.headerBand,
+            foregroundColor: c.onHeaderBand,
             // Senza ombra: sotto gli angoli c'è lo sfondo della pagina, e
             // l'ombra lo sporcherebbe.
             elevation: 0,
@@ -147,9 +147,9 @@ class HeaderSearchButton extends StatelessWidget {
       key: const Key('header-search'),
       icon: Icon(
         Icons.search_rounded,
-        // Bianco come il testo dell'header: l'icona sta sulla banda blu, non
+        // Bianco come il testo dell'header: l'icona sta sulla banda indaco, non
         // sullo sfondo della pagina.
-        color: AppColors.of(context).headerOnBlue,
+        color: AppColors.of(context).onHeaderBand,
       ),
       tooltip: 'Cerca',
       onPressed: () => showSearchOverlay(context),
@@ -169,7 +169,7 @@ class HeaderCustomizationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: const Key('header-customization'),
-      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).headerOnBlue),
+      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).onHeaderBand),
       tooltip: 'Personalizzazione',
       onPressed: () => Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => const CustomizationScreen())),
@@ -187,7 +187,7 @@ class HeaderCustomizationButton extends StatelessWidget {
 /// compare il nome: senza, la pagina sembrerebbe quella di sempre e i progressi
 /// mostrati sarebbero quelli di un'altra scuola senza che lo si dica. Icona e
 /// nome sono bianchi come tutto il resto dell'header, perché stanno sulla banda
-/// blu: in `accent` sul blu non si leggerebbero.
+/// indaco: in `accent` sull'indaco non si leggerebbero.
 ///
 /// Il `Flexible` sta in cima, non attorno al nome: le `actions` dell'AppBar sono
 /// una `Row` che dà larghezza illimitata ai figli, quindi è la riga dei bottoni
@@ -225,7 +225,7 @@ class SchoolBrowseButton extends StatelessWidget {
                 key: const Key('header-school-browse'),
                 icon: Icon(
                   other ? Icons.visibility_outlined : Icons.school_outlined,
-                  color: AppColors.of(context).headerOnBlue,
+                  color: AppColors.of(context).onHeaderBand,
                 ),
                 tooltip: other ? 'Guardi $title' : 'Altre scuole',
                 onPressed: () => _pick(context),
@@ -240,7 +240,7 @@ class SchoolBrowseButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppText.label,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.of(context).headerOnBlue,
+                      color: AppColors.of(context).onHeaderBand,
                     ),
                   ),
                 ),

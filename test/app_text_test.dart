@@ -33,14 +33,17 @@ void main() {
       expect(AppText.docTitle, greaterThan(AppText.docHeading));
     });
 
-    test('il titolo delle AppBar è `headline` in chiaro e in scuro', () {
-      for (final theme in [AppTheme.light, AppTheme.dark]) {
-        expect(
-          theme.appBarTheme.titleTextStyle?.fontSize,
-          AppText.headline,
-          reason: 'il tema ${theme.brightness}',
-        );
-      }
+    test('il titolo delle AppBar è `headline`, in Fredoka', () {
+      final style = AppTheme.light.appBarTheme.titleTextStyle;
+      expect(style?.fontSize, AppText.headline);
+      expect(style?.fontFamily, AppText.headingFont);
+    });
+
+    test('il testo è in Nunito e i titoli in Fredoka', () {
+      final text = AppTheme.light.textTheme;
+      expect(text.bodyMedium?.fontFamily, AppText.bodyFont);
+      expect(text.titleLarge?.fontFamily, AppText.headingFont);
+      expect(text.labelLarge?.fontFamily, AppText.headingFont);
     });
   });
 }

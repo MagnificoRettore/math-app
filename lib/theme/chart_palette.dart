@@ -6,8 +6,8 @@ import 'app_colors.dart';
 ///
 /// Sono una cosa sola dei grafici, quindi stanno qui e non in `AppPalette`,
 /// dove vivono i colori che il resto dell'app usa. È una `ThemeExtension` come
-/// `AppPalette`: `AppTheme` la registra e cambia con il tema, quindi in scuro
-/// gli assi non restano il grigio chiaro di una costante.
+/// `AppPalette`: `AppTheme` la registra, quindi i grafici leggono i colori dal
+/// tema e non da costanti.
 @immutable
 class ChartPalette extends ThemeExtension<ChartPalette> {
   final Color grid;
@@ -21,11 +21,8 @@ class ChartPalette extends ThemeExtension<ChartPalette> {
   });
 
   factory ChartPalette.of(AppPalette palette) => ChartPalette(
-    // La griglia è un filetto: il bordo della card, un po' più discreto in
-    // scuro perché lì il contrasto è già forte.
-    grid: palette.border.withValues(
-      alpha: palette == AppPalette.dark ? 0.55 : 0.9,
-    ),
+    // La griglia è un filetto: il bordo della card.
+    grid: palette.border.withValues(alpha: 0.9),
     axis: palette.textSecondary,
     label: palette.textSecondary,
   );

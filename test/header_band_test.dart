@@ -23,10 +23,9 @@ const _avatarKey = Key('home-profile-avatar');
 const _badgeKey = Key('home-profile-edit-badge');
 const _ospiteKey = Key('profile-button-guest');
 
-/// Il blu di marca della banda dell'header. È dichiarato in `AppPalette` e non
-/// cambia fra i temi: dentro l'header i colori sono bianchi in chiaro e in
-/// scuro.
-const Color _bluHeader = Color(0xFF3F46E8);
+/// L'indaco del design, il colore della banda dell'header. Dentro la banda i
+/// colori sono bianchi.
+const Color _bluHeader = Color(0xFF2B1A6B);
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -78,7 +77,7 @@ void main() {
 
   setUp(_prepare);
 
-  testWidgets('l\'header è una banda blu che attraversa tutta la larghezza', (
+  testWidgets('l\'header è una banda indaco che attraversa tutta la larghezza', (
     tester,
   ) async {
     await _register(tester);
@@ -90,7 +89,7 @@ void main() {
     expect(appBar.backgroundColor, _bluHeader);
     expect(
       appBar.foregroundColor,
-      AppColors.of(tester.element(find.byKey(_identitaKey))).headerOnBlue,
+      AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
     );
 
     final banda = tester.getRect(find.byType(AppBar));
@@ -166,7 +165,7 @@ void main() {
       final widget = tester.widget<Icon>(find.byIcon(icona).first);
       expect(
         widget.color,
-        AppColors.of(tester.element(find.byKey(_identitaKey))).headerOnBlue,
+        AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
         reason: '$icona',
       );
     }
@@ -186,7 +185,7 @@ void main() {
     expect(stile.fontWeight, FontWeight.w700);
     expect(
       stile.color,
-      AppColors.of(tester.element(find.byKey(_identitaKey))).headerOnBlue,
+      AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
     );
 
     // Le due righe sono impilate e alliniate a sinistra, non affiancate.
@@ -196,27 +195,27 @@ void main() {
     expect(scuola.left, closeTo(nome.left, 1));
   });
 
-  testWidgets('contrasto: bianco e bianco all\'80% sul blu passano 4.5:1', (
-    tester,
-  ) async {
-    // Il secondario del tema sul blu non legge: dentro l'header la riga sotto
-    // è bianco all'80%, non il colore secondario della pagina. Al 70% si
-    // scende a 3.98:1, quindi il test è falsificato abbassando l'opacità.
-    await _register(tester);
+  testWidgets(
+    'contrasto: bianco e bianco all\'80% sull\'indaco passano 4.5:1',
+    (tester) async {
+      // Il secondario del tema sull'indaco non legge: dentro l'header la riga
+      // sotto è bianco all'80%, non il colore secondario della pagina.
+      await _register(tester);
 
-    final scuola = tester.widget<Text>(find.byKey(_scuolaKey)).style!;
-    expect(scuola.color!.a, lessThan(1.0));
-    expect(
-      _contrastoSu(scuola.color!, _bluHeader),
-      greaterThan(4.5),
-      reason: 'riga della scuola',
-    );
-    expect(
-      _contrastoSu(Colors.white, _bluHeader),
-      greaterThan(4.5),
-      reason: 'nome',
-    );
-  });
+      final scuola = tester.widget<Text>(find.byKey(_scuolaKey)).style!;
+      expect(scuola.color!.a, lessThan(1.0));
+      expect(
+        _contrastoSu(scuola.color!, _bluHeader),
+        greaterThan(4.5),
+        reason: 'riga della scuola',
+      );
+      expect(
+        _contrastoSu(Colors.white, _bluHeader),
+        greaterThan(4.5),
+        reason: 'nome',
+      );
+    },
+  );
 
   testWidgets('avatar a sinistra del nome, sulla stessa riga', (tester) async {
     await _register(tester);

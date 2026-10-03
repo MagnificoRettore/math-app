@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,9 +9,8 @@ void main() {
     await SettingsStore.instance.resetForTest();
   });
 
-  test('stato iniziale: onboarding non visto e tema chiaro', () async {
+  test('stato iniziale: onboarding non visto', () async {
     expect(SettingsStore.instance.onboardingSeen, isFalse);
-    expect(SettingsStore.instance.themeMode, ThemeMode.light);
   });
 
   test('stato iniziale: vibrazioni accese', () {
@@ -26,11 +24,15 @@ void main() {
     expect(SettingsStore.instance.onboardingSeen, isTrue);
   });
 
-  test('setThemeMode persiste il tema scuro', () async {
-    await SettingsStore.instance.setThemeMode(ThemeMode.dark);
-
+  test('un themeMode salvato prima si ignora senza perdere il resto', () async {
+    SharedPreferences.setMockInitialValues({
+      'settings_v1':
+          '{"onboardingSeen":true,"themeMode":"dark",'
+          '"hapticsEnabled":false}',
+    });
     await SettingsStore.instance.reload();
-    expect(SettingsStore.instance.themeMode, ThemeMode.dark);
+    expect(SettingsStore.instance.onboardingSeen, isTrue);
+    expect(SettingsStore.instance.hapticsEnabled, isFalse);
   });
 
   test(

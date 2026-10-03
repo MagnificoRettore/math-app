@@ -35,7 +35,7 @@ class ProfileButton extends StatelessWidget {
                 key: const Key('profile-button-guest'),
                 icon: Icon(
                   Icons.person_outline,
-                  color: AppColors.of(context).headerOnBlue,
+                  color: AppColors.of(context).onHeaderBand,
                   size: 32,
                 ),
                 tooltip: 'Accedi',
@@ -90,8 +90,8 @@ class _ProfileAvatar extends StatelessWidget {
               height: kProfileAvatarSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                // Anello bianco: sulla pilla blu il bordo del tema sparirebbe.
-                border: Border.all(color: c.headerOnBlue, width: 2),
+                // Anello bianco: sulla banda indaco il bordo del tema sparirebbe.
+                border: Border.all(color: c.onHeaderBand, width: 2),
               ),
               child: ProfileAvatar(
                 user: user,
@@ -117,7 +117,7 @@ class _ProfileAvatar extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: scheme.primary,
-                  border: Border.all(color: c.headerOnBlue, width: 1.5),
+                  border: Border.all(color: c.onHeaderBand, width: 1.5),
                 ),
                 child: Icon(
                   Icons.edit_rounded,

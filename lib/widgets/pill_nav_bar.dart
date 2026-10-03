@@ -238,17 +238,16 @@ class _PillNavBarState extends State<PillNavBar> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     // ―― Liquid Glass ――――――――――――――――――――――――――――――――――――――
     // Tinta del vetro: semi-trasparente e più spessa in alto, così la
     // sfocatura del contenuto sottostante resta ben visibile.
-    final glassTop = c.surface.withValues(alpha: isDark ? 0.25 : 0.18);
-    final glassBottom = c.surface.withValues(alpha: isDark ? 0.12 : 0.08);
+    final glassTop = c.surface.withValues(alpha: 0.18);
+    final glassBottom = c.surface.withValues(alpha: 0.08);
     // Riflessi di luce: più marcati in chiaro, soffusi in scuro.
-    final rim = isDark ? 0.35 : 0.6;
-    final glare = isDark ? 0.12 : 0.2;
+    final rim = 0.6;
+    final glare = 0.2;
 
     return SafeArea(
       minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
@@ -269,7 +268,7 @@ class _PillNavBarState extends State<PillNavBar> {
                 ),
                 // Ombra di contatto più corta per "ancorare" il vetro.
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -319,9 +318,7 @@ class _PillNavBarState extends State<PillNavBar> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(32),
                           border: Border.all(
-                            color: Colors.white.withValues(
-                              alpha: isDark ? 0.14 : 0.55,
-                            ),
+                            color: Colors.white.withValues(alpha: 0.55),
                             width: 1,
                           ),
                         ),
@@ -398,9 +395,7 @@ class _PillNavBarState extends State<PillNavBar> {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withValues(
-                                alpha: isDark ? 0.22 : 0.06,
-                              ),
+                              Colors.black.withValues(alpha: 0.06),
                               Colors.black.withValues(alpha: 0),
                             ],
                           ),
@@ -573,7 +568,6 @@ class _GlassIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: DecoratedBox(
@@ -583,19 +577,12 @@ class _GlassIndicator extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDark
-                ? [
-                    Colors.white.withValues(alpha: 0.16),
-                    Colors.white.withValues(alpha: 0.07),
-                  ]
-                : [
-                    Colors.white.withValues(alpha: 0.9),
-                    Colors.white.withValues(alpha: 0.45),
-                  ],
+            colors: [
+              Colors.white.withValues(alpha: 0.9),
+              Colors.white.withValues(alpha: 0.45),
+            ],
           ),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: isDark ? 0.1 : 0.55),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
           boxShadow: [
             BoxShadow(
               color: c.shadow,
@@ -618,7 +605,7 @@ class _GlassIndicator extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withValues(alpha: isDark ? 0.5 : 0.7),
+                  Colors.white.withValues(alpha: 0.7),
                   Colors.white.withValues(alpha: 0),
                 ],
               ),

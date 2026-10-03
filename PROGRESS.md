@@ -2,7 +2,16 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **484 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **478 test in 40 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — Design del canvas, fase 1: colori, font e tema
+
+- L'app si allinea al canvas «Illustrazioni App Educativa». Prima fase: i fondamenti, senza ancora toccare i componenti.
+- **Palette** (`AppPalette`): indaco `#2B1A6B` come primary, crema `#FFF4D6` come sfondo, inchiostro `#1F1250` per il testo, giallo `#F6B818` come secondario. Nuovi token per la fase dei componenti: `yellow`, `yellowDeep`, `orange`, `orangeDeep`, `accentDeep`, `cardShadow`, `paperLine`. I ruoli che finiscono come testo sono toni scuri della famiglia del canvas, tutti oltre 4.5:1 su bianco e su crema.
+- **Font**: Fredoka (titoli, bottoni, `AppBar`) e Nunito (testo), statici in `assets/fonts/` con le licenze OFL. `AppText.headingFont` e `AppText.bodyFont`.
+- **Un tema solo, chiaro**: via `AppTheme.dark`, `AppPalette.dark`, il toggle sole/luna (`ThemeToggle`, `toggle.json`) e la transizione fra temi. Personalizzazione tiene solo le vibrazioni; `settings_v1` ignora il `themeMode` dei salvataggi di prima.
+- La banda dell'header passa dal blu `#3F46E8` all'indaco del design: `headerBlue`/`headerOnBlue` diventano `headerBand`/`onHeaderBand`.
+- Test: via `theme_toggle_test.dart` e `theme_transition_test.dart`; nuovi casi su primary, secondario, sfondo, contrasto dei colori di testo, font del tema, e un `themeMode` vecchio che si ignora. Suite a **478 test in 40 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — La calcolatrice diventa una scientifica classica
 

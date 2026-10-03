@@ -60,15 +60,9 @@ Future<void> _pausa(String lessonId, {int step = 0}) =>
       LessonResume(levelId: 'high-school', lessonId: lessonId, step: step),
     );
 
-Future<void> _pumpHome(
-  WidgetTester tester, {
-  Brightness brightness = Brightness.light,
-}) async {
+Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpWidget(
-    MaterialApp(
-      theme: brightness == Brightness.dark ? AppTheme.dark : AppTheme.light,
-      home: const HomeScreen(),
-    ),
+    MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
   );
   await tester.pumpAndSettle();
 }
@@ -129,46 +123,60 @@ void main() {
   setUp(_resetStores);
 
   group('tema', () {
-    test('il primary in chiaro è l\'indaco di marca, non il grigio-viola', () {
+    test('il primary è l\'indaco del design, non quello del seme', () {
       // `ColorScheme.fromSeed` prende dal seme la tonalità 40 e l'indaco ne
-      // esce slavato: il primary va dichiarato, il resto della scala no.
-      expect(AppTheme.light.colorScheme.primary, const Color(0xFF3525CD));
-      expect(AppTheme.dark.colorScheme.primary, AppPalette.dark.accent);
+      // esce diverso: il primary va dichiarato, il resto della scala no.
+      expect(AppTheme.light.colorScheme.primary, const Color(0xFF2B1A6B));
     });
 
-    test('il terziario in chiaro è il rosa scuro di «da ripassare»', () {
+    test('il secondario è il giallo del design, con l\'inchiostro sopra', () {
+      expect(AppTheme.light.colorScheme.secondary, const Color(0xFFF6B818));
+      expect(
+        _contrasto(
+          AppTheme.light.colorScheme.onSecondary,
+          AppTheme.light.colorScheme.secondary,
+        ),
+        greaterThan(4.5),
+      );
+    });
+
+    test('il terziario è il rosa scuro di «da ripassare»', () {
       expect(AppTheme.light.colorScheme.tertiary, const Color(0xFF8B1B34));
-      expect(AppTheme.dark.colorScheme.tertiary, AppPalette.dark.danger);
     });
 
-    test('lo sfondo della pagina è il lilla chiaro, le card sono bianche', () {
-      expect(AppTheme.light.scaffoldBackgroundColor, const Color(0xFFFCF8FF));
+    test('lo sfondo della pagina è il crema, le card sono bianche', () {
+      expect(AppTheme.light.scaffoldBackgroundColor, const Color(0xFFFFF4D6));
       expect(AppPalette.light.surface, Colors.white);
     });
 
-    test(
-      'il testo del bottone pieno contrasta col primary in entrambi i temi',
-      () {
-        // Il bottone «Riprendi» è pieno di primary: se il testo non passa 4.5:1
-        // il bottone è illeggibile proprio dove l'azione è importante.
-        expect(
-          _contrasto(
-            AppTheme.light.colorScheme.onPrimary,
-            AppTheme.light.colorScheme.primary,
-          ),
-          greaterThan(4.5),
-          reason: 'chiaro',
-        );
-        expect(
-          _contrasto(
-            AppTheme.dark.colorScheme.onPrimary,
-            AppTheme.dark.colorScheme.primary,
-          ),
-          greaterThan(4.5),
-          reason: 'scuro',
-        );
-      },
-    );
+    test('i colori usati come testo passano 4.5:1 sul bianco e sul crema', () {
+      final p = AppPalette.light;
+      for (final colore in [
+        p.textPrimary,
+        p.textSecondary,
+        p.accent,
+        p.easy,
+        p.medium,
+        p.hard,
+        p.indigo,
+        p.danger,
+      ]) {
+        expect(_contrasto(colore, p.surface), greaterThan(4.5));
+        expect(_contrasto(colore, p.background), greaterThan(4.5));
+      }
+    });
+
+    test('il testo del bottone pieno contrasta col primary', () {
+      // Il bottone «Riprendi» è pieno di primary: se il testo non passa 4.5:1
+      // il bottone è illeggibile proprio dove l'azione è importante.
+      expect(
+        _contrasto(
+          AppTheme.light.colorScheme.onPrimary,
+          AppTheme.light.colorScheme.primary,
+        ),
+        greaterThan(4.5),
+      );
+    });
   });
 
   group('testate', () {

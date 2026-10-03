@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 
+/// I colori dell'app, presi dal design (canvas «Illustrazioni App Educativa»):
+/// indaco profondo, giallo, crema, arancio, turchese e rosa.
+///
+/// Un tema solo, chiaro: il design non ha una versione scura. I colori del
+/// canvas restano quelli di decoro e riempimento; i ruoli che finiscono come
+/// testo (`easy`, `medium`, `hard`, `teal`, `pink`) sono toni più scuri della
+/// stessa famiglia, perché il verde, l'arancio e il rosso del canvas su bianco
+/// stanno sotto 4.5:1.
 class AppPalette extends ThemeExtension<AppPalette> {
   final Color background;
   final Color surface;
@@ -18,14 +26,35 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color danger;
   final Color shadow;
 
-  /// Sfondo della pilla identitaria dell'header. È un colore di marca, quindi
-  /// è lo stesso in chiaro e in scuro: dentro la pilla i testi sono bianchi in
-  /// entrambi i temi e non letti dal tema.
-  final Color headerBlue;
+  /// Il giallo del design: bottoni secondari, badge, barre di avanzamento.
+  /// Ci va sopra l'inchiostro ([textPrimary]), non il bianco.
+  final Color yellow;
 
-  /// Testo e anelli dentro [headerBlue]. Bianco in entrambi i temi, perché la
-  /// pilla non cambia: i colori del tema non ci arriverebbero.
-  final Color headerOnBlue;
+  /// Il bordo e l'ombra piena di ciò che è [yellow].
+  final Color yellowDeep;
+
+  /// L'arancio del design, per i traguardi e i bottoni tondi.
+  final Color orange;
+
+  /// Il bordo e l'ombra piena di ciò che è [orange].
+  final Color orangeDeep;
+
+  /// L'ombra piena dei bottoni [accent]: il design li solleva con un gradino
+  /// di colore pieno sotto, non con un'ombra sfumata.
+  final Color accentDeep;
+
+  /// L'ombra piena delle card, un oro che sta bene sul crema dello sfondo.
+  final Color cardShadow;
+
+  /// Le righe del quaderno nelle card a righe.
+  final Color paperLine;
+
+  /// Sfondo della banda dell'header: l'indaco del design, con i testi bianchi
+  /// di [onHeaderBand].
+  final Color headerBand;
+
+  /// Testo e anelli dentro [headerBand].
+  final Color onHeaderBand;
   final List<Color> iconPalette;
   final Color splashTop;
   final Color splashBottom;
@@ -48,8 +77,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.indigo,
     required this.danger,
     required this.shadow,
-    required this.headerBlue,
-    required this.headerOnBlue,
+    required this.yellow,
+    required this.yellowDeep,
+    required this.orange,
+    required this.orangeDeep,
+    required this.accentDeep,
+    required this.cardShadow,
+    required this.paperLine,
+    required this.headerBand,
+    required this.onHeaderBand,
     required this.iconPalette,
     required this.splashTop,
     required this.splashBottom,
@@ -57,68 +93,42 @@ class AppPalette extends ThemeExtension<AppPalette> {
   });
 
   static const AppPalette light = AppPalette(
-    background: Color(0xFFFCF8FF),
+    background: Color(0xFFFFF4D6),
     surface: Color(0xFFFFFFFF),
-    border: Color(0xFFE6E1EC),
-    textPrimary: Color(0xFF1C1C1E),
-    textSecondary: Color(0xFF6E6E73),
-    accent: Color(0xFF3525CD),
-    accentSoft: Color(0xFFE7E4FF),
-    easy: Color(0xFF34C759),
-    medium: Color(0xFFFF9500),
-    hard: Color(0xFFFF3B30),
-    teal: Color(0xFF00BFA5),
-    purple: Color(0xFF9C27B0),
-    pink: Color(0xFFEC407A),
-    indigo: Color(0xFF5C6BC0),
+    border: Color(0xFFCFC7E6),
+    textPrimary: Color(0xFF1F1250),
+    textSecondary: Color(0xFF574E7D),
+    accent: Color(0xFF2B1A6B),
+    accentSoft: Color(0xFFECE7FA),
+    easy: Color(0xFF2E7D32),
+    medium: Color(0xFFB14D06),
+    hard: Color(0xFFC0391B),
+    teal: Color(0xFF1F8577),
+    purple: Color(0xFF5048D6),
+    pink: Color(0xFFC2406B),
+    indigo: Color(0xFF463589),
     danger: Color(0xFF8B1B34),
-    shadow: Color(0x14000000),
-    headerBlue: Color(0xFF3F46E8),
-    headerOnBlue: Color(0xFFFFFFFF),
+    shadow: Color(0x1F2B1A6B),
+    yellow: Color(0xFFF6B818),
+    yellowDeep: Color(0xFFB98500),
+    orange: Color(0xFFEF7D1A),
+    orangeDeep: Color(0xFFB65508),
+    accentDeep: Color(0xFF160C3E),
+    cardShadow: Color(0xFFE3C46E),
+    paperLine: Color(0xFFCFDCF3),
+    headerBand: Color(0xFF2B1A6B),
+    onHeaderBand: Color(0xFFFFFFFF),
     iconPalette: [
-      Color(0xFF007AFF),
-      Color(0xFF9C27B0),
-      Color(0xFF00BFA5),
-      Color(0xFFEC407A),
-      Color(0xFF5C6BC0),
-      Color(0xFFFF9500),
-      Color(0xFF34C759),
+      Color(0xFF2B1A6B),
+      Color(0xFFEF7D1A),
+      Color(0xFF2FB3A2),
+      Color(0xFFC2406B),
+      Color(0xFF5048D6),
+      Color(0xFFB98500),
+      Color(0xFF2E7D32),
     ],
-    splashTop: Color(0xFF007AFF),
-    splashBottom: Color(0xFF5C6BC0),
-    onSplash: Color(0xFFFFFFFF),
-  );
-
-  static const AppPalette dark = AppPalette(
-    background: Color(0xFF0E0E11),
-    surface: Color(0xFF1C1C22),
-    border: Color(0xFF2C2C33),
-    textPrimary: Color(0xFFF2F2F7),
-    textSecondary: Color(0xFFA0A0AB),
-    accent: Color(0xFFBFC2FF),
-    accentSoft: Color(0xFF2A2480),
-    easy: Color(0xFF4CD964),
-    medium: Color(0xFFFFB340),
-    hard: Color(0xFFFF6961),
-    teal: Color(0xFF2EC9B5),
-    purple: Color(0xFFB388FF),
-    pink: Color(0xFFFF7A9C),
-    indigo: Color(0xFF8E9BFF),
-    danger: Color(0xFFFFB4AB),
-    shadow: Color(0x33000000),
-    headerBlue: Color(0xFF3F46E8),
-    headerOnBlue: Color(0xFFFFFFFF),
-    iconPalette: [
-      Color(0xFF3B9BFF),
-      Color(0xFFB388FF),
-      Color(0xFF2EC9B5),
-      Color(0xFFFF7A9C),
-      Color(0xFF8E9BFF),
-      Color(0xFFFFB340),
-      Color(0xFF4CD964),
-    ],
-    splashTop: Color(0xFF007AFF),
-    splashBottom: Color(0xFF5C6BC0),
+    splashTop: Color(0xFF2B1A6B),
+    splashBottom: Color(0xFF463589),
     onSplash: Color(0xFFFFFFFF),
   );
 
@@ -140,8 +150,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? indigo,
     Color? danger,
     Color? shadow,
-    Color? headerBlue,
-    Color? headerOnBlue,
+    Color? yellow,
+    Color? yellowDeep,
+    Color? orange,
+    Color? orangeDeep,
+    Color? accentDeep,
+    Color? cardShadow,
+    Color? paperLine,
+    Color? headerBand,
+    Color? onHeaderBand,
     List<Color>? iconPalette,
     Color? splashTop,
     Color? splashBottom,
@@ -164,8 +181,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
       indigo: indigo ?? this.indigo,
       danger: danger ?? this.danger,
       shadow: shadow ?? this.shadow,
-      headerBlue: headerBlue ?? this.headerBlue,
-      headerOnBlue: headerOnBlue ?? this.headerOnBlue,
+      yellow: yellow ?? this.yellow,
+      yellowDeep: yellowDeep ?? this.yellowDeep,
+      orange: orange ?? this.orange,
+      orangeDeep: orangeDeep ?? this.orangeDeep,
+      accentDeep: accentDeep ?? this.accentDeep,
+      cardShadow: cardShadow ?? this.cardShadow,
+      paperLine: paperLine ?? this.paperLine,
+      headerBand: headerBand ?? this.headerBand,
+      onHeaderBand: onHeaderBand ?? this.onHeaderBand,
       iconPalette: iconPalette ?? this.iconPalette,
       splashTop: splashTop ?? this.splashTop,
       splashBottom: splashBottom ?? this.splashBottom,
@@ -193,8 +217,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
       indigo: Color.lerp(indigo, other.indigo, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
-      headerBlue: Color.lerp(headerBlue, other.headerBlue, t)!,
-      headerOnBlue: Color.lerp(headerOnBlue, other.headerOnBlue, t)!,
+      yellow: Color.lerp(yellow, other.yellow, t)!,
+      yellowDeep: Color.lerp(yellowDeep, other.yellowDeep, t)!,
+      orange: Color.lerp(orange, other.orange, t)!,
+      orangeDeep: Color.lerp(orangeDeep, other.orangeDeep, t)!,
+      accentDeep: Color.lerp(accentDeep, other.accentDeep, t)!,
+      cardShadow: Color.lerp(cardShadow, other.cardShadow, t)!,
+      paperLine: Color.lerp(paperLine, other.paperLine, t)!,
+      headerBand: Color.lerp(headerBand, other.headerBand, t)!,
+      onHeaderBand: Color.lerp(onHeaderBand, other.onHeaderBand, t)!,
       iconPalette: List.generate(
         iconPalette.length,
         (i) => Color.lerp(iconPalette[i], other.iconPalette[i], t)!,

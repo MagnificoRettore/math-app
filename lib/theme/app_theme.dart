@@ -5,28 +5,16 @@ import 'app_colors.dart';
 import 'chart_palette.dart';
 
 class AppTheme {
-  /// Durata e curva del passaggio fra tema chiaro e tema scuro.
-  ///
-  /// Flutter di default anima il tema con 200ms lineari, che si leggono come un
-  /// lampo. Qui il passaggio dura 200ms con `easeOutCubic`: parte subito e
-  /// arriva dolce, senza la coda lunga di `easeInOutCubicEmphasized`, che a
-  /// fine passaggio sembrava bloccarsi mentre l'icona era già ferma. Sono i 320ms
-  /// dell'animazione sole/luna (`ThemeToggle._transition`) meno i 40ms di
-  /// ritardo, così i colori arrivano 80ms **prima** dell'icona: due viaggi che
-  /// finiscono insieme si leggono come un unico scatto.
-  static const AnimationStyle transitionStyle = AnimationStyle(
-    duration: Duration(milliseconds: 200),
-    reverseDuration: Duration(milliseconds: 200),
-    curve: Curves.easeOutCubic,
-  );
-
   /// Il bottone principale a tutta riga delle schermate di accesso, profilo e
   /// onboarding. Non è il `filledButtonTheme`: `Size.fromHeight` allarga a
   /// tutta riga, e «Completa la lezione», «Riprendi» o il dialog di Google non
   /// lo sono. Il colore è il `primary` del tema, cioè `accent`.
   static final ButtonStyle wideButton = FilledButton.styleFrom(
     minimumSize: const Size.fromHeight(52),
+    // La famiglia va scritta: un `textStyle` del bottone sostituisce quello
+    // del tema e non eredita il font.
     textStyle: const TextStyle(
+      fontFamily: AppText.headingFont,
       fontSize: AppText.titleSmall,
       fontWeight: FontWeight.w600,
     ),
@@ -50,40 +38,59 @@ class AppTheme {
     );
   }
 
-  static final ThemeData light = _build(Brightness.light, AppPalette.light);
-  static final ThemeData dark = _build(Brightness.dark, AppPalette.dark);
+  /// Il tema dell'app, uno solo e chiaro come il design.
+  static final ThemeData light = _build(AppPalette.light);
 
-  static ThemeData _build(Brightness brightness, AppPalette palette) {
-    final dark = brightness == Brightness.dark;
+  static ThemeData _build(AppPalette palette) {
     final base = ThemeData(
       useMaterial3: true,
+      fontFamily: AppText.bodyFont,
       colorScheme:
           ColorScheme.fromSeed(
             seedColor: palette.accent,
-            brightness: brightness,
             surface: palette.surface,
           ).copyWith(
             // `fromSeed` ricava il primary dalla **tonalità 40** del seme,
-            // quindi dall'indaco di marca esce un grigio-viola: il primary si
-            // dichiara, e dal seme resta tutta la scala intorno (secondary,
-            // surface, surfaceContainer). Il terziario è il rosa scuro delle
-            // sezioni «da ripassare», e come il primary non viene dal seme:
-            // `AppPalette.danger` ne resta l'unica sorgente.
+            // quindi dall'indaco del design uscirebbe un altro viola: il
+            // primary si dichiara, e dal seme resta la scala intorno. Il
+            // secondario è il giallo del design, con l'inchiostro sopra; il
+            // terziario il rosa scuro delle sezioni «da ripassare».
             primary: palette.accent,
-            onPrimary: dark ? palette.accentSoft : Colors.white,
+            onPrimary: Colors.white,
             primaryContainer: palette.accentSoft,
             onPrimaryContainer: palette.textPrimary,
+            secondary: palette.yellow,
+            onSecondary: palette.textPrimary,
             tertiary: palette.danger,
             onTertiary: Colors.white,
-            tertiaryContainer: palette.danger.withValues(
-              alpha: dark ? 0.22 : 0.12,
-            ),
+            tertiaryContainer: palette.danger.withValues(alpha: 0.12),
           ),
     );
+
+    // Titoli in Fredoka, il resto in Nunito: `fontFamily` del tema vale per
+    // tutti gli stili, quindi i titoli si rimettono a mano.
+    TextStyle? heading(TextStyle? style) =>
+        style?.copyWith(fontFamily: AppText.headingFont);
+    final textTheme = base.textTheme
+        .copyWith(
+          displayLarge: heading(base.textTheme.displayLarge),
+          displayMedium: heading(base.textTheme.displayMedium),
+          displaySmall: heading(base.textTheme.displaySmall),
+          headlineLarge: heading(base.textTheme.headlineLarge),
+          headlineMedium: heading(base.textTheme.headlineMedium),
+          headlineSmall: heading(base.textTheme.headlineSmall),
+          titleLarge: heading(base.textTheme.titleLarge),
+          labelLarge: heading(base.textTheme.labelLarge),
+        )
+        .apply(
+          bodyColor: palette.textPrimary,
+          displayColor: palette.textPrimary,
+        );
 
     return base.copyWith(
       scaffoldBackgroundColor: palette.background,
       splashFactory: InkSparkle.splashFactory,
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: palette.background,
         foregroundColor: palette.textPrimary,
@@ -91,20 +98,17 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
+          fontFamily: AppText.headingFont,
           color: palette.textPrimary,
           fontSize: AppText.headline,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
         ),
-      ),
-      textTheme: base.textTheme.apply(
-        bodyColor: palette.textPrimary,
-        displayColor: palette.textPrimary,
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: palette.surface,
         indicatorColor: palette.accentSoft,
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w600),
+          const TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w700),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
@@ -116,7 +120,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: palette.textPrimary,
-        contentTextStyle: const TextStyle(color: Colors.white),
+        contentTextStyle: const TextStyle(
+          fontFamily: AppText.bodyFont,
+          color: Colors.white,
+        ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -131,7 +138,7 @@ class AppTheme {
         labelColor: palette.textPrimary,
         unselectedLabelColor: palette.textSecondary,
         labelStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           fontSize: AppText.bodyLarge,
         ),
         unselectedLabelStyle: const TextStyle(fontSize: AppText.bodyLarge),

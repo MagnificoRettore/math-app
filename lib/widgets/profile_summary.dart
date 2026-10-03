@@ -11,9 +11,9 @@ const double kSummaryNameFontSize = AppText.titleLarge;
 
 /// Opacità della riga 2, il titolo della scuola.
 ///
-/// Dentro la pilla blu i colori del tema non arrivano: il secondario del tema
-/// sul blu non passa 4.5:1, quindi la riga è bianco all'80%, che sul blu dà
-/// 4.7:1. Al 70% si scende a 3.98:1 e la riga non si legge più.
+/// Dentro la banda indaco i colori del tema non arrivano: il secondario del
+/// tema sull'indaco non passa 4.5:1, quindi la riga è bianco all'80%, che
+/// sull'indaco dà 9.6:1 e resta un gradino sotto il nome.
 const double _kSummarySecondaryOpacity = 0.8;
 
 /// Le due righe dentro la pilla dell'header: il nome e la scuola.
@@ -64,7 +64,7 @@ class ProfileSummary extends StatelessWidget {
               style: TextStyle(
                 fontSize: kSummaryNameFontSize,
                 fontWeight: FontWeight.w700,
-                color: c.headerOnBlue,
+                color: c.onHeaderBand,
               ),
             ),
             if (school.isNotEmpty)
@@ -76,7 +76,7 @@ class ProfileSummary extends StatelessWidget {
                 style: TextStyle(
                   fontSize: AppText.label,
                   fontWeight: FontWeight.w600,
-                  color: c.headerOnBlue.withValues(
+                  color: c.onHeaderBand.withValues(
                     alpha: _kSummarySecondaryOpacity,
                   ),
                 ),
