@@ -6,6 +6,7 @@ import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
+import 'package:math_app/widgets/main_header.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -86,5 +87,54 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.byType(LessonScreen), findsOneWidget);
+  });
+
+  testWidgets('la pagina dell\'argomento ha la banda dell\'header', (
+    tester,
+  ) async {
+    await tester.pumpWidget(host('high-school'));
+    await tester.pump();
+
+    // La stessa banda delle pagine main: identità, lente e personalizzazione.
+    expect(find.byType(MainHeaderAppBar), findsOneWidget);
+    expect(find.byKey(const Key('header-identity')), findsOneWidget);
+    expect(find.byKey(const Key('header-search')), findsOneWidget);
+    expect(find.byKey(const Key('header-customization')), findsOneWidget);
+    // Il titolo dell'argomento sta nel corpo, sotto la banda.
+    final banda = tester.getRect(find.byType(AppBar));
+    expect(
+      // La lezione si chiama come l'argomento: la prima è l'intestazione.
+      tester.getTopLeft(find.text('Equazioni di primo grado').first).dy,
+      greaterThanOrEqualTo(banda.bottom),
+    );
+  });
+
+  testWidgets('la freccia nella banda torna alla pagina di prima', (
+    tester,
+  ) async {
+    final argomento = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Moduli',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ArgomentoLessonsScreen(argomento: argomento),
+              ),
+            ),
+            child: const Text('apri'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('apri'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ArgomentoLessonsScreen), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(ArgomentoLessonsScreen), findsNothing);
   });
 }

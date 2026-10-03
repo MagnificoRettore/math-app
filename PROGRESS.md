@@ -2,7 +2,13 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **462 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **464 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — La banda dell'header anche nella pagina di un argomento
+
+- `ArgomentoLessonsScreen` usa `MainHeaderAppBar` come le pagine main: identità, lente e personalizzazione restano anche dopo aver scelto un argomento. `MainHeaderAppBar` prende `showBack`, che mette la freccia indietro bianca prima dell'avatar.
+- Titolo e sottotitolo dell'argomento passano dall'`AppBar` al corpo, in testa alla lista delle lezioni.
+- Test: in `test/argomento_lessons_screen_test.dart` due casi nuovi, la banda con identità e icone e il titolo sotto di essa, la freccia che torna alla pagina di prima. Suite a **464 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — Il carosello degli argomenti a card quadrate
 

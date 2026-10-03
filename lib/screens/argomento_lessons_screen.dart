@@ -9,6 +9,7 @@ import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/main_header.dart';
 
 /// Elenco delle lezioni di un argomento (capitolo).
 /// Passo intermedio fra il livello anno e il player a passi [LessonScreen].
@@ -26,66 +27,98 @@ class ArgomentoLessonsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final color = topicColor(c, argomento.icon);
-    final lessons = argomento.lessons;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(argomento.title),
-        bottom: argomento.subtitle.isEmpty
-            ? null
-            : PreferredSize(
-                preferredSize: const Size.fromHeight(28),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                  child: Text(
-                    argomento.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.label,
-                      color: c.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
+      appBar: MainHeaderAppBar(
+        showBack: true,
+        title: MainHeaderTitle(levelId: argomento.levelId),
+        actions: const [HeaderSearchButton(), HeaderCustomizationButton()],
       ),
       body: SafeArea(
-        child: lessons.isEmpty
-            ? EmptyState(
-                title: 'Nessuna lezione in ${argomento.title}',
-                subtitle:
-                    'Le lezioni guidate per questo capitolo sono in arrivo.',
-              )
-            : ListenableBuilder(
-                listenable: ProgressStore.instance,
-                builder: (context, _) => ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  children: [
-                    for (var i = 0; i < lessons.length; i++)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _LessonCard(
-                          lesson: lessons[i],
-                          color: color,
-                          completed: ProgressStore.instance.isLessonCompleted(
-                            argomento.levelId,
-                            lessons[i].id,
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => LessonScreen(
-                                  lesson: lessons[i],
-                                  levelId: levelId ?? argomento.levelId,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Heading(argomento: argomento),
+            Expanded(child: _body(context, color)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _body(BuildContext context, Color color) {
+    final lessons = argomento.lessons;
+    return lessons.isEmpty
+        ? EmptyState(
+            title: 'Nessuna lezione in ${argomento.title}',
+            subtitle: 'Le lezioni guidate per questo capitolo sono in arrivo.',
+          )
+        : ListenableBuilder(
+            listenable: ProgressStore.instance,
+            builder: (context, _) => ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              children: [
+                for (var i = 0; i < lessons.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: _LessonCard(
+                      lesson: lessons[i],
+                      color: color,
+                      completed: ProgressStore.instance.isLessonCompleted(
+                        argomento.levelId,
+                        lessons[i].id,
                       ),
-                  ],
-                ),
-              ),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => LessonScreen(
+                              lesson: lessons[i],
+                              levelId: levelId ?? argomento.levelId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          );
+  }
+}
+
+/// Titolo e sottotitolo dell'argomento in testa alla pagina: nella banda c'è
+/// l'identità, quindi il nome della pagina scende nel corpo.
+class _Heading extends StatelessWidget {
+  final Argomento argomento;
+
+  const _Heading({required this.argomento});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            argomento.title,
+            style: TextStyle(
+              fontSize: AppText.headline,
+              fontWeight: FontWeight.w700,
+              color: c.textPrimary,
+            ),
+          ),
+          if (argomento.subtitle.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              argomento.subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+            ),
+          ],
+        ],
       ),
     );
   }

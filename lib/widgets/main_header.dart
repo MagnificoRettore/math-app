@@ -74,16 +74,22 @@ class MainHeaderTitle extends StatelessWidget {
 /// nell'`AppBar.bottom`, che lo dipingerebbe di blu: il colore è solo della
 /// riga dell'header. L'`AppBar` sta in un `Expanded` perché dentro una `Column`
 /// senza limite di altezza il suo layout non si chiude.
+///
+/// [showBack] mette la freccia indietro prima dell'identità: serve alle
+/// sotto-pagine che tengono la banda (la pagina di un argomento), dove su iOS
+/// e sul web non c'è un back di sistema.
 class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? title;
   final PreferredSizeWidget? bottom;
   final List<Widget> actions;
+  final bool showBack;
 
   const MainHeaderAppBar({
     super.key,
     this.title,
     this.bottom,
     this.actions = const <Widget>[],
+    this.showBack = false,
   });
 
   @override
@@ -101,7 +107,10 @@ class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             automaticallyImplyLeading: false,
             toolbarHeight: kHeaderToolbarHeight,
-            titleSpacing: kHeaderHorizontalMargin,
+            leading: showBack ? BackButton(color: c.headerOnBlue) : null,
+            // Con la freccia il margine lo dà già lei: 30 in più staccherebbero
+            // l'avatar dalla freccia come se fossero due cose diverse.
+            titleSpacing: showBack ? 0 : kHeaderHorizontalMargin,
             backgroundColor: c.headerBlue,
             foregroundColor: c.headerOnBlue,
             // Senza ombra: sotto gli angoli c'è lo sfondo della pagina, e
