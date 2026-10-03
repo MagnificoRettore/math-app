@@ -33,7 +33,6 @@ ChartStyle _style() => ChartStyle(
     axis: Color(0xFF888888),
     label: Color(0xFF666666),
   ),
-  series: const Color(0xFF4F46E5),
 );
 
 ChartBoxPayload _function() => ChartBoxPayload.fromJson({

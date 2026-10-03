@@ -129,13 +129,6 @@ class ChartScale {
     final t = (value - minX) / (maxX - minX);
     return rect.left + t * rect.width;
   }
-
-  /// Il punto finisce dentro l'area di disegno.
-  bool isInside(ChartPoint p) =>
-      p.x >= minX - _epsilon &&
-      p.x <= maxX + _epsilon &&
-      p.y >= minY - _epsilon &&
-      p.y <= maxY + _epsilon;
 }
 
 /// Area di disegno in pixel, detta con numeri per non avere `Rect` (che viene da

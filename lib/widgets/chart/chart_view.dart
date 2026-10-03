@@ -50,7 +50,6 @@ class ChartView extends StatelessWidget {
               builder: (context, progress, _) {
                 final style = ChartStyle(
                   palette: palette,
-                  series: colors.first,
                   textScale: textScale,
                 );
                 return Semantics(

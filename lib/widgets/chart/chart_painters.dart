@@ -13,14 +13,9 @@ import 'chart_scale.dart';
 /// chiaro sparirebbero.
 class ChartStyle {
   final ChartPalette palette;
-  final Color series;
   final double textScale;
 
-  const ChartStyle({
-    required this.palette,
-    required this.series,
-    this.textScale = 1,
-  });
+  const ChartStyle({required this.palette, this.textScale = 1});
 
   Color get grid => palette.grid;
   Color get axis => palette.axis;
@@ -36,11 +31,10 @@ class ChartStyle {
   bool operator ==(Object other) =>
       other is ChartStyle &&
       other.palette == palette &&
-      other.series == series &&
       other.textScale == textScale;
 
   @override
-  int get hashCode => Object.hash(palette, series, textScale);
+  int get hashCode => Object.hash(palette, textScale);
 }
 
 /// Testo dei tick: [AppText.micro] come base, scalato dalla scala del sistema.

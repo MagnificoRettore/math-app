@@ -71,10 +71,6 @@ class ProgressStore extends ChangeNotifier {
     await load();
   }
 
-  /// Restituisce il progresso per un esercizio nel livello scolastico indicato.
-  ExerciseProgress? forExercise(String levelId, String exerciseId) =>
-      _progress[scopedKey(levelId, exerciseId)];
-
   ExerciseStatus statusOf(String levelId, String exerciseId) =>
       _progress[scopedKey(levelId, exerciseId)]?.status ?? ExerciseStatus.none;
 
