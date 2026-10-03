@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/level.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 
 class SchoolLevelTile extends StatelessWidget {
@@ -42,7 +43,7 @@ class SchoolLevelTile extends StatelessWidget {
                 Text(
                   level.title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.titleSmall,
                     fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
@@ -51,7 +52,10 @@ class SchoolLevelTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     level.subtitle,
-                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ],
               ],

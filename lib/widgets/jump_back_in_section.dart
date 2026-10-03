@@ -6,6 +6,7 @@ import '../data/progress_store.dart';
 import '../models/lesson_target.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'progress_bar.dart';
 import 'section_header.dart';
@@ -93,7 +94,7 @@ class _JumpBackInCard extends StatelessWidget {
                       Text(
                         target.isPaused ? 'In corso' : 'Da iniziare',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: AppText.caption,
                           fontWeight: FontWeight.w700,
                           color: c.accent,
                         ),
@@ -112,7 +113,7 @@ class _JumpBackInCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: AppText.titleLarge,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -122,7 +123,10 @@ class _JumpBackInCard extends StatelessWidget {
               target.lesson.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 13.5, color: c.textSecondary),
+              style: TextStyle(
+                fontSize: AppText.bodySmall,
+                color: c.textSecondary,
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -131,7 +135,7 @@ class _JumpBackInCard extends StatelessWidget {
                   child: Text(
                     _progressoTesto(progresso, carte),
                     style: TextStyle(
-                      fontSize: 12.5,
+                      fontSize: AppText.labelSmall,
                       fontWeight: FontWeight.w600,
                       color: c.textSecondary,
                     ),
@@ -140,7 +144,7 @@ class _JumpBackInCard extends StatelessWidget {
                 Text(
                   '${(progresso * 100).round()}%',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: AppText.labelSmall,
                     fontWeight: FontWeight.w700,
                     color: c.accent,
                   ),
@@ -168,7 +172,10 @@ class _JumpBackInCard extends StatelessWidget {
                 icon: const Icon(Icons.play_arrow_rounded, size: 22),
                 label: const Text(
                   'Riprendi',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),

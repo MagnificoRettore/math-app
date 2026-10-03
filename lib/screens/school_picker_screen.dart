@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/school_level_tile.dart';
 
 class SchoolPickerScreen extends StatefulWidget {
@@ -59,7 +60,10 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
                   : level == null
                   ? 'Seleziona il tuo livello scolastico.'
                   : 'Ora frequenti ${level.title}. Puoi cambiarlo quando vuoi.',
-              style: TextStyle(fontSize: 14, color: c.textSecondary),
+              style: TextStyle(
+                fontSize: AppText.bodyMedium,
+                color: c.textSecondary,
+              ),
             ),
             const SizedBox(height: 16),
             for (final item in levels)
@@ -78,7 +82,7 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
                 minimumSize: const Size.fromHeight(52),
                 backgroundColor: c.accent,
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: AppText.titleSmall,
                   fontWeight: FontWeight.w600,
                 ),
               ),

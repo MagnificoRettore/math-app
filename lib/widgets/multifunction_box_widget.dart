@@ -4,13 +4,15 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import '../models/multifunction_box/box_payload.dart';
 import '../models/multifunction_box/multifunction_box.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
+import 'chart/chart_view.dart';
 import 'image_source.dart';
 import 'math_text.dart';
 
 /// Card che mostra un [MultifunctionBox] in base a `box_type`: l'immagine sta
-/// nuda nella colonna di testo, la formula va in card e `hidden` la lascia
-/// da sola.
+/// nuda nella colonna di testo, la formula e il grafico vanno in card e
+/// `hidden` lascia la formula da sola.
 class MultifunctionBoxWidget extends StatelessWidget {
   final MultifunctionBox box;
 
@@ -20,6 +22,29 @@ class MultifunctionBoxWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     if (box.payload is ImageBoxPayload) return _ImageView(box: box);
+
+    if (box.payload is ChartBoxPayload) {
+      return AppCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (box.title.isNotEmpty) ...[
+              Text(
+                box.title,
+                style: TextStyle(
+                  fontSize: AppText.titleSmall,
+                  fontWeight: FontWeight.w700,
+                  color: c.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+            ChartView(payload: box.payload as ChartBoxPayload),
+          ],
+        ),
+      );
+    }
 
     final formula = box.payload as MathFormulaPayload;
     if (formula.hidden) return _FormulaView(payload: formula);
@@ -36,7 +61,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
             Text(
               box.title,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -70,7 +95,7 @@ class _ImageView extends StatelessWidget {
               box.title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -96,7 +121,8 @@ class _FormulaView extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final cleaned = stripMathDelimiters(payload.tex);
-    final fontSize = 18 * (payload.fontSizeMultiplier ?? 1).toDouble();
+    final fontSize =
+        AppText.titleMedium * (payload.fontSizeMultiplier ?? 1).toDouble();
     return Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,

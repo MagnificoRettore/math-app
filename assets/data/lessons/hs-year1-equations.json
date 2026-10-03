@@ -73,6 +73,36 @@
                     ]
                 },
                 {
+                    "type": "info",
+                    "title": "L'equazione come intersezione",
+                    "content": [
+                        "L'equazione $$2x - 4 = 0$$ vuol dire che la retta $$y = 2x - 4$$ incontra l'asse $x$.",
+                        "Nel grafico la soluzione è il punto in cui la retta **tocca zero**: $x = 2$.",
+                        {
+                            "id": "eq1-chart-function",
+                            "box_type": "chart",
+                            "title": "La retta y = 2x - 4",
+                            "payload": {
+                                "kind": "function",
+                                "xMin": -4,
+                                "xMax": 8,
+                                "yMin": -10,
+                                "yMax": 10,
+                                "samples": 200,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "series": [
+                                    {
+                                        "label": "y = 2x - 4",
+                                        "color": "accent",
+                                        "expression": "2 * x - 4"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
                     "type": "mcq",
                     "title": "Verifica",
                     "prompt": "Qual è la soluzione di $$3x - 1 = 5$$?",

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -96,7 +97,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: _skip,
                     child: Text(
                       isLast ? '' : 'Salta',
-                      style: TextStyle(color: c.textSecondary, fontSize: 14),
+                      style: TextStyle(
+                        color: c.textSecondary,
+                        fontSize: AppText.bodyMedium,
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -132,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     minimumSize: const Size.fromHeight(52),
                     backgroundColor: c.accent,
                     textStyle: const TextStyle(
-                      fontSize: 16,
+                      fontSize: AppText.titleSmall,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -169,7 +173,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             slide.title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: AppText.headline,
               fontWeight: FontWeight.w800,
               color: c.textPrimary,
               height: 1.2,
@@ -179,7 +183,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             slide.body,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15, height: 1.5, color: c.textSecondary),
+            style: TextStyle(
+              fontSize: AppText.bodyLarge,
+              height: 1.5,
+              color: c.textSecondary,
+            ),
           ),
         ],
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/content_repository.dart';
 import '../models/level.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'school_level_tile.dart';
 
 enum SchoolChoiceDestination { lessons, exercises }
@@ -61,7 +62,7 @@ Future<Level?> showSchoolChoiceSheet(
                           ? 'Lezioni per scuola'
                           : 'Esercizi per scuola'),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: AppText.titleLarge,
                   fontWeight: FontWeight.w700,
                   color: c.textPrimary,
                 ),
@@ -77,7 +78,7 @@ Future<Level?> showSchoolChoiceSheet(
                     : 'Scegli la tua scuola per accedere agli esercizi '
                           'organizzati per anno e argomento.',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.label,
                   color: c.textSecondary,
                   height: 1.4,
                 ),
@@ -99,7 +100,7 @@ Future<Level?> showSchoolChoiceSheet(
                     'questa scelta non ti verrà più richiesta.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppText.caption,
                       color: c.textSecondary,
                       height: 1.4,
                     ),

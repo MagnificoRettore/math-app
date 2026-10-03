@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/course.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 
 class YearTabs extends StatelessWidget {
   final List<Course> courses;
@@ -20,7 +21,11 @@ class YearTabs extends StatelessWidget {
     final c = AppColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: c.border)),
+        // La banda sotto è il blu dell'header, quindi il bordo è bianco: quello
+        // del tema sparirebbe dentro il blu.
+        border: Border(
+          bottom: BorderSide(color: c.headerOnBlue.withValues(alpha: 0.2)),
+        ),
       ),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       child: LayoutBuilder(
@@ -135,9 +140,13 @@ class _YearTab extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 11.5,
+                fontSize: AppText.micro,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? c.textPrimary : c.textSecondary,
+                // Testo sulla banda: bianco pieno quello scelto, all'80%
+                // l'altro, come il titolo della scuola nell'header.
+                color: selected
+                    ? c.headerOnBlue
+                    : c.headerOnBlue.withValues(alpha: 0.8),
               ),
             ),
           ),
@@ -159,7 +168,7 @@ class _CircleText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 17,
+        fontSize: AppText.titleMedium,
         fontWeight: FontWeight.w700,
         color: selected
             ? Theme.of(context).colorScheme.onPrimary

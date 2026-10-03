@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_text.dart';
 import 'image_source.dart';
 import 'math_text.dart';
 
@@ -12,7 +13,11 @@ class PromptView extends StatelessWidget {
   final String prompt;
   final double fontSize;
 
-  const PromptView({super.key, required this.prompt, this.fontSize = 18});
+  const PromptView({
+    super.key,
+    required this.prompt,
+    this.fontSize = AppText.titleMedium,
+  });
 
   static bool isImageSource(String value) {
     return value.startsWith('assets/') ||

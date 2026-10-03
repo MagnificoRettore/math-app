@@ -11,6 +11,7 @@ import '../data/search_index.dart';
 import '../data/settings_store.dart';
 import '../data/study_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 
@@ -108,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 Text(
                   'Math App',
                   style: TextStyle(
-                    fontSize: 34,
+                    fontSize: AppText.display,
                     fontWeight: FontWeight.w800,
                     color: c.onSplash,
                     letterSpacing: -0.5,
@@ -119,7 +120,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   Text(
                     'Non è stato possibile caricare i contenuti.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: c.onSplash),
+                    style: TextStyle(
+                      fontSize: AppText.bodyMedium,
+                      color: c.onSplash,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
@@ -139,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     label: const Text(
                       'Riprova',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppText.bodyLarge,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

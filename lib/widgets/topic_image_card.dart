@@ -2,6 +2,7 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'topic_background.dart';
 
@@ -45,7 +46,7 @@ class TopicImageCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: AppText.headline,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                     color: Colors.white,

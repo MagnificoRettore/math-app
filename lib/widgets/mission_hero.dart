@@ -11,6 +11,7 @@ import '../screens/lesson_list_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/weak_points_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'school_choice_sheet.dart';
 
@@ -60,7 +61,7 @@ class MissionHero extends StatelessWidget {
                 child: Text(
                   'La nostra missione',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: AppText.title,
                     fontWeight: FontWeight.w700,
                     color: c.textPrimary,
                   ),
@@ -76,7 +77,7 @@ class MissionHero extends StatelessWidget {
             'risolti passo-passo, spiegazioni chiare e un percorso di studio '
             'che cresce insieme ai suoi progressi.',
             style: TextStyle(
-              fontSize: 14.5,
+              fontSize: AppText.bodyMedium,
               height: 1.5,
               color: c.textSecondary,
             ),
@@ -234,7 +235,7 @@ class _Shortcut extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.label,
                   fontWeight: FontWeight.w600,
                   color: c.textPrimary,
                 ),

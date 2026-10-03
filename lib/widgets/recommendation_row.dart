@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 
 /// La riga che sta dentro le sezioni «Per te» e «Per iniziare»: una card con
@@ -64,7 +65,7 @@ class RecommendationRow extends StatelessWidget {
                       child: Text(
                         title,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: AppText.bodyLarge,
                           fontWeight: FontWeight.w600,
                           color: c.textPrimary,
                         ),
@@ -78,7 +79,10 @@ class RecommendationRow extends StatelessWidget {
                   preview,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppText.label,
+                    color: c.textSecondary,
+                  ),
                 ),
               ],
             ),

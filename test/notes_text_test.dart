@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/notes_text.dart';
 import 'package:math_app/widgets/multifunction_box_widget.dart';
@@ -58,41 +59,50 @@ TextStyle _spanStyle(WidgetTester tester, String expected) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('titolo usa font 28 e peso 800', (tester) async {
+  testWidgets('titolo usa docTitle e peso 800', (tester) async {
     await _pump(tester, '# Ciao');
     final style = _spanStyle(tester, 'Ciao');
-    expect(style.fontSize, 28);
+    expect(style.fontSize, AppText.docTitle);
     expect(style.fontWeight, FontWeight.w800);
   });
 
-  testWidgets('intestazione usa font 22 e peso 700', (tester) async {
+  testWidgets('intestazione usa docHeading e peso 700', (tester) async {
     await _pump(tester, '## Sezione');
     final style = _spanStyle(tester, 'Sezione');
-    expect(style.fontSize, 22);
+    expect(style.fontSize, AppText.docHeading);
     expect(style.fontWeight, FontWeight.w700);
   });
 
-  testWidgets('sottointestazione usa font 17 e peso 600', (tester) async {
+  testWidgets('sottointestazione usa docBody e peso 600', (tester) async {
     await _pump(tester, '### Sottosezione');
     final style = _spanStyle(tester, 'Sottosezione');
-    expect(style.fontSize, 17);
+    expect(style.fontSize, AppText.docBody);
     expect(style.fontWeight, FontWeight.w600);
   });
 
   testWidgets('corpo usa il font di base', (tester) async {
     await _pump(tester, 'Testo normale');
     final style = _spanStyle(tester, 'Testo normale');
-    expect(style.fontSize, 17);
+    expect(style.fontSize, AppText.docBody);
     expect(style.fontWeight, FontWeight.w400);
   });
 
   testWidgets('fontScale scala titolo, intestazione e corpo', (tester) async {
     await _pumpScaled(tester, '# Titolo\n## Sezione\nTesto normale', 0.8);
-    expect(_spanStyle(tester, 'Titolo').fontSize, closeTo(22.4, 0.01));
+    expect(
+      _spanStyle(tester, 'Titolo').fontSize,
+      closeTo(AppText.docTitle * 0.8, 0.01),
+    );
     expect(_spanStyle(tester, 'Titolo').fontWeight, FontWeight.w800);
-    expect(_spanStyle(tester, 'Sezione').fontSize, closeTo(17.6, 0.01));
+    expect(
+      _spanStyle(tester, 'Sezione').fontSize,
+      closeTo(AppText.docHeading * 0.8, 0.01),
+    );
     expect(_spanStyle(tester, 'Sezione').fontWeight, FontWeight.w700);
-    expect(_spanStyle(tester, 'Testo normale').fontSize, closeTo(13.6, 0.01));
+    expect(
+      _spanStyle(tester, 'Testo normale').fontSize,
+      closeTo(AppText.docBody * 0.8, 0.01),
+    );
     expect(_spanStyle(tester, 'Testo normale').fontWeight, FontWeight.w400);
   });
 
@@ -346,7 +356,7 @@ void main() {
     expect(find.text('Takeaway'), findsOneWidget);
     expect(_richContaining(tester, 'caso'), isNotNull);
     expect(_richContaining(tester, 'Titolo dopo'), isNotNull);
-    expect(_spanStyle(tester, 'Titolo dopo').fontSize, 22);
+    expect(_spanStyle(tester, 'Titolo dopo').fontSize, AppText.docHeading);
   });
 
   testWidgets('chiave callout ignota resta testo puro', (tester) async {

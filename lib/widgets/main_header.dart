@@ -6,6 +6,9 @@ import '../data/content_repository.dart';
 import '../haptics.dart';
 import '../screens/customization_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
+import 'profile_button.dart';
+import 'profile_summary.dart';
 import 'school_choice_sheet.dart';
 import 'search_overlay.dart';
 
@@ -14,12 +17,109 @@ import 'search_overlay.dart';
 const double kHeaderHorizontalMargin = 30;
 
 /// Altezza della riga dell'header delle pagine principali: ospita l'avatar da
-/// `kProfileAvatarSize` (`profile_button.dart`) e le icone a destra alla stessa
-/// misura, con aria sopra e sotto.
+/// `kProfileAvatarSize` (50) e le icone a destra alla stessa misura, con aria
+/// sopra e sotto.
 const double kHeaderToolbarHeight = 80;
 
 /// Margine destro delle icone dell'header.
 const EdgeInsets kHeaderActionsPadding = EdgeInsets.only(right: 12);
+
+/// Raggio degli angoli in basso della banda: sono smussati, i due in alto no,
+/// perché in alto la banda è appoggiata al bordo dello schermo.
+const double kHeaderBottomRadius = 28;
+
+/// Il `title` degli header delle tre pagine principali: l'identità a sinistra,
+/// con l'avatar e il suo badge, e il nome e la scuola che occupano il resto.
+///
+/// Il blu non è qui ma sull'`AppBar` che contiene questa riga: è una banda di
+/// marca che parte dai due bordi dello schermo e li attraversa tutti, non una
+/// pilla con i bordi curvi dentro una pagina colorata. Le icone sono nella stessa
+/// banda, nelle `actions`, e quindi bianche come il testo.
+///
+/// Il nome trunca quando le icone sono tre e lo spazio è poco: su 360px in
+/// visita è il nome a cedere, non le icone.
+///
+/// [levelId] è il livello della pagina, che serve solo da ospite: senza un
+/// profilo la visita non esiste (`BrowseStore.levelId` è `null` per contratto)
+/// e la riga della scuola verrebbe vuota anche se Lezioni ed Esercizi sanno
+/// benissimo quale scuola stanno mostrando.
+class MainHeaderTitle extends StatelessWidget {
+  final String? levelId;
+
+  const MainHeaderTitle({super.key, this.levelId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      key: const Key('header-identity'),
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const ProfileButton(),
+        const SizedBox(width: 12),
+        // La `Row` dell'`AppBar` non dà larghezza illimitata ai figli, quindi
+        // il testo va in `Expanded` per arrivare fino alle icone.
+        Expanded(child: ProfileSummary(levelId: levelId)),
+      ],
+    );
+  }
+}
+
+/// L'`AppBar` dei tre header principali.
+///
+/// Il blu è dell'`AppBar`, che parte dai due bordi dello schermo e li attraversa
+/// tutti, e i due angoli in basso sono smussati dal suo `shape`. Dietro c'è il
+/// viola di Material 3: senza lo `Stack` sotto, gli angoli smussati mostrerebbero
+/// lo sfondo della pagina, che sembrerebbero un taglio e non degli angoli.
+class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Widget? title;
+  final PreferredSizeWidget? bottom;
+  final List<Widget> actions;
+
+  const MainHeaderAppBar({
+    super.key,
+    this.title,
+    this.bottom,
+    this.actions = const <Widget>[],
+  });
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+    kHeaderToolbarHeight + (bottom?.preferredSize.height ?? 0),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ColoredBox(color: Theme.of(context).colorScheme.primary),
+        ),
+        AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: kHeaderToolbarHeight,
+          titleSpacing: kHeaderHorizontalMargin,
+          backgroundColor: c.headerBlue,
+          foregroundColor: c.headerOnBlue,
+          // Senza ombra: l'AppBar la dipingerebbe anche sopra il viola degli
+          // angoli, che è l'unico pezzo che si vede sotto la banda.
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(kHeaderBottomRadius),
+            ),
+          ),
+          centerTitle: false,
+          title: title,
+          actionsPadding: kHeaderActionsPadding,
+          actions: actions,
+          bottom: bottom,
+        ),
+      ],
+    );
+  }
+}
 
 /// La lente della ricerca, nelle `actions` dell'header delle tre pagine
 /// principali. Toccarla apre `showSearchOverlay`: una sovrapposizione a tutta
@@ -33,7 +133,9 @@ class HeaderSearchButton extends StatelessWidget {
       key: const Key('header-search'),
       icon: Icon(
         Icons.search_rounded,
-        color: AppColors.of(context).textPrimary,
+        // Bianco come il testo dell'header: l'icona sta sulla banda blu, non
+        // sullo sfondo della pagina.
+        color: AppColors.of(context).headerOnBlue,
       ),
       tooltip: 'Cerca',
       onPressed: () => showSearchOverlay(context),
@@ -53,7 +155,7 @@ class HeaderCustomizationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: const Key('header-customization'),
-      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).textPrimary),
+      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).headerOnBlue),
       tooltip: 'Personalizzazione',
       onPressed: () => Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => const CustomizationScreen())),
@@ -69,7 +171,9 @@ class HeaderCustomizationButton extends StatelessWidget {
 ///
 /// Se si guarda una scuola diversa da quella del profilo, l'icona cambia e
 /// compare il nome: senza, la pagina sembrerebbe quella di sempre e i progressi
-/// mostrati sarebbero quelli di un'altra scuola senza che lo si dica.
+/// mostrati sarebbero quelli di un'altra scuola senza che lo si dica. Icona e
+/// nome sono bianchi come tutto il resto dell'header, perché stanno sulla banda
+/// blu: in `accent` sul blu non si leggerebbero.
 ///
 /// Il `Flexible` sta in cima, non attorno al nome: le `actions` dell'AppBar sono
 /// una `Row` che dà larghezza illimitata ai figli, quindi è la riga dei bottoni
@@ -107,9 +211,7 @@ class SchoolBrowseButton extends StatelessWidget {
                 key: const Key('header-school-browse'),
                 icon: Icon(
                   other ? Icons.visibility_outlined : Icons.school_outlined,
-                  color: other
-                      ? AppColors.of(context).accent
-                      : AppColors.of(context).textPrimary,
+                  color: AppColors.of(context).headerOnBlue,
                 ),
                 tooltip: other ? 'Guardi $title' : 'Altre scuole',
                 onPressed: () => _pick(context),
@@ -122,9 +224,9 @@ class SchoolBrowseButton extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppText.label,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.of(context).accent,
+                      color: AppColors.of(context).headerOnBlue,
                     ),
                   ),
                 ),

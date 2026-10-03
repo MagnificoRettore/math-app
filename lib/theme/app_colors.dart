@@ -17,6 +17,15 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color indigo;
   final Color danger;
   final Color shadow;
+
+  /// Sfondo della pilla identitaria dell'header. È un colore di marca, quindi
+  /// è lo stesso in chiaro e in scuro: dentro la pilla i testi sono bianchi in
+  /// entrambi i temi e non letti dal tema.
+  final Color headerBlue;
+
+  /// Testo e anelli dentro [headerBlue]. Bianco in entrambi i temi, perché la
+  /// pilla non cambia: i colori del tema non ci arriverebbero.
+  final Color headerOnBlue;
   final List<Color> iconPalette;
   final Color splashTop;
   final Color splashBottom;
@@ -39,6 +48,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.indigo,
     required this.danger,
     required this.shadow,
+    required this.headerBlue,
+    required this.headerOnBlue,
     required this.iconPalette,
     required this.splashTop,
     required this.splashBottom,
@@ -62,6 +73,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     indigo: Color(0xFF5C6BC0),
     danger: Color(0xFF8B1B34),
     shadow: Color(0x14000000),
+    headerBlue: Color(0xFF3F46E8),
+    headerOnBlue: Color(0xFFFFFFFF),
     iconPalette: [
       Color(0xFF007AFF),
       Color(0xFF9C27B0),
@@ -93,6 +106,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     indigo: Color(0xFF8E9BFF),
     danger: Color(0xFFFFB4AB),
     shadow: Color(0x33000000),
+    headerBlue: Color(0xFF3F46E8),
+    headerOnBlue: Color(0xFFFFFFFF),
     iconPalette: [
       Color(0xFF3B9BFF),
       Color(0xFFB388FF),
@@ -125,6 +140,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? indigo,
     Color? danger,
     Color? shadow,
+    Color? headerBlue,
+    Color? headerOnBlue,
     List<Color>? iconPalette,
     Color? splashTop,
     Color? splashBottom,
@@ -147,6 +164,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       indigo: indigo ?? this.indigo,
       danger: danger ?? this.danger,
       shadow: shadow ?? this.shadow,
+      headerBlue: headerBlue ?? this.headerBlue,
+      headerOnBlue: headerOnBlue ?? this.headerOnBlue,
       iconPalette: iconPalette ?? this.iconPalette,
       splashTop: splashTop ?? this.splashTop,
       splashBottom: splashBottom ?? this.splashBottom,
@@ -174,6 +193,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       indigo: Color.lerp(indigo, other.indigo, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
+      headerBlue: Color.lerp(headerBlue, other.headerBlue, t)!,
+      headerOnBlue: Color.lerp(headerOnBlue, other.headerOnBlue, t)!,
       iconPalette: List.generate(
         iconPalette.length,
         (i) => Color.lerp(iconPalette[i], other.iconPalette[i], t)!,

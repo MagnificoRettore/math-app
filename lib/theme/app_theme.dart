@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_text.dart';
 import 'app_colors.dart';
+import 'chart_palette.dart';
 
 class AppTheme {
   /// Durata e curva del passaggio fra tema chiaro e tema scuro.
   ///
   /// Flutter di default anima il tema con 200ms lineari, che si leggono come un
-  /// lampo. Qui il passaggio dura 400ms con easing emphasized, così i colori sono
-  /// visibili mentre viaggiano senza rallentare il cambio. Sono i 500ms
-  /// dell'animazione sole/luna (`ThemeToggle._transition`) meno i 100ms di
-  /// ritardo con cui il tema si cambia: i colori partono quando l'icona è già in
-  /// viaggio e arrivano con lei.
+  /// lampo. Qui il passaggio dura 200ms con `easeOutCubic`: parte subito e
+  /// arriva dolce, senza la coda lunga di `easeInOutCubicEmphasized`, che a
+  /// fine passaggio sembrava bloccarsi mentre l'icona era già ferma. Sono i 320ms
+  /// dell'animazione sole/luna (`ThemeToggle._transition`) meno i 40ms di
+  /// ritardo, così i colori arrivano 80ms **prima** dell'icona: due viaggi che
+  /// finiscono insieme si leggono come un unico scatto.
   static const AnimationStyle transitionStyle = AnimationStyle(
-    duration: Duration(milliseconds: 400),
-    curve: Curves.easeInOutCubicEmphasized,
+    duration: Duration(milliseconds: 200),
+    reverseDuration: Duration(milliseconds: 200),
+    curve: Curves.easeOutCubic,
   );
 
   static final ThemeData light = _build(Brightness.light, AppPalette.light);
@@ -58,7 +62,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: TextStyle(
           color: palette.textPrimary,
-          fontSize: 28,
+          fontSize: AppText.headline,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -70,7 +74,7 @@ class AppTheme {
         backgroundColor: palette.surface,
         indicatorColor: palette.accentSoft,
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          const TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w600),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
@@ -96,10 +100,13 @@ class AppTheme {
         indicatorColor: palette.accent,
         labelColor: palette.textPrimary,
         unselectedLabelColor: palette.textSecondary,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-        unselectedLabelStyle: const TextStyle(fontSize: 15),
+        labelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: AppText.bodyLarge,
+        ),
+        unselectedLabelStyle: const TextStyle(fontSize: AppText.bodyLarge),
       ),
-      extensions: [palette],
+      extensions: [palette, ChartPalette.of(palette)],
     );
   }
 }

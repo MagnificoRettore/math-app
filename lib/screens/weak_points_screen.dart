@@ -5,6 +5,7 @@ import '../data/progress_store.dart';
 import '../data/weak_topic_engine.dart';
 import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/weak_topic_row.dart';
 import 'weak_topic_screen.dart';
 import 'welcome_screen.dart';
@@ -74,7 +75,7 @@ class _GuestWeakPoints extends StatelessWidget {
               'Ancora niente da ripassare',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -84,7 +85,7 @@ class _GuestWeakPoints extends StatelessWidget {
               'Crea il tuo profilo e segna i tuoi esercizi: qui vedrai gli '
               'argomenti da rivedere.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -119,7 +120,7 @@ class _AllResolved extends StatelessWidget {
               'Tutto assimilato!',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -128,7 +129,7 @@ class _AllResolved extends StatelessWidget {
             Text(
               'Non hai esercizi da ripassare. Ottimo lavoro!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
           ],
         ),

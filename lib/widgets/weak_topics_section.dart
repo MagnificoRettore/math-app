@@ -6,6 +6,7 @@ import '../models/weak_topic.dart';
 import '../screens/weak_points_screen.dart';
 import '../screens/weak_topic_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'section_header.dart';
 import 'weak_topic_row.dart';
@@ -54,7 +55,7 @@ class WeakTopicsSection extends StatelessWidget {
                 child: Text(
                   total == 1 ? '1 da ripassare' : '$total da ripassare',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: AppText.labelSmall,
                     fontWeight: FontWeight.w700,
                     color: c.danger,
                   ),
@@ -88,7 +89,7 @@ class WeakTopicsSection extends StatelessWidget {
                           child: Text(
                             'Vedi tutti (${weakTopics.length})',
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: AppText.bodySmall,
                               fontWeight: FontWeight.w700,
                               color: c.accent,
                             ),

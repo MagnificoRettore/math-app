@@ -5,6 +5,7 @@ import '../models/lesson.dart';
 import '../data/progress_store.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
 
@@ -37,9 +38,12 @@ class ArgomentoLessonsScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                   child: Text(
                     argomento.subtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ),
               ),
@@ -61,7 +65,6 @@ class ArgomentoLessonsScreen extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 14),
                         child: _LessonCard(
                           lesson: lessons[i],
-                          number: i + 1,
                           color: color,
                           completed: ProgressStore.instance.isLessonCompleted(
                             argomento.levelId,
@@ -89,14 +92,12 @@ class ArgomentoLessonsScreen extends StatelessWidget {
 
 class _LessonCard extends StatelessWidget {
   final Lesson lesson;
-  final int number;
   final Color color;
   final bool completed;
   final VoidCallback onTap;
 
   const _LessonCard({
     required this.lesson,
-    required this.number,
     required this.color,
     required this.completed,
     required this.onTap,
@@ -108,27 +109,11 @@ class _LessonCard extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+      borderColor: color.withValues(alpha: 0.25),
+      glow: color.withValues(alpha: 0.10),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Text(
-              '$number',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,18 +123,21 @@ class _LessonCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.titleSmall,
                     fontWeight: FontWeight.w700,
                     color: c.textPrimary,
                   ),
                 ),
                 if (lesson.subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 4),
                   Text(
                     lesson.subtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ],
                 if (lesson.minutes > 0) ...[
@@ -160,7 +148,10 @@ class _LessonCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         lesson.minutes == 1 ? '1 min' : '${lesson.minutes} min',
-                        style: TextStyle(fontSize: 12, color: c.textSecondary),
+                        style: TextStyle(
+                          fontSize: AppText.caption,
+                          color: c.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -170,28 +161,7 @@ class _LessonCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           if (completed)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: c.easy.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle, size: 14, color: c.easy),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Completata',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: c.easy,
-                    ),
-                  ),
-                ],
-              ),
-            )
+            Icon(Icons.check_circle_rounded, size: 22, color: c.easy)
           else
             Icon(Icons.chevron_right, color: c.textSecondary),
         ],
@@ -221,7 +191,7 @@ class _EmptyArgomento extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
@@ -230,7 +200,7 @@ class _EmptyArgomento extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
           ],
         ),

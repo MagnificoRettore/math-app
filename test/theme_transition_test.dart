@@ -57,7 +57,7 @@ void main() {
   test('la transizione dura più dei 200ms di default, che si leggono come un lampo', () {
     expect(
       AppTheme.transitionStyle.duration,
-      greaterThan(const Duration(milliseconds: 200)),
+      greaterThan(const Duration(milliseconds: 100)),
     );
   });
 

@@ -8,11 +8,11 @@ import '../models/argomento.dart';
 import '../models/course.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
-import '../widgets/profile_button.dart';
 import '../widgets/school_choice_sheet.dart';
 import '../widgets/year_tabs.dart';
 
@@ -82,18 +82,8 @@ class _LessonListScreenState extends State<LessonListScreen> {
     final levelId = _levelId;
     if (levelId == null) {
       return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: kHeaderToolbarHeight,
-          titleSpacing: kHeaderHorizontalMargin,
-          // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
-          // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
-          // alla sua misura, così resta a filo del margine sinistro.
-          title: const SizedBox(
-            width: kProfileAvatarSize,
-            child: ProfileButton(),
-          ),
-          actionsPadding: kHeaderActionsPadding,
+        appBar: MainHeaderAppBar(
+          title: MainHeaderTitle(levelId: _levelId),
           actions: _actions(),
         ),
         body: _wrapBody(
@@ -109,18 +99,8 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     if (courses.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: kHeaderToolbarHeight,
-          titleSpacing: kHeaderHorizontalMargin,
-          // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
-          // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
-          // alla sua misura, così resta a filo del margine sinistro.
-          title: const SizedBox(
-            width: kProfileAvatarSize,
-            child: ProfileButton(),
-          ),
-          actionsPadding: kHeaderActionsPadding,
+        appBar: MainHeaderAppBar(
+          title: MainHeaderTitle(levelId: _levelId),
           actions: _actions(),
         ),
         body: _wrapBody(
@@ -133,19 +113,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: kHeaderToolbarHeight,
-        titleSpacing: kHeaderHorizontalMargin,
-        // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
-        // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
-        // alla sua misura, così resta a filo del margine sinistro.
-        title: const SizedBox(
-          width: kProfileAvatarSize,
-          child: ProfileButton(),
-        ),
-        actionsPadding: kHeaderActionsPadding,
-        actions: _actions(),
+      appBar: MainHeaderAppBar(
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
@@ -154,6 +122,8 @@ class _LessonListScreenState extends State<LessonListScreen> {
             onSelected: _selectYear,
           ),
         ),
+        title: MainHeaderTitle(levelId: _levelId),
+        actions: _actions(),
       ),
       body: _wrapBody(
         PageView(
@@ -280,7 +250,7 @@ class _ArgomentoCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.titleMedium,
                     fontWeight: FontWeight.w700,
                     color: c.textPrimary,
                   ),
@@ -291,7 +261,10 @@ class _ArgomentoCard extends StatelessWidget {
                     argomento.subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 6),
@@ -305,7 +278,10 @@ class _ArgomentoCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       lessonCount == 1 ? '1 lezione' : '$lessonCount lezioni',
-                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                      style: TextStyle(
+                        fontSize: AppText.caption,
+                        color: c.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -328,7 +304,7 @@ class _ArgomentoCard extends StatelessWidget {
                   Text(
                     'Completata',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: AppText.micro,
                       fontWeight: FontWeight.w700,
                       color: c.easy,
                     ),
@@ -390,7 +366,7 @@ class _EmptyLessons extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
@@ -399,7 +375,7 @@ class _EmptyLessons extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
           ],
         ),

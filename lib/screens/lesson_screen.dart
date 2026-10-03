@@ -11,6 +11,7 @@ import '../models/lesson.dart';
 import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mcq_option_tile.dart';
 import '../widgets/notes_text.dart';
@@ -252,7 +253,7 @@ class _LessonScreenState extends State<LessonScreen> {
                         Text(
                           '${_page + 1} di $_total',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppText.label,
                             color: c.textSecondary,
                           ),
                         ),
@@ -262,7 +263,7 @@ class _LessonScreenState extends State<LessonScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppText.label,
                             color: c.textSecondary,
                           ),
                         ),
@@ -410,7 +411,7 @@ class _TrophyCelebration extends StatelessWidget {
                 Text(
                   'Lezione completata!',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: AppText.title,
                     fontWeight: FontWeight.w700,
                     color: c.textPrimary,
                   ),
@@ -418,7 +419,10 @@ class _TrophyCelebration extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Tocca per continuare',
-                  style: TextStyle(fontSize: 15, color: c.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    color: c.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -482,7 +486,7 @@ class _StepCard extends StatelessWidget {
                       Text(
                         step.title,
                         style: TextStyle(
-                          fontSize: 24 * scale,
+                          fontSize: AppText.headline * scale,
                           fontWeight: FontWeight.w700,
                           color: c.textPrimary,
                         ),
@@ -500,7 +504,10 @@ class _StepCard extends StatelessWidget {
                         NotesText(step.content, fontScale: scale),
                         if (step.prompt.isNotEmpty) ...[
                           const SizedBox(height: 16),
-                          PromptView(prompt: step.prompt, fontSize: 18 * scale),
+                          PromptView(
+                            prompt: step.prompt,
+                            fontSize: AppText.titleMedium * scale,
+                          ),
                         ],
                         const SizedBox(height: 24),
                         for (var i = 0; i < step.options.length; i++)
@@ -571,7 +578,7 @@ class _StepCard extends StatelessWidget {
                         text: const TextSpan(
                           text: 'Completa la lezione',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppText.bodyLarge,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -674,7 +681,10 @@ class _StepCard extends StatelessWidget {
       icon: const Icon(Icons.check_circle_outline, size: 20),
       label: const Text(
         'Completa la lezione',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+        style: TextStyle(
+          fontSize: AppText.bodyLarge,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

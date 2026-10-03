@@ -60,6 +60,10 @@ void main() {
     expect(find.text('@anna'), findsOneWidget);
     expect(find.text('anna@example.com'), findsWidgets);
     expect(find.text('Modifica profilo'), findsOneWidget);
+    // La foto si cambia toccando l'avatar in testata: sotto l'email non c'è più
+    // né la riga con l'anteprima né il bottone «Cambia foto».
+    expect(find.text('Cambia foto'), findsNothing);
+    expect(find.textContaining('Foto profilo:'), findsNothing);
   });
 
   testWidgets('salva è spento finché non si tocca qualcosa', (tester) async {
@@ -144,25 +148,6 @@ void main() {
 
     expect(find.text('Modifiche salvate'), findsOneWidget);
     expect(AuthStore.instance.currentUser!.avatarId, 'rocket_launch_rounded');
-  });
-
-  testWidgets('rimuovere la foto torna alle iniziali', (tester) async {
-    await registerAccount();
-    await AuthStore.instance.updateProfile(avatarId: 'rocket_launch_rounded');
-    await pumpProfile(tester);
-
-    await scrollTo(tester, find.byKey(const Key('profile-change-avatar')));
-    await tester.tap(find.byKey(const Key('profile-change-avatar')));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Rimuovi foto, torna alle iniziali'));
-    await tester.pumpAndSettle();
-    await scrollTo(tester, find.byKey(const Key('profile-save')));
-    await tester.tap(find.byKey(const Key('profile-save')));
-    await tester.pumpAndSettle();
-
-    expect(AuthStore.instance.currentUser!.avatarId, isEmpty);
-    expect(find.text('A'), findsOneWidget);
   });
 
   testWidgets('uscire chiude la sessione e il profilo torna ospite', (

@@ -9,6 +9,7 @@ import '../screens/course_screen.dart';
 import '../screens/exercise_detail_screen.dart';
 import '../screens/welcome_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'exercise_card.dart';
 import 'recommendation_row.dart';
 import 'school_choice_sheet.dart';
@@ -44,7 +45,7 @@ class RecommendedSection extends StatelessWidget {
             onPressed: () => _openLevel(context, level.id),
             child: Text(
               'Esplora',
-              style: TextStyle(fontSize: 13, color: c.accent),
+              style: TextStyle(fontSize: AppText.label, color: c.accent),
             ),
           ),
         ),
@@ -96,7 +97,7 @@ class RecommendedSection extends StatelessWidget {
             onPressed: () => _browse(context),
             child: Text(
               'Esplora',
-              style: TextStyle(fontSize: 13, color: c.accent),
+              style: TextStyle(fontSize: AppText.label, color: c.accent),
             ),
           ),
         ),
@@ -154,7 +155,7 @@ class _MiniHeader extends StatelessWidget {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 15,
+          fontSize: AppText.bodyLarge,
           fontWeight: FontWeight.w700,
           color: c.textSecondary,
         ),

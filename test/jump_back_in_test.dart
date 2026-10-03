@@ -101,8 +101,8 @@ void main() {
     expect(find.text('Modulo e Equazioni con Modulo'), findsOneWidget);
     // il contatore numerico non c'è più
     expect(find.textContaining('Step'), findsNothing);
-    // 1 card di Definizione + 3 superate, su 9
-    expect(_barra(tester).progress, closeTo(4 / 9, 0.001));
+    // 1 card di Definizione + 3 superate, su 10
+    expect(_barra(tester).progress, closeTo(4 / 10, 0.001));
   });
 
   testWidgets('una lezione di un solo passo mostra la barra a zero', (
@@ -147,12 +147,12 @@ void main() {
 
     expect(find.byType(LessonScreen), findsOneWidget);
     // «3 di 3» è il contatore dello schermo lezione, non della card
-    expect(find.text('3 di 3'), findsOneWidget);
+    expect(find.text('3 di 4'), findsOneWidget);
   });
 
   testWidgets('completando la lezione la sezione sparisce', (tester) async {
     await _registra();
-    await _pausa('eq1-intro', step: 2);
+    await _pausa('eq1-intro', step: 3);
     await _pumpHome(tester);
 
     await tester.tap(_card);

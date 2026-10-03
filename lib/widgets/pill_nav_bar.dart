@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 
+import '../theme/app_text.dart';
 import '../data/auth_store.dart';
 import '../data/browse_store.dart';
 import '../data/content_repository.dart';
@@ -691,7 +692,9 @@ class _PillButton extends StatelessWidget {
               Text(
                 _label,
                 style: TextStyle(
-                  fontSize: 10,
+                  // Era l'unico testo sotto `AppText.micro`, e a 10 px nella
+                  // barra più stretta dell'app era il primo a soffrire.
+                  fontSize: AppText.micro,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                   color: active ? c.accent : c.textSecondary,
                 ),

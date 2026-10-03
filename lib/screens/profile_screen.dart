@@ -6,6 +6,7 @@ import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/avatar_picker.dart';
 import '../widgets/profile_avatar.dart';
@@ -70,7 +71,7 @@ class _GuestProfile extends StatelessWidget {
           child: Text(
             'Nessun profilo',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: AppText.titleLarge,
               fontWeight: FontWeight.w700,
               color: c.textPrimary,
             ),
@@ -82,7 +83,11 @@ class _GuestProfile extends StatelessWidget {
             'Accedi per ritrovare i tuoi progressi, oppure crea un profilo per '
             'ricevere lezioni ed esercizi consigliati per la tua scuola.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: c.textSecondary, height: 1.4),
+            style: TextStyle(
+              fontSize: AppText.bodyMedium,
+              color: c.textSecondary,
+              height: 1.4,
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -95,7 +100,7 @@ class _GuestProfile extends StatelessWidget {
             minimumSize: const Size.fromHeight(52),
             backgroundColor: c.accent,
             textStyle: const TextStyle(
-              fontSize: 16,
+              fontSize: AppText.titleSmall,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -111,7 +116,7 @@ class _GuestProfile extends StatelessWidget {
             minimumSize: const Size.fromHeight(52),
             side: BorderSide(color: c.border),
             textStyle: const TextStyle(
-              fontSize: 16,
+              fontSize: AppText.titleSmall,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -124,7 +129,7 @@ class _GuestProfile extends StatelessWidget {
             child: Text(
               'Scopri come ospite',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 color: c.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -205,11 +210,20 @@ class _ProfileContentState extends State<_ProfileContent> {
         const SizedBox(height: 12),
         Row(
           children: [
-            ProfileAvatar(
-              user: preview,
-              size: 68,
-              color: levelColor,
-              plateColor: levelColor.withValues(alpha: 0.14),
+            Semantics(
+              button: true,
+              label: 'Cambia foto profilo',
+              child: GestureDetector(
+                key: const Key('profile-change-avatar'),
+                behavior: HitTestBehavior.opaque,
+                onTap: _saving ? null : _pickAvatar,
+                child: ProfileAvatar(
+                  user: preview,
+                  size: 68,
+                  color: levelColor,
+                  plateColor: levelColor.withValues(alpha: 0.14),
+                ),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -220,7 +234,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                     preview.name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: AppText.title,
                       fontWeight: FontWeight.w700,
                       color: c.textPrimary,
                     ),
@@ -229,13 +243,19 @@ class _ProfileContentState extends State<_ProfileContent> {
                   Text(
                     '@${preview.accountId}',
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.bodyMedium,
+                      color: c.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     user.email,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.bodyMedium,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -253,7 +273,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 Text(
                   'Modifica profilo',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.titleSmall,
                     fontWeight: FontWeight.w700,
                     color: c.textPrimary,
                   ),
@@ -288,32 +308,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 ),
                 const SizedBox(height: 12),
                 _ReadOnlyField(label: 'Email', value: user.email),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    ProfileAvatar(
-                      user: preview,
-                      size: 44,
-                      color: levelColor,
-                      plateColor: levelColor.withValues(alpha: 0.14),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        _avatarId.isEmpty
-                            ? 'Foto profilo: iniziali'
-                            : 'Foto profilo: ${_avatarId.replaceAll('_rounded', '')}',
-                        style: TextStyle(fontSize: 14, color: c.textSecondary),
-                      ),
-                    ),
-                    TextButton(
-                      key: const Key('profile-change-avatar'),
-                      onPressed: _saving ? null : _pickAvatar,
-                      child: const Text('Cambia foto'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 FilledButton(
                   key: const Key('profile-save'),
                   onPressed: _saving || !_dirty ? null : _save,
@@ -321,7 +316,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                     minimumSize: const Size.fromHeight(52),
                     backgroundColor: c.accent,
                     textStyle: const TextStyle(
-                      fontSize: 16,
+                      fontSize: AppText.titleSmall,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -356,7 +351,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 child: Text(
                   'Cambia la tua scuola',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
@@ -377,7 +372,7 @@ class _ProfileContentState extends State<_ProfileContent> {
               Text(
                 'Esci',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w600,
                   color: c.hard,
                 ),
@@ -410,7 +405,10 @@ class _ProfileContentState extends State<_ProfileContent> {
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,
-        helperStyle: TextStyle(fontSize: 12, color: c.textSecondary),
+        helperStyle: TextStyle(
+          fontSize: AppText.caption,
+          color: c.textSecondary,
+        ),
         filled: true,
         fillColor: c.background,
         labelStyle: TextStyle(color: c.textSecondary),
@@ -441,7 +439,7 @@ class _ProfileContentState extends State<_ProfileContent> {
               Text(
                 'Scegli la foto profilo',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: AppText.titleMedium,
                   fontWeight: FontWeight.w700,
                   color: AppColors.of(context).textPrimary,
                 ),
@@ -533,7 +531,10 @@ class _ReadOnlyField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         helperText: 'Identifica l’account, non si modifica',
-        helperStyle: TextStyle(fontSize: 12, color: c.textSecondary),
+        helperStyle: TextStyle(
+          fontSize: AppText.caption,
+          color: c.textSecondary,
+        ),
         filled: true,
         fillColor: c.background,
         labelStyle: TextStyle(color: c.textSecondary),
@@ -549,10 +550,8 @@ class _ReadOnlyField extends StatelessWidget {
       child: Text(
         value,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 15, color: c.textSecondary),
+        style: TextStyle(fontSize: AppText.bodyLarge, color: c.textSecondary),
       ),
     );
   }
 }
-
-

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/difficulty.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 
 class DifficultyBadge extends StatelessWidget {
   final Difficulty difficulty;
@@ -27,7 +28,7 @@ class DifficultyBadge extends StatelessWidget {
         difficulty.label,
         style: TextStyle(
           color: color,
-          fontSize: 12,
+          fontSize: AppText.caption,
           fontWeight: FontWeight.w700,
         ),
       ),

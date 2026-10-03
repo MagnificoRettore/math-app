@@ -18,6 +18,7 @@ import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/screens/welcome_screen.dart';
 import 'package:math_app/screens/weak_points_screen.dart';
 import 'package:math_app/theme/app_colors.dart';
+import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/image_carousel.dart';
@@ -169,6 +170,27 @@ void main() {
     );
   });
 
+  group('testate', () {
+    testWidgets('il titolo di sezione è a filo della card sotto', (
+      tester,
+    ) async {
+      await _registra();
+      await _pumpHome(tester);
+      final testata = find.text('Per te \u00b7 Scuola Superiore');
+      await _scrollaA(tester, testata);
+
+      // I 20 px orizzontali della testata, sommati a quelli della pagina,
+      // mettevano il titolo a 40 mentre le card erano a 20: disallineati e con
+      // 20 px in meno per il testo.
+      // La `AppCard` è dentro la riga, non sopra.
+      final card = find.descendant(
+        of: find.byType(RecommendationRow).first,
+        matching: find.byType(AppCard),
+      );
+      expect(tester.getTopLeft(testata).dx, tester.getTopLeft(card).dx);
+    });
+  });
+
   group('superfici', () {
     testWidgets('la card ha il raggio grande dell\'app', (tester) async {
       await _registra();
@@ -233,7 +255,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(LessonScreen), findsOneWidget);
-      expect(find.text('3 di 3'), findsOneWidget);
+      expect(find.text('3 di 4'), findsOneWidget);
     });
 
     testWidgets('il badge dice se la lezione era già aperta', (tester) async {
@@ -261,10 +283,10 @@ void main() {
       await _pausa('mod-equations-intro', step: 3);
       await _pumpHome(tester);
 
-      // 1 card di Definizione + 3 superate, su 9: il conteggio è posizionale
+      // 1 card di Definizione + 3 superate, su 10: il conteggio è posizionale
       // e `LessonResumeEngine` lo dice già nei suoi test.
-      expect(find.text('4 di 9 card'), findsOneWidget);
-      expect(find.text('44%'), findsOneWidget);
+      expect(find.text('4 di 10 card'), findsOneWidget);
+      expect(find.text('40%'), findsOneWidget);
       expect(find.textContaining('esercizi'), findsNothing);
     });
   });
@@ -442,7 +464,7 @@ void main() {
 
       // Stessa riga e stesso play: la geometria è di `RecommendationRow`, non
       // due widget che si somigliano.
-      expect(titoloOspite.fontSize, 15);
+      expect(titoloOspite.fontSize, AppText.bodyLarge);
       expect(titoloCollegato.fontSize, titoloOspite.fontSize);
       expect(titoloCollegato.fontWeight, titoloOspite.fontWeight);
       expect(playCollegato, playOspite);

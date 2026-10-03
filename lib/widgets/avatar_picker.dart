@@ -17,7 +17,6 @@ class AvatarPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
     final selected = value.trim();
 
     return Column(
@@ -35,16 +34,6 @@ class AvatarPicker extends StatelessWidget {
                 onTap: () => onChanged(name),
               ),
           ],
-        ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: () => onChanged(''),
-          icon: const Icon(Icons.person_off_outlined, size: 18),
-          label: const Text('Rimuovi foto, torna alle iniziali'),
-          style: TextButton.styleFrom(
-            foregroundColor: c.textSecondary,
-            padding: EdgeInsets.zero,
-          ),
         ),
       ],
     );

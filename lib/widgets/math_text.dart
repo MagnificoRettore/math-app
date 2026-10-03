@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 
+import '../theme/app_text.dart';
 import '../theme/app_colors.dart';
 
 class MathSegment {
@@ -107,7 +108,7 @@ class MathText extends StatelessWidget {
   const MathText(
     this.data, {
     super.key,
-    this.fontSize = 16,
+    this.fontSize = AppText.titleSmall,
     this.color,
     this.textAlign = TextAlign.left,
     this.fontWeight,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/auth_validators.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
 import '../widgets/strength_meter.dart';
@@ -55,7 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Text(
               'Crea il tuo profilo',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: AppText.hero,
                 fontWeight: FontWeight.w800,
                 color: c.textPrimary,
               ),
@@ -65,7 +66,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               'Subito dopo sceglierai la tua scuola per ricevere consigli su '
               'misura.',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 color: c.textSecondary,
                 height: 1.4,
               ),
@@ -158,7 +159,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 minimumSize: const Size.fromHeight(52),
                 backgroundColor: c.accent,
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: AppText.titleSmall,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -181,7 +182,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
                     'Oppure registrati con',
-                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
                   ),
                 ),
                 Expanded(child: Divider(color: c.border, height: 1)),
@@ -196,7 +200,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Center(
               child: Text(
                 'Il profilo è salvato solo su questo dispositivo.',
-                style: TextStyle(fontSize: 12, color: c.textSecondary),
+                style: TextStyle(
+                  fontSize: AppText.caption,
+                  color: c.textSecondary,
+                ),
               ),
             ),
           ],
@@ -229,7 +236,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,
-        helperStyle: TextStyle(fontSize: 12, color: c.textSecondary),
+        helperStyle: TextStyle(
+          fontSize: AppText.caption,
+          color: c.textSecondary,
+        ),
         prefixIcon: prefixIcon == null
             ? null
             : Icon(prefixIcon, color: c.textSecondary),
@@ -332,7 +342,7 @@ class _TermsRow extends StatelessWidget {
               child: Text.rich(
                 TextSpan(
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.label,
                     color: c.textSecondary,
                     height: 1.35,
                   ),
@@ -381,7 +391,7 @@ class _TermsRow extends StatelessWidget {
             Text(
               'Termini e Condizioni, Privacy Policy',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -390,7 +400,7 @@ class _TermsRow extends StatelessWidget {
             Text(
               _placeholder,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppText.bodyMedium,
                 color: c.textSecondary,
                 height: 1.5,
               ),

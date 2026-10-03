@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/auth_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               'Bentornato',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: AppText.hero,
                 fontWeight: FontWeight.w800,
                 color: c.textPrimary,
               ),
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               'Accedi col tuo ID account o con la tua email.',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 color: c.textSecondary,
                 height: 1.4,
               ),
@@ -117,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         minimumSize: const Size.fromHeight(52),
                         backgroundColor: c.accent,
                         textStyle: const TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.titleSmall,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -140,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'Password dimenticata?',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppText.bodyMedium,
                             color: c.textSecondary,
                           ),
                         ),
@@ -161,7 +162,10 @@ class _LoginScreenState extends State<LoginScreen> {
             Center(
               child: Text.rich(
                 TextSpan(
-                  style: TextStyle(fontSize: 15, color: c.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    color: c.textSecondary,
+                  ),
                   children: [
                     const TextSpan(text: 'Non hai un account? '),
                     WidgetSpan(
@@ -171,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'Registrati',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppText.bodyLarge,
                             fontWeight: FontWeight.w600,
                             color: c.accent,
                           ),
@@ -188,7 +192,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _busy ? null : () => Navigator.of(context).pop(),
                 child: Text(
                   'Continua come ospite',
-                  style: TextStyle(fontSize: 15, color: c.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    color: c.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -254,7 +261,11 @@ class _LoginScreenState extends State<LoginScreen> {
           'un server a cui chiedere una nuova password.\n\n'
           'Se ricordi l\'ID account e la password, accedi. Altrimenti puoi '
           'tornare indietro e creare un account nuovo.',
-          style: TextStyle(fontSize: 14, color: c.textSecondary, height: 1.4),
+          style: TextStyle(
+            fontSize: AppText.bodyMedium,
+            color: c.textSecondary,
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
@@ -285,7 +296,11 @@ class _ErrorLine extends StatelessWidget {
         Expanded(
           child: Text(
             message,
-            style: TextStyle(fontSize: 13, color: c.hard, height: 1.3),
+            style: TextStyle(
+              fontSize: AppText.label,
+              color: c.hard,
+              height: 1.3,
+            ),
           ),
         ),
       ],
@@ -308,7 +323,7 @@ class _Separator extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             label,
-            style: TextStyle(fontSize: 13, color: c.textSecondary),
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
           ),
         ),
         Expanded(child: Divider(color: c.border, height: 1)),

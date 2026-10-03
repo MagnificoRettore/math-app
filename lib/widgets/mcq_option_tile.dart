@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'math_text.dart';
 
 enum McqOptionState { idle, selected, correct, wrong }
@@ -63,7 +64,9 @@ class McqOptionTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
-                Expanded(child: MathText(label, fontSize: 16 * scale)),
+                Expanded(
+                  child: MathText(label, fontSize: AppText.titleSmall * scale),
+                ),
                 if (check != null) ...[
                   const SizedBox(width: 10),
                   Icon(check, size: 22, color: iconColor),
@@ -117,7 +120,7 @@ class McqFeedbackCard extends StatelessWidget {
               Text(
                 correct ? 'Corretto!' : 'Non è corretto',
                 style: TextStyle(
-                  fontSize: 16 * scale,
+                  fontSize: AppText.titleSmall * scale,
                   fontWeight: FontWeight.w700,
                   color: color,
                 ),
@@ -126,7 +129,7 @@ class McqFeedbackCard extends StatelessWidget {
           ),
           if (message.isNotEmpty) ...[
             const SizedBox(height: 8),
-            MathText(message, fontSize: 14 * scale),
+            MathText(message, fontSize: AppText.bodyMedium * scale),
           ],
         ],
       ),

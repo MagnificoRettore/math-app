@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../haptics.dart';
+import '../theme/app_text.dart';
 import 'expression_evaluator.dart';
 
 /// Calcolatrice scientifica non modale, ancorata al basso della lezione.
@@ -296,7 +297,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                     Text(
                       'Calcolatrice',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppText.bodyLarge,
                         fontWeight: FontWeight.w700,
                         color: c.textPrimary,
                       ),
@@ -304,7 +305,10 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                     const Spacer(),
                     Text(
                       'trascina giù per chiudere',
-                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                      style: TextStyle(
+                        fontSize: AppText.caption,
+                        color: c.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -342,7 +346,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 17,
+                    fontSize: AppText.titleMedium,
                     color: c.textSecondary,
                     fontFamily: 'monospace',
                   ),
@@ -361,7 +365,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: AppText.hero,
                     fontWeight: FontWeight.w700,
                     color: _result == 'Errore' ? c.hard : c.accent,
                   ),
@@ -393,7 +397,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
           child: Text(
             _deg ? 'DEG' : 'RAD',
             style: TextStyle(
-              fontSize: 11,
+              fontSize: AppText.micro,
               fontWeight: FontWeight.w700,
               color: c.accent,
             ),
@@ -552,7 +556,7 @@ class _CalcKey extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: AppText.titleMedium,
               fontWeight: FontWeight.w700,
               color: foreground,
             ),

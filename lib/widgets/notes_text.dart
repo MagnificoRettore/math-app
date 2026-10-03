@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../models/multifunction_box/multifunction_box.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'math_text.dart';
 import 'multifunction_box_widget.dart';
 
@@ -61,7 +62,7 @@ class NotesText extends StatelessWidget {
   const NotesText(
     this.data, {
     super.key,
-    this.baseFontSize = 17,
+    this.baseFontSize = AppText.docBody,
     this.fontScale = 1.0,
     this.color,
   });
@@ -240,7 +241,7 @@ class NotesText extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: AppText.bodyMedium,
                   fontWeight: FontWeight.w700,
                   color: calloutColor,
                 ),
@@ -419,11 +420,23 @@ class NotesText extends StatelessWidget {
     NotesBlockType type,
     double scale,
   ) => switch (type) {
-    NotesBlockType.title => (28 * scale, FontWeight.w800, null),
-    NotesBlockType.heading => (22 * scale, FontWeight.w700, null),
-    NotesBlockType.subheading => (17 * scale, FontWeight.w600, null),
+    NotesBlockType.title => (AppText.docTitle * scale, FontWeight.w800, null),
+    NotesBlockType.heading => (
+      AppText.docHeading * scale,
+      FontWeight.w700,
+      null,
+    ),
+    NotesBlockType.subheading => (
+      AppText.docBody * scale,
+      FontWeight.w600,
+      null,
+    ),
     NotesBlockType.body => (baseFontSize * scale, FontWeight.w400, null),
-    NotesBlockType.mono => (14 * scale, FontWeight.w400, 'monospace'),
+    NotesBlockType.mono => (
+      AppText.docMono * scale,
+      FontWeight.w400,
+      'monospace',
+    ),
     NotesBlockType.bullet => (baseFontSize * scale, FontWeight.w400, null),
   };
 
@@ -487,7 +500,10 @@ class NotesText extends StatelessWidget {
       style = style.copyWith(fontStyle: FontStyle.italic);
     }
     if (stack.contains('`')) {
-      style = style.copyWith(fontFamily: 'monospace', fontSize: 14 * scale);
+      style = style.copyWith(
+        fontFamily: 'monospace',
+        fontSize: AppText.bodyMedium * scale,
+      );
     }
     final decorations = <TextDecoration>[];
     if (stack.contains('__')) {

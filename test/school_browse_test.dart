@@ -52,6 +52,17 @@ Future<void> _vaiAgliEsercizi(WidgetTester tester) async {
 
 Finder _bottoneScuola() => find.byKey(const Key('header-school-browse'));
 
+/// La riga del bottone «Altre scuole»: la chiave sta sull'`IconButton`, quindi
+/// il nome della scuola è suo fratello e va cercato nella riga che lo contiene.
+Finder _rigaScuola() =>
+    find.ancestor(of: _bottoneScuola(), matching: find.byType(Row)).first;
+
+/// Il nome della scuola in visita **nel bottone** dell'header. Va ambito:
+/// anche la pilla scrive il titolo della scuola che si sta guardando, quindi il
+/// testo da solo matcha due widget.
+Finder _titoloNelBottone(String titolo) =>
+    find.descendant(of: _rigaScuola(), matching: find.text(titolo));
+
 /// Apre il foglio dal bottone dell'header e sceglie la scuola dal titolo che
 /// `SchoolLevelTile` mostra. Il tap è sulla tile, che è ciò che sta sotto il
 /// dito, non sul testo.
@@ -161,12 +172,15 @@ void main() {
     await _registra(school: 'high-school');
     await _pumpHome(tester);
     await _vaiAllezioni(tester);
-    expect(find.text('Scuola Media'), findsNothing);
+    expect(_titoloNelBottone('Scuola Media'), findsNothing);
 
     await _scegliScuola(tester, 'Scuola Media');
 
-    expect(find.text('Scuola Media'), findsOneWidget);
+    expect(_titoloNelBottone('Scuola Media'), findsOneWidget);
     expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    // E la pilla dice la stessa scuola: nome e titolo non si contraddicono.
+    final scuola = tester.widget<Text>(find.byKey(const Key('header-school')));
+    expect(scuola.data, 'Scuola Media');
   });
 
   testWidgets('schermo stretto: scuola in visita e icone ci stanno tutte', (
@@ -203,7 +217,7 @@ void main() {
     }
     // Il nome della scuola si tronca invece di spingere fuori le icone, e non
     // va a capo perché l'header è alto 80.
-    final nome = tester.getRect(find.text('Scuola Superiore'));
+    final nome = tester.getRect(_titoloNelBottone('Scuola Superiore'));
     final personalizzazione = tester.getRect(
       find.byKey(const Key('header-customization')),
     );
@@ -253,7 +267,10 @@ void main() {
 
     expect(find.text('Equazioni di primo grado'), findsNothing);
     expect(find.text('Nessuna lezione in prima'), findsOneWidget);
-    expect(find.text('Scuola Media'), findsNothing);
+    expect(_titoloNelBottone('Scuola Media'), findsNothing);
+    // Non è sparito il titolo della scuola: quello del profilo sta nella
+    // pilla, che scrive sempre la scuola su cui si è.
+    expect(find.byKey(const Key('header-school')), findsOneWidget);
   });
 
   testWidgets('cambiare scuola con un anno aperto non lascia l\'indice', (

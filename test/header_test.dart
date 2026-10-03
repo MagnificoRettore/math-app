@@ -12,6 +12,7 @@ import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
+import 'package:math_app/widgets/main_header.dart';
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -87,37 +88,41 @@ void main() {
     expect(find.byType(CourseScreen), findsNothing);
   });
 
-  testWidgets('home: l\'avatar sta a sinistra del saluto, sulla stessa riga', (
+  testWidgets('home: l\'avatar sta a sinistra del nome, sulla stessa riga', (
     tester,
   ) async {
     await _register();
     await _pumpHome(tester);
 
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
-    final hello = tester.getRect(find.byKey(const Key('home-greeting-hello')));
-    final name = tester.getRect(find.byKey(const Key('home-greeting-name')));
+    final name = tester.getRect(find.byKey(const Key('header-name')));
 
-    // ordine: avatar, poi le due righe del saluto
-    expect(avatar.left, lessThan(hello.left));
-    expect(hello.left, closeTo(name.left, 1));
-    // e stanno sulla stessa riga: l'altezza dell'header li contiene tutti e
-    // tre senza dividerli in due piani
+    // ordine: avatar, poi il testo dell'header
+    expect(avatar.left, lessThan(name.left));
+    // e stanno sulla stessa riga: l'altezza della banda li contiene tutti e
+    // due senza dividerli in due piani
     expect((avatar.center.dy - name.center.dy).abs(), lessThan(avatar.height));
     expect(name.bottom, lessThanOrEqualTo(avatar.bottom));
+    // L'avatar è a filo del margine sinistro: la banda parte dal bordo dello
+    // schermo, quindi non c'è aria interna che lo spinga dentro.
+    expect(avatar.left, closeTo(kHeaderHorizontalMargin, 1));
   });
 
-  testWidgets('home: l\'icona delle impostazioni sta a destra del saluto', (
+  testWidgets('home: l\'icona delle impostazioni sta a destra del nome', (
     tester,
   ) async {
     await _register();
     await _pumpHome(tester);
 
-    final name = tester.getRect(find.byKey(const Key('home-greeting-name')));
+    final name = tester.getRect(find.byKey(const Key('header-name')));
     final icon = tester.getRect(_customizzazione);
 
-    // in alto a destra, sulla stessa riga del saluto
+    // in alto a destra e sulla stessa riga del testo: le icone stanno nelle
+    // `actions`, dentro la banda, e restano dentro l'altezza dell'header
     expect(icon.left, greaterThan(name.right));
     expect((icon.center.dy - name.center.dy).abs(), lessThan(icon.height));
+    expect(icon.top, greaterThanOrEqualTo(0));
+    expect(icon.bottom, lessThanOrEqualTo(kHeaderToolbarHeight));
   });
 
   testWidgets('ospite: l\'icona profilo porta all\'accesso', (tester) async {
@@ -162,7 +167,9 @@ void main() {
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
 
     expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
-    expect(avatar.left, closeTo(30, 1));
+    // La banda parte dal bordo dello schermo, quindi l'avatar è a filo del
+    // margine dell'header e non c'è aria interna che lo spinga dentro.
+    expect(avatar.left, closeTo(kHeaderHorizontalMargin, 1));
     // la lente non è più l'ultima a destra: le impostazioni le stanno accanto,
     // ed è l'icona delle impostazioni a finire al bordo.
     expect(lens.right, lessThanOrEqualTo(tune.left));
@@ -183,7 +190,9 @@ void main() {
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
 
     expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
-    expect(avatar.left, closeTo(30, 1));
+    // La banda parte dal bordo dello schermo, quindi l'avatar è a filo del
+    // margine dell'header e non c'è aria interna che lo spinga dentro.
+    expect(avatar.left, closeTo(kHeaderHorizontalMargin, 1));
     expect(lens.right, lessThanOrEqualTo(tune.left));
     expect(_schermo(tester) - tune.right, lessThanOrEqualTo(12));
   });

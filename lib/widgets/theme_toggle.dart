@@ -3,15 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../_perf_probe.dart';
 import '../data/settings_store.dart';
 import '../haptics.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 
 /// Card «Tema scuro» con l'animazione sole/luna.
 ///
-/// L'animazione parte sul tap e il tema cambia 100ms dopo, così l'icona è già in
-/// viaggio quando i colori cominciano a Interpolare (`AppTheme.transitionStyle`).
+/// L'animazione parte sul tap e il tema cambia 50ms dopo, così l'icona è già in
+/// viaggio quando i colori cominciano a interpolare (`AppTheme.transitionStyle`).
 class ThemeToggle extends StatefulWidget {
   const ThemeToggle({super.key});
 
@@ -20,7 +22,10 @@ class ThemeToggle extends StatefulWidget {
 }
 
 class _ThemeToggleState extends State<ThemeToggle>
-    with SingleTickerProviderStateMixin {
+        /// Due controller: [_controller] per gli idle e [_drive] per il viaggio del
+        /// tratto. `SingleTickerProviderStateMixin` ne ammette uno solo.
+        with
+        TickerProviderStateMixin {
   static const _asset = 'assets/animations/toggle.json';
   static const _dayIdle = 'Day Idle';
   static const _nightIdle = 'Night Idle';
@@ -32,17 +37,39 @@ class _ThemeToggleState extends State<ThemeToggle>
   ///
   /// I marker durano 1000ms («Day to Night») e 1333ms («Night to Day»): senza
   /// un override ogni direzione avrebbe una velocità diversa, e diversa da
-  /// quella dei colori. Fissare 500ms rende le due uguali e le accorcia.
-  static const _transition = Duration(milliseconds: 500);
+  /// quella dei colori. Fissare 320ms rende le due uguali e le accorcia.
+  static const _transition = Duration(milliseconds: 320);
 
-  /// Quanto l'icona parte prima del tema. Con i colori a 400ms
-  /// (`AppTheme.transitionStyle`) i due viaggi finiscono insieme, a 500ms.
-  static const _themeChangeDelay = Duration(milliseconds: 100);
+  /// Quanto l'icona parte prima del tema. Con i colori a 200ms
+  /// (`AppTheme.transitionStyle`) i due viaggi finiscono **separati**: i colori
+  /// a 240ms, l'icona a 320ms.
+  static const _themeChangeDelay = Duration(milliseconds: 40);
 
+  /// Curva del tratto: l'icona parte subito e frena, mentre il tempo della
+  /// composizione resterebbe lineare (`animateTo` non ha curva) e si fermerebbe
+  /// di colpo.
+  static const _curve = Curves.easeOutCubic;
+
+  /// Il tempo della composizione, usato dagli idle.
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 400),
   );
+
+  /// Il viaggio del tratto, da 0 a 1. Sta separato da [_controller] perché la
+  /// curva si applichi **allo span del marker** e non a tutto l'intervallo 0..1
+  /// della composizione: un `CurvedAnimation` sul controller di prima
+  /// sposterebbe l'idle fuori dai suoi marker (`easeOutCubic(0.19)` non è più
+  /// il frame 0.19) e la fine del tratto cadrebbe su 0.78 invece che sul
+  /// marker, con la luna ferma a metà.
+  late final AnimationController _drive = AnimationController(
+    vsync: this,
+    duration: _transition,
+  );
+
+  /// Quello che `Lottie` legge: il tempo della composizione quando è fermo, il
+  /// viaggio del tratto quando sta cambiando tema.
+  late Animation<double> _frame;
 
   LottieComposition? _composition;
   bool _animating = false;
@@ -52,11 +79,13 @@ class _ThemeToggleState extends State<ThemeToggle>
   @override
   void initState() {
     super.initState();
+    _frame = _controller;
     _load();
   }
 
   @override
   void dispose() {
+    _drive.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -69,6 +98,10 @@ class _ThemeToggleState extends State<ThemeToggle>
       _controller.duration = composition.duration;
     });
     _playIdle();
+    if (kPerfProbe && kPerfTrack) {
+      composition.performanceTrackingEnabled = true;
+      Timer.periodic(const Duration(milliseconds: 1200), (_) => _onToggle());
+    }
   }
 
   Marker? _marker(String name) => _composition?.getMarker(name);
@@ -81,6 +114,7 @@ class _ThemeToggleState extends State<ThemeToggle>
 
   void _onToggle() {
     if (_animating) return;
+    PerfProbe.aziona();
     AppHaptics.selectionClick();
     final next = _isDark ? ThemeMode.light : ThemeMode.dark;
     final transition = _marker(next == ThemeMode.dark ? _toNight : _toDay);
@@ -89,13 +123,20 @@ class _ThemeToggleState extends State<ThemeToggle>
       return;
     }
     _animating = true;
-    _controller.animateTo(transition.end, duration: _transition).whenComplete(
-      () {
-        if (!mounted) return;
-        _animating = false;
-        _playIdle();
-      },
-    );
+    setState(() {
+      _frame = Tween<double>(
+        begin: _controller.value,
+        end: transition.end,
+      ).animate(CurvedAnimation(parent: _drive, curve: _curve));
+    });
+    _drive.forward(from: 0).whenComplete(() {
+      if (!mounted) return;
+      setState(() => _frame = _controller);
+      _animating = false;
+      _playIdle();
+      if (kPerfTrack) _composition?.performanceTracker.logRenderTimes();
+      PerfProbe.spegni();
+    });
     // Il tema segue l'avvio dell'icona invece di precederlo. Il timer non va
     // cancellato in `dispose`: scrive sullo store e non tocca il widget, quindi
     // un cambio tema richiesto e poi schermata chiusa deve comunque valere.
@@ -121,7 +162,7 @@ class _ThemeToggleState extends State<ThemeToggle>
                 child: Text(
                   'Tema scuro',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
@@ -141,14 +182,16 @@ class _ThemeToggleState extends State<ThemeToggle>
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: _onToggle,
-                    child: SizedBox(
-                      key: const Key('theme-toggle-animation'),
-                      width: 88,
-                      height: 48,
-                      child: Lottie(
-                        composition: composition,
-                        controller: _controller,
-                        fit: BoxFit.contain,
+                    child: RepaintBoundary(
+                      child: SizedBox(
+                        key: const Key('theme-toggle-animation'),
+                        width: 88,
+                        height: 48,
+                        child: Lottie(
+                          composition: composition,
+                          controller: _frame,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),

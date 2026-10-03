@@ -58,6 +58,33 @@
                 },
                 {
                     "type": "info",
+                    "title": "Il modulo in un istogramma",
+                    "content": [
+                        "Il modulo di un numero è la sua **distanza dallo zero**, quindi è sempre positivo o nullo.",
+                        "Nelle barre sotto ogni altezza è un valore assoluto: i numeri negativi dal grafico sono comparsi, ma con il segno tolto.",
+                        {
+                            "id": "mod-chart-bars",
+                            "box_type": "chart",
+                            "title": "Valori assoluti da 0 a 5",
+                            "payload": {
+                                "kind": "bar",
+                                "xLabel": "x",
+                                "yLabel": "|x|",
+                                "xLabels": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
+                                "series": [
+                                    {
+                                        "label": "|x|",
+                                        "color": "accent",
+                                        "values": [5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5]
+                                    }
+                                ]
+                            }
+                        },
+                        "Da $-5$ a $5$ le barre sono simmetriche: $-3$ e $3$ sono alla stessa distanza dallo zero."
+                    ]
+                },
+                {
+                    "type": "info",
                     "title": "Modulo ed Espressioni Letterali",
                     "content": [
                         "Quando dentro il modulo c'è un'espressione con l'incognita, il modulo dipende dal **segno dell'argomento**: se l'argomento è negativo, il modulo cambia segno.",
@@ -137,7 +164,35 @@
                     "type": "info",
                     "title": "Prova tu",
                     "content": [
-                        "Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione."
+                        "Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione.",
+                        {
+                            "id": "mod-chart-equation",
+                            "box_type": "chart",
+                            "title": "|x - 5| e 4x: dove si incontrano",
+                            "payload": {
+                                "kind": "function",
+                                "xMin": -2,
+                                "xMax": 10,
+                                "yMin": -5,
+                                "yMax": 10,
+                                "samples": 240,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "series": [
+                                    {
+                                        "label": "y = |x - 5|",
+                                        "color": "accent",
+                                        "expression": "abs(x - 5)"
+                                    },
+                                    {
+                                        "label": "y = 4x",
+                                        "color": "indigo",
+                                        "expression": "4 * x"
+                                    }
+                                ]
+                            }
+                        },
+                        "La curva $|x - 5|$ parte da $5$ sul asse $y$: il **vertice** del modulo è lì. Le due curve si incontrano in $x = \\frac{5}{3}$ e in $x = 5$, e solo $x = 5$ è accettata perché il modulo è sempre positivo."
                     ]
                 },
                 {

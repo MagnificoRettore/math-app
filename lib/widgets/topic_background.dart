@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_text.dart';
+
 class TopicBackground extends StatelessWidget {
   final String? image;
   final Color color;
@@ -76,7 +78,7 @@ class TopicHeader extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: AppText.headline,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                     color: Colors.white,
@@ -96,7 +98,7 @@ class TopicHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: AppText.bodyMedium,
                       color: Colors.white.withValues(alpha: 0.85),
                     ),
                   ),

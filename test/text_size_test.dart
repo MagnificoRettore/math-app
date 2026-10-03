@@ -7,6 +7,7 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/settings_store.dart';
 import 'package:math_app/haptics.dart';
+import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/math_text.dart';
 import 'package:math_app/widgets/notes_text.dart';
@@ -47,7 +48,7 @@ void main() {
     testWidgets('MathText segue il fattore di scala', (tester) async {
       await _pump(tester, 1.0, const MathText(r'Testo $x+1$'));
       final base = _bodyFontSize(tester);
-      expect(base, 16);
+      expect(base, AppText.titleSmall);
 
       await _pump(tester, 1.3, const MathText(r'Testo $x+1$'));
       expect(_bodyFontSize(tester), closeTo(base * 1.3, 0.01));
@@ -56,7 +57,7 @@ void main() {
     testWidgets('NotesText segue il fattore di scala', (tester) async {
       await _pump(tester, 1.0, const NotesText(' corpo'));
       final base = _bodyFontSize(tester);
-      expect(base, 17);
+      expect(base, AppText.docBody);
 
       await _pump(tester, 1.15, const NotesText(' corpo'));
       expect(_bodyFontSize(tester), closeTo(base * 1.15, 0.01));

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 
 /// Identità raccolta dal dialog dimostrativo di Google.
 class GoogleIdentity {
@@ -46,7 +47,7 @@ class GoogleButton extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: AppText.titleSmall,
                   fontWeight: FontWeight.w600,
                   color: c.textPrimary,
                 ),
@@ -76,7 +77,7 @@ Future<GoogleIdentity?> askGoogleIdentity(BuildContext context) async {
         children: [
           Text(
             'Accedi con un profilo demo, nessuna credenziale richiesta.',
-            style: TextStyle(fontSize: 13, color: c.textSecondary),
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
           ),
           const SizedBox(height: 12),
           TextField(

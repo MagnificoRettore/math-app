@@ -32,6 +32,7 @@ class MultifunctionBox {
     return switch (type) {
       BoxType.image => ImageBoxPayload.fromJson(data),
       BoxType.mathFormula => MathFormulaPayload.fromJson(data),
+      BoxType.chart => ChartBoxPayload.fromJson(data),
     };
   }
 

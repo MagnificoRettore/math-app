@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/progress_store.dart';
-import '../widgets/main_header.dart';
-import '../widgets/home_greeting.dart';
 import '../widgets/image_carousel.dart';
 import '../widgets/jump_back_in_section.dart';
+import '../widgets/main_header.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
-import '../widgets/profile_button.dart';
 import '../widgets/recommended_section.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
@@ -21,23 +19,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: kHeaderToolbarHeight,
-        titleSpacing: kHeaderHorizontalMargin,
-        centerTitle: false,
-        title: const Row(
-          children: [
-            ProfileButton(),
-            SizedBox(width: 12),
-            Expanded(child: HomeGreeting()),
-          ],
-        ),
-        // Le due righe del saluto riempiono la riga da sinistra: a destra ci
-        // sono la lente e le impostazioni, non una seconda copia del profilo
-        // che sta già a sinistra. La lente viene prima dell'icona di
-        // Personalizzazione perché cercare è l'azione più frequente.
-        actionsPadding: kHeaderActionsPadding,
+      appBar: MainHeaderAppBar(
+        title: const MainHeaderTitle(),
         actions: const [HeaderSearchButton(), HeaderCustomizationButton()],
       ),
       body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),

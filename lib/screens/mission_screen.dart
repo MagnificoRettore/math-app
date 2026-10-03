@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mission_hero.dart';
 
@@ -21,7 +22,7 @@ class MissionScreen extends StatelessWidget {
             Text(
               'Cosa facciamo',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.title,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -108,7 +109,7 @@ class _FeatureCard extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: AppText.titleSmall,
                     fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
@@ -117,7 +118,7 @@ class _FeatureCard extends StatelessWidget {
                 Text(
                   description,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppText.label,
                     height: 1.45,
                     color: c.textSecondary,
                   ),

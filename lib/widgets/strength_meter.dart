@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/auth_validators.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 
 /// Quattro segmenti che dicono quanto è robusta la password appena scritta.
 ///
@@ -46,7 +47,7 @@ class StrengthMeter extends StatelessWidget {
             label ?? '',
             textAlign: TextAlign.end,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppText.caption,
               fontWeight: FontWeight.w600,
               color: password.isEmpty ? c.textSecondary : color,
             ),

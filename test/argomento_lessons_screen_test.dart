@@ -33,7 +33,7 @@ void main() {
 
     expect(find.byType(ArgomentoLessonsScreen), findsOneWidget);
     expect(find.text('Equazioni di primo grado'), findsWidgets);
-    expect(find.text('1'), findsOneWidget);
+    // Il numero a sinistra è stato rimosso
     expect(find.text('Concetti e risoluzione guidata'), findsOneWidget);
     expect(find.text('5 min'), findsOneWidget);
     expect(find.text('Completata'), findsNothing);
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpWidget(host('high-school'));
     await tester.pump();
 
-    expect(find.text('Completata'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
   });
 
   testWidgets('Moduli mostra le lezioni Definizione e Modulo e Equazioni', (

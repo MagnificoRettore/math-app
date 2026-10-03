@@ -9,6 +9,7 @@ import '../models/level.dart';
 import '../models/progress.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/difficulty_badge.dart';
 import '../widgets/math_text.dart';
@@ -90,7 +91,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
         const SizedBox(width: 12),
         Text(
           '${widget.level.title} · ${widget.course.title} · ${widget.topic.title}',
-          style: TextStyle(fontSize: 13, color: c.textSecondary),
+          style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
         ),
       ],
     );
@@ -105,13 +106,13 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           Text(
             'Problema',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.bodyLarge,
               fontWeight: FontWeight.w700,
               color: c.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
-          MathText(widget.exercise.problem, fontSize: 17),
+          MathText(widget.exercise.problem, fontSize: AppText.titleMedium),
         ],
       ),
     );
@@ -126,7 +127,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           Text(
             'Formule chiave',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppText.bodyLarge,
               fontWeight: FontWeight.w700,
               color: c.textPrimary,
             ),
@@ -135,7 +136,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
           for (final formula in widget.exercise.formulas)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: MathText(formula, fontSize: 16),
+              child: MathText(formula, fontSize: AppText.titleSmall),
             ),
         ],
       ),
@@ -160,7 +161,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                   'Suggerimenti',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     color: c.textPrimary,
                   ),
                 ),
@@ -178,7 +179,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
             for (final hint in widget.exercise.hints)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: MathText(hint, fontSize: 14),
+                child: MathText(hint, fontSize: AppText.bodyMedium),
               ),
           ],
         ],
@@ -221,7 +222,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                         '${index + 1}',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontSize: AppText.label,
                           color: c.accent,
                         ),
                       ),
@@ -230,7 +231,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                     Expanded(
                       child: MathText(
                         step,
-                        fontSize: 15,
+                        fontSize: AppText.bodyLarge,
                         textAlign: TextAlign.left,
                       ),
                     ),
@@ -333,7 +334,7 @@ class _StatusButton extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppText.caption,
                 fontWeight: FontWeight.w600,
                 color: color,
               ),

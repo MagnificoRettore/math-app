@@ -129,8 +129,8 @@ void main() {
 
       final lezione = rettes.lessons.single;
       expect(lezione.title, 'Introduzione');
-      expect(lezione.steps, hasLength(1));
-      final step = lezione.steps.single;
+      expect(lezione.steps, hasLength(2));
+      final step = lezione.steps.first;
       expect(step.title, 'Definizione');
       expect(step.type, LessonStepType.info);
       final box = MultifunctionBox.fromJson(
@@ -160,14 +160,17 @@ void main() {
         .first;
     expect(lesson.id, 'eq1-intro');
     expect(lesson.minutes, 5);
-    expect(lesson.steps, hasLength(3));
+    expect(lesson.steps, hasLength(4));
     expect(lesson.steps[0].type, LessonStepType.info);
     expect(lesson.steps[1].type, LessonStepType.info);
-    expect(lesson.steps[2].type, LessonStepType.mcq);
-    expect(lesson.steps[2].options, hasLength(3));
-    expect(lesson.steps[2].correctIndex, 0);
-    expect(lesson.steps[2].explanation, isNotEmpty);
-    expect(lesson.steps[2].prompt, contains('3x - 1 = 5'));
+    expect(lesson.steps[1].content, contains('::box'));
+    expect(lesson.steps[2].type, LessonStepType.info);
+    expect(lesson.steps[2].title, 'L\'equazione come intersezione');
+    expect(lesson.steps[3].type, LessonStepType.mcq);
+    expect(lesson.steps[3].options, hasLength(3));
+    expect(lesson.steps[3].correctIndex, 0);
+    expect(lesson.steps[3].explanation, isNotEmpty);
+    expect(lesson.steps[3].prompt, contains('3x - 1 = 5'));
     expect(lesson.steps[0].prompt, isEmpty);
     expect(LessonStep.fromJson(const {'type': 'info'}).prompt, isEmpty);
   });
@@ -310,13 +313,13 @@ void main() {
   ) async {
     final lesson = await _apriPrimaLezione(tester);
     await _swipeNext(tester);
-    expect(find.text('2 di 3'), findsOneWidget);
+    expect(find.text('2 di 4'), findsOneWidget);
 
     await tester.drag(find.byType(PageView), const Offset(-500, 0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('3 di 3'), findsOneWidget);
+    expect(find.text('3 di 4'), findsOneWidget);
     expect(find.byType(Lottie), findsNothing);
     expect(
       ProgressStore.instance.isLessonCompleted('high-school', lesson.id),
@@ -443,7 +446,7 @@ void main() {
     expect(find.text('Definizione'), findsWidgets);
   });
 
-  test('la lezione Modulo e Equazioni con Modulo ha otto card', () {
+  test('la lezione Modulo e Equazioni con Modulo ha nove card', () {
     final moduli = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Moduli',
     );
@@ -452,10 +455,11 @@ void main() {
     );
     expect(lesson.title, 'Modulo e Equazioni con Modulo');
     expect(lesson.minutes, 6);
-    expect(lesson.steps, hasLength(8));
+    expect(lesson.steps, hasLength(9));
     expect(lesson.steps.map((s) => s.title), [
       'Che cos\'è il Modulo?',
       'Esempi pratici',
+      'Il modulo in un istogramma',
       'Modulo ed Espressioni Letterali',
       'Esempi pratici',
       'Equazioni con Modulo',
@@ -463,7 +467,7 @@ void main() {
       'Prova tu',
       'Verifica',
     ]);
-    for (final step in lesson.steps.take(7)) {
+    for (final step in lesson.steps.take(8)) {
       expect(step.type, LessonStepType.info);
       expect(step.content, isNotEmpty);
     }
@@ -478,14 +482,18 @@ void main() {
     expect(step1.split('::box').length - 1, 1);
     expect(step1, contains(r'\begin{cases}'));
     expect(step1, isNot(contains('Esempi pratici')));
-    expect(lesson.steps[4].content, isNot(contains('Esempio guidato')));
-    expect(lesson.steps[4].content, isNot(contains('Prova tu')));
-    expect(lesson.steps[5].content, contains('x - 5'));
+    expect(lesson.steps[5].content, isNot(contains('Esempio guidato')));
     expect(lesson.steps[5].content, isNot(contains('Prova tu')));
-    expect(lesson.steps[6].content, contains('4x'));
-    expect(lesson.steps[2].content, contains('x-3'));
-    expect(lesson.steps[2].content, isNot(contains('Esempi pratici')));
-    expect(lesson.steps[3].content, contains('x = 5'));
+    expect(lesson.steps[6].content, contains('x - 5'));
+    expect(lesson.steps[6].content, isNot(contains('Prova tu')));
+    expect(lesson.steps[7].content, contains('4x'));
+    expect(lesson.steps[3].content, contains('x-3'));
+    expect(lesson.steps[3].content, isNot(contains('Esempi pratici')));
+    expect(lesson.steps[4].content, contains('x = 5'));
+    // il nuovo step del grafico sta fra i due esempi e non porta testo
+    // copiato da un'altra card
+    expect(lesson.steps[2].content, contains('"box_type":"chart"'));
+    expect(lesson.steps[2].content, contains('"kind":"bar"'));
   });
 
   testWidgets('la toolbar compatta è allineata a Completa la lezione', (

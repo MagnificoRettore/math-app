@@ -55,7 +55,7 @@ void main() {
     test('un passo oltre la fine viene ricondotto all\'ultimo', () async {
       await salvaPausa('eq1-intro', step: 99);
 
-      expect(LessonResumeEngine.target(levelId: 'high-school')!.step, 2);
+      expect(LessonResumeEngine.target(levelId: 'high-school')!.step, 3);
     });
 
     test('il passo riparte da zero senza pausa', () async {
@@ -122,8 +122,8 @@ void main() {
     });
   });
 
-  // Argomento «Moduli»: Definizione da 1 card, Modulo e Equazioni da 8, in
-  // tutto 9.
+  // Argomento «Moduli»: Definizione da 1 card, Modulo e Equazioni da 9, in
+  // tutto 10.
   group('avanzamento dentro il topic', () {
     test('sul primo passo non c\'è ancora nessuna card superata', () async {
       await salvaPausa('mod-definition');
@@ -136,8 +136,8 @@ void main() {
       await salvaPausa('mod-equations-intro', step: 3);
 
       final target = LessonResumeEngine.target(levelId: 'high-school')!;
-      // 1 card di Definizione che la precede + 3 superate, su 9.
-      expect(LessonResumeEngine.topicProgress(target), closeTo(4 / 9, 0.001));
+      // 1 card di Definizione che la precede + 3 superate, su 10.
+      expect(LessonResumeEngine.topicProgress(target), closeTo(4 / 10, 0.001));
     });
 
     test('conta anche le lezioni precedenti mai aperte', () async {
@@ -153,7 +153,7 @@ void main() {
       final target = LessonResumeEngine.target(levelId: 'high-school')!;
       // Definizione non è stata fatta, ma il topic si affronta in ordine e
       // la sua card conta lo stesso.
-      expect(LessonResumeEngine.topicProgress(target), closeTo(1 / 9, 0.001));
+      expect(LessonResumeEngine.topicProgress(target), closeTo(1 / 10, 0.001));
     });
 
     test(
@@ -167,7 +167,10 @@ void main() {
 
         final target = LessonResumeEngine.target(levelId: 'high-school')!;
         expect(target.lesson.id, 'mod-equations-intro');
-        expect(LessonResumeEngine.topicProgress(target), closeTo(1 / 9, 0.001));
+        expect(
+          LessonResumeEngine.topicProgress(target),
+          closeTo(1 / 10, 0.001),
+        );
       },
     );
 
@@ -175,8 +178,8 @@ void main() {
       await salvaPausa('mod-equations-intro', step: 99);
 
       final target = LessonResumeEngine.target(levelId: 'high-school')!;
-      expect(target.step, 7);
-      expect(LessonResumeEngine.topicProgress(target), closeTo(8 / 9, 0.001));
+      expect(target.step, 8);
+      expect(LessonResumeEngine.topicProgress(target), closeTo(9 / 10, 0.001));
     });
   });
 }

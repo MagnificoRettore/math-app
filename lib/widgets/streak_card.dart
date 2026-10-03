@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/study_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 
 class StreakCard extends StatelessWidget {
@@ -47,7 +48,7 @@ class StreakCard extends StatelessWidget {
                         Text(
                           'Serie di ${store.currentStreak} ${store.currentStreak == 1 ? 'giorno' : 'giorni'}',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: AppText.titleSmall,
                             fontWeight: FontWeight.w700,
                             color: c.textPrimary,
                           ),
@@ -55,7 +56,7 @@ class StreakCard extends StatelessWidget {
                         Text(
                           'Record personale: ${store.bestStreak}',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppText.label,
                             color: c.textSecondary,
                           ),
                         ),
@@ -102,7 +103,7 @@ class StreakCard extends StatelessWidget {
                         child: Text(
                           'Obiettivi di oggi raggiunti!',
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppText.bodySmall,
                             fontWeight: FontWeight.w700,
                             color: c.easy,
                           ),
@@ -165,7 +166,7 @@ class _GoalBar extends StatelessWidget {
         Text(
           '$value/$max',
           style: TextStyle(
-            fontSize: 13,
+            fontSize: AppText.label,
             fontWeight: FontWeight.w600,
             color: c.textSecondary,
           ),

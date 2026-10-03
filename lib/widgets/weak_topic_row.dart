@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'progress_bar.dart';
 
@@ -46,7 +47,7 @@ class WeakTopicRow extends StatelessWidget {
             child: Text(
               '$rank',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppText.bodyMedium,
                 fontWeight: FontWeight.w700,
                 color: color,
               ),
@@ -72,7 +73,7 @@ class WeakTopicRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w600,
                   color: c.textPrimary,
                 ),
@@ -82,7 +83,10 @@ class WeakTopicRow extends StatelessWidget {
                 '${weakTopic.level.title} · ${weakTopic.course.title}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, color: c.textSecondary),
+                style: TextStyle(
+                  fontSize: AppText.caption,
+                  color: c.textSecondary,
+                ),
               ),
               const SizedBox(height: 8),
               ProgressBar(progress: ratio, height: 4, color: c.medium),
@@ -90,25 +94,27 @@ class WeakTopicRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        // La percentuale dice quanto dell'argomento è padroneggiato: è il
-        // numero che fa capire se il ripasso è una passeggiata o un capitolo.
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: c.medium.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '${(ratio * 100).round()}%',
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: c.medium,
+        if (ratio >= 1.0)
+          Icon(Icons.check_circle_rounded, size: 22, color: c.easy)
+        else ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: c.medium.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${(ratio * 100).round()}%',
+              style: TextStyle(
+                fontSize: AppText.micro,
+                fontWeight: FontWeight.w700,
+                color: c.medium,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 6),
-        Icon(Icons.chevron_right, color: c.textSecondary, size: 20),
+          const SizedBox(width: 6),
+          Icon(Icons.chevron_right, color: c.textSecondary, size: 20),
+        ],
       ],
     );
 

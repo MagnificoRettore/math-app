@@ -7,10 +7,10 @@ import '../models/course.dart';
 import '../models/level.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
-import '../widgets/profile_button.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/school_choice_sheet.dart';
 import '../widgets/topic_row.dart';
@@ -76,23 +76,7 @@ class _CourseScreenState extends State<CourseScreen> {
     final courses = level.courses;
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: kHeaderToolbarHeight,
-        titleSpacing: kHeaderHorizontalMargin,
-        // Il titolo occupa tutta la larghezza rimasta, e il `Center` dentro
-        // `ProfileButton` metterebbe l'avatar al centro di quella: lo stringo
-        // alla sua misura, così resta a filo del margine sinistro.
-        title: const SizedBox(
-          width: kProfileAvatarSize,
-          child: ProfileButton(),
-        ),
-        actionsPadding: kHeaderActionsPadding,
-        actions: const [
-          SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
-          HeaderSearchButton(),
-          HeaderCustomizationButton(),
-        ],
+      appBar: MainHeaderAppBar(
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(88),
           child: YearTabs(
@@ -101,6 +85,12 @@ class _CourseScreenState extends State<CourseScreen> {
             onSelected: _selectYear,
           ),
         ),
+        title: MainHeaderTitle(levelId: level.id),
+        actions: const [
+          SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
+          HeaderSearchButton(),
+          HeaderCustomizationButton(),
+        ],
       ),
       body: _buildPages(level, courses),
     );
@@ -147,7 +137,10 @@ class _CourseSectionsView extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
               course.subtitle,
-              style: TextStyle(fontSize: 14, color: c.textSecondary),
+              style: TextStyle(
+                fontSize: AppText.bodyMedium,
+                color: c.textSecondary,
+              ),
             ),
           ),
         Padding(
@@ -174,7 +167,7 @@ class _CourseSectionsView extends StatelessWidget {
                       Text(
                         'Tutti gli esercizi',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppText.titleSmall,
                           fontWeight: FontWeight.w600,
                           color: c.textPrimary,
                         ),
@@ -182,7 +175,10 @@ class _CourseSectionsView extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Tutti gli esercizi del corso',
-                        style: TextStyle(fontSize: 13, color: c.textSecondary),
+                        style: TextStyle(
+                          fontSize: AppText.label,
+                          color: c.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       ProgressBar(

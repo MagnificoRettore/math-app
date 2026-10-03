@@ -5,6 +5,7 @@ import '../data/weak_topic_engine.dart';
 import '../haptics.dart';
 import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/exercise_card.dart';
 import '../widgets/progress_bar.dart';
@@ -94,7 +95,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
     final c = AppColors.of(context);
     return Text(
       '${current.level.title} · ${current.course.title}',
-      style: TextStyle(fontSize: 13, color: c.textSecondary),
+      style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
     );
   }
 
@@ -115,7 +116,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
               Text(
                 'Progresso',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppText.bodyLarge,
                   fontWeight: FontWeight.w700,
                   color: c.textPrimary,
                 ),
@@ -124,7 +125,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
               Text(
                 toReview == 1 ? '1 da ripassare' : '$toReview da ripassare',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppText.label,
                   fontWeight: FontWeight.w600,
                   color: c.medium,
                 ),
@@ -140,7 +141,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
           const SizedBox(height: 10),
           Text(
             '$mastered di $total assimilati',
-            style: TextStyle(fontSize: 13, color: c.textSecondary),
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
           ),
         ],
       ),
@@ -166,7 +167,7 @@ class _AllMasteredView extends StatelessWidget {
               'Punto debole risolto!',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 17,
+                fontSize: AppText.titleMedium,
                 fontWeight: FontWeight.w700,
                 color: c.textPrimary,
               ),
@@ -175,7 +176,7 @@ class _AllMasteredView extends StatelessWidget {
             Text(
               'Tutti gli esercizi di questo argomento sono assimilati.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
           ],
         ),

@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 
 import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/theme_toggle.dart';
+
+const _hapticsSwitch = Key('haptics-switch');
 
 /// Personalizzazione: tema e vibrazioni.
 ///
@@ -51,7 +54,7 @@ class _Label extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: AppText.label,
           fontWeight: FontWeight.w600,
           color: c.textSecondary,
         ),
@@ -66,7 +69,6 @@ class _HapticsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final enabled = SettingsStore.instance.hapticsEnabled;
     return AppCard(
       child: Row(
         children: [
@@ -79,7 +81,7 @@ class _HapticsCard extends StatelessWidget {
                 Text(
                   'Vibrazioni',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
@@ -87,20 +89,32 @@ class _HapticsCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Una scossa breve quando la risposta è giusta o sbagliata.',
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+                  style: TextStyle(
+                    fontSize: AppText.label,
+                    color: c.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
-          Switch(
-            key: const Key('haptics-switch'),
-            value: enabled,
-            activeThumbColor: c.accent,
-            onChanged: (value) {
-              // Il tasto che spegne le vibrazioni vibra comunque: è l'unico
-              // modo di sentire che l'opzione è stata ricevuta.
-              HapticFeedback.selectionClick();
-              SettingsStore.instance.setHapticsEnabled(value);
+          // L'interruttore si ascolta da sé: la card è `const` nella lista della
+          // pagina, quindi Flutter la salta quando il padre si ricostruisce con
+          // la stessa istanza canonicizzata, e la notifica del padre non basta
+          // a girare lo switch.
+          ListenableBuilder(
+            listenable: SettingsStore.instance,
+            builder: (context, _) {
+              return Switch(
+                key: _hapticsSwitch,
+                value: SettingsStore.instance.hapticsEnabled,
+                activeThumbColor: c.accent,
+                onChanged: (value) {
+                  // Il tasto che spegne le vibrazioni vibra comunque: è l'unico
+                  // modo di sentire che l'opzione è stata ricevuta.
+                  HapticFeedback.selectionClick();
+                  SettingsStore.instance.setHapticsEnabled(value);
+                },
+              );
             },
           ),
         ],

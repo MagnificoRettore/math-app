@@ -27,6 +27,9 @@ Future<void> _pumpCustomization(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 100));
 }
 
+Switch _switch(WidgetTester tester) =>
+    tester.widget<Switch>(find.byKey(_hapticsSwitch));
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -58,11 +61,15 @@ void main() {
   testWidgets('l\'interruttore delle vibrazioni viene salvato', (tester) async {
     await _pumpCustomization(tester);
     expect(SettingsStore.instance.hapticsEnabled, isTrue);
+    expect(_switch(tester).value, isTrue);
 
     await tester.tap(find.byKey(_hapticsSwitch));
     await tester.pumpAndSettle();
 
     expect(SettingsStore.instance.hapticsEnabled, isFalse);
+    // Lo switch deve seguire lo store da solo: il tema non è stato toccato e
+    // non deve servire a farlo girare.
+    expect(_switch(tester).value, isFalse);
     await SettingsStore.instance.reload();
     expect(SettingsStore.instance.hapticsEnabled, isFalse);
   });

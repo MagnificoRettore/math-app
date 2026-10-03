@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../haptics.dart';
 import '../models/practice_exercise.dart';
+import '../theme/app_text.dart';
 import 'math_text.dart';
 import 'mcq_option_tile.dart';
 import 'prompt_view.dart';
@@ -103,10 +104,13 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
         key: ValueKey('exercise_$_current'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PromptView(prompt: exercise.prompt, fontSize: 18 * scale),
+          PromptView(
+            prompt: exercise.prompt,
+            fontSize: AppText.titleMedium * scale,
+          ),
           if (exercise.text.isNotEmpty) ...[
             const SizedBox(height: 10),
-            MathText(exercise.text, fontSize: 15 * scale),
+            MathText(exercise.text, fontSize: AppText.bodyLarge * scale),
           ],
           const SizedBox(height: 16),
           for (var i = 0; i < exercise.options.length; i++)

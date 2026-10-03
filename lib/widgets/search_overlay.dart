@@ -7,6 +7,7 @@ import '../data/search_index.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import 'app_card.dart';
 
 /// Cosa vede la ricerca: argomenti e lezioni, per titolo.
@@ -249,7 +250,7 @@ class _ResultCard extends StatelessWidget {
           Text(
             titolo,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: AppText.titleSmall,
               fontWeight: FontWeight.w700,
               color: c.textPrimary,
             ),
@@ -258,14 +259,17 @@ class _ResultCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               contesto,
-              style: TextStyle(fontSize: 13, color: c.textSecondary),
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
           ],
           if (dettaglio.isNotEmpty) ...[
             const SizedBox(height: 2),
             Text(
               dettaglio,
-              style: TextStyle(fontSize: 12, color: c.textSecondary),
+              style: TextStyle(
+                fontSize: AppText.caption,
+                color: c.textSecondary,
+              ),
             ),
           ],
         ],
@@ -318,7 +322,7 @@ class _TipoBadge extends StatelessWidget {
         tipo.label,
         style: TextStyle(
           color: color,
-          fontSize: 12,
+          fontSize: AppText.caption,
           fontWeight: FontWeight.w700,
         ),
       ),

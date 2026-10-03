@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text.dart';
 import '../widgets/google_button.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
@@ -23,7 +24,7 @@ class WelcomeScreen extends StatelessWidget {
             Text(
               'Crea il tuo profilo',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: AppText.hero,
                 fontWeight: FontWeight.w800,
                 color: c.textPrimary,
               ),
@@ -33,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
               'Raccontaci quale scuola frequenti e ti proponiamo le lezioni '
               'guidate e gli esercizi più adatti a te.',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: AppText.bodyLarge,
                 color: c.textSecondary,
                 height: 1.4,
               ),
@@ -54,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                 minimumSize: const Size.fromHeight(52),
                 backgroundColor: c.accent,
                 textStyle: const TextStyle(
-                  fontSize: 16,
+                  fontSize: AppText.titleSmall,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -69,7 +70,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Text(
                   'Hai già un account? Accedi',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     color: c.accent,
                     fontWeight: FontWeight.w600,
                   ),
@@ -84,7 +85,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Text(
                   'Scopri come ospite',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppText.bodyLarge,
                     color: c.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -96,7 +97,10 @@ class WelcomeScreen extends StatelessWidget {
               child: Text(
                 'Il tuo profilo è salvato solo su questo dispositivo.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: c.textSecondary),
+                style: TextStyle(
+                  fontSize: AppText.caption,
+                  color: c.textSecondary,
+                ),
               ),
             ),
           ],
@@ -155,7 +159,7 @@ class _WelcomeHero extends StatelessWidget {
             child: Text(
               'Math App\nStudia con noi',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: AppText.title,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
                 height: 1.2,
