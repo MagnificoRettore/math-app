@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
 
@@ -132,14 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _next,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                    backgroundColor: c.accent,
-                    textStyle: const TextStyle(
-                      fontSize: AppText.titleSmall,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  style: AppTheme.wideButton,
                   child: Text(isLast ? 'Inizia' : 'Avanti'),
                 ),
               ),

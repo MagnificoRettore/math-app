@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/google_button.dart';
 import 'login_screen.dart';
@@ -51,14 +52,7 @@ class WelcomeScreen extends StatelessWidget {
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RegistrationScreen()),
               ),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                backgroundColor: c.accent,
-                textStyle: const TextStyle(
-                  fontSize: AppText.titleSmall,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              style: AppTheme.wideButton,
               child: const Text('Registrati con email'),
             ),
             const SizedBox(height: 16),

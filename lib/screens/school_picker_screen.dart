@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/school_level_tile.dart';
 
@@ -78,14 +79,7 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
             const SizedBox(height: 8),
             FilledButton(
               onPressed: _selectedId.isEmpty ? null : _save,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                backgroundColor: c.accent,
-                textStyle: const TextStyle(
-                  fontSize: AppText.titleSmall,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              style: AppTheme.wideButton,
               child: Text(onboarding ? 'Crea il mio profilo' : 'Salva'),
             ),
           ],

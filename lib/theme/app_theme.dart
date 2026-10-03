@@ -20,6 +20,36 @@ class AppTheme {
     curve: Curves.easeOutCubic,
   );
 
+  /// Il bottone principale a tutta riga delle schermate di accesso, profilo e
+  /// onboarding. Non è il `filledButtonTheme`: `Size.fromHeight` allarga a
+  /// tutta riga, e «Completa la lezione», «Riprendi» o il dialog di Google non
+  /// lo sono. Il colore è il `primary` del tema, cioè `accent`.
+  static final ButtonStyle wideButton = FilledButton.styleFrom(
+    minimumSize: const Size.fromHeight(52),
+    textStyle: const TextStyle(
+      fontSize: AppText.titleSmall,
+      fontWeight: FontWeight.w600,
+    ),
+  );
+
+  /// La base dei campi dei form: riquadro a 14, bordo e testi del tema. Non è
+  /// l'`inputDecorationTheme` perché i campi del dialog di Google restano
+  /// sottolineati; ogni campo aggiunge etichetta e icone con `copyWith`.
+  static InputDecoration fieldDecoration(AppPalette c, {required Color fill}) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: c.border),
+    );
+    return InputDecoration(
+      filled: true,
+      fillColor: fill,
+      labelStyle: TextStyle(color: c.textSecondary),
+      helperStyle: TextStyle(fontSize: AppText.caption, color: c.textSecondary),
+      border: border,
+      enabledBorder: border,
+    );
+  }
+
   static final ThemeData light = _build(Brightness.light, AppPalette.light);
   static final ThemeData dark = _build(Brightness.dark, AppPalette.dark);
 

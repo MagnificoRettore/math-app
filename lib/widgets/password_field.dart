@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 /// Campo password con l'occhio che mostra e nasconde.
 ///
@@ -47,11 +48,8 @@ class _PasswordFieldState extends State<PasswordField> {
       validator: widget.validator,
       autofillHints: widget.autofillHints,
       autovalidateMode: widget.autovalidateMode,
-      decoration: InputDecoration(
+      decoration: AppTheme.fieldDecoration(c, fill: c.surface).copyWith(
         labelText: widget.label,
-        filled: true,
-        fillColor: c.surface,
-        labelStyle: TextStyle(color: c.textSecondary),
         suffixIcon: IconButton(
           tooltip: _hidden ? 'Mostra la password' : 'Nascondi la password',
           icon: Icon(
@@ -59,14 +57,6 @@ class _PasswordFieldState extends State<PasswordField> {
             color: c.textSecondary,
           ),
           onPressed: () => setState(() => _hidden = !_hidden),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
         ),
       ),
     );

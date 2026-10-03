@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/auth_store.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/google_button.dart';
@@ -74,24 +75,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       textInputAction: TextInputAction.next,
                       autocorrect: false,
                       autofillHints: const [AutofillHints.username],
-                      decoration: InputDecoration(
-                        labelText: 'Email o ID account',
-                        prefixIcon: Icon(
-                          Icons.person_outline,
-                          color: c.textSecondary,
-                        ),
-                        filled: true,
-                        fillColor: c.background,
-                        labelStyle: TextStyle(color: c.textSecondary),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: c.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: c.border),
-                        ),
-                      ),
+                      decoration:
+                          AppTheme.fieldDecoration(
+                            c,
+                            fill: c.background,
+                          ).copyWith(
+                            labelText: 'Email o ID account',
+                            prefixIcon: Icon(
+                              Icons.person_outline,
+                              color: c.textSecondary,
+                            ),
+                          ),
                       validator: (value) => (value?.trim() ?? '').isEmpty
                           ? 'Scrivi il tuo ID account o la tua email'
                           : null,
@@ -114,14 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: _busy ? null : _submit,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: c.accent,
-                        textStyle: const TextStyle(
-                          fontSize: AppText.titleSmall,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      style: AppTheme.wideButton,
                       child: _busy
                           ? const SizedBox(
                               width: 22,

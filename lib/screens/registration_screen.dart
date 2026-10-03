@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/auth_validators.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
@@ -155,14 +156,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _busy ? null : _submit,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                backgroundColor: c.accent,
-                textStyle: const TextStyle(
-                  fontSize: AppText.titleSmall,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              style: AppTheme.wideButton,
               child: _busy
                   ? const SizedBox(
                       width: 22,
@@ -233,27 +227,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       autofillHints: autofillHints,
       onChanged: onChanged,
       validator: validator,
-      decoration: InputDecoration(
+      decoration: AppTheme.fieldDecoration(c, fill: c.surface).copyWith(
         labelText: label,
         helperText: helperText,
-        helperStyle: TextStyle(
-          fontSize: AppText.caption,
-          color: c.textSecondary,
-        ),
         prefixIcon: prefixIcon == null
             ? null
             : Icon(prefixIcon, color: c.textSecondary),
-        filled: true,
-        fillColor: c.surface,
-        labelStyle: TextStyle(color: c.textSecondary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
       ),
     );
   }

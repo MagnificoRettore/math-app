@@ -6,6 +6,7 @@ import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/avatar_picker.dart';
@@ -96,14 +97,7 @@ class _GuestProfile extends StatelessWidget {
           onPressed: () =>
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            backgroundColor: c.accent,
-            textStyle: const TextStyle(
-              fontSize: AppText.titleSmall,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          style: AppTheme.wideButton,
           child: const Text('Accedi'),
         ),
         const SizedBox(height: 12),
@@ -312,14 +306,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 FilledButton(
                   key: const Key('profile-save'),
                   onPressed: _saving || !_dirty ? null : _save,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                    backgroundColor: c.accent,
-                    textStyle: const TextStyle(
-                      fontSize: AppText.titleSmall,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  style: AppTheme.wideButton,
                   child: _saving
                       ? const SizedBox(
                           width: 22,
@@ -402,25 +389,10 @@ class _ProfileContentState extends State<_ProfileContent> {
       autocorrect: autocorrect,
       onChanged: onChanged,
       validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        helperText: helperText,
-        helperStyle: TextStyle(
-          fontSize: AppText.caption,
-          color: c.textSecondary,
-        ),
-        filled: true,
-        fillColor: c.background,
-        labelStyle: TextStyle(color: c.textSecondary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-      ),
+      decoration: AppTheme.fieldDecoration(
+        c,
+        fill: c.background,
+      ).copyWith(labelText: label, helperText: helperText),
     );
   }
 
@@ -528,24 +500,9 @@ class _ReadOnlyField extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return InputDecorator(
-      decoration: InputDecoration(
+      decoration: AppTheme.fieldDecoration(c, fill: c.background).copyWith(
         labelText: label,
         helperText: 'Identifica l’account, non si modifica',
-        helperStyle: TextStyle(
-          fontSize: AppText.caption,
-          color: c.textSecondary,
-        ),
-        filled: true,
-        fillColor: c.background,
-        labelStyle: TextStyle(color: c.textSecondary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c.border),
-        ),
       ),
       child: Text(
         value,
