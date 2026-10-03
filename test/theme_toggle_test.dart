@@ -20,7 +20,10 @@ const _toNightEnd = 0.4;
 
 /// Poco oltre la durata del tratto di transizione, per non campionare sul
 /// confine.
-const _settled = Duration(milliseconds: 2100);
+const _settled = Duration(milliseconds: 600);
+
+/// Ritardo con cui il tema segue l'avvio dell'animazione (`_onToggle`).
+const _themeChangeDelay = Duration(milliseconds: 100);
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -58,37 +61,57 @@ void main() {
     await _pumpCustomization(tester);
 
     await tester.tap(find.byKey(_toggle));
-    await tester.pump();
+    await tester.pump(_themeChangeDelay);
     expect(SettingsStore.instance.themeMode, ThemeMode.dark);
 
     await tester.pump(_settled);
     expect(_frame(tester), inInclusiveRange(_nightIdle[0], _nightIdle[1]));
 
     await tester.tap(find.byKey(_toggle));
-    await tester.pump();
+    await tester.pump(_themeChangeDelay);
     expect(SettingsStore.instance.themeMode, ThemeMode.light);
 
     await tester.pump(_settled);
     expect(_frame(tester), inInclusiveRange(_dayIdle[0], _dayIdle[1]));
   });
 
-  testWidgets('il tratto di transizione dura 2s, non la durata del marker', (
+  testWidgets('l\'animazione parte prima del cambio tema, che la segue di 100ms', (
+    tester,
+  ) async {
+    await _pumpCustomization(tester);
+    final start = _frame(tester);
+
+    await tester.tap(find.byKey(_toggle));
+    // Senza questa pump il controller non parte e il primo `pump` se ne va:
+    // il ticker prende l'avvio al primo frame dopo il tap.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // L'icona è già in viaggio mentre il tema è ancora quello di partenza.
+    expect(_frame(tester), greaterThan(start));
+    expect(SettingsStore.instance.themeMode, ThemeMode.light);
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(SettingsStore.instance.themeMode, ThemeMode.dark);
+  });
+
+  testWidgets('il tratto di transizione dura 500ms, non la durata del marker', (
     tester,
   ) async {
     await _pumpCustomization(tester);
 
-    // «Day to Night» al tempo nativo dura 1000ms: a metà del tratto da 2s
+    // «Day to Night» al tempo nativo dura 1000ms: a metà del tratto da 500ms
     // l'animazione deve essere ancora in viaggio, non già arrivata alla fine.
     await tester.tap(find.byKey(_toggle));
     // Senza questa pump il controller non parte e il primo `pump` se ne va:
     // il ticker prende l'avvio al primo frame dopo il tap.
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 250));
     final mid = _frame(tester);
     expect(mid, greaterThan(_dayIdle[1]));
     expect(mid, lessThan(_toNightEnd));
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 250));
     await tester.pump(const Duration(milliseconds: 100));
     expect(_frame(tester), inInclusiveRange(_nightIdle[0], _nightIdle[1]));
   });
@@ -97,7 +120,7 @@ void main() {
     await _pumpCustomization(tester);
 
     await tester.tap(find.byKey(_toggle));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(_themeChangeDelay);
     await tester.tap(find.byKey(_toggle));
     await tester.pump(_settled);
 

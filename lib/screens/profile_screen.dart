@@ -242,44 +242,6 @@ class _ProfileContentState extends State<_ProfileContent> {
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            _AuthChip(
-              label: user.authMethod == AuthMethod.google ? 'Google' : 'Email',
-              icon: user.authMethod == AuthMethod.google
-                  ? Icons.g_mobiledata
-                  : Icons.alternate_email,
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: levelColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    level == null ? Icons.help_outline : _iconFor(level.icon),
-                    size: 16,
-                    color: levelColor,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    level?.title ?? 'Scuola non impostata',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: levelColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
         const SizedBox(height: 20),
         AppCard(
           child: Form(
@@ -544,19 +506,6 @@ class _ProfileContentState extends State<_ProfileContent> {
       );
   }
 
-  IconData _iconFor(String name) {
-    switch (name) {
-      case 'school':
-        return Icons.school_outlined;
-      case 'account_balance':
-        return Icons.account_balance_outlined;
-      case 'menu_book':
-        return Icons.menu_book_outlined;
-      default:
-        return Icons.category_outlined;
-    }
-  }
-
   Color _colorFor(AppPalette c, String name) {
     switch (name) {
       case 'school':
@@ -606,36 +555,4 @@ class _ReadOnlyField extends StatelessWidget {
   }
 }
 
-class _AuthChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
 
-  const _AuthChip({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: c.accentSoft,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: c.accent),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: c.accent,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

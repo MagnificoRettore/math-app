@@ -6,12 +6,13 @@ class AppTheme {
   /// Durata e curva del passaggio fra tema chiaro e tema scuro.
   ///
   /// Flutter di default anima il tema con 200ms lineari, che si leggono come un
-  /// lampo. Qui il passaggio dura 2s con easing emphasized, così i colori sono
-  /// visibili mentre viaggiano. I 2s sono gli stessi dell'animazione sole/luna
-  /// del toggle (`ThemeToggle._transition`): i due viaggi sono lunghi uguali,
-  /// quindi nessuno finisce prima e resta protagonista da solo.
+  /// lampo. Qui il passaggio dura 400ms con easing emphasized, così i colori sono
+  /// visibili mentre viaggiano senza rallentare il cambio. Sono i 500ms
+  /// dell'animazione sole/luna (`ThemeToggle._transition`) meno i 100ms di
+  /// ritardo con cui il tema si cambia: i colori partono quando l'icona è già in
+  /// viaggio e arrivano con lei.
   static const AnimationStyle transitionStyle = AnimationStyle(
-    duration: Duration(seconds: 2),
+    duration: Duration(milliseconds: 400),
     curve: Curves.easeInOutCubicEmphasized,
   );
 

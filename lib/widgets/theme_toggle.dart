@@ -10,8 +10,8 @@ import 'app_card.dart';
 
 /// Card «Tema scuro» con l'animazione sole/luna.
 ///
-/// Cambia tema all'inizio dell'animazione, non a metà, e la transizione dei
-/// colori la segue per gli stessi 2s (`AppTheme.transitionStyle`).
+/// L'animazione parte sul tap e il tema cambia 100ms dopo, così l'icona è già in
+/// viaggio quando i colori cominciano a Interpolare (`AppTheme.transitionStyle`).
 class ThemeToggle extends StatefulWidget {
   const ThemeToggle({super.key});
 
@@ -31,10 +31,13 @@ class _ThemeToggleState extends State<ThemeToggle>
   /// Durata del tratto sole/luna del cambio tema.
   ///
   /// I marker durano 1000ms («Day to Night») e 1333ms («Night to Day»): senza
-  /// un override ogni direzione avrebbe una velocità diversa. Fissare 2s rende
-  /// le due uguali e allinea i colori, che viaggiano per
-  /// `AppTheme.transitionStyle`.
-  static const _transition = Duration(seconds: 2);
+  /// un override ogni direzione avrebbe una velocità diversa, e diversa da
+  /// quella dei colori. Fissare 500ms rende le due uguali e le accorcia.
+  static const _transition = Duration(milliseconds: 500);
+
+  /// Quanto l'icona parte prima del tema. Con i colori a 400ms
+  /// (`AppTheme.transitionStyle`) i due viaggi finiscono insieme, a 500ms.
+  static const _themeChangeDelay = Duration(milliseconds: 100);
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -80,9 +83,11 @@ class _ThemeToggleState extends State<ThemeToggle>
     if (_animating) return;
     AppHaptics.selectionClick();
     final next = _isDark ? ThemeMode.light : ThemeMode.dark;
-    unawaited(SettingsStore.instance.setThemeMode(next));
     final transition = _marker(next == ThemeMode.dark ? _toNight : _toDay);
-    if (transition == null) return;
+    if (transition == null) {
+      unawaited(SettingsStore.instance.setThemeMode(next));
+      return;
+    }
     _animating = true;
     _controller.animateTo(transition.end, duration: _transition).whenComplete(
       () {
@@ -91,6 +96,12 @@ class _ThemeToggleState extends State<ThemeToggle>
         _playIdle();
       },
     );
+    // Il tema segue l'avvio dell'icona invece di precederlo. Il timer non va
+    // cancellato in `dispose`: scrive sullo store e non tocca il widget, quindi
+    // un cambio tema richiesto e poi schermata chiusa deve comunque valere.
+    Timer(_themeChangeDelay, () {
+      unawaited(SettingsStore.instance.setThemeMode(next));
+    });
   }
 
   @override
