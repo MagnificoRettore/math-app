@@ -13,6 +13,18 @@ import '../theme/topic_style.dart';
 import 'app_card.dart';
 import 'topic_background.dart';
 
+/// Margine orizzontale della pagina che ospita il carosello (il padding della
+/// lista della Home): la striscia lo scavalca per prendersi tutto lo schermo e
+/// lo rimette come padding interno, così la prima card resta a filo del testo.
+const double _pageMargin = 20;
+
+/// Spazio fra due card.
+const double _gap = 12;
+
+/// Quante card stanno in larghezza: due intere e un pezzo della terza, che dice
+/// che la striscia si scorre.
+const double _visibleCards = 2.2;
+
 /// Il carosello degli argomenti in Home.
 ///
 /// Con la scuola nel profilo mostra tutti gli argomenti di quella scuola, in
@@ -20,6 +32,9 @@ import 'topic_background.dart';
 /// che hanno argomenti, così il carosello non è mai vuoto. Se non c'è niente da
 /// mostrare (una scuola ancora senza argomenti) la sezione sparisce, e con lei
 /// lo spazio sotto, che per questo sta dentro e non nella lista della Home.
+///
+/// Le card sono quadrate e se ne vedono circa due: è una lista orizzontale, non
+/// un `PageView`, che aggancerebbe e centrerebbe una card per volta.
 class ArgomentoCarousel extends StatefulWidget {
   const ArgomentoCarousel({super.key});
 
@@ -28,23 +43,9 @@ class ArgomentoCarousel extends StatefulWidget {
 }
 
 class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
-  /// Altezza fissa della striscia, come quella delle foto che sostituisce.
-  static const double _height = 180;
-
-  late final PageController _controller = PageController(
-    viewportFraction: 0.85,
-  );
-  int _index = 0;
-
   /// L'anno dell'ospite si estrae una volta: a ogni rebuild cambierebbe slide
   /// sotto il dito.
   late final (String, String)? _guestYear = _randomYear();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   (String, String)? _randomYear() {
     final years = {
@@ -80,7 +81,7 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
     );
   }
 
-  Widget _slide(Argomento argomento, int index) {
+  Widget _card(Argomento argomento, double side) {
     final c = AppColors.of(context);
     final color = topicColor(c, argomento.icon);
     final year = ContentRepository.instance
@@ -95,89 +96,71 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
       count == 1 ? '1 lezione' : '$count lezioni',
     ].join(' · ');
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final page = _controller.hasClients
-            ? (_controller.page ?? _index.toDouble())
-            : _index.toDouble();
-        final dist = (index - page).clamp(-1.0, 1.0);
-        // La slide attiva sta a scala 1 e piena, le vicine rientrano e si
-        // spengono: è la profondità del carosello, non una dissolvenza a caso.
-        final scale = 1 - 0.05 * dist.abs();
-        final opacity = 1 - 0.4 * dist.abs();
-        return Opacity(
-          opacity: opacity,
-          child: Transform.scale(scale: scale, child: child),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(kCardRadius),
-            boxShadow: [
-              BoxShadow(
-                color: c.shadow,
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(kCardRadius),
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                key: ValueKey('carousel-${argomento.topicId}'),
-                onTap: () => _open(argomento),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    TopicBackground(image: null, color: color),
-                    // Sopra i pallini, che stanno a 10 dal fondo.
-                    Positioned(
-                      left: 18,
-                      right: 18,
-                      bottom: 28,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            argomento.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: AppText.headline,
-                              fontWeight: FontWeight.w700,
-                              height: 1.15,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black45,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
+    return SizedBox.square(
+      dimension: side,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kCardRadius),
+          boxShadow: [
+            BoxShadow(
+              color: c.shadow,
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(kCardRadius),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: ValueKey('carousel-${argomento.topicId}'),
+              onTap: () => _open(argomento),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  TopicBackground(image: null, color: color),
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          argomento.title,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: AppText.titleLarge,
+                            fontWeight: FontWeight.w700,
+                            height: 1.15,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black45,
+                                blurRadius: 8,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            details,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: AppText.label,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          details,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppText.labelSmall,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -195,51 +178,29 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
       builder: (context, _) {
         final argomenti = _argomenti();
         if (argomenti.isEmpty) return const SizedBox.shrink();
-        final selected = _index.clamp(0, argomenti.length - 1);
+        final screen = MediaQuery.sizeOf(context).width;
+        final side =
+            (screen - _pageMargin - _gap * (_visibleCards.ceil() - 1)) /
+            _visibleCards;
         return Padding(
           padding: const EdgeInsets.only(bottom: 24),
+          // La lista della Home dà 20 di margine per lato: la striscia li
+          // scavalca e prende tutto lo schermo, così le card scorrono fino al
+          // bordo invece di sparire a 20 px da esso.
           child: SizedBox(
-            height: _height,
-            width: double.infinity,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                ClipRect(
-                  child: SizedBox.expand(
-                    child: PageView.builder(
-                      controller: _controller,
-                      itemCount: argomenti.length,
-                      padEnds: true,
-                      allowImplicitScrolling: true,
-                      onPageChanged: (i) => setState(() => _index = i),
-                      itemBuilder: (context, index) =>
-                          _slide(argomenti[index], index),
-                    ),
-                  ),
-                ),
-                // Con una slide sola i pallini non indicano niente.
-                if (argomenti.length > 1)
-                  Positioned(
-                    bottom: 10,
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < argomenti.length; i++)
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            width: i == selected ? 18 : 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: i == selected
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.55),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-              ],
+            height: side,
+            child: OverflowBox(
+              maxWidth: screen,
+              child: ListView.separated(
+                key: const Key('argomento-carousel-list'),
+                scrollDirection: Axis.horizontal,
+                // In basso l'ombra delle card: senza, il `ListView` la taglia.
+                clipBehavior: Clip.none,
+                padding: const EdgeInsets.symmetric(horizontal: _pageMargin),
+                itemCount: argomenti.length,
+                separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                itemBuilder: (context, index) => _card(argomenti[index], side),
+              ),
             ),
           ),
         );

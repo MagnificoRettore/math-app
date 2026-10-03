@@ -2,7 +2,13 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **461 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **462 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — Il carosello degli argomenti a card quadrate
+
+- Le card del carosello in Home sono **quadrate** e se ne vedono **circa due**: due intere e un pezzo della terza. Il `PageView` con una slide centrata, la profondità e i pallini lasciano il posto a un `ListView` orizzontale.
+- La striscia **prende tutta la larghezza dello schermo**: scavalca i 20 px di margine della Home con un `OverflowBox` e li rimette come padding, quindi la prima card resta a filo del testo e le altre scorrono fino al bordo.
+- Test: in `test/home_widget_test.dart` un caso nuovo fissa card quadrate, fra 2 e 3 card nella larghezza, striscia da bordo a bordo e prima card a 20. Suite a **462 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — In Home il carosello degli argomenti
 

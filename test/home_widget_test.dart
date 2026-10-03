@@ -294,8 +294,12 @@ void main() {
 
   group('carosello degli argomenti', () {
     final carousel = find.byType(ArgomentoCarousel);
-    Finder pallini() =>
-        find.descendant(of: carousel, matching: find.byType(AnimatedContainer));
+    final lista = find.byKey(const Key('argomento-carousel-list'));
+    Finder slide() => find.byWidgetPredicate(
+      (w) =>
+          w.key is ValueKey<String> &&
+          (w.key! as ValueKey<String>).value.startsWith('carousel-'),
+    );
     const titoli = ['Equazioni di primo grado', 'Moduli', 'Le rette'];
 
     testWidgets('con la scuola: tutti gli argomenti della scuola', (
@@ -304,25 +308,35 @@ void main() {
       await _registra();
       await _pumpHome(tester);
 
-      // La striscia resta alta 180, come quella delle foto.
-      expect(
-        tester
-            .getSize(
-              find.descendant(of: carousel, matching: find.byType(PageView)),
-            )
-            .height,
-        180,
-      );
-      // La Superiore ha un argomento per anno, tre in tutto: tre pallini.
-      expect(pallini(), findsNWidgets(3));
+      // La Superiore ha un argomento per anno, tre in tutto.
+      expect(slide(), findsNWidgets(3));
       expect(find.text('Equazioni di primo grado'), findsOneWidget);
+    });
+
+    testWidgets('le card sono quadrate e se ne vedono circa due', (
+      tester,
+    ) async {
+      await _registra();
+      await _pumpHome(tester);
+
+      final schermo = tester.getSize(find.byType(HomeScreen)).width;
+      final card = tester.getSize(slide().first);
+      expect(card.width, card.height);
+      // Due card intere e un pezzo della terza.
+      expect(schermo / card.width, inInclusiveRange(2, 3));
+      // La striscia scavalca i 20 di margine della pagina: va da bordo a bordo,
+      // e la prima card resta a filo del testo.
+      final striscia = tester.getRect(lista);
+      expect(striscia.left, 0);
+      expect(striscia.width, schermo);
+      expect(tester.getTopLeft(slide().first).dx, 20);
     });
 
     testWidgets('da ospite: gli argomenti di un anno a caso', (tester) async {
       await _pumpHome(tester);
 
-      // Ogni anno con argomenti ne ha uno: una slide, quindi niente pallini.
-      expect(pallini(), findsNothing);
+      // Ogni anno con argomenti ne ha uno: una card sola.
+      expect(slide(), findsOneWidget);
       final mostrati = titoli.where(
         (t) => find
             .descendant(of: carousel, matching: find.text(t))
@@ -338,10 +352,7 @@ void main() {
       await _registra(levelId: 'middle-school');
       await _pumpHome(tester);
 
-      expect(
-        find.descendant(of: carousel, matching: find.byType(PageView)),
-        findsNothing,
-      );
+      expect(lista, findsNothing);
     });
 
     testWidgets('il tap su una slide apre le lezioni dell\'argomento', (
