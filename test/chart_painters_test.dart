@@ -107,6 +107,30 @@ void main() {
     expect(painted, greaterThan(500));
   });
 
+  testWidgets(
+    'più valori che etichette: le barre senza etichetta non rompono',
+    (tester) async {
+      final painted = await tester.runAsync(
+        () => _pixeliDipinti(
+          BarChartPainter(
+            payload: ChartBoxPayload.fromJson({
+              'kind': 'bar',
+              'xLabels': ['a', 'b'],
+              'series': [
+                {
+                  'values': [1, 2, 3],
+                },
+              ],
+            }),
+            colors: [const Color(0xFF4F46E5)],
+            style: _style(),
+          ),
+        ),
+      );
+      expect(painted, greaterThan(500));
+    },
+  );
+
   testWidgets('una funzione senza dati non disegna niente', (tester) async {
     final painted = await tester.runAsync(
       () => _pixeliDipinti(

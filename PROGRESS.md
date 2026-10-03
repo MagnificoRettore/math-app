@@ -2,7 +2,7 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **456 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **457 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
 ## 2026-10-03 — L'header è una banda blu con gli angoli viola
 

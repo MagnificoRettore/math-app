@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-import '../_perf_probe.dart';
 import '../data/settings_store.dart';
 import '../haptics.dart';
 import '../theme/app_colors.dart';
@@ -67,6 +66,14 @@ class _ThemeToggleState extends State<ThemeToggle>
     duration: _transition,
   );
 
+  /// La curva del tratto, creata una volta sola: ogni `CurvedAnimation` si
+  /// registra come listener di [_drive], e una nuova a ogni tap si sommerebbe
+  /// alle precedenti senza essere mai liberata.
+  late final CurvedAnimation _curved = CurvedAnimation(
+    parent: _drive,
+    curve: _curve,
+  );
+
   /// Quello che `Lottie` legge: il tempo della composizione quando è fermo, il
   /// viaggio del tratto quando sta cambiando tema.
   late Animation<double> _frame;
@@ -85,6 +92,7 @@ class _ThemeToggleState extends State<ThemeToggle>
 
   @override
   void dispose() {
+    _curved.dispose();
     _drive.dispose();
     _controller.dispose();
     super.dispose();
@@ -98,10 +106,6 @@ class _ThemeToggleState extends State<ThemeToggle>
       _controller.duration = composition.duration;
     });
     _playIdle();
-    if (kPerfProbe && kPerfTrack) {
-      composition.performanceTrackingEnabled = true;
-      Timer.periodic(const Duration(milliseconds: 1200), (_) => _onToggle());
-    }
   }
 
   Marker? _marker(String name) => _composition?.getMarker(name);
@@ -114,7 +118,6 @@ class _ThemeToggleState extends State<ThemeToggle>
 
   void _onToggle() {
     if (_animating) return;
-    PerfProbe.aziona();
     AppHaptics.selectionClick();
     final next = _isDark ? ThemeMode.light : ThemeMode.dark;
     final transition = _marker(next == ThemeMode.dark ? _toNight : _toDay);
@@ -127,15 +130,13 @@ class _ThemeToggleState extends State<ThemeToggle>
       _frame = Tween<double>(
         begin: _controller.value,
         end: transition.end,
-      ).animate(CurvedAnimation(parent: _drive, curve: _curve));
+      ).animate(_curved);
     });
     _drive.forward(from: 0).whenComplete(() {
       if (!mounted) return;
       setState(() => _frame = _controller);
       _animating = false;
       _playIdle();
-      if (kPerfTrack) _composition?.performanceTracker.logRenderTimes();
-      PerfProbe.spegni();
     });
     // Il tema segue l'avvio dell'icona invece di precederlo. Il timer non va
     // cancellato in `dispose`: scrive sullo store e non tocca il widget, quindi

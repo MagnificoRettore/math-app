@@ -32,6 +32,10 @@ class ChartView extends StatelessWidget {
     final colors = _seriesColors(context);
     final textScale = textScaleFactorOf(context);
     final labels = _legendLabels(payload);
+    // Fuori dal builder animato: i campioni non cambiano fra un frame e l'altro.
+    final segments = payload.kind == ChartKind.bar
+        ? null
+        : LineChartPainter.segmentsOf(payload);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,7 +58,13 @@ class ChartView extends StatelessWidget {
                       '${payload.kind.label}${labels.length > 1 ? ': ${labels.join(', ')}' : ''}',
                   child: CustomPaint(
                     key: const Key('chart-canvas'),
-                    painter: _painterFor(payload, colors, style, progress),
+                    painter: _painterFor(
+                      payload,
+                      colors,
+                      style,
+                      progress,
+                      segments,
+                    ),
                     size: Size.infinite,
                   ),
                 );
@@ -82,6 +92,7 @@ class ChartView extends StatelessWidget {
     List<Color> colors,
     ChartStyle style,
     double progress,
+    List<List<List<ChartPoint>>>? segments,
   ) {
     return switch (payload.kind) {
       ChartKind.bar => BarChartPainter(
@@ -95,6 +106,7 @@ class ChartView extends StatelessWidget {
         colors: colors,
         style: style,
         progress: progress,
+        segments: segments,
       ),
     };
   }

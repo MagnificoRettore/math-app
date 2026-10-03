@@ -116,6 +116,7 @@ void _drawGrid(
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, Offset(frame.rect.left - 6 - tp.width, y - tp.height / 2));
+    tp.dispose();
   }
 }
 
@@ -160,6 +161,7 @@ void _drawAxisLabels(
         frame.rect.bottom + 12 * style.textScale,
       ),
     );
+    tp.dispose();
   }
   if (yLabel.isEmpty) return;
   final yTp = TextPainter(
@@ -171,6 +173,7 @@ void _drawAxisLabels(
   canvas.rotate(-math.pi / 2);
   yTp.paint(canvas, Offset(-yTp.width / 2, -yTp.height / 2));
   canvas.restore();
+  yTp.dispose();
 }
 
 Path _smoothPath(List<Offset> points) {
@@ -307,7 +310,7 @@ class BarChartPainter extends CustomPainter {
           Paint()..color = colors[s % colors.length],
         );
       }
-      if (labels.isNotEmpty && g % labelStep == 0) {
+      if (g < labels.length && g % labelStep == 0) {
         _drawTickLabel(
           canvas,
           labels[g],
@@ -353,6 +356,7 @@ class BarChartPainter extends CustomPainter {
       canvas,
       Offset(alignRight ? at.dx - tp.width : at.dx - tp.width / 2, at.dy + 6),
     );
+    tp.dispose();
   }
 
   @override
@@ -372,17 +376,23 @@ class LineChartPainter extends CustomPainter {
   final double progress;
   final bool fill;
 
+  /// I campioni di [segmentsOf], calcolati una volta da chi crea il painter:
+  /// il painter si ricrea a ogni frame dell'entrata, e ricampionare la funzione
+  /// ogni volta rifarebbe il parsing dell'espressione per ogni punto.
+  final List<List<List<ChartPoint>>>? segments;
+
   LineChartPainter({
     required this.payload,
     required this.colors,
     required this.style,
     this.progress = 1,
     this.fill = true,
+    this.segments,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final segments = _segments(size);
+    final segments = this.segments ?? segmentsOf(payload);
     if (segments.isEmpty) return;
     final frame = _frameOf(
       [
@@ -460,7 +470,7 @@ class LineChartPainter extends CustomPainter {
 
   /// Punti e curve di ogni serie, coi buchi lasciati fuori: un segmento per
   /// tratto continuo, quindi il painter può spezzare la penna.
-  List<List<List<ChartPoint>>> _segments(Size size) {
+  static List<List<List<ChartPoint>>> segmentsOf(ChartBoxPayload payload) {
     final out = <List<List<ChartPoint>>>[];
     for (final s in payload.series) {
       if (s.points.isNotEmpty) {
@@ -500,9 +510,11 @@ class LineChartPainter extends CustomPainter {
       )..layout();
       if (x - tp.width / 2 < frame.rect.left - 1 ||
           x + tp.width / 2 > frame.rect.right + 1) {
+        tp.dispose();
         continue;
       }
       tp.paint(canvas, Offset(x - tp.width / 2, frame.rect.bottom + 5));
+      tp.dispose();
     }
   }
 
