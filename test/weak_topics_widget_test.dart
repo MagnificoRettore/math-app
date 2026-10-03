@@ -23,6 +23,15 @@ Future<void> _resetStores() async {
   SearchIndex.instance.build(ContentRepository.instance.levels);
 }
 
+/// Le pagine dei punti deboli sono di chi ha un profilo: da ospite non ci sono
+/// esercizi da ripassare e la pagina lo dice invece di promettere il contrario.
+Future<void> _registra() => AuthStore.instance.registerManual(
+  name: 'Anna',
+  email: 'anna@example.com',
+  password: 'segreta1',
+  schoolLevelId: 'middle-school',
+);
+
 Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
@@ -97,6 +106,7 @@ void main() {
   testWidgets('Vedi tutti apre la lista completa dei punti deboli', (
     tester,
   ) async {
+    await _registra();
     await _pumpHome(tester);
     const weakIds = [
       'ms-frac-compare-1',

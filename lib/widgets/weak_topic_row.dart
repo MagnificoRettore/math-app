@@ -5,24 +5,54 @@ import '../theme/app_colors.dart';
 import 'app_card.dart';
 import 'progress_bar.dart';
 
+/// Una riga della lista dei punti deboli.
+///
+/// [inGroup] dice se la riga sta dentro una card che ne contiene altre: in quel
+/// caso la riga non porta bordo, ombra e raggio suoi, sennò la lista si legge
+/// come una pila di card dentro una card. [rank] è il numero in testa, la
+/// posizione nella lista.
 class WeakTopicRow extends StatelessWidget {
   final WeakTopic weakTopic;
   final VoidCallback onTap;
+  final bool inGroup;
+  final int? rank;
 
-  const WeakTopicRow({super.key, required this.weakTopic, required this.onTap});
+  const WeakTopicRow({
+    super.key,
+    required this.weakTopic,
+    required this.onTap,
+    this.inGroup = false,
+    this.rank,
+  });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final icon = _iconFor(weakTopic.topic.icon);
     final color = _colorFor(c, weakTopic.topic.icon);
-    final count = weakTopic.needsReviewCount;
+    final ratio = weakTopic.masteredRatio;
 
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
+    final row = Row(
+      children: [
+        if (rank != null)
+          Container(
+            width: 32,
+            height: 32,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$rank',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          )
+        else
           Container(
             width: 40,
             height: 40,
@@ -32,70 +62,70 @@ class WeakTopicRow extends StatelessWidget {
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        weakTopic.topic.title,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: c.textPrimary,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: c.medium.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.autorenew, size: 13, color: c.medium),
-                          const SizedBox(width: 4),
-                          Text(
-                            count == 1
-                                ? '1 da ripassare'
-                                : '$count da ripassare',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: c.medium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                weakTopic.topic.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: c.textPrimary,
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${weakTopic.level.title} · ${weakTopic.course.title}',
-                  style: TextStyle(fontSize: 12, color: c.textSecondary),
-                ),
-                const SizedBox(height: 8),
-                ProgressBar(
-                  progress: weakTopic.masteredRatio,
-                  height: 4,
-                  color: c.medium,
-                ),
-              ],
+              ),
+              const SizedBox(height: 3),
+              Text(
+                '${weakTopic.level.title} · ${weakTopic.course.title}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: c.textSecondary),
+              ),
+              const SizedBox(height: 8),
+              ProgressBar(progress: ratio, height: 4, color: c.medium),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        // La percentuale dice quanto dell'argomento è padroneggiato: è il
+        // numero che fa capire se il ripasso è una passeggiata o un capitolo.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: c.medium.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '${(ratio * 100).round()}%',
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              color: c.medium,
             ),
           ),
-          const SizedBox(width: 6),
-          Icon(Icons.chevron_right, color: c.textSecondary, size: 20),
-        ],
-      ),
+        ),
+        const SizedBox(width: 6),
+        Icon(Icons.chevron_right, color: c.textSecondary, size: 20),
+      ],
+    );
+
+    if (inGroup) {
+      return InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: row,
+        ),
+      );
+    }
+
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: row,
     );
   }
 

@@ -16,18 +16,22 @@ class StreakCard extends StatelessWidget {
         final store = StudyStore.instance;
         final allDone = store.allGoalsReached;
         return AppCard(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(18),
+          // La serie è l'unica sezione con il bordo colorato: è quella che si
+          // guarda per capire se conviene aprire l'app oggi.
+          borderColor: c.accent.withValues(alpha: 0.35),
+          glow: c.medium,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: c.medium.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(12),
+                      shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.local_fire_department,
@@ -61,46 +65,47 @@ class StreakCard extends StatelessWidget {
                   Icon(Icons.emoji_events_outlined, color: c.medium, size: 22),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               _GoalBar(
                 label: 'Esercizi',
                 icon: Icons.edit_outlined,
                 value: store.todayExercises,
                 max: StudyStore.exerciseGoal,
                 progress: store.exerciseGoalProgress,
-                color: c.accent,
+                color: c.easy,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               _GoalBar(
                 label: 'Tempo',
                 icon: Icons.schedule,
                 value: store.todayMinutes,
                 max: StudyStore.minutesGoal,
                 progress: store.minutesGoalProgress,
-                color: c.teal,
+                color: c.accent,
               ),
               if (allDone) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 8,
+                    vertical: 10,
                   ),
                   decoration: BoxDecoration(
                     color: c.easy.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.check_circle, color: c.easy, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Obiettivo di oggi raggiunto!',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: c.easy,
+                      Icon(Icons.check_circle, color: c.easy, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Obiettivi di oggi raggiunti!',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: c.easy,
+                          ),
                         ),
                       ),
                     ],
@@ -151,6 +156,12 @@ class _GoalBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
+        // La spunta arriva quando l'obiettivo è chiuso: è l'unico segnale che
+        // distingue «sto andando bene» da «ho finito».
+        if (value >= max) ...[
+          Icon(Icons.check_circle, color: color, size: 15),
+          const SizedBox(width: 5),
+        ],
         Text(
           '$value/$max',
           style: TextStyle(

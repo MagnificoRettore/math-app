@@ -15,6 +15,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color purple;
   final Color pink;
   final Color indigo;
+  final Color danger;
   final Color shadow;
   final List<Color> iconPalette;
   final Color splashTop;
@@ -36,6 +37,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.purple,
     required this.pink,
     required this.indigo,
+    required this.danger,
     required this.shadow,
     required this.iconPalette,
     required this.splashTop,
@@ -44,13 +46,13 @@ class AppPalette extends ThemeExtension<AppPalette> {
   });
 
   static const AppPalette light = AppPalette(
-    background: Color(0xFFF9F9F9),
+    background: Color(0xFFFCF8FF),
     surface: Color(0xFFFFFFFF),
-    border: Color(0xFFE5E5EA),
+    border: Color(0xFFE6E1EC),
     textPrimary: Color(0xFF1C1C1E),
     textSecondary: Color(0xFF6E6E73),
-    accent: Color(0xFF6750A4),
-    accentSoft: Color(0xFFEDE3FF),
+    accent: Color(0xFF3525CD),
+    accentSoft: Color(0xFFE7E4FF),
     easy: Color(0xFF34C759),
     medium: Color(0xFFFF9500),
     hard: Color(0xFFFF3B30),
@@ -58,6 +60,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     purple: Color(0xFF9C27B0),
     pink: Color(0xFFEC407A),
     indigo: Color(0xFF5C6BC0),
+    danger: Color(0xFF8B1B34),
     shadow: Color(0x14000000),
     iconPalette: [
       Color(0xFF007AFF),
@@ -79,8 +82,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     border: Color(0xFF2C2C33),
     textPrimary: Color(0xFFF2F2F7),
     textSecondary: Color(0xFFA0A0AB),
-    accent: Color(0xFFD0BCFF),
-    accentSoft: Color(0xFF211B36),
+    accent: Color(0xFFBFC2FF),
+    accentSoft: Color(0xFF2A2480),
     easy: Color(0xFF4CD964),
     medium: Color(0xFFFFB340),
     hard: Color(0xFFFF6961),
@@ -88,6 +91,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     purple: Color(0xFFB388FF),
     pink: Color(0xFFFF7A9C),
     indigo: Color(0xFF8E9BFF),
+    danger: Color(0xFFFFB4AB),
     shadow: Color(0x33000000),
     iconPalette: [
       Color(0xFF3B9BFF),
@@ -119,6 +123,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? purple,
     Color? pink,
     Color? indigo,
+    Color? danger,
     Color? shadow,
     List<Color>? iconPalette,
     Color? splashTop,
@@ -140,6 +145,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       purple: purple ?? this.purple,
       pink: pink ?? this.pink,
       indigo: indigo ?? this.indigo,
+      danger: danger ?? this.danger,
       shadow: shadow ?? this.shadow,
       iconPalette: iconPalette ?? this.iconPalette,
       splashTop: splashTop ?? this.splashTop,
@@ -166,6 +172,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       purple: Color.lerp(purple, other.purple, t)!,
       pink: Color.lerp(pink, other.pink, t)!,
       indigo: Color.lerp(indigo, other.indigo, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
       shadow: Color.lerp(shadow, other.shadow, t)!,
       iconPalette: List.generate(
         iconPalette.length,

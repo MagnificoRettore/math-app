@@ -62,9 +62,21 @@ class LessonResumeEngine {
   /// nell'argomento, anche se non sono mai state aperte. Un argomento si
   /// affronta in ordine, quindi la barra dice dove si è, non cosa si è fatto.
   static double topicProgress(LessonTarget target) {
+    final conteggio = topicCards(target);
+    if (conteggio == null) return 0;
+    return conteggio.total == 0
+        ? 0
+        : (conteggio.passed / conteggio.total).clamp(0.0, 1.0);
+  }
+
+  /// Card superate e card totali dell'argomento, per poter scrivere «N di M»
+  /// accanto alla percentuale senza rifare il conteggio in un secondo posto.
+  ///
+  /// Vedi `topicProgress` sul perché il conteggio è posizionale.
+  static ({int passed, int total})? topicCards(LessonTarget target) {
     final lezioni = target.argomento.lessons;
     final indice = lezioni.indexWhere((l) => l.id == target.lesson.id);
-    if (indice < 0) return 0;
+    if (indice < 0) return null;
 
     var total = 0;
     var superate = target.step;
@@ -73,7 +85,7 @@ class LessonResumeEngine {
       total += step;
       if (i < indice) superate += step;
     }
-    return total == 0 ? 0 : (superate / total).clamp(0.0, 1.0);
+    return (passed: superate, total: total);
   }
 
   /// Il passo salvato può superare la lunghezza della lezione se nel

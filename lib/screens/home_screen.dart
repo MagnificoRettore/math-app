@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/progress_store.dart';
-import '../theme/app_colors.dart';
-import '../widgets/app_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/home_greeting.dart';
 import '../widgets/image_carousel.dart';
@@ -16,7 +14,6 @@ import '../widgets/recommended_section.dart';
 import '../widgets/streak_card.dart';
 import '../widgets/weak_topics_section.dart';
 import 'mission_screen.dart';
-import 'welcome_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -61,64 +58,32 @@ class HomeScreen extends StatelessWidget {
           listenable: ProgressStore.instance,
           builder: (context, _) {
             return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              // Le sezioni si distanziano di 24: il ritmo è della pagina, non
+              // di ogni widget, quindi il `SizedBox` sta qui e non dentro le
+              // sezioni. Il primo e l'ultimo invece sono padding.
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               children: [
                 const JumpBackInSection(),
                 const ImageCarousel(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 MissionHero(
+                  showShortcuts: true,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const MissionScreen()),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 const StreakCard(),
-                if (user != null) ...[
-                  const SizedBox(height: 16),
-                  RecommendedSection(user: user),
-                ] else ...[
-                  const SizedBox(height: 16),
-                  _buildGuestCard(context),
-                ],
-                const SizedBox(height: 8),
+                // La sezione dei consigli è una sola: da ospite non cambia
+                // disegno, cambia il contenuto (l'invito a creare il profilo).
+                const SizedBox(height: 24),
+                RecommendedSection(user: user),
                 const WeakTopicsSection(),
               ],
             );
           },
         );
       },
-    );
-  }
-
-  Widget _buildGuestCard(BuildContext context) {
-    final c = AppColors.of(context);
-    return AppCard(
-      onTap: () =>
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => const WelcomeScreen())),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: c.indigo.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.person_outline, color: c.indigo, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Crea il tuo profilo per ricevere lezioni ed esercizi '
-              'consigliati per la tua scuola.',
-              style: TextStyle(fontSize: 14, color: c.textPrimary, height: 1.3),
-            ),
-          ),
-          Icon(Icons.chevron_right, color: c.textSecondary),
-        ],
-      ),
     );
   }
 }

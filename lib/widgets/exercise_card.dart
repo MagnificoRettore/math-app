@@ -3,75 +3,43 @@ import 'package:flutter/material.dart';
 import '../models/exercise.dart';
 import '../models/progress.dart';
 import '../theme/app_colors.dart';
-import 'app_card.dart';
 import 'difficulty_badge.dart';
+import 'recommendation_row.dart';
 
+/// Un esercizio consigliato sulla Home: il suo stato diventa il colore della
+/// piastra e il play è dichiarato esplicitamente.
+///
+/// La riga è di [RecommendationRow], la stessa che fa da invito all'ospite.
 class ExerciseCard extends StatelessWidget {
   final Exercise exercise;
   final VoidCallback onTap;
   final ExerciseStatus status;
+
+  /// Bottone pieno a destra. Sulla Home l'esercizio consigliato ha già il suo
+  /// bottone «play»: metterlo dentro la card dice che l'azione è una sola e
+  /// dice quale, il tappo della card resta aperto a chi tocca altrove.
+  final bool showPlayButton;
 
   const ExerciseCard({
     super.key,
     required this.exercise,
     required this.onTap,
     required this.status,
+    this.showPlayButton = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return AppCard(
+    return RecommendationRow(
+      plateColor: _statusColor(c, status),
+      plateIcon: _statusIcon(status),
+      title: exercise.title,
+      badge: DifficultyBadge(difficulty: exercise.difficulty),
+      preview: _preview(exercise.problem),
       onTap: onTap,
-      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: _statusColor(c, status).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              _statusIcon(status),
-              color: _statusColor(c, status),
-              size: 21,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        exercise.title,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: c.textPrimary,
-                        ),
-                      ),
-                    ),
-                    DifficultyBadge(difficulty: exercise.difficulty),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _preview(exercise.problem),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      showPlayButton: showPlayButton,
+      playKey: Key('exercise-play-${exercise.id}'),
     );
   }
 

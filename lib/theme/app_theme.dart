@@ -19,13 +19,31 @@ class AppTheme {
   static final ThemeData dark = _build(Brightness.dark, AppPalette.dark);
 
   static ThemeData _build(Brightness brightness, AppPalette palette) {
+    final dark = brightness == Brightness.dark;
     final base = ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: palette.accent,
-        brightness: brightness,
-        surface: palette.surface,
-      ),
+      colorScheme:
+          ColorScheme.fromSeed(
+            seedColor: palette.accent,
+            brightness: brightness,
+            surface: palette.surface,
+          ).copyWith(
+            // `fromSeed` ricava il primary dalla **tonalità 40** del seme,
+            // quindi dall'indaco di marca esce un grigio-viola: il primary si
+            // dichiara, e dal seme resta tutta la scala intorno (secondary,
+            // surface, surfaceContainer). Il terziario è il rosa scuro delle
+            // sezioni «da ripassare», e come il primary non viene dal seme:
+            // `AppPalette.danger` ne resta l'unica sorgente.
+            primary: palette.accent,
+            onPrimary: dark ? palette.accentSoft : Colors.white,
+            primaryContainer: palette.accentSoft,
+            onPrimaryContainer: palette.textPrimary,
+            tertiary: palette.danger,
+            onTertiary: Colors.white,
+            tertiaryContainer: palette.danger.withValues(
+              alpha: dark ? 0.22 : 0.12,
+            ),
+          ),
     );
 
     return base.copyWith(

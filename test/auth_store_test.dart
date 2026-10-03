@@ -461,7 +461,7 @@ void main() {
     expect(find.text('Scopri come ospite'), findsOneWidget);
   });
 
-  testWidgets('home mostra la card ospite e poi i consigli per la scuola', (
+  testWidgets('home mostra l\'invito all\'ospite e poi i consigli', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
@@ -473,8 +473,11 @@ void main() {
       listView,
       const Offset(0, -80),
     );
+    // La sezione non sparisce da ospite: cambia titolo e contenuto, non
+    // esistenza.
     expect(find.textContaining('Crea il tuo profilo'), findsOneWidget);
-    expect(find.text('Per te'), findsNothing);
+    expect(find.text('Per iniziare'), findsOneWidget);
+    expect(find.textContaining('Per te ·'), findsNothing);
 
     await AuthStore.instance.registerManual(
       name: 'Anna',
