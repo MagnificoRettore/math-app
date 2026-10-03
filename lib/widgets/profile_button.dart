@@ -68,6 +68,11 @@ class _ProfileAvatar extends StatelessWidget {
 
   final UserProfile user;
 
+  /// Avatar e badge portano allo stesso posto.
+  void _open(BuildContext context) =>
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
@@ -79,8 +84,7 @@ class _ProfileAvatar extends StatelessWidget {
           InkWell(
             key: const Key('home-profile-avatar'),
             customBorder: const CircleBorder(),
-            onTap: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+            onTap: () => _open(context),
             child: Container(
               width: kProfileAvatarSize,
               height: kProfileAvatarSize,
@@ -105,9 +109,7 @@ class _ProfileAvatar extends StatelessWidget {
               // il tap finirebbe a terra e non aprirebbe niente. `GestureDetector`
               // e non `InkWell` perché lo schermo dell'acqua si disegnerebbe
               // sul `Material` della pagina, fuori dal badge.
-              onTap: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+              onTap: () => _open(context),
               child: Container(
                 key: const Key('home-profile-edit-badge'),
                 width: _kEditBadgeSize,

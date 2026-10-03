@@ -181,3 +181,28 @@ class _GoogleLogoPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+/// La riga «Oppure … con» sopra [GoogleButton], nel login e nella registrazione.
+class OrSeparator extends StatelessWidget {
+  final String label;
+
+  const OrSeparator({super.key, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Row(
+      children: [
+        Expanded(child: Divider(color: c.border, height: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+          ),
+        ),
+        Expanded(child: Divider(color: c.border, height: 1)),
+      ],
+    );
+  }
+}

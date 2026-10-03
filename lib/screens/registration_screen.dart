@@ -169,22 +169,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   : const Text('Crea account'),
             ),
             const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(child: Divider(color: c.border, height: 1)),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    'Oppure registrati con',
-                    style: TextStyle(
-                      fontSize: AppText.label,
-                      color: c.textSecondary,
-                    ),
-                  ),
-                ),
-                Expanded(child: Divider(color: c.border, height: 1)),
-              ],
-            ),
+            const OrSeparator(label: 'Oppure registrati con'),
             const SizedBox(height: 12),
             GoogleButton(
               label: 'Registrati con Google',

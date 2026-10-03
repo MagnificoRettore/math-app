@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            _Separator(label: 'Oppure accedi con'),
+            OrSeparator(label: 'Oppure accedi con'),
             const SizedBox(height: 12),
             GoogleButton(
               label: 'Accedi con Google',
@@ -290,30 +290,6 @@ class _ErrorLine extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _Separator extends StatelessWidget {
-  final String label;
-
-  const _Separator({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Row(
-      children: [
-        Expanded(child: Divider(color: c.border, height: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            label,
-            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
-          ),
-        ),
-        Expanded(child: Divider(color: c.border, height: 1)),
       ],
     );
   }
