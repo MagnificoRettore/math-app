@@ -2,7 +2,13 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **457 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **458 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — Sotto la banda lo sfondo, gli anni fuori dal blu
+
+- **Gli angoli smussati dell'header mostrano lo sfondo della pagina**: via lo strato `colorScheme.primary` che `MainHeaderAppBar` metteva dietro l'`AppBar` e che si leggeva come un blu più scuro.
+- **In Lezioni ed Esercizi il blu è solo della riga dell'header**: `YearTabs` non è più nell'`AppBar.bottom` ma in una `Column` sotto la banda, e torna ai colori del tema (`textPrimary`/`textSecondary`, bordo `border`).
+- Test: in `test/header_band_test.dart` il caso degli angoli verifica che fuori dall'`AppBar` non ci sia nessuno strato colorato, e un caso nuovo che in Lezioni i `YearTabs` stiano sotto la banda e fuori dall'`AppBar`. Suite a **458 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — L'header è una banda blu con gli angoli viola
 

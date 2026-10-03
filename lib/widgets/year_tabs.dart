@@ -21,11 +21,7 @@ class YearTabs extends StatelessWidget {
     final c = AppColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        // La banda sotto è il blu dell'header, quindi il bordo è bianco: quello
-        // del tema sparirebbe dentro il blu.
-        border: Border(
-          bottom: BorderSide(color: c.headerOnBlue.withValues(alpha: 0.2)),
-        ),
+        border: Border(bottom: BorderSide(color: c.border)),
       ),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       child: LayoutBuilder(
@@ -142,11 +138,7 @@ class _YearTab extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppText.micro,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                // Testo sulla banda: bianco pieno quello scelto, all'80%
-                // l'altro, come il titolo della scuola nell'header.
-                color: selected
-                    ? c.headerOnBlue
-                    : c.headerOnBlue.withValues(alpha: 0.8),
+                color: selected ? c.textPrimary : c.textSecondary,
               ),
             ),
           ),

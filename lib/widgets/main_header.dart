@@ -67,9 +67,13 @@ class MainHeaderTitle extends StatelessWidget {
 /// L'`AppBar` dei tre header principali.
 ///
 /// Il blu è dell'`AppBar`, che parte dai due bordi dello schermo e li attraversa
-/// tutti, e i due angoli in basso sono smussati dal suo `shape`. Dietro c'è il
-/// viola di Material 3: senza lo `Stack` sotto, gli angoli smussati mostrerebbero
-/// lo sfondo della pagina, che sembrerebbero un taglio e non degli angoli.
+/// tutti, e i due angoli in basso sono smussati dal suo `shape`: sotto gli
+/// angoli si vede lo sfondo della pagina.
+///
+/// [bottom] (i `YearTabs` di Lezioni ed Esercizi) sta **sotto** la banda e non
+/// nell'`AppBar.bottom`, che lo dipingerebbe di blu: il colore è solo della
+/// riga dell'header. L'`AppBar` sta in un `Expanded` perché dentro una `Column`
+/// senza limite di altezza il suo layout non si chiude.
 class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? title;
   final PreferredSizeWidget? bottom;
@@ -90,32 +94,33 @@ class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return Stack(
+    final bottom = this.bottom;
+    return Column(
       children: [
-        Positioned.fill(
-          child: ColoredBox(color: Theme.of(context).colorScheme.primary),
-        ),
-        AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: kHeaderToolbarHeight,
-          titleSpacing: kHeaderHorizontalMargin,
-          backgroundColor: c.headerBlue,
-          foregroundColor: c.headerOnBlue,
-          // Senza ombra: l'AppBar la dipingerebbe anche sopra il viola degli
-          // angoli, che è l'unico pezzo che si vede sotto la banda.
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(kHeaderBottomRadius),
+        Expanded(
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            toolbarHeight: kHeaderToolbarHeight,
+            titleSpacing: kHeaderHorizontalMargin,
+            backgroundColor: c.headerBlue,
+            foregroundColor: c.headerOnBlue,
+            // Senza ombra: sotto gli angoli c'è lo sfondo della pagina, e
+            // l'ombra lo sporcherebbe.
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(kHeaderBottomRadius),
+              ),
             ),
+            centerTitle: false,
+            title: title,
+            actionsPadding: kHeaderActionsPadding,
+            actions: actions,
           ),
-          centerTitle: false,
-          title: title,
-          actionsPadding: kHeaderActionsPadding,
-          actions: actions,
-          bottom: bottom,
         ),
+        if (bottom != null)
+          SizedBox(height: bottom.preferredSize.height, child: bottom),
       ],
     );
   }

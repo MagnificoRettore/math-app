@@ -7,12 +7,14 @@ import 'package:math_app/data/browse_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/theme/app_colors.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/main_header.dart';
 import 'package:math_app/widgets/profile_button.dart';
+import 'package:math_app/widgets/year_tabs.dart';
 
 const _identitaKey = Key('header-identity');
 const _nomeKey = Key('header-name');
@@ -34,9 +36,8 @@ Future<void> _prepare() async {
   await ProgressStore.instance.resetForTest();
 }
 
-// Il tema vero, non quello di base: il viola degli angoli viene da
-// `colorScheme.primary`, che è un campo dichiarato di `AppTheme` e non il
-// viola di base di Material 3.
+// Il tema vero, non quello di base: la banda e i suoi colori vengono da
+// `AppPalette`, che il tema di base non registra.
 Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
@@ -98,7 +99,7 @@ void main() {
     expect(banda.height, closeTo(kHeaderToolbarHeight, 1));
   });
 
-  testWidgets('gli angoli in basso sono smussati e dietro c\'è il viola', (
+  testWidgets('gli angoli in basso sono smussati e sotto c\'è lo sfondo', (
     tester,
   ) async {
     await _register(tester);
@@ -114,21 +115,46 @@ void main() {
     expect(raggi.topLeft.x, 0);
     expect(raggi.topRight.x, 0);
 
-    // Il viola di Material 3 sta dietro l'`AppBar`: senza quello il quadrato
-    // dell'angolo mostrerebbe lo sfondo della pagina e sembrerebbe un taglio.
-    final viola = Theme.of(tester.element(find.byKey(_identitaKey)))
-        .colorScheme
-        .primary;
-    expect(viola, const Color(0xFF3525CD));
-    expect(
-      find.descendant(
-        of: find.byType(MainHeaderAppBar),
-        matching: find.byWidgetPredicate(
-          (w) => w is ColoredBox && w.color == viola,
-        ),
-      ),
-      findsOneWidget,
+    // Dietro gli angoli non c'è nessuno strato colorato: si vede lo sfondo
+    // della pagina. Dentro la banda i colori ci sono (la piastra dell'avatar),
+    // fuori dall'`AppBar` no.
+    final fuoriDallaBanda = tester
+        .elementList(
+          find.descendant(
+            of: find.byType(MainHeaderAppBar),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .where((e) => e.findAncestorWidgetOfExactType<AppBar>() == null);
+    expect(fuoriDallaBanda, isEmpty);
+  });
+
+  testWidgets('in Lezioni gli anni stanno sotto la banda, non dentro', (
+    tester,
+  ) async {
+    await AuthStore.instance.registerManual(
+      name: 'Anna Rossi',
+      email: 'anna@example.com',
+      password: 'segreta1',
+      schoolLevelId: 'high-school',
     );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: const LessonListScreen(levelId: 'high-school'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final tabs = find.byType(YearTabs);
+    expect(tabs, findsOneWidget);
+    // Fuori dall'`AppBar`, quindi fuori dal blu.
+    expect(
+      find.ancestor(of: tabs, matching: find.byType(AppBar)),
+      findsNothing,
+    );
+    final banda = tester.getRect(find.byType(AppBar));
+    expect(tester.getRect(tabs).top, greaterThanOrEqualTo(banda.bottom));
   });
 
   testWidgets('le icone stanno sulla banda e sono bianche come il testo', (
