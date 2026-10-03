@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:math_app/models/course.dart';
+import 'package:math_app/theme/app_colors.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/year_tabs.dart';
 
@@ -32,10 +33,14 @@ Color _circleTextColor(WidgetTester tester) =>
 
 void main() {
   testWidgets(
-    'anno selezionato: l\'etichetta contrasta con il cerchio accent',
+    'anno selezionato: inchiostro sul giallo, come la «Classe» del design',
     (tester) async {
       await _pumpTabs(tester, AppTheme.light);
-      expect(_circleTextColor(tester), AppTheme.light.colorScheme.onPrimary);
+      expect(_circleTextColor(tester), AppPalette.light.textPrimary);
+      // L'inchiostro sul giallo passa ampiamente 4.5:1.
+      final fondo = AppPalette.light.yellow.computeLuminance();
+      final testo = _circleTextColor(tester).computeLuminance();
+      expect((fondo + 0.05) / (testo + 0.05), greaterThan(4.5));
     },
   );
 }

@@ -9,6 +9,7 @@ import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
 import '../widgets/strength_meter.dart';
 import 'school_picker_screen.dart';
+import '../widgets/app_button.dart';
 
 /// Creazione account.
 ///
@@ -154,19 +155,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _busy ? null : _submit,
-              style: AppTheme.wideButton,
-              child: _busy
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Crea account'),
+            AppButton(
+              label: 'Crea account',
+              onPressed: _submit,
+              busy: _busy,
+              expand: true,
             ),
             const SizedBox(height: 20),
             const OrSeparator(label: 'Oppure registrati con'),
@@ -212,7 +205,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       autofillHints: autofillHints,
       onChanged: onChanged,
       validator: validator,
-      decoration: AppTheme.fieldDecoration(c, fill: c.surface).copyWith(
+      decoration: AppTheme.fieldDecoration(c).copyWith(
         labelText: label,
         helperText: helperText,
         prefixIcon: prefixIcon == null

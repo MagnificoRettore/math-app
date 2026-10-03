@@ -9,6 +9,7 @@ import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
 import 'registration_screen.dart';
 import 'school_picker_screen.dart';
+import '../widgets/app_button.dart';
 
 /// Pagina di accesso.
 ///
@@ -75,17 +76,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       textInputAction: TextInputAction.next,
                       autocorrect: false,
                       autofillHints: const [AutofillHints.username],
-                      decoration:
-                          AppTheme.fieldDecoration(
-                            c,
-                            fill: c.background,
-                          ).copyWith(
-                            labelText: 'Email o ID account',
-                            prefixIcon: Icon(
-                              Icons.person_outline,
-                              color: c.textSecondary,
-                            ),
-                          ),
+                      decoration: AppTheme.fieldDecoration(c).copyWith(
+                        labelText: 'Email o ID account',
+                        prefixIcon: Icon(
+                          Icons.person_outline,
+                          color: c.textSecondary,
+                        ),
+                      ),
                       validator: (value) => (value?.trim() ?? '').isEmpty
                           ? 'Scrivi il tuo ID account o la tua email'
                           : null,
@@ -106,19 +103,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       _ErrorLine(message: _error!),
                     ],
                     const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: _busy ? null : _submit,
-                      style: AppTheme.wideButton,
-                      child: _busy
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Accedi'),
+                    AppButton(
+                      label: 'Accedi',
+                      onPressed: _submit,
+                      busy: _busy,
+                      expand: true,
                     ),
                     const SizedBox(height: 4),
                     Align(

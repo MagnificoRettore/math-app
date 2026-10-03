@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
+import '../widgets/app_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -129,13 +129,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _next,
-                  style: AppTheme.wideButton,
-                  child: Text(isLast ? 'Inizia' : 'Avanti'),
-                ),
+              child: AppButton(
+                label: isLast ? 'Inizia' : 'Avanti',
+                onPressed: _next,
+                expand: true,
               ),
             ),
           ],

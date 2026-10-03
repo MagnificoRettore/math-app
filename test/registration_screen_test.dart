@@ -6,6 +6,7 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/screens/registration_screen.dart';
 import 'package:math_app/screens/school_picker_screen.dart';
+import 'package:math_app/widgets/app_button.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -228,8 +229,8 @@ void main() {
     await tester.pumpAndSettle();
     await tapCreate(tester);
 
-    FilledButton creaProfilo() => tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Crea il mio profilo'),
+    AppButton creaProfilo() => tester.widget<AppButton>(
+      find.widgetWithText(AppButton, 'Crea il mio profilo'),
     );
 
     // Spento finché la scuola non è scelta: il tap prima sarebbe un no-op.
@@ -239,7 +240,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(creaProfilo().onPressed, isNotNull);
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Crea il mio profilo'));
+    await tester.tap(find.widgetWithText(AppButton, 'Crea il mio profilo'));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);

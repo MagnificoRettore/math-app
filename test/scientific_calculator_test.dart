@@ -26,7 +26,12 @@ Finder _sheet() => find.byKey(const ValueKey('calc-sheet'));
 /// stesso testo (un `5` scritto è anche il tasto `5`).
 Future<void> _keys(WidgetTester tester, List<String> labels) async {
   for (final label in labels) {
-    await tester.tap(find.text(label).last);
+    // ⌫ è un'icona: Nunito non ha il carattere.
+    await tester.tap(
+      label == '⌫'
+          ? find.byIcon(Icons.backspace_outlined)
+          : find.text(label).last,
+    );
     await tester.pump();
   }
 }
@@ -289,11 +294,11 @@ void main() {
       expect(_result(tester), '20');
     });
 
-    testWidgets('x², x⁻¹ e n! sul numero scritto', (tester) async {
+    testWidgets('x², 1/x e n! sul numero scritto', (tester) async {
       await _pump(tester);
       await _keys(tester, ['3', 'x²', '=']);
       expect(_result(tester), '9');
-      await _keys(tester, ['AC', '4', 'x⁻¹', '=']);
+      await _keys(tester, ['AC', '4', '1/x', '=']);
       expect(_result(tester), '0.25');
       await _keys(tester, ['AC', '5', 'n!', '=']);
       expect(_result(tester), '120');
@@ -304,16 +309,16 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('calc-mode')));
       await tester.pump();
       await _keys(tester, ['2nd']);
-      expect(find.text('sin⁻¹'), findsOneWidget);
-      await _keys(tester, ['sin⁻¹', '1', '=']);
+      expect(find.text('asin'), findsOneWidget);
+      await _keys(tester, ['asin', '1', '=']);
       expect(_result(tester), '90');
       expect(find.text('sin'), findsOneWidget);
-      expect(find.text('sin⁻¹'), findsNothing);
+      expect(find.text('asin'), findsNothing);
     });
 
-    testWidgets('2nd su log dà 10ˣ', (tester) async {
+    testWidgets('2nd su log dà 10^x', (tester) async {
       await _pump(tester);
-      await _keys(tester, ['2nd', '10ˣ', '3', '=']);
+      await _keys(tester, ['2nd', '10^x', '3', '=']);
       expect(_result(tester), '1000');
     });
 
@@ -343,7 +348,7 @@ void main() {
 
     testWidgets('0 elevato a −1 è un errore, non zero', (tester) async {
       await _pump(tester);
-      await _keys(tester, ['0', 'xʸ', '−', '1', '=']);
+      await _keys(tester, ['0', 'x^y', '−', '1', '=']);
       expect(_result(tester), 'Errore');
     });
   });

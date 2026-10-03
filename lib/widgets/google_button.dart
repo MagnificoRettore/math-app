@@ -4,6 +4,7 @@ import '../data/auth_store.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'app_button.dart';
 
 /// Identità raccolta dal dialog dimostrativo di Google.
 class GoogleIdentity {
@@ -97,7 +98,9 @@ Future<GoogleIdentity?> askGoogleIdentity(BuildContext context) async {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text('Annulla'),
         ),
-        FilledButton(
+        AppButton(
+          label: 'Continua',
+          height: 44,
           onPressed: () => Navigator.of(context).pop(
             GoogleIdentity(
               name: nameController.text.trim().isEmpty
@@ -108,7 +111,6 @@ Future<GoogleIdentity?> askGoogleIdentity(BuildContext context) async {
                   : emailController.text.trim(),
             ),
           ),
-          child: const Text('Continua'),
         ),
       ],
     ),

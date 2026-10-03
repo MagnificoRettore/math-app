@@ -15,6 +15,7 @@ import 'login_screen.dart';
 import 'registration_screen.dart';
 import 'school_picker_screen.dart';
 import 'welcome_screen.dart';
+import '../widgets/app_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -92,29 +93,23 @@ class _GuestProfile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        FilledButton(
+        AppButton(
           key: const Key('profile-guest-login'),
+          label: 'Accedi',
+          expand: true,
           onPressed: () =>
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (_) => const LoginScreen())),
-          style: AppTheme.wideButton,
-          child: const Text('Accedi'),
         ),
         const SizedBox(height: 12),
-        OutlinedButton(
+        AppButton(
           key: const Key('profile-guest-register'),
+          label: 'Registrati',
+          variant: AppButtonVariant.outline,
+          expand: true,
           onPressed: () => Navigator.of(
             context,
           ).push(MaterialPageRoute(builder: (_) => const RegistrationScreen())),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            side: BorderSide(color: c.border),
-            textStyle: const TextStyle(
-              fontSize: AppText.titleSmall,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          child: Text('Registrati', style: TextStyle(color: c.textPrimary)),
         ),
         const SizedBox(height: 12),
         Center(
@@ -303,20 +298,12 @@ class _ProfileContentState extends State<_ProfileContent> {
                 const SizedBox(height: 12),
                 _ReadOnlyField(label: 'Email', value: user.email),
                 const SizedBox(height: 16),
-                FilledButton(
+                AppButton(
                   key: const Key('profile-save'),
-                  onPressed: _saving || !_dirty ? null : _save,
-                  style: AppTheme.wideButton,
-                  child: _saving
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Salva modifiche'),
+                  label: 'Salva modifiche',
+                  onPressed: _dirty ? _save : null,
+                  busy: _saving,
+                  expand: true,
                 ),
               ],
             ),
@@ -389,10 +376,8 @@ class _ProfileContentState extends State<_ProfileContent> {
       autocorrect: autocorrect,
       onChanged: onChanged,
       validator: validator,
-      decoration: AppTheme.fieldDecoration(
-        c,
-        fill: c.background,
-      ).copyWith(labelText: label, helperText: helperText),
+      decoration: AppTheme.fieldDecoration(c)
+          .copyWith(labelText: label, helperText: helperText),
     );
   }
 
@@ -500,7 +485,7 @@ class _ReadOnlyField extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return InputDecorator(
-      decoration: AppTheme.fieldDecoration(c, fill: c.background).copyWith(
+      decoration: AppTheme.fieldDecoration(c).copyWith(
         labelText: label,
         helperText: 'Identifica l’account, non si modifica',
       ),

@@ -108,22 +108,15 @@ class _YearTab extends StatelessWidget {
             width: 44,
             height: 44,
             alignment: Alignment.center,
+            // Il quadrato arrotondato della «Classe» del design: giallo con il
+            // bordo oro l'anno scelto, bianco con il bordo lilla gli altri.
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: selected ? c.accent : c.surface,
+              borderRadius: BorderRadius.circular(12),
+              color: selected ? c.yellow : c.surface,
               border: Border.all(
-                color: selected ? c.accent : c.border,
-                width: 1.5,
+                color: selected ? c.yellowDeep : c.border,
+                width: 3,
               ),
-              boxShadow: selected
-                  ? [
-                      BoxShadow(
-                        color: c.accent.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : null,
             ),
             child: _CircleText(text: circleText, selected: selected),
           ),
@@ -159,12 +152,12 @@ class _CircleText extends StatelessWidget {
     final c = AppColors.of(context);
     return Text(
       text,
+      // Inchiostro sul giallo, indaco sul bianco: come la «Classe» del design.
       style: TextStyle(
+        fontFamily: AppText.headingFont,
         fontSize: AppText.titleMedium,
-        fontWeight: FontWeight.w700,
-        color: selected
-            ? Theme.of(context).colorScheme.onPrimary
-            : c.textSecondary,
+        fontWeight: FontWeight.w600,
+        color: selected ? c.textPrimary : c.accent,
       ),
     );
   }

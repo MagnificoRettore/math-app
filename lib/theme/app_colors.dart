@@ -33,6 +33,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Il bordo e l'ombra piena di ciò che è [yellow].
   final Color yellowDeep;
 
+  /// Il fondo giallo chiaro delle barre di avanzamento.
+  final Color yellowSoft;
+
   /// L'arancio del design, per i traguardi e i bottoni tondi.
   final Color orange;
 
@@ -48,6 +51,11 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Le righe del quaderno nelle card a righe.
   final Color paperLine;
+
+  /// Il fondo e il testo di un bottone disabilitato: un grigio caldo, che sul
+  /// crema non sembra un errore.
+  final Color disabled;
+  final Color onDisabled;
 
   /// Sfondo della banda dell'header: l'indaco del design, con i testi bianchi
   /// di [onHeaderBand].
@@ -79,11 +87,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.shadow,
     required this.yellow,
     required this.yellowDeep,
+    required this.yellowSoft,
     required this.orange,
     required this.orangeDeep,
     required this.accentDeep,
     required this.cardShadow,
     required this.paperLine,
+    required this.disabled,
+    required this.onDisabled,
     required this.headerBand,
     required this.onHeaderBand,
     required this.iconPalette,
@@ -111,11 +122,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
     shadow: Color(0x1F2B1A6B),
     yellow: Color(0xFFF6B818),
     yellowDeep: Color(0xFFB98500),
+    yellowSoft: Color(0xFFFBE7A8),
     orange: Color(0xFFEF7D1A),
     orangeDeep: Color(0xFFB65508),
     accentDeep: Color(0xFF160C3E),
     cardShadow: Color(0xFFE3C46E),
     paperLine: Color(0xFFCFDCF3),
+    disabled: Color(0xFFE4DFD4),
+    onDisabled: Color(0xFF6F6A86),
     headerBand: Color(0xFF2B1A6B),
     onHeaderBand: Color(0xFFFFFFFF),
     iconPalette: [
@@ -152,11 +166,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? shadow,
     Color? yellow,
     Color? yellowDeep,
+    Color? yellowSoft,
     Color? orange,
     Color? orangeDeep,
     Color? accentDeep,
     Color? cardShadow,
     Color? paperLine,
+    Color? disabled,
+    Color? onDisabled,
     Color? headerBand,
     Color? onHeaderBand,
     List<Color>? iconPalette,
@@ -183,11 +200,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
       shadow: shadow ?? this.shadow,
       yellow: yellow ?? this.yellow,
       yellowDeep: yellowDeep ?? this.yellowDeep,
+      yellowSoft: yellowSoft ?? this.yellowSoft,
       orange: orange ?? this.orange,
       orangeDeep: orangeDeep ?? this.orangeDeep,
       accentDeep: accentDeep ?? this.accentDeep,
       cardShadow: cardShadow ?? this.cardShadow,
       paperLine: paperLine ?? this.paperLine,
+      disabled: disabled ?? this.disabled,
+      onDisabled: onDisabled ?? this.onDisabled,
       headerBand: headerBand ?? this.headerBand,
       onHeaderBand: onHeaderBand ?? this.onHeaderBand,
       iconPalette: iconPalette ?? this.iconPalette,
@@ -219,11 +239,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
       shadow: Color.lerp(shadow, other.shadow, t)!,
       yellow: Color.lerp(yellow, other.yellow, t)!,
       yellowDeep: Color.lerp(yellowDeep, other.yellowDeep, t)!,
+      yellowSoft: Color.lerp(yellowSoft, other.yellowSoft, t)!,
       orange: Color.lerp(orange, other.orange, t)!,
       orangeDeep: Color.lerp(orangeDeep, other.orangeDeep, t)!,
       accentDeep: Color.lerp(accentDeep, other.accentDeep, t)!,
       cardShadow: Color.lerp(cardShadow, other.cardShadow, t)!,
       paperLine: Color.lerp(paperLine, other.paperLine, t)!,
+      disabled: Color.lerp(disabled, other.disabled, t)!,
+      onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
       headerBand: Color.lerp(headerBand, other.headerBand, t)!,
       onHeaderBand: Color.lerp(onHeaderBand, other.onHeaderBand, t)!,
       iconPalette: List.generate(

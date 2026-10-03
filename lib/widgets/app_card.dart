@@ -10,6 +10,10 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color? color;
   final Color? borderColor;
+
+  /// Spessore del bordo, quando c'è: 3 per una card scelta, come i controlli
+  /// del design.
+  final double borderWidth;
   final double radius;
   final bool flat;
 
@@ -23,6 +27,7 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(18),
     this.color,
     this.borderColor,
+    this.borderWidth = 1,
     this.radius = kCardRadius,
     this.flat = false,
     this.glow,
@@ -36,23 +41,17 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? c.surface,
         borderRadius: shape,
-        border: Border.all(color: borderColor ?? c.border),
+        // Il design non ha bordi sulle card: il bordo c'è solo quando chi
+        // chiama lo chiede, per colorarla.
+        border: borderColor == null
+            ? null
+            : Border.all(color: borderColor!, width: borderWidth),
         boxShadow: flat
             ? const []
             : [
-                // Due strati: quello stretto definisce il bordo, quello largo
-                // stende l'ombra morbida sotto la card. Una ombra sola,
-                // stretta, fa la plastica lucida.
-                BoxShadow(
-                  color: c.shadow,
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: c.shadow.withValues(alpha: 0.06),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
+                // Un gradino pieno e dorato sotto la card, non un'ombra
+                // sfumata: è l'ombra del design, la stessa dei bottoni.
+                BoxShadow(color: c.cardShadow, offset: const Offset(0, 6)),
               ],
       ),
       child: Material(
@@ -86,9 +85,8 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Raggio delle card dell'app. È alto per scelta: le superfici morbide stanno
-/// bene arrotondate, e `Material` su iOS arrotondava già i fogli.
-const double kCardRadius = 24;
+/// Raggio delle card dell'app: le card del design stanno fra 18 e 22.
+const double kCardRadius = 20;
 
 /// Alone colorato nell'angolo in alto a destra di una card.
 ///

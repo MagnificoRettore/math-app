@@ -48,7 +48,7 @@ class _PasswordFieldState extends State<PasswordField> {
       validator: widget.validator,
       autofillHints: widget.autofillHints,
       autovalidateMode: widget.autovalidateMode,
-      decoration: AppTheme.fieldDecoration(c, fill: c.surface).copyWith(
+      decoration: AppTheme.fieldDecoration(c).copyWith(
         labelText: widget.label,
         suffixIcon: IconButton(
           tooltip: _hidden ? 'Mostra la password' : 'Nascondi la password',

@@ -7,6 +7,7 @@ import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/screens/school_picker_screen.dart';
+import 'package:math_app/widgets/app_button.dart';
 import 'package:math_app/widgets/profile_avatar.dart';
 
 void main() {
@@ -70,8 +71,8 @@ void main() {
     await registerAccount();
     await pumpProfile(tester);
 
-    FilledButton save() =>
-        tester.widget<FilledButton>(find.byKey(const Key('profile-save')));
+    AppButton save() =>
+        tester.widget<AppButton>(find.byKey(const Key('profile-save')));
     expect(save().onPressed, isNull);
 
     await tester.enterText(find.byType(TextFormField).first, 'Anna Maria');
@@ -181,7 +182,7 @@ void main() {
 
     await tester.tap(find.text('Università'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(FilledButton, 'Salva'));
+    await tester.tap(find.widgetWithText(AppButton, 'Salva'));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);

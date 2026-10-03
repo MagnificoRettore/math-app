@@ -50,10 +50,9 @@ class McqOptionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: borderColor,
-          width: state == McqOptionState.correct ? 1.8 : 1.2,
-        ),
+        // Il bordo da 3 dei controlli del design: lilla a riposo, poi il
+        // colore dello stato.
+        border: Border.all(color: borderColor, width: 3),
       ),
       child: Material(
         color: Colors.transparent,
@@ -121,7 +120,8 @@ class McqFeedbackCard extends StatelessWidget {
                 correct ? 'Corretto!' : 'Non è corretto',
                 style: TextStyle(
                   fontSize: AppText.titleSmall * scale,
-                  fontWeight: FontWeight.w700,
+                  fontFamily: AppText.headingFont,
+                  fontWeight: FontWeight.w600,
                   color: color,
                 ),
               ),

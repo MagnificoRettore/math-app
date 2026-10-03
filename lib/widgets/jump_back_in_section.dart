@@ -10,6 +10,7 @@ import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'progress_bar.dart';
 import 'section_header.dart';
+import 'app_button.dart';
 
 /// Prima sezione della home: da dove riprendere.
 ///
@@ -76,30 +77,17 @@ class _JumpBackInCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: c.accent.withValues(alpha: 0.12),
+                    // Il badge giallo del design, con l'inchiostro sopra.
+                    color: c.yellow,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: c.accent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        target.isPaused ? 'In corso' : 'Da iniziare',
-                        style: TextStyle(
-                          fontSize: AppText.caption,
-                          fontWeight: FontWeight.w700,
-                          color: c.accent,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    target.isPaused ? 'In corso' : 'Da iniziare',
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      fontWeight: FontWeight.w800,
+                      color: c.textPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -113,8 +101,9 @@ class _JumpBackInCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: AppText.titleLarge,
-                fontWeight: FontWeight.w700,
+                fontFamily: AppText.headingFont,
+                fontSize: AppText.headline,
+                fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
             ),
@@ -156,28 +145,12 @@ class _JumpBackInCard extends StatelessWidget {
             const SizedBox(height: 16),
             // Il tappo della card e il bottone fanno la stessa cosa: il bottone
             // dice cosa succede, la card dice che si può anche premere tutto.
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                key: const Key('jump-back-in-button'),
-                onPressed: () => _open(context),
-                style: FilledButton.styleFrom(
-                  backgroundColor: c.accent,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                icon: const Icon(Icons.play_arrow_rounded, size: 22),
-                label: const Text(
-                  'Riprendi',
-                  style: TextStyle(
-                    fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+            AppButton(
+              key: const Key('jump-back-in-button'),
+              label: 'Riprendi',
+              icon: Icons.play_arrow_rounded,
+              expand: true,
+              onPressed: () => _open(context),
             ),
           ],
         ),

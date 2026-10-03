@@ -120,7 +120,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   }
 
   static const _binary = ['+', '−', '×', '÷', '^'];
-  static const _postfix = ['²', '⁻¹', '!', '%'];
+  static const _postfix = ['²', '^(−1)', '!', '%'];
 
   static bool _isNumberPart(String t) => t == '.' || _isDigit(t);
   static bool _isDigit(String t) =>
@@ -212,7 +212,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     });
   }
 
-  /// `x²`, `x⁻¹`, `n!` e `%` si applicano al valore che li precede.
+  /// `x²`, `1/x`, `n!` e `%` si applicano al valore che li precede.
   void _postfixOp(String op) {
     setState(() {
       _second = false;
@@ -347,11 +347,8 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
         '−' => '-',
         'π' => 'pi',
         '√(' => 'sqrt(',
-        'sin⁻¹(' => 'asin(',
-        'cos⁻¹(' => 'acos(',
-        'tan⁻¹(' => 'atan(',
         '²' => '^2',
-        '⁻¹' => '^(-1)',
+        '^(−1)' => '^(-1)',
         '%' => '/100',
         'Ans' => _literal(_ans),
         'M' => _literal(_memory),
@@ -592,21 +589,23 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
             primary: second,
             accent: !second,
           ),
-          _fn(second ? 'sin⁻¹' : 'sin', second ? 'sin⁻¹(' : 'sin('),
-          _fn(second ? 'cos⁻¹' : 'cos', second ? 'cos⁻¹(' : 'cos('),
-          _fn(second ? 'tan⁻¹' : 'tan', second ? 'tan⁻¹(' : 'tan('),
+          // Etichette che i font sanno disegnare: Nunito non ha `⁻ ˣ ʸ`, e sul
+          // web il carattere di riserva andrebbe scaricato.
+          _fn(second ? 'asin' : 'sin', second ? 'asin(' : 'sin('),
+          _fn(second ? 'acos' : 'cos', second ? 'acos(' : 'cos('),
+          _fn(second ? 'atan' : 'tan', second ? 'atan(' : 'tan('),
           _key(second ? 'e' : 'π', () => _value(second ? 'e' : 'π')),
         ]),
         _row(context, c, [
           _key('x²', () => _postfixOp('²'), accent: true),
-          _key('xʸ', () => _operator('^'), accent: true),
+          _key('x^y', () => _operator('^'), accent: true),
           _fn('√', '√('),
-          _key('x⁻¹', () => _postfixOp('⁻¹'), accent: true),
+          _key('1/x', () => _postfixOp('^(−1)'), accent: true),
           _key('n!', () => _postfixOp('!'), accent: true),
         ]),
         _row(context, c, [
-          _fn(second ? 'eˣ' : 'ln', second ? 'e^(' : 'ln('),
-          _fn(second ? '10ˣ' : 'log', second ? '10^(' : 'log('),
+          _fn(second ? 'e^x' : 'ln', second ? 'e^(' : 'ln('),
+          _fn(second ? '10^x' : 'log', second ? '10^(' : 'log('),
           _key('(', _open),
           _key(')', _close),
           _key('%', () => _postfixOp('%')),
@@ -622,22 +621,22 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
           _key('7', () => _value('7')),
           _key('8', () => _value('8')),
           _key('9', () => _value('9')),
-          _key('⌫', _delete, destructive: true),
+          _key('⌫', _delete, destructive: true, icon: Icons.backspace_outlined),
           _key('AC', _clear, destructive: true),
         ]),
         _row(context, c, [
           _key('4', () => _value('4')),
           _key('5', () => _value('5')),
           _key('6', () => _value('6')),
-          _key('×', () => _operator('×'), accent: true),
-          _key('÷', () => _operator('÷'), accent: true),
+          _key('×', () => _operator('×'), operator: true),
+          _key('÷', () => _operator('÷'), operator: true),
         ]),
         _row(context, c, [
           _key('1', () => _value('1')),
           _key('2', () => _value('2')),
           _key('3', () => _value('3')),
-          _key('+', () => _operator('+'), accent: true),
-          _key('−', () => _operator('−'), accent: true),
+          _key('+', () => _operator('+'), operator: true),
+          _key('−', () => _operator('−'), operator: true),
         ]),
         _row(context, c, [
           _key('0', () => _value('0')),
@@ -671,83 +670,102 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     VoidCallback onTap, {
     int flex = 1,
     bool accent = false,
+    bool operator = false,
     bool primary = false,
     bool destructive = false,
+    IconData? icon,
   }) {
     return _CalcKey(
       label: label,
       onTap: onTap,
       flex: flex,
       accent: accent,
+      operator: operator,
       primary: primary,
       destructive: destructive,
+      icon: icon,
     );
   }
 }
 
+/// Un tasto nello stile del design: le cifre bianche col bordo da 3, gli
+/// operatori gialli e `=` indaco col gradino pieno sotto, le funzioni lilla,
+/// AC e ⌫ in rosso.
 class _CalcKey extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final int flex;
   final bool accent;
+  final bool operator;
   final bool primary;
   final bool destructive;
+
+  /// Al posto dell'etichetta: `⌫` non c'è in Nunito.
+  final IconData? icon;
 
   const _CalcKey({
     required this.label,
     required this.onTap,
     this.flex = 1,
     this.accent = false,
+    this.operator = false,
     this.primary = false,
     this.destructive = false,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final Color background;
-    final Color foreground;
-    final Color? borderColor;
-    if (primary) {
-      background = c.accent;
-      foreground = c.surface;
-      borderColor = null;
-    } else if (destructive) {
-      background = c.hard.withValues(alpha: 0.10);
-      foreground = c.hard;
-      borderColor = c.hard.withValues(alpha: 0.3);
-    } else if (accent) {
-      background = c.accentSoft;
-      foreground = c.accent;
-      borderColor = null;
-    } else {
-      background = c.surface;
-      foreground = c.textPrimary;
-      borderColor = c.border;
-    }
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          onTap();
-          AppHaptics.selectionClick();
-        },
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          // 40 e non 46: le righe sono 8, e il foglio non deve crescere.
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(14),
-            border: borderColor == null ? null : Border.all(color: borderColor),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: AppText.titleMedium,
-              fontWeight: FontWeight.w700,
-              color: foreground,
+    final (background, foreground, border, step) = primary
+        ? (c.accent, Colors.white, null, c.accentDeep)
+        : operator
+        ? (c.yellow, c.textPrimary, null, c.yellowDeep)
+        : destructive
+        ? (
+            c.hard.withValues(alpha: 0.10),
+            c.hard,
+            c.hard.withValues(alpha: 0.4),
+            null,
+          )
+        : accent
+        ? (c.accentSoft, c.accent, null, null)
+        : (c.surface, c.textPrimary, c.border, null);
+    final radius = BorderRadius.circular(14);
+    return Semantics(
+      button: true,
+      label: icon == null ? null : label,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: radius,
+          border: border == null ? null : Border.all(color: border, width: 3),
+          boxShadow: [
+            if (step != null)
+              BoxShadow(color: step, offset: const Offset(0, 3)),
+          ],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: () {
+              onTap();
+              AppHaptics.selectionClick();
+            },
+            borderRadius: radius,
+            child: Center(
+              child: icon != null
+                  ? Icon(icon, size: 20, color: foreground)
+                  : Text(
+                      label,
+                      // Nunito e non Fredoka: Fredoka non ha `π` né `√`.
+                      style: TextStyle(
+                        fontSize: AppText.titleMedium,
+                        fontWeight: FontWeight.w800,
+                        color: foreground,
+                      ),
+                    ),
             ),
           ),
         ),

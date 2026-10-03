@@ -65,6 +65,7 @@ class RecommendationRow extends StatelessWidget {
                       child: Text(
                         title,
                         style: TextStyle(
+                          fontFamily: AppText.headingFont,
                           fontSize: AppText.bodyLarge,
                           fontWeight: FontWeight.w600,
                           color: c.textPrimary,
@@ -89,20 +90,29 @@ class RecommendationRow extends StatelessWidget {
           ),
           if (showPlayButton) ...[
             const SizedBox(width: 10),
-            SizedBox(
-              width: 42,
-              height: 42,
-              child: Material(
-                color: c.accent,
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  key: playKey,
-                  onTap: onTap,
-                  child: Icon(
-                    Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 24,
+            // Il bottone tondo arancio del design, con il suo gradino pieno.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: c.orangeDeep, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: SizedBox(
+                width: 42,
+                height: 42,
+                child: Material(
+                  color: c.orange,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    key: playKey,
+                    onTap: onTap,
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: c.textPrimary,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),

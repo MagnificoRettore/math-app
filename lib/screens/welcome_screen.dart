@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/google_button.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
 import 'school_picker_screen.dart';
+import '../widgets/app_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -48,12 +48,12 @@ class WelcomeScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 12),
-            FilledButton(
+            AppButton(
+              label: 'Registrati con email',
+              expand: true,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const RegistrationScreen()),
               ),
-              style: AppTheme.wideButton,
-              child: const Text('Registrati con email'),
             ),
             const SizedBox(height: 16),
             Center(

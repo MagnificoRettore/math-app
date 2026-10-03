@@ -23,7 +23,9 @@ class SchoolLevelTile extends StatelessWidget {
     final color = _colorFor(c, level.icon);
     return AppCard(
       onTap: onTap,
-      borderColor: selected ? color : null,
+      // Scelta: il bordo indaco da 3 dei controlli del design.
+      borderColor: selected ? c.accent : null,
+      borderWidth: 3,
       child: Row(
         children: [
           Container(
@@ -63,7 +65,7 @@ class SchoolLevelTile extends StatelessWidget {
           ),
           Icon(
             selected ? Icons.radio_button_checked : Icons.radio_button_off,
-            color: selected ? color : c.textSecondary,
+            color: selected ? c.accent : c.textSecondary,
           ),
         ],
       ),

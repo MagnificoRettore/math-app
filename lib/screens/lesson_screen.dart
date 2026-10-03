@@ -12,6 +12,7 @@ import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mcq_option_tile.dart';
 import '../widgets/notes_text.dart';
@@ -602,7 +603,6 @@ class _StepCard extends StatelessWidget {
                             ),
                           if (showComplete)
                             _completeButton(
-                              c,
                               compact: constraints.maxWidth - taken < full,
                             ),
                         ],
@@ -657,35 +657,23 @@ class _StepCard extends StatelessWidget {
     );
   }
 
-  Widget _completeButton(AppPalette c, {required bool compact}) {
-    final style = FilledButton.styleFrom(
-      backgroundColor: c.accent,
-      foregroundColor: c.surface,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-    );
+  Widget _completeButton({required bool compact}) {
+    // Faccia da 44 più il gradino: insieme fanno la fascia del footer.
+    const height = _kFooterControlHeight - AppButton.depth;
     if (compact) {
       // Niente spazio per il testo: resta solo l'icona, col testo nel tooltip.
-      return Tooltip(
-        message: 'Completa la lezione',
-        child: FilledButton(
-          onPressed: onComplete,
-          style: style,
-          child: const Icon(Icons.check_circle_outline, size: 20),
-        ),
+      return AppButton(
+        icon: Icons.check_circle_outline,
+        tooltip: 'Completa la lezione',
+        height: height,
+        onPressed: onComplete,
       );
     }
-    return FilledButton.icon(
+    return AppButton(
+      label: 'Completa la lezione',
+      icon: Icons.check_circle_outline,
+      height: height,
       onPressed: onComplete,
-      style: style,
-      icon: const Icon(Icons.check_circle_outline, size: 20),
-      label: const Text(
-        'Completa la lezione',
-        style: TextStyle(
-          fontSize: AppText.bodyLarge,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
     );
   }
 

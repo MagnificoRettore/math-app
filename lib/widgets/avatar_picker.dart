@@ -26,12 +26,13 @@ class AvatarPicker extends StatelessWidget {
           spacing: 12,
           runSpacing: 12,
           children: [
-            for (final name in avatarOptions)
+            for (var i = 0; i < avatarOptions.length; i++)
               _Option(
-                name: name,
-                selected: name == selected,
+                name: avatarOptions[i],
+                index: i,
+                selected: avatarOptions[i] == selected,
                 size: _tile,
-                onTap: () => onChanged(name),
+                onTap: () => onChanged(avatarOptions[i]),
               ),
           ],
         ),
@@ -42,12 +43,14 @@ class AvatarPicker extends StatelessWidget {
 
 class _Option extends StatelessWidget {
   final String name;
+  final int index;
   final bool selected;
   final double size;
   final VoidCallback onTap;
 
   const _Option({
     required this.name,
+    required this.index,
     required this.selected,
     required this.size,
     required this.onTap,
@@ -56,6 +59,8 @@ class _Option extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    // I cerchi colorati del design, a turno: giallo, turchese, arancio, lilla.
+    final plates = [c.yellow, c.iconPalette[2], c.orange, c.accentSoft];
     return Semantics(
       selected: selected,
       button: true,
@@ -66,18 +71,26 @@ class _Option extends StatelessWidget {
         child: Container(
           width: size,
           height: size,
+          // Scelto: bordo indaco, poi un anello bianco e uno giallo intorno,
+          // come l'avatar scelto nel design.
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: selected ? c.accentSoft : c.surface,
+            color: plates[index % plates.length],
             border: Border.all(
-              color: selected ? c.accent : c.border,
-              width: selected ? 2 : 1,
+              color: selected ? c.accent : Colors.transparent,
+              width: 4,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(color: c.surface, spreadRadius: 4),
+                    BoxShadow(color: c.yellow, spreadRadius: 7),
+                  ]
+                : null,
           ),
           child: Icon(
             avatarIcon(name),
             size: size * 0.44,
-            color: selected ? c.accent : c.textSecondary,
+            color: c.textPrimary,
           ),
         ),
       ),

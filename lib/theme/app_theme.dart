@@ -5,36 +5,29 @@ import 'app_colors.dart';
 import 'chart_palette.dart';
 
 class AppTheme {
-  /// Il bottone principale a tutta riga delle schermate di accesso, profilo e
-  /// onboarding. Non è il `filledButtonTheme`: `Size.fromHeight` allarga a
-  /// tutta riga, e «Completa la lezione», «Riprendi» o il dialog di Google non
-  /// lo sono. Il colore è il `primary` del tema, cioè `accent`.
-  static final ButtonStyle wideButton = FilledButton.styleFrom(
-    minimumSize: const Size.fromHeight(52),
-    // La famiglia va scritta: un `textStyle` del bottone sostituisce quello
-    // del tema e non eredita il font.
-    textStyle: const TextStyle(
-      fontFamily: AppText.headingFont,
-      fontSize: AppText.titleSmall,
-      fontWeight: FontWeight.w600,
-    ),
-  );
-
-  /// La base dei campi dei form: riquadro a 14, bordo e testi del tema. Non è
+  /// La base dei campi dei form: bordo da 3 lilla, indaco col fuoco, rosso
+  /// nell'errore, raggio 14 e fondo bianco, come nel design. Non è
   /// l'`inputDecorationTheme` perché i campi del dialog di Google restano
   /// sottolineati; ogni campo aggiunge etichetta e icone con `copyWith`.
-  static InputDecoration fieldDecoration(AppPalette c, {required Color fill}) {
-    final border = OutlineInputBorder(
+  static InputDecoration fieldDecoration(AppPalette c) {
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: c.border),
+      borderSide: BorderSide(color: color, width: 3),
     );
     return InputDecoration(
       filled: true,
-      fillColor: fill,
+      fillColor: c.surface,
       labelStyle: TextStyle(color: c.textSecondary),
+      floatingLabelStyle: TextStyle(
+        color: c.accent,
+        fontWeight: FontWeight.w800,
+      ),
       helperStyle: TextStyle(fontSize: AppText.caption, color: c.textSecondary),
-      border: border,
-      enabledBorder: border,
+      border: border(c.border),
+      enabledBorder: border(c.border),
+      focusedBorder: border(c.accent),
+      errorBorder: border(c.hard),
+      focusedErrorBorder: border(c.hard),
     );
   }
 

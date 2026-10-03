@@ -14,6 +14,7 @@ import 'package:math_app/models/multifunction_box/box_payload.dart';
 import 'package:math_app/models/multifunction_box/box_type.dart';
 import 'package:math_app/models/multifunction_box/multifunction_box.dart';
 import 'package:math_app/screens/lesson_screen.dart';
+import 'package:math_app/widgets/app_button.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/mcq_option_tile.dart';
 import 'package:math_app/widgets/practice_quiz_view.dart';
@@ -339,10 +340,7 @@ void main() {
 
     expect(find.byType(LessonScreen), findsOneWidget);
     expect(find.byType(Lottie), findsNothing);
-    expect(
-      find.widgetWithText(FilledButton, 'Completa la lezione'),
-      findsNothing,
-    );
+    expect(find.widgetWithText(AppButton, 'Completa la lezione'), findsNothing);
     expect(
       ProgressStore.instance.isLessonCompleted('high-school', lesson.id),
       isFalse,
@@ -410,7 +408,7 @@ void main() {
 
     final reload = tester.getTopLeft(find.byIcon(Icons.refresh_rounded));
     final complete = tester.getTopLeft(
-      find.widgetWithText(FilledButton, 'Completa la lezione'),
+      find.widgetWithText(AppButton, 'Completa la lezione'),
     );
     expect(reload.dx, lessThan(complete.dx));
     // il bottone è ancorato al padding interno della card, non a piena larghezza
@@ -418,7 +416,7 @@ void main() {
     final padding = (card.padding as EdgeInsets).right;
     final cardRight = tester.getTopRight(find.byType(AppCard).last).dx;
     final completeSize = tester.getSize(
-      find.widgetWithText(FilledButton, 'Completa la lezione'),
+      find.widgetWithText(AppButton, 'Completa la lezione'),
     );
     expect(complete.dx + completeSize.width, closeTo(cardRight - padding, 1));
   });
@@ -521,7 +519,7 @@ void main() {
       find.byKey(ValueKey('lesson_toolbar_${lesson.steps.length - 1}')),
     );
     final complete = tester.getRect(
-      find.widgetWithText(FilledButton, 'Completa la lezione'),
+      find.widgetWithText(AppButton, 'Completa la lezione'),
     );
     expect(toolbar.width, closeTo(complete.height, 1));
     expect(toolbar.bottom, closeTo(complete.bottom, 0.5));

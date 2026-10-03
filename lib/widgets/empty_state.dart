@@ -35,8 +35,9 @@ class EmptyState extends StatelessWidget {
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
+                fontFamily: AppText.headingFont,
                 fontSize: AppText.titleMedium,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
             ),

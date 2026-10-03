@@ -2,7 +2,18 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **478 test in 40 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **485 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — Design del canvas, fase 2: i componenti condivisi
+
+- **`AppButton`** (`lib/widgets/app_button.dart`): la pillola in Fredoka del design, sollevata da un gradino di colore pieno che si accorcia premendo. Varianti principale (indaco), secondaria (giallo, anche sul fondo indaco dello splash) e contorno; disabilitato grigio caldo senza gradino; `busy` con la rotella. Sostituisce i 14 `FilledButton`/`OutlinedButton` e `AppTheme.wideButton`.
+- **`AppCard`**: ombra piena dorata sfalsata in basso, niente bordo di default, raggio 20; `borderWidth` per le card scelte.
+- **Campi**: bordo da 3 lilla, indaco col fuoco, rosso nell'errore, fondo bianco.
+- **`ProgressBar`**: gialla a strisce con il bordo oro da 10 px in su, piena e arrotondata sotto.
+- **Controlli scelti**: gli anni (`YearTabs`) sono i quadrati gialli della «Classe»; tessera della scuola, opzioni delle domande e avatar col bordo da 3; il play delle righe consigliate è il bottone tondo arancio.
+- **Titoli in Fredoka** in testate, stati vuoti, feedback, carosello e card «riprendi», con il badge giallo.
+- **Calcolatrice**: tasti nello stile del design ed etichette senza i caratteri che Nunito non ha (`asin`, `1/x`, `x^y`, `e^x`, `10^x`, ⌫ come icona).
+- Test: nuovi `test/app_button_test.dart` (varianti, disabilitato, altezza costante premendo, busy) e `test/progress_bar_test.dart` (alta a strisce, sottile piena); i test che cercavano `FilledButton` cercano `AppButton`. Suite a **485 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — Design del canvas, fase 1: colori, font e tema
 

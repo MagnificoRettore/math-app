@@ -10,6 +10,7 @@ import '../widgets/empty_state.dart';
 import '../widgets/weak_topic_row.dart';
 import 'weak_topic_screen.dart';
 import 'welcome_screen.dart';
+import '../widgets/app_button.dart';
 
 class WeakPointsScreen extends StatelessWidget {
   const WeakPointsScreen({super.key});
@@ -96,12 +97,12 @@ class _GuestWeakPoints extends StatelessWidget {
               style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
             ),
             const SizedBox(height: 20),
-            FilledButton(
+            AppButton(
               key: const Key('weak-points-guest-cta'),
+              label: 'Crea il tuo profilo',
               onPressed: () => Navigator.of(
                 context,
               ).push(MaterialPageRoute(builder: (_) => const WelcomeScreen())),
-              child: const Text('Crea il tuo profilo'),
             ),
           ],
         ),

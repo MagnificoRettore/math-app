@@ -201,7 +201,9 @@ void main() {
   });
 
   group('superfici', () {
-    testWidgets('la card ha il raggio grande dell\'app', (tester) async {
+    testWidgets('la card ha il raggio e l\'ombra piena del design', (
+      tester,
+    ) async {
       await _registra();
       await _pausa('eq1-intro');
       await _pumpHome(tester);
@@ -215,7 +217,12 @@ void main() {
           (box.decoration! as BoxDecoration).borderRadius! as BorderRadius;
 
       expect(radius.topLeft.x, kCardRadius);
-      expect(kCardRadius, 24);
+      expect(kCardRadius, 20);
+      // Un gradino pieno e dorato, non un'ombra sfumata.
+      final ombra = (box.decoration! as BoxDecoration).boxShadow!.single;
+      expect(ombra.color, AppPalette.light.cardShadow);
+      expect(ombra.blurRadius, 0);
+      expect(ombra.offset, const Offset(0, 6));
     });
 
     testWidgets('la card riprendi ha l\'alone nell\'angolo in alto a destra', (

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/school_level_tile.dart';
+import '../widgets/app_button.dart';
 
 class SchoolPickerScreen extends StatefulWidget {
   final String initialLevelId;
@@ -77,10 +77,10 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
                 ),
               ),
             const SizedBox(height: 8),
-            FilledButton(
+            AppButton(
+              label: onboarding ? 'Crea il mio profilo' : 'Salva',
               onPressed: _selectedId.isEmpty ? null : _save,
-              style: AppTheme.wideButton,
-              child: Text(onboarding ? 'Crea il mio profilo' : 'Salva'),
+              expand: true,
             ),
           ],
         ),

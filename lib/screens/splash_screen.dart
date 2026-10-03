@@ -14,6 +14,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
+import '../widgets/app_button.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -126,27 +127,12 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: c.onSplash,
-                      foregroundColor: c.splashTop,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
+                  // Sul fondo indaco il bottone è giallo: l'indaco sparirebbe.
+                  AppButton(
+                    label: 'Riprova',
+                    icon: Icons.refresh,
+                    variant: AppButtonVariant.secondary,
                     onPressed: _retry,
-                    icon: const Icon(Icons.refresh, size: 20),
-                    label: const Text(
-                      'Riprova',
-                      style: TextStyle(
-                        fontSize: AppText.bodyLarge,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                   ),
                 ] else
                   const SizedBox(height: 32),
