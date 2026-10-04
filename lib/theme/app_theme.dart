@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../theme/app_text.dart';
 import 'app_colors.dart';
@@ -30,6 +31,20 @@ class AppTheme {
       focusedErrorBorder: border(c.hard),
     );
   }
+
+  /// Il tema della toolbar delle lezioni: FAB e pannello indaco con le icone
+  /// bianche, come la barra di avanzamento della lezione.
+  ///
+  /// È un tema di `material_3_expressive` e non un `ThemeData`: il pacchetto
+  /// legge i colori dal `Theme` di `material_ui`, non da quello di Flutter,
+  /// quindi senza questo la toolbar resta sul lilla di default di Material 3.
+  /// Lo schema nasce dall'indaco dell'app e cambia solo i colori del FAB.
+  static final M3EThemeData lessonToolbar = M3EThemeData(
+    colorScheme: M3EColorScheme.fromSeed(AppPalette.light.accent).copyWith(
+      primaryContainer: AppPalette.light.accent,
+      onPrimaryContainer: AppPalette.light.onHeaderBand,
+    ),
+  );
 
   /// Il tema dell'app, uno solo e chiaro come il design.
   static final ThemeData light = _build(AppPalette.light);

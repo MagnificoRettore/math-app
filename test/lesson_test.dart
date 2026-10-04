@@ -530,6 +530,35 @@ void main() {
     expect(complete.left, greaterThan(toolbar.left + 100));
   });
 
+  testWidgets('la toolbar ha il colore della barra di avanzamento', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Equazioni di primo grado')
+        .lessons
+        .first;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final barra = tester.widget<M3EProgressIndicator>(
+      find.byType(M3EProgressIndicator),
+    );
+    const key = ValueKey('lesson_toolbar_0');
+    final toolbar = tester.widget<M3EToolbar>(find.byKey(key));
+    // Il pannello espanso e il FAB sono dell'indaco della barra; il FAB lo
+    // prende dal tema del pacchetto, che non legge il `Theme` di Flutter.
+    expect(toolbar.backgroundColor, barra.color);
+    final tema = tester.widget<M3ETheme>(
+      find.ancestor(of: find.byKey(key), matching: find.byType(M3ETheme)),
+    );
+    expect(tema.data.colorScheme.primaryContainer, barra.color);
+    expect(tema.data.colorScheme.onPrimaryContainer, Colors.white);
+  });
+
   testWidgets('la toolbar sta nel footer della card e il FAB la espande', (
     tester,
   ) async {

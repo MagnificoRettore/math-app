@@ -162,6 +162,7 @@ assets/data/     # levels.json, middle_school.json, high_school.json, university
   - **Non** sta nella `Row` del footer: il pacchetto riserva l'altezza della pila (136px, di cui 80 il FAB) in layout anche da collassata, e con la larghezza illimitata di una `Row` il suo layout verticale va in `Infinity` — da qui il `width` nella `Positioned`.
   - Una toolbar per card, costruita dal `PageView`: lo stato di espansione vive in `_LessonScreenState` (`expanded` + `onExpandedChanged`), altrimenti ogni swipe la richiuderebbe.
   - Il tap è sull'icona del FAB, non sul `getCenter` del pacchetto.
+  - **Colori**: FAB e pannello sono `accent` come la barra di avanzamento della lezione. Il pannello prende `backgroundColor`/`foregroundColor`; il FAB no, legge `primaryContainer` dal **tema del pacchetto**, che **non è il `Theme` di Flutter** (`material_3_expressive` usa il `ThemeData` di `material_ui`): per questo la toolbar sta dentro `M3ETheme(data: AppTheme.lessonToolbar)`, uno schema nato dall'indaco con `primaryContainer` indaco e contenuto bianco. Un `Theme` di Flutter attorno non cambia niente.
 
 ### Home, ripresa e avanzamento
 

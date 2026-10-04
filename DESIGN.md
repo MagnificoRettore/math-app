@@ -168,6 +168,9 @@ Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Fredoka e una
 ### Testata ondulata — `WaveBottomClipper` (`lib/widgets/wave_clipper.dart`)
 Il bordo in basso della testata di «Creazione profilo», scalato sul riquadro: nel benvenuto (con gli angoli in alto arrotondati) e nella registrazione a passi (a filo dello schermo).
 
+### Toolbar delle lezioni (`M3EToolbar` in `LessonScreen`)
+Il FAB degli strumenti e il pannello che si apre sono **indaco come la barra di avanzamento della lezione**, con le icone bianche. I colori del FAB vengono da `AppTheme.lessonToolbar`, un tema di `material_3_expressive`: il pacchetto non legge il `Theme` di Flutter, e senza resterebbe sul lilla di default di Material 3.
+
 ### Calcolatrice
 Tasti da 40: cifre bianche col bordo da 3, operatori gialli e `=` indaco col gradino pieno, funzioni lilla, AC e ⌫ in rosso. Etichette in Nunito 800.
 
@@ -251,7 +254,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 |---|---|
 | Colori | `lib/theme/app_colors.dart`, `lib/theme/chart_palette.dart` |
 | Caratteri | `lib/theme/app_text.dart`, `assets/fonts/` |
-| Tema, campi | `lib/theme/app_theme.dart` |
+| Tema, campi, tema della toolbar delle lezioni | `lib/theme/app_theme.dart` |
 | Movimento | `lib/theme/app_motion.dart` |
 | Bottone, card, barra | `lib/widgets/app_button.dart`, `app_card.dart`, `progress_bar.dart` |
 | Selezioni | `lib/widgets/year_tabs.dart`, `avatar_picker.dart`, `mcq_option_tile.dart`, `school_level_tile.dart` |
@@ -268,6 +271,7 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-04 | Toolbar delle lezioni indaco come la barra di avanzamento (FAB e pannello, icone bianche); prima restava sul lilla di default di Material 3. |
 | 2026-10-04 | Nasce `DESIGN.md`, a partire dal design già in uso. |
 | 2026-10-04 | Micro-interazioni: `AppMotion`; bottoni che scendono sul gradino; rimbalzo dell'avatar; anni animati con spunta; barra animata; registrazione a passi con testata ondulata e passi che entrano di lato; entrata in sequenza della Home; pop e scossa sulle risposte; scossa dei campi obbligatori vuoti. |
 | 2026-10-03 | Fase 3, le schermate: illustrazioni in splash, onboarding e stati vuoti; testata ondulata del benvenuto; card «riprendi» a quaderno; serie di giorni come card «Traguardo»; titoli in Fredoka. |

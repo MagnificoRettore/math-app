@@ -2,7 +2,12 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **524 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **525 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-04 — Toolbar delle lezioni indaco
+
+- Il FAB degli strumenti e il pannello della toolbar nelle lezioni sono indaco come la barra di avanzamento, con le icone bianche. Prima restavano sul lilla di default di Material 3: `material_3_expressive` legge i colori dal `Theme` di `material_ui`, non da quello di Flutter, quindi non vedeva il tema dell'app. Ora la toolbar sta in `M3ETheme(data: AppTheme.lessonToolbar)`.
+- Test: in `test/lesson_test.dart` il colore di pannello e FAB confrontato con quello della barra. Suite a **525 test in 46 file**, `flutter analyze` pulito.
 
 ## 2026-10-04 — DESIGN.md
 

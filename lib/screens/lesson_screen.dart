@@ -12,6 +12,7 @@ import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mcq_option_tile.dart';
@@ -620,7 +621,7 @@ class _StepCard extends StatelessWidget {
             left: 0,
             bottom: bottomInset,
             width: M3EToolbarTokens.fabMedium,
-            child: _toolsBar(),
+            child: _toolsBar(c),
           ),
         ],
       ),
@@ -637,25 +638,33 @@ class _StepCard extends StatelessWidget {
   /// `Infinity`: da qui il `width` nella `Positioned`. La scala parte dal basso
   /// a sinistra, così il FAB dipinto è a filo del padding della card e ha lo
   /// stesso spigolo inferiore del bottone, e la pila si rivela in alto.
-  Widget _toolsBar() {
+  Widget _toolsBar(AppPalette c) {
     return Transform.scale(
       alignment: Alignment.bottomLeft,
       scale: _kFooterControlHeight / M3EToolbarTokens.fabMedium,
-      child: M3EToolbar(
-        key: ValueKey('lesson_toolbar_$index'),
-        axis: Axis.vertical,
-        fabPosition: M3EToolbarFabPosition.bottom,
-        expanded: toolbarExpanded,
-        onExpandedChanged: onToolbarExpandedChanged,
-        fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
-        fabCollapseIcon: const Icon(M3EIcons.close_rounded),
-        actions: [
-          M3EToolbarAction(
-            icon: M3EIcons.calculate_rounded,
-            tooltip: 'Calcolatrice',
-            onPressed: onOpenCalculator,
-          ),
-        ],
+      // Indaco come la barra di avanzamento: il FAB prende i colori da
+      // `AppTheme.lessonToolbar` (dal `Theme` di Flutter non gli arriverebbero),
+      // il pannello espanso quelli qui sotto.
+      child: M3ETheme(
+        data: AppTheme.lessonToolbar,
+        child: M3EToolbar(
+          backgroundColor: c.accent,
+          foregroundColor: Colors.white,
+          key: ValueKey('lesson_toolbar_$index'),
+          axis: Axis.vertical,
+          fabPosition: M3EToolbarFabPosition.bottom,
+          expanded: toolbarExpanded,
+          onExpandedChanged: onToolbarExpandedChanged,
+          fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
+          fabCollapseIcon: const Icon(M3EIcons.close_rounded),
+          actions: [
+            M3EToolbarAction(
+              icon: M3EIcons.calculate_rounded,
+              tooltip: 'Calcolatrice',
+              onPressed: onOpenCalculator,
+            ),
+          ],
+        ),
       ),
     );
   }
