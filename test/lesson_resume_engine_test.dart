@@ -117,6 +117,15 @@ void main() {
         'high-school',
         'mod-equations-intro',
       );
+      // Anche le lezioni dell'argomento d'esempio dei grafici, in prima.
+      for (final id in [
+        'ex-arg-funzioni',
+        'ex-arg-geometria',
+        'ex-arg-disequazioni',
+        'ex-arg-barre',
+      ]) {
+        await ProgressStore.instance.completeLesson('high-school', id);
+      }
 
       expect(LessonResumeEngine.target(levelId: 'high-school'), isNull);
     });

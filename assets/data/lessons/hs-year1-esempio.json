@@ -1,0 +1,511 @@
+{
+    "level": "high-school",
+    "year": "year1",
+    "section": "year1-esempio",
+    "topic": "year1-esempio-argomento",
+    "title": "Esempio argomento",
+    "subtitle": "Tutti i grafici delle lezioni",
+    "icon": "show_chart",
+    "lessons": [
+        {
+            "id": "ex-arg-funzioni",
+            "title": "Funzioni e punti",
+            "subtitle": "Una parabola e un'iperbole sul piano cartesiano",
+            "minutes": 3,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Una parabola",
+                    "content": [
+                        "La parabola $y = x^2 - 2x - 3$ taglia l'asse $x$ dove $y = 0$, cioè in $x = -1$ e $x = 3$.",
+                        {
+                            "id": "ex-parabola",
+                            "box_type": "graph",
+                            "title": "y = x² − 2x − 3",
+                            "payload": {
+                                "x": [
+                                    -3,
+                                    5
+                                ],
+                                "y": [
+                                    -5,
+                                    6
+                                ],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "x^2 - 2*x - 3",
+                                        "label": "y = x^2 - 2x - 3",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            -1,
+                                            0
+                                        ],
+                                        "label": "A(-1,\\,0)",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            3,
+                                            0
+                                        ],
+                                        "label": "B(3,\\,0)",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            1,
+                                            -4
+                                        ],
+                                        "label": "V(1,\\,-4)",
+                                        "guides": true,
+                                        "color": "teal"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il **vertice** $V(1, -4)$ sta a metà fra le due intersezioni: le guide tratteggiate ne leggono le coordinate sugli assi."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Un'iperbole e i suoi asintoti",
+                    "content": [
+                        "La funzione $y = \\frac{1}{x - 2} + 1$ non esiste in $x = 2$: lì il grafico si spezza.",
+                        {
+                            "id": "ex-iperbole",
+                            "box_type": "graph",
+                            "title": "y = 1/(x − 2) + 1",
+                            "payload": {
+                                "x": [
+                                    -4,
+                                    8
+                                ],
+                                "y": [
+                                    -5,
+                                    7
+                                ],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "1/(x - 2) + 1",
+                                        "label": "y = \\frac{1}{x-2} + 1",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "line",
+                                        "x": 2,
+                                        "style": "dashed",
+                                        "label": "x = 2",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "line",
+                                        "y": 1,
+                                        "style": "dashed",
+                                        "label": "y = 1",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        },
+                        "Le rette tratteggiate sono gli **asintoti**: la curva si avvicina sempre di più, senza toccarle."
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ex-arg-geometria",
+            "title": "Geometria analitica",
+            "subtitle": "Circonferenze, triangoli, vettori e curve",
+            "minutes": 3,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Una circonferenza",
+                    "content": [
+                        "La circonferenza di centro $C(1, 1)$ e raggio $3$ è l'insieme dei punti a distanza $3$ da $C$.",
+                        {
+                            "id": "ex-circonferenza",
+                            "box_type": "graph",
+                            "title": "Centro C(1, 1), raggio 3",
+                            "payload": {
+                                "x": [
+                                    -4,
+                                    6
+                                ],
+                                "y": [
+                                    -4,
+                                    6
+                                ],
+                                "aspect": "equal",
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "circle",
+                                        "center": [
+                                            1,
+                                            1
+                                        ],
+                                        "radius": 3,
+                                        "fill": true,
+                                        "label": "\\mathcal{C}",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "segment",
+                                        "from": [
+                                            1,
+                                            1
+                                        ],
+                                        "to": [
+                                            1,
+                                            4
+                                        ],
+                                        "label": "r = 3",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            1,
+                                            1
+                                        ],
+                                        "label": "C",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        },
+                        "Sui due assi l'unità è la stessa: per questo la circonferenza è rotonda e non schiacciata."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Un triangolo e un vettore",
+                    "content": [
+                        {
+                            "id": "ex-triangolo",
+                            "box_type": "graph",
+                            "title": "Triangolo ABC e vettore v",
+                            "payload": {
+                                "x": [
+                                    -1,
+                                    7
+                                ],
+                                "y": [
+                                    -1,
+                                    5
+                                ],
+                                "aspect": "equal",
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "polygon",
+                                        "points": [
+                                            [
+                                                0,
+                                                0
+                                            ],
+                                            [
+                                                4,
+                                                0
+                                            ],
+                                            [
+                                                1,
+                                                3
+                                            ]
+                                        ],
+                                        "label": "T",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            0,
+                                            0
+                                        ],
+                                        "label": "A",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            4,
+                                            0
+                                        ],
+                                        "label": "B",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            1,
+                                            3
+                                        ],
+                                        "label": "C",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "vector",
+                                        "from": [
+                                            4,
+                                            0
+                                        ],
+                                        "to": [
+                                            6,
+                                            3
+                                        ],
+                                        "label": "\\vec v",
+                                        "color": "pink"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il vettore $\\vec v$ va da $(4, 0)$ a $(6, 3)$: le sue componenti sono $(2, 3)$."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Una curva parametrica",
+                    "content": [
+                        "Un'**ellisse** si descrive con un parametro $t$: $x = 3\\cos t$, $y = 2\\sin t$, con $t$ da $0$ a $2\\pi$.",
+                        {
+                            "id": "ex-ellisse",
+                            "box_type": "graph",
+                            "title": "Ellisse di semiassi 3 e 2",
+                            "payload": {
+                                "x": [
+                                    -4,
+                                    4
+                                ],
+                                "y": [
+                                    -3,
+                                    3
+                                ],
+                                "aspect": "equal",
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "curve",
+                                        "x": "3*cos(t)",
+                                        "y": "2*sin(t)",
+                                        "t": [
+                                            0,
+                                            6.2832
+                                        ],
+                                        "label": "x = 3\\cos t,\\ y = 2\\sin t",
+                                        "color": "purple"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ex-arg-disequazioni",
+            "title": "Aree e disequazioni",
+            "subtitle": "Regioni del piano e intervalli sulla retta",
+            "minutes": 4,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "L'area fra due curve",
+                    "content": [
+                        "La retta $y = x + 2$ e la parabola $y = x^2$ si incontrano in $x = -1$ e $x = 2$. Fra i due punti la retta sta sopra.",
+                        {
+                            "id": "ex-area",
+                            "box_type": "graph",
+                            "title": "Area fra y = x + 2 e y = x²",
+                            "payload": {
+                                "x": [
+                                    -3,
+                                    4
+                                ],
+                                "y": [
+                                    -1,
+                                    6
+                                ],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "area",
+                                        "between": [
+                                            "x + 2",
+                                            "x^2"
+                                        ],
+                                        "from": -1,
+                                        "to": 2,
+                                        "label": "A",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "function",
+                                        "expr": "x + 2",
+                                        "label": "y = x + 2",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "function",
+                                        "expr": "x^2",
+                                        "label": "y = x^2",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Una regione del piano",
+                    "content": [
+                        "Il sistema $y \\ge x^2 - 4$ e $y < 2 - x$ è la parte di piano **sopra** la parabola e **sotto** la retta.",
+                        {
+                            "id": "ex-regione",
+                            "box_type": "graph",
+                            "title": "y ≥ x² − 4 e y < 2 − x",
+                            "payload": {
+                                "x": [
+                                    -5,
+                                    4
+                                ],
+                                "y": [
+                                    -5,
+                                    7
+                                ],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "region",
+                                        "where": [
+                                            "y >= x^2 - 4",
+                                            "y < 2 - x"
+                                        ],
+                                        "label": "R",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il bordo della parabola è **continuo** perché il $\\ge$ lo include; quello della retta è **tratteggiato** perché il $<$ lo esclude."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Un sistema sulla retta numerica",
+                    "content": [
+                        "Le soluzioni di $x \\ge -1$ e di $x < \\frac{5}{3}$ si disegnano una per riga; la soluzione del sistema è dove valgono **entrambe**.",
+                        {
+                            "id": "ex-retta",
+                            "box_type": "graph",
+                            "title": "Sistema di disequazioni",
+                            "payload": {
+                                "plane": "numberLine",
+                                "items": [
+                                    {
+                                        "type": "interval",
+                                        "set": "[-1, +inf[",
+                                        "label": "x \\ge -1",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "interval",
+                                        "set": "]-inf, 5/3[",
+                                        "label": "x < \\frac{5}{3}",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "interval",
+                                        "set": "[-1, 5/3[",
+                                        "label": "S",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il pallino **pieno** in $-1$ dice che l'estremo è incluso, quello **vuoto** in $\\frac{5}{3}$ che è escluso."
+                    ]
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "$$\\begin{cases} x \\ge -1 \\\\ x < \\frac{5}{3} \\end{cases}$$",
+                    "options": [
+                        "$$\\left[-1,\\ \\frac{5}{3}\\right[$$",
+                        "$$\\left]-1,\\ \\frac{5}{3}\\right]$$",
+                        "$$\\left[-1,\\ +\\infty\\right[$$",
+                        "$$\\left]-\\infty,\\ \\frac{5}{3}\\right[$$"
+                    ],
+                    "correctIndex": 0,
+                    "explanation": "Valgono entrambe da $-1$ incluso fino a $\\frac{5}{3}$ escluso: $\\left[-1, \\frac{5}{3}\\right[$."
+                }
+            ]
+        },
+        {
+            "id": "ex-arg-barre",
+            "title": "Grafici a barre",
+            "subtitle": "Confrontare due serie di dati",
+            "minutes": 2,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Minuti di studio",
+                    "content": [
+                        "Le barre confrontano due settimane giorno per giorno: con due serie compare la legenda.",
+                        {
+                            "id": "ex-barre",
+                            "box_type": "graph",
+                            "title": "Minuti di studio al giorno",
+                            "payload": {
+                                "plane": "bars",
+                                "xLabel": "",
+                                "yLabel": "min",
+                                "categories": [
+                                    "Lun",
+                                    "Mar",
+                                    "Mer",
+                                    "Gio",
+                                    "Ven"
+                                ],
+                                "series": [
+                                    {
+                                        "label": "\\text{Settimana 1}",
+                                        "color": "accent",
+                                        "values": [
+                                            20,
+                                            35,
+                                            15,
+                                            40,
+                                            25
+                                        ]
+                                    },
+                                    {
+                                        "label": "\\text{Settimana 2}",
+                                        "color": "orange",
+                                        "values": [
+                                            30,
+                                            25,
+                                            45,
+                                            35,
+                                            50
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        "Nella seconda settimana lo studio è cresciuto in quattro giorni su cinque."
+                    ]
+                }
+            ]
+        }
+    ]
+}

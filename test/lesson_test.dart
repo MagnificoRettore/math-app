@@ -86,7 +86,7 @@ void main() {
 
   test('il repository carica gli argomenti e filtra per anno', () {
     expect(LessonRepository.instance.loaded, isTrue);
-    expect(LessonRepository.instance.argomenti, hasLength(3));
+    expect(LessonRepository.instance.argomenti, hasLength(4));
 
     final argomento = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Equazioni di primo grado',
@@ -107,7 +107,8 @@ void main() {
       'high-school',
       'year1',
     );
-    expect(lessons, hasLength(1));
+    // Le equazioni (1) e l'argomento d'esempio dei grafici (4).
+    expect(lessons, hasLength(5));
     expect(LessonRepository.instance.lessonsInYear('high-school', 'year2'), [
       ...moduli.lessons,
     ]);

@@ -4,6 +4,11 @@ Changelog e roadmap del progetto.
 
 Stato della suite: **542 test in 45 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
+## 2026-10-04 — Argomento d'esempio dei grafici
+
+- Nuovo argomento «Esempio argomento» in prima superiore (`hs-year1-esempio.json`) con tutti i tipi di grafico: parabola con intersezioni e vertice, iperbole con gli asintoti; circonferenza con raggio, triangolo e vettore, ellisse parametrica; area fra due curve, regione di un sistema di disequazioni, sistema sulla retta numerica con una domanda; barre con due serie.
+- Test: `lesson_test.dart` conta quattro argomenti e cinque lezioni in prima; in `lesson_resume_engine_test.dart` l'anno completo comprende le lezioni d'esempio. Suite a **542 test in 45 file**, `flutter analyze` pulito.
+
 ## 2026-10-04 — Grafici delle lezioni, fase 3: retta numerica
 
 - `plane: "numberLine"`: intervalli scritti come sul libro (`"set": "]-1, 5/3]"`, con `-inf`/`+inf`), una riga ciascuno dall'alto, estremi pieni se inclusi e vuoti se esclusi, guide tratteggiate fino alla retta; i punti (`"at": 3`) stanno sulla retta. Sotto, solo i numeri degli estremi e dei punti come sono scritti; con `grid` anche quelli regolari, diradati.
