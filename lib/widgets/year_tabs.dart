@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/course.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 
 class YearTabs extends StatelessWidget {
@@ -80,6 +81,11 @@ String yearCircleText(String title) {
   return words.take(2).map((w) => w.substring(0, 1)).join().toUpperCase();
 }
 
+/// Un anno: il quadrato della «Classe» del design, con la sua etichetta.
+///
+/// Scegliendolo, colore, bordo e testi passano in [AppMotion.medium] e la
+/// spunta entra con un rimbalzo ([AppMotion.bounce], [AppMotion.slow]); col
+/// movimento ridotto il cambio è istantaneo.
 class _YearTab extends StatelessWidget {
   final String circleText;
   final String label;
@@ -96,68 +102,99 @@ class _YearTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return GestureDetector(
+    final change = AppMotion.duration(context, AppMotion.medium);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      // Il tocco va dichiarato qui: `excludeSemantics` nasconde anche quello
+      // del `GestureDetector`, e lo screen reader non potrebbe scegliere.
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            width: 44,
-            height: 44,
-            alignment: Alignment.center,
-            // Il quadrato arrotondato della «Classe» del design: giallo con il
-            // bordo oro l'anno scelto, bianco con il bordo lilla gli altri.
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: selected ? c.yellow : c.surface,
-              border: Border.all(
-                color: selected ? c.yellowDeep : c.border,
-                width: 3,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedContainer(
+                  duration: change,
+                  curve: AppMotion.standard,
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  // Il quadrato arrotondato della «Classe» del design: giallo
+                  // con il bordo oro l'anno scelto, bianco con il bordo lilla
+                  // gli altri.
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: selected ? c.yellow : c.surface,
+                    border: Border.all(
+                      color: selected ? c.yellowDeep : c.border,
+                      width: 3,
+                    ),
+                  ),
+                  // Inchiostro sul giallo, indaco sul bianco.
+                  child: AnimatedDefaultTextStyle(
+                    duration: change,
+                    curve: AppMotion.standard,
+                    style: TextStyle(
+                      fontFamily: AppText.headingFont,
+                      fontSize: AppText.titleMedium,
+                      fontWeight: FontWeight.w600,
+                      color: selected ? c.textPrimary : c.accent,
+                    ),
+                    child: Text(circleText),
+                  ),
+                ),
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: AnimatedScale(
+                    key: const Key('year-tab-check'),
+                    scale: selected ? 1 : 0,
+                    duration: AppMotion.duration(context, AppMotion.slow),
+                    curve: AppMotion.bounce,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: c.accent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: c.surface, width: 2),
+                      ),
+                      child: Icon(
+                        Icons.check_rounded,
+                        size: 11,
+                        color: c.surface,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 72),
+              child: AnimatedDefaultTextStyle(
+                duration: change,
+                curve: AppMotion.standard,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: AppText.micro,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? c.textPrimary : c.textSecondary,
+                ),
+                child: Text(label),
               ),
             ),
-            child: _CircleText(text: circleText, selected: selected),
-          ),
-          const SizedBox(height: 5),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 72),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppText.micro,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? c.textPrimary : c.textSecondary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CircleText extends StatelessWidget {
-  final String text;
-  final bool selected;
-
-  const _CircleText({required this.text, this.selected = false});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Text(
-      text,
-      // Inchiostro sul giallo, indaco sul bianco: come la «Classe» del design.
-      style: TextStyle(
-        fontFamily: AppText.headingFont,
-        fontSize: AppText.titleMedium,
-        fontWeight: FontWeight.w600,
-        color: selected ? c.textPrimary : c.accent,
+          ],
+        ),
       ),
     );
   }

@@ -32,6 +32,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Le micro-interazioni combinate (passi della registrazione, entrate in
+  # sequenza, shake): le implicite di Flutter bastano per tutto il resto.
+  flutter_animate: ^4.5.2
   flutter_math_fork: ^0.7.4
   # Le illustrazioni del design (assets/illustrations/), in SVG statico.
   flutter_svg: ^2.3.0

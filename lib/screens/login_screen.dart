@@ -7,6 +7,7 @@ import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
+import '../widgets/shake.dart';
 import 'registration_screen.dart';
 import 'school_picker_screen.dart';
 import '../widgets/app_button.dart';
@@ -27,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _shakes = FieldShakes();
   bool _busy = false;
   String? _error;
 
@@ -72,32 +74,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: _identifierController,
-                      textInputAction: TextInputAction.next,
-                      autocorrect: false,
-                      autofillHints: const [AutofillHints.username],
-                      decoration: AppTheme.fieldDecoration(c).copyWith(
-                        labelText: 'Email o ID account',
-                        prefixIcon: Icon(
-                          Icons.person_outline,
-                          color: c.textSecondary,
+                    ShakeWidget(
+                      trigger: _shakes.of(_identifierController),
+                      child: TextFormField(
+                        controller: _identifierController,
+                        textInputAction: TextInputAction.next,
+                        autocorrect: false,
+                        autofillHints: const [AutofillHints.username],
+                        decoration: AppTheme.fieldDecoration(c).copyWith(
+                          labelText: 'Email o ID account',
+                          prefixIcon: Icon(
+                            Icons.person_outline,
+                            color: c.textSecondary,
+                          ),
                         ),
+                        validator: (value) => (value?.trim() ?? '').isEmpty
+                            ? 'Scrivi il tuo ID account o la tua email'
+                            : null,
                       ),
-                      validator: (value) => (value?.trim() ?? '').isEmpty
-                          ? 'Scrivi il tuo ID account o la tua email'
-                          : null,
                     ),
                     const SizedBox(height: 12),
-                    PasswordField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      onSubmitted: (_) => _submit(),
-                      validator: (value) => (value == null || value.isEmpty)
-                          ? 'Scrivi la password'
-                          : null,
+                    ShakeWidget(
+                      trigger: _shakes.of(_passwordController),
+                      child: PasswordField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onSubmitted: (_) => _submit(),
+                        validator: (value) => (value == null || value.isEmpty)
+                            ? 'Scrivi la password'
+                            : null,
+                      ),
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 12),
@@ -184,7 +192,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (_busy) return;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(
+        () => _shakes.shakeEmpty([_identifierController, _passwordController]),
+      );
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;

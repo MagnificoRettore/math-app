@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 import 'math_text.dart';
 
@@ -44,9 +47,10 @@ class McqOptionTile extends StatelessWidget {
       McqOptionState.idle => (c.border, c.surface, c.textSecondary, null),
     };
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
+    final reduced = AppMotion.reduced(context);
+    final tile = AnimatedContainer(
+      duration: AppMotion.duration(context, AppMotion.medium),
+      curve: AppMotion.standard,
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(14),
@@ -68,7 +72,15 @@ class McqOptionTile extends StatelessWidget {
                 ),
                 if (check != null) ...[
                   const SizedBox(width: 10),
-                  Icon(check, size: 22, color: iconColor),
+                  // La spunta entra in scala con il rimbalzo, al montaggio.
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: reduced ? 1 : 0, end: 1),
+                    duration: AppMotion.duration(context, AppMotion.slow),
+                    curve: AppMotion.bounce,
+                    builder: (context, value, child) =>
+                        Transform.scale(scale: value, child: child),
+                    child: Icon(check, size: 22, color: iconColor),
+                  ),
                 ],
               ],
             ),
@@ -76,8 +88,25 @@ class McqOptionTile extends StatelessWidget {
         ),
       ),
     );
+    // Il pop della risposta giusta: una campana di scala, 1 → 1.06 → 1,
+    // mentre il valore va da 0 a 1. È un'animazione implicita e sempre
+    // presente: la struttura non cambia, quindi il passaggio di colore non
+    // riparte, e a differenza di un `Animate` non lascia timer al montaggio.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: state == McqOptionState.correct ? 1 : 0),
+      duration: AppMotion.duration(context, AppMotion.slow),
+      curve: AppMotion.standard,
+      builder: (context, value, child) => Transform.scale(
+        scale: 1 + (_kPop - 1) * math.sin(math.pi * value),
+        child: child,
+      ),
+      child: tile,
+    );
   }
 }
+
+/// Quanto cresce l'opzione giusta al culmine del pop.
+const double _kPop = 1.06;
 
 /// Esito della risposta: messaggio verde su quella giusta, rosso su quella
 /// sbagliata.
@@ -98,7 +127,8 @@ class McqFeedbackCard extends StatelessWidget {
     final c = AppColors.of(context);
     final color = correct ? c.easy : c.hard;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: AppMotion.duration(context, AppMotion.medium),
+      curve: AppMotion.standard,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
@@ -133,76 +163,6 @@ class McqFeedbackCard extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// Scuotimento orizzontale usato sulla risposta sbagliata.
-class ShakeWidget extends StatefulWidget {
-  final Widget child;
-
-  const ShakeWidget({super.key, required this.child});
-
-  @override
-  State<ShakeWidget> createState() => _ShakeWidgetState();
-}
-
-class _ShakeWidgetState extends State<ShakeWidget>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 420),
-  );
-  late final Animation<double> _shake = TweenSequence<double>([
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 0.0,
-        end: -12.0,
-      ).chain(CurveTween(curve: Curves.easeOut)),
-      weight: 2,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: -12.0,
-        end: 12.0,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 4,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: 12.0,
-        end: -8.0,
-      ).chain(CurveTween(curve: Curves.easeInOut)),
-      weight: 3,
-    ),
-    TweenSequenceItem(
-      tween: Tween(
-        begin: -8.0,
-        end: 0.0,
-      ).chain(CurveTween(curve: Curves.easeOut)),
-      weight: 3,
-    ),
-  ]).animate(_controller);
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) =>
-          Transform.translate(offset: Offset(_shake.value, 0), child: child),
-      child: widget.child,
     );
   }
 }

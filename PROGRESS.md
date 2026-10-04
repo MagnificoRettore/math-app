@@ -2,7 +2,61 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **490 test in 43 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **524 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-04 — Micro-interazioni, 9: i campi di testo
+
+- **Shake dei campi obbligatori vuoti**: premendo «Continua», «Accedi» o «Salva modifiche» con un campo obbligatorio vuoto, quel campo si scuote (registrazione, login, profilo). Il campo resta lo stesso widget: tiene fuoco, testo ed errore.
+- `ShakeWidget` passa in `lib/widgets/shake.dart` e diventa un'animazione implicita con un `trigger`: senza si scuote al montaggio (la card «Non è corretto», come prima), con si scuote quando il numero cresce. Non usa più `flutter_animate`: cambiare la chiave a un campo lo ricreerebbe, e un `Animate` sempre presente lascia un timer al montaggio. `FieldShakes` tiene i contatori per campo.
+- **Bordo al fuoco**: già animato da Flutter (`InputDecorator`, 167 ms); non serviva altro.
+- Col movimento ridotto niente scossa.
+- Test: nuovo `test/shake_test.dart` (niente scossa al montaggio, scossa al trigger e ritorno a zero, fuoco e testo conservati, movimento ridotto, `FieldShakes` solo sui vuoti); casi nuovi in `registration_screen_test.dart` e `login_screen_test.dart`. Suite a **524 test in 46 file**, `flutter analyze` pulito.
+
+## 2026-10-04 — Micro-interazioni, 8: il feedback degli esercizi
+
+- **Risposta sbagliata**: la card «Non è corretto» si scuote, ora con `flutter_animate` (`shakeX`, 300 ms, 4 oscillazioni di 10 px) invece di un `AnimationController` scritto a mano da 420 ms.
+- **Risposta giusta**: l'opzione fa un pop (1 → 1.06 → 1) e la spunta entra in scala con un rimbalzo. Sono animazioni implicite (`TweenAnimationBuilder`): un `Animate` sempre presente sull'opzione lascerebbe un timer a ogni montaggio.
+- Col movimento ridotto niente scossa né pop. Vale per le domande delle lezioni e per gli esercizi di verifica.
+- Test: nuovo `test/mcq_feedback_test.dart` (pop che cresce e torna a 1, spunta in scala, scossa che torna al suo posto, movimento ridotto). Suite a **518 test in 45 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 7: l'entrata della Home
+
+- Al primo caricamento le sei sezioni della Home entrano una dopo l'altra: dissolvenza e piccola salita, 300 ms `easeOut`, 60 ms fra una e l'altra (`AppMotion.stagger`). Col movimento ridotto compaiono subito.
+- Una volta sola: alla prima sezione entrata la Home si ricostruisce una volta, e le sezioni che la lista ricrea scorrendo sono già al loro posto.
+- Il ritardo sta negli effetti di `flutter_animate` e non in `Animate.delay`, che lascia un `Future.delayed` non cancellabile.
+- Test: in `test/home_widget_test.dart` la prima sezione più avanti della seconda a metà entrata, la sezione ricreata già piena, il movimento ridotto. Suite a **513 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 6: la registrazione a passi
+
+- **Funzione nuova**: la registrazione diventa «Creazione profilo» del canvas, in tre passi — chi sei (avatar e nome), l'account (email, ID, password, termini), la scuola. Il profilo nasce completo di avatar e scuola (`registerManual` prende `avatarId`), e alla fine si torna alla Home senza passare dalla scelta della scuola, che resta per Google e per il profilo.
+- Testata indaco ondulata con «PASSO X DI 3», la barra che avanza e il titolo che cambia in dissolvenza; il passo nuovo entra con dissolvenza e scorrimento laterale (`flutter_animate`, nuova dipendenza), avanti da destra e indietro da sinistra. Col movimento ridotto il passo cambia e basta.
+- «Continua» controlla il passo al tocco; al passo della scuola è spento finché non la si sceglie. Freccia e back di sistema dal secondo passo tornano al passo prima, e i dati scritti restano.
+- Il bordo ondulato passa dal benvenuto a `WaveBottomClipper`, condiviso.
+- Test: `test/registration_screen_test.dart` riscritto sul percorso a passi (testata, nome mancante, Google, metro, ID che segue l'email, termini, email e ID già presi, password diverse, «Indietro» e freccia, profilo completo e ritorno alla radice, passaggio animato e movimento ridotto). Suite a **510 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 5: la barra di avanzamento
+
+- Quando il valore cambia, il riempimento ci arriva in 300 ms `easeOut`, strisce comprese; al primo disegno la barra parte già al suo valore, e col movimento ridotto salta subito. Lo screen reader ora legge la percentuale.
+- Test: in `test/progress_bar_test.dart` il primo disegno, il valore intermedio a metà animazione, durata e curva, il movimento ridotto e la percentuale. Suite a **505 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 4: il selettore degli anni
+
+- Scegliendo un anno, colore, bordo, lettera ed etichetta passano in 200 ms `easeOut` (prima lettera ed etichetta cambiavano di colpo), e una spunta indaco entra nell'angolo con un rimbalzo (300 ms `easeOutBack`). Col movimento ridotto il cambio è istantaneo. Le chip delle materie non ci sono: l'app non ha materie preferite.
+- Ogni anno è ora un bottone «selezionato» per lo screen reader; prima era solo un `GestureDetector`.
+- Test: in `test/year_tabs_test.dart` la spunta che si sposta, durate e curve da `AppMotion` e il movimento ridotto, la semantica. Suite a **501 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 3: la scelta dell'avatar
+
+- L'avatar scelto cresce con un piccolo rimbalzo (1.08, `easeOutBack`, 300 ms) e il bordo indaco con gli anelli bianco e giallo cresce in 200 ms invece di comparire di colpo. Col movimento ridotto niente animazione.
+- `AvatarPicker` diventa `StatefulWidget` e tiene da sé la scelta: nel profilo il foglio si chiudeva al tocco e l'animazione non si sarebbe vista. Il foglio ora si chiude dopo il rimbalzo.
+- La voce 2 (bottone a matita) non si fa; la voce 4 si limita al selettore degli anni; la 6 aggiungerà la registrazione a passi.
+- Test: nuovo `test/avatar_picker_test.dart` (rimbalzo e bordo, cambio di scelta, movimento ridotto, semantica «selezionato»); in `test/profile_edit_test.dart` il foglio resta aperto durante il rimbalzo. Suite a **498 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-03 — Micro-interazioni, 1: i bottoni
+
+- **`AppMotion`** (`lib/theme/app_motion.dart`): durate (`fast` 120, `medium` 200, `slow` 300 ms) e curve (`easeOut`, `easeOutBack`) in un posto solo, con `duration(context, base)` che dà zero quando il sistema chiede di ridurre il movimento.
+- **`AppButton`** premuto scende di tutto il gradino (5 px) e il gradino va a zero, poi torna su al rilascio, in 120 ms `easeOut`. Prima scendeva di 3 e il gradino restava di 2, con un `Padding` che saltava e un margine che si animava; ora è una sola traslazione, che non rifà il layout. Col movimento ridotto il cambio è istantaneo.
+- Test: in `test/app_button_test.dart` la discesa e il ritorno, durata e curva da `AppMotion`, il movimento ridotto, la semantica di bottone e l'altezza oltre 44. Suite a **493 test in 43 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — Design del canvas, fase 3: le schermate
 

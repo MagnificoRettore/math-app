@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -295,6 +296,89 @@ void main() {
       expect(find.text('4 di 10 card'), findsOneWidget);
       expect(find.text('40%'), findsOneWidget);
       expect(find.textContaining('esercizi'), findsNothing);
+    });
+  });
+
+  group('entrata in sequenza', () {
+    /// L'opacità della dissolvenza d'entrata della sezione [sezione]: la
+    /// `FadeTransition` più vicina sopra di lei.
+    double opacita(WidgetTester tester, Finder sezione) => tester
+        .widget<FadeTransition>(
+          find
+              .ancestor(of: sezione, matching: find.byType(FadeTransition))
+              .first,
+        )
+        .opacity
+        .value;
+
+    Future<void> pumpPrimoFrame(WidgetTester tester, {bool reduced = false}) =>
+        tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.light,
+            // Il `MediaQuery` vero con la sola riduzione del movimento: uno
+            // nuovo avrebbe larghezza zero.
+            home: Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(disableAnimations: reduced),
+                child: const HomeScreen(),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('le sezioni entrano una dopo l\'altra', (tester) async {
+      await _registra();
+      await _pausa('eq1-intro');
+      await pumpPrimoFrame(tester);
+      // `Animate` parte al frame dopo che l'orologio è avanzato: due frame
+      // per avviarla, poi l'entrata corre.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(const Duration(milliseconds: 150));
+
+      // La prima sezione è più avanti della seconda, che parte 60 ms dopo.
+      final prima = opacita(tester, _cardRiprendi);
+      final seconda = opacita(tester, find.byType(ArgomentoCarousel));
+      expect(prima, greaterThan(seconda));
+      expect(prima, lessThan(1));
+
+      await tester.pumpAndSettle();
+      expect(opacita(tester, _cardRiprendi), 1);
+      expect(opacita(tester, find.byType(ArgomentoCarousel)), 1);
+    });
+
+    testWidgets('una sezione ricreata dopo l\'entrata non rientra', (
+      tester,
+    ) async {
+      await _registra();
+      await _pausa('eq1-intro');
+      await _pumpHome(tester);
+
+      // Giù abbastanza perché la lista butti la card «riprendi», poi su:
+      // la card è ricreata e deve essere già al suo posto.
+      final lista = find.byType(ListView).first;
+      await tester.drag(lista, const Offset(0, -2000));
+      await tester.pumpAndSettle();
+      expect(_cardRiprendi, findsNothing);
+      await tester.drag(lista, const Offset(0, 2000));
+      await tester.pump();
+
+      expect(opacita(tester, _cardRiprendi), 1);
+      // Lo scroll ha ancora i suoi timer brevi: si lasciano finire.
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('col movimento ridotto niente entrata', (tester) async {
+      await _registra();
+      await _pausa('eq1-intro');
+      await pumpPrimoFrame(tester, reduced: true);
+      await tester.pump();
+
+      expect(
+        find.ancestor(of: _cardRiprendi, matching: find.byType(Animate)),
+        findsNothing,
+      );
     });
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:math_app/theme/app_colors.dart';
+import 'package:math_app/theme/app_motion.dart';
 import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_button.dart';
@@ -14,6 +15,13 @@ Future<void> _pump(WidgetTester tester, Widget button) async {
     ),
   );
 }
+
+/// Di quanto la faccia è scesa: la traslazione verticale dell'`AnimatedContainer`.
+double _discesa(WidgetTester tester) => tester
+    .widget<AnimatedContainer>(find.byType(AnimatedContainer))
+    .transform!
+    .getTranslation()
+    .y;
 
 /// La decorazione della faccia del bottone: il primo `AnimatedContainer`.
 BoxDecoration _faccia(WidgetTester tester) =>
@@ -58,24 +66,80 @@ void main() {
     expect(_faccia(tester).boxShadow, isEmpty);
   });
 
-  testWidgets('l\'altezza comprende il gradino e non cambia premendo', (
+  testWidgets('premuto scende di 5 e il gradino si azzera, poi torna su', (
     tester,
   ) async {
     await _pump(tester, AppButton(label: 'Inizia', onPressed: () {}));
-    final prima = tester.getSize(find.byType(AppButton)).height;
-    expect(prima, 52 + AppButton.depth);
+    final altezza = tester.getSize(find.byType(AppButton)).height;
+    expect(altezza, 52 + AppButton.depth);
+    expect(_discesa(tester), 0);
 
     final gesto = await tester.startGesture(
       tester.getCenter(find.byType(AppButton)),
     );
     await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(AppButton)).height, prima);
-    // Premuto, il gradino si accorcia: la faccia scende.
-    expect(
-      _faccia(tester).boxShadow!.single.offset.dy,
-      lessThan(AppButton.depth),
-    );
+    expect(_discesa(tester), AppButton.depth);
+    expect(_faccia(tester).boxShadow!.single.offset, Offset.zero);
+    // La faccia si sposta con una traslazione: l'altezza non cambia.
+    expect(tester.getSize(find.byType(AppButton)).height, altezza);
+
     await gesto.up();
+    await tester.pumpAndSettle();
+    expect(_discesa(tester), 0);
+    expect(
+      _faccia(tester).boxShadow!.single.offset,
+      const Offset(0, AppButton.depth),
+    );
+  });
+
+  testWidgets('la pressione dura AppMotion.fast con easeOut', (tester) async {
+    await _pump(tester, AppButton(label: 'Inizia', onPressed: () {}));
+    final faccia = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    );
+    expect(faccia.duration, AppMotion.fast);
+    expect(faccia.curve, AppMotion.standard);
+  });
+
+  testWidgets('col movimento ridotto il cambio è istantaneo', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: MediaQuery(
+          data: const MediaQueryData(disableAnimations: true),
+          child: Scaffold(
+            body: Center(
+              child: AppButton(label: 'Inizia', onPressed: () {}),
+            ),
+          ),
+        ),
+      ),
+    );
+    final faccia = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    );
+    expect(faccia.duration, Duration.zero);
+  });
+
+  testWidgets('è un bottone per lo screen reader, alto almeno 44', (
+    tester,
+  ) async {
+    final semantica = tester.ensureSemantics();
+    await _pump(tester, AppButton(label: 'Inizia', onPressed: () {}));
+    expect(
+      tester.getSemantics(find.byType(AppButton)),
+      matchesSemantics(
+        label: 'Inizia',
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+    expect(tester.getSize(find.byType(AppButton)).height, greaterThan(44));
+    semantica.dispose();
   });
 
   testWidgets('il tap chiama onPressed, occupato no', (tester) async {

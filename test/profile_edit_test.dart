@@ -141,7 +141,11 @@ void main() {
     final option = find.byIcon(avatarIcon('rocket_launch_rounded'));
     expect(option, findsOneWidget);
     await tester.tap(option);
+    // Il foglio resta aperto il tempo del rimbalzo, così la scelta si vede.
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('Scegli la foto profilo'), findsOneWidget);
     await tester.pumpAndSettle();
+    expect(find.text('Scegli la foto profilo'), findsNothing);
 
     await scrollTo(tester, find.byKey(const Key('profile-save')));
     await tester.tap(find.byKey(const Key('profile-save')));

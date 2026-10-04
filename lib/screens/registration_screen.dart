@@ -1,20 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../data/auth_store.dart';
 import '../data/auth_validators.dart';
+import '../data/content_repository.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
+import '../widgets/avatar_picker.dart';
 import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
+import '../widgets/progress_bar.dart';
+import '../widgets/school_level_tile.dart';
+import '../widgets/shake.dart';
 import '../widgets/strength_meter.dart';
+import '../widgets/wave_clipper.dart';
 import 'school_picker_screen.dart';
-import '../widgets/app_button.dart';
 
-/// Creazione account.
+/// Creazione del profilo in tre passi, come «Creazione profilo» del design:
+/// chi sei (avatar e nome), l'account (email, ID, password, termini) e la
+/// scuola, che decide lezioni, esercizi e consigli.
 ///
-/// Subito dopo si sceglie la scuola, come prima: è il livello che decide
-/// lezioni, esercizi e consigli.
+/// La testata indaco dice il passo e la barra avanza; fra un passo e l'altro
+/// il contenuto scorre con una dissolvenza (avanti da destra, indietro da
+/// sinistra) e il titolo cambia in dissolvenza. Col movimento ridotto il passo
+/// cambia e basta.
+///
+/// «Continua» controlla il passo al tocco e mostra gli errori nei campi; al
+/// passo della scuola resta spento finché la scuola non è scelta. Il back di
+/// sistema, dal secondo passo in poi, torna al passo prima invece di uscire.
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -23,18 +40,34 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final _formKey = GlobalKey<FormState>();
+  static const _titles = ['Chi sei?', 'Il tuo account', 'La tua scuola'];
+
+  /// Di quanto, in frazione della larghezza, il passo nuovo entra di lato.
+  static const double _slide = 0.08;
+
+  final _whoForm = GlobalKey<FormState>();
+  final _accountForm = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _accountIdController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  final _shakes = FieldShakes();
+  String _avatarId = '';
+  String _schoolId = '';
   bool _termsAccepted = false;
   bool _busy = false;
+  int _step = 0;
+
+  /// Il verso dell'ultimo cambio di passo: avanti il passo nuovo entra da
+  /// destra, indietro da sinistra.
+  bool _forward = true;
 
   /// Finché l'utente non scrive a mano nell'ID account, il campo segue
   /// l'email: il suggerimento è buono e nessuno lo scrive da solo.
   bool _accountIdTouched = false;
+
+  bool get _last => _step == _titles.length - 1;
 
   @override
   void dispose() {
@@ -46,43 +79,145 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
+  void _go(int step) {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _forward = step > _step;
+      _step = step;
+    });
+  }
+
+  void _continue() {
+    if (_busy) return;
+    if (_step == 0 && !(_whoForm.currentState?.validate() ?? false)) {
+      setState(() => _shakes.shakeEmpty([_nameController]));
+      return;
+    }
+    if (_step == 1) {
+      if (!(_accountForm.currentState?.validate() ?? false)) {
+        setState(
+          () => _shakes.shakeEmpty([
+            _emailController,
+            _accountIdController,
+            _passwordController,
+            _confirmController,
+          ]),
+        );
+        return;
+      }
+      if (!_termsAccepted) {
+        _tell('Accetta i Termini e la Privacy Policy per continuare.');
+        return;
+      }
+    }
+    if (_last) {
+      _submit();
+    } else {
+      _go(_step + 1);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+    Widget content = KeyedSubtree(
+      key: ValueKey('registration-step-$_step'),
+      child: switch (_step) {
+        0 => _whoStep(c),
+        1 => _accountStep(c),
+        _ => _schoolStep(),
+      },
+    );
+    if (!AppMotion.reduced(context)) {
+      content = content
+          .animate(key: ValueKey(_step))
+          .fadeIn(duration: AppMotion.slow, curve: AppMotion.standard)
+          .slideX(
+            begin: _forward ? _slide : -_slide,
+            end: 0,
+            duration: AppMotion.slow,
+            curve: AppMotion.standard,
+          );
+    }
+
+    return PopScope(
+      canPop: _step == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _go(_step - 1);
+      },
+      child: Scaffold(
+        body: Column(
           children: [
-            Text(
-              'Crea il tuo profilo',
-              style: TextStyle(
-                fontFamily: AppText.headingFont,
-                fontSize: AppText.hero,
-                fontWeight: FontWeight.w600,
-                color: c.textPrimary,
+            _StepHeader(
+              step: _step,
+              steps: _titles.length,
+              title: _titles[_step],
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                children: [content],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Subito dopo sceglierai la tua scuola per ricevere consigli su '
-              'misura.',
-              style: TextStyle(
-                fontSize: AppText.bodyLarge,
-                color: c.textSecondary,
-                height: 1.4,
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                child: Row(
+                  children: [
+                    if (_step > 0) ...[
+                      AppButton(
+                        key: const Key('registration-back'),
+                        label: 'Indietro',
+                        variant: AppButtonVariant.outline,
+                        onPressed: _busy ? null : () => _go(_step - 1),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    Expanded(
+                      child: AppButton(
+                        key: const Key('registration-next'),
+                        label: _last ? 'Crea il mio profilo' : 'Continua',
+                        expand: true,
+                        busy: _busy,
+                        onPressed: _last && _schoolId.isEmpty
+                            ? null
+                            : _continue,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                children: [
-                  _field(
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _whoStep(AppPalette c) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AppCard(
+          child: Form(
+            key: _whoForm,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Label('Scegli il tuo avatar'),
+                const SizedBox(height: 14),
+                AvatarPicker(
+                  value: _avatarId,
+                  onChanged: (value) => setState(() => _avatarId = value),
+                ),
+                const SizedBox(height: 22),
+                ShakeWidget(
+                  trigger: _shakes.of(_nameController),
+                  child: _field(
                     controller: _nameController,
-                    label: 'Nome e cognome',
+                    label: 'Come ti chiami?',
                     textCapitalization: TextCapitalization.words,
                     validator: (value) {
                       final v = value?.trim() ?? '';
@@ -93,95 +228,124 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 12),
-                  _field(
-                    controller: _emailController,
-                    label: 'Email',
-                    keyboardType: TextInputType.emailAddress,
-                    autofillHints: const [AutofillHints.email],
-                    onChanged: (value) {
-                      if (_accountIdTouched) return;
-                      final suggested = AuthValidators.accountIdFromEmail(
-                        value.trim(),
-                      );
-                      if (suggested == 'studente') return;
-                      _accountIdController.text = suggested;
-                    },
-                    validator: (value) => AuthValidators.emailError(
-                      value,
-                      taken: AuthStore.instance.emailsInUse(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _field(
-                    controller: _accountIdController,
-                    label: 'ID account',
-                    autocorrect: false,
-                    helperText: 'Come ti trovano gli altri: 3-20 caratteri',
-                    prefixIcon: Icons.tag,
-                    onChanged: (_) => _accountIdTouched = true,
-                    validator: (value) => AuthValidators.accountIdError(
-                      value,
-                      taken: AuthStore.instance.accountIdsInUse(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  PasswordField(
-                    controller: _passwordController,
-                    label: 'Password',
-                    autofillHints: const [AutofillHints.newPassword],
-                    onChanged: (_) => setState(() {}),
-                    validator: AuthValidators.passwordError,
-                  ),
-                  const SizedBox(height: 8),
-                  StrengthMeter(password: _passwordController.text),
-                  const SizedBox(height: 12),
-                  PasswordField(
-                    controller: _confirmController,
-                    label: 'Conferma password',
-                    textInputAction: TextInputAction.done,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    validator: (value) => AuthValidators.confirmError(
-                      value,
-                      _passwordController.text,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  _TermsRow(
-                    accepted: _termsAccepted,
-                    onChanged: (value) =>
-                        setState(() => _termsAccepted = value),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            AppButton(
-              label: 'Crea account',
-              onPressed: _submit,
-              busy: _busy,
-              expand: true,
-            ),
-            const SizedBox(height: 20),
-            const OrSeparator(label: 'Oppure registrati con'),
-            const SizedBox(height: 12),
-            GoogleButton(
-              label: 'Registrati con Google',
-              onTap: _continueWithGoogle,
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: Text(
-                'Il profilo è salvato solo su questo dispositivo.',
-                style: TextStyle(
-                  fontSize: AppText.caption,
-                  color: c.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 20),
+        const OrSeparator(label: 'Oppure registrati con'),
+        const SizedBox(height: 12),
+        GoogleButton(
+          label: 'Registrati con Google',
+          onTap: _continueWithGoogle,
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            'Il profilo è salvato solo su questo dispositivo.',
+            style: TextStyle(fontSize: AppText.caption, color: c.textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _accountStep(AppPalette c) {
+    return AppCard(
+      child: Form(
+        key: _accountForm,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          children: [
+            ShakeWidget(
+              trigger: _shakes.of(_emailController),
+              child: _field(
+                controller: _emailController,
+                label: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                onChanged: (value) {
+                  if (_accountIdTouched) return;
+                  final suggested = AuthValidators.accountIdFromEmail(
+                    value.trim(),
+                  );
+                  if (suggested == 'studente') return;
+                  _accountIdController.text = suggested;
+                },
+                validator: (value) => AuthValidators.emailError(
+                  value,
+                  taken: AuthStore.instance.emailsInUse(),
                 ),
               ),
+            ),
+            const SizedBox(height: 12),
+            ShakeWidget(
+              trigger: _shakes.of(_accountIdController),
+              child: _field(
+                controller: _accountIdController,
+                label: 'ID account',
+                autocorrect: false,
+                helperText: 'Come ti trovano gli altri: 3-20 caratteri',
+                prefixIcon: Icons.tag,
+                onChanged: (_) => _accountIdTouched = true,
+                validator: (value) => AuthValidators.accountIdError(
+                  value,
+                  taken: AuthStore.instance.accountIdsInUse(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ShakeWidget(
+              trigger: _shakes.of(_passwordController),
+              child: PasswordField(
+                controller: _passwordController,
+                label: 'Password',
+                autofillHints: const [AutofillHints.newPassword],
+                onChanged: (_) => setState(() {}),
+                validator: AuthValidators.passwordError,
+              ),
+            ),
+            const SizedBox(height: 8),
+            StrengthMeter(password: _passwordController.text),
+            const SizedBox(height: 12),
+            ShakeWidget(
+              trigger: _shakes.of(_confirmController),
+              child: PasswordField(
+                controller: _confirmController,
+                label: 'Conferma password',
+                textInputAction: TextInputAction.done,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) => AuthValidators.confirmError(
+                  value,
+                  _passwordController.text,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            _TermsRow(
+              accepted: _termsAccepted,
+              onChanged: (value) => setState(() => _termsAccepted = value),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _schoolStep() {
+    return Column(
+      children: [
+        for (final level in ContentRepository.instance.levels)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SchoolLevelTile(
+              level: level,
+              selected: _schoolId == level.id,
+              onTap: () => setState(() => _schoolId = level.id),
+            ),
+          ),
+      ],
     );
   }
 
@@ -217,20 +381,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<void> _submit() async {
-    if (_busy) return;
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (!_termsAccepted) {
-      _tell('Accetta i Termini e la Privacy Policy per continuare.');
-      return;
-    }
     setState(() => _busy = true);
-
     try {
       await AuthStore.instance.registerManual(
         name: _nameController.text,
         email: _emailController.text,
         accountId: _accountIdController.text,
         password: _passwordController.text,
+        schoolLevelId: _schoolId,
+        avatarId: _avatarId,
       );
     } on AuthException catch (error) {
       if (!mounted) return;
@@ -238,13 +397,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       _tell(error.message);
       return;
     }
-
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const SchoolPickerScreen(onboarding: true),
-      ),
-    );
+    // La Home è la radice: il profilo è completo, scuola compresa.
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   Future<void> _continueWithGoogle() async {
@@ -378,4 +533,111 @@ class _TermsRow extends StatelessWidget {
       'solo su questo dispositivo, in memoria locale. Non viene inviato niente '
       'a server o a terzi e la password non viene conservata in chiaro: ne '
       'resta solo una derivata crittografica.';
+}
+
+class _Label extends StatelessWidget {
+  final String text;
+
+  const _Label(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: AppText.titleSmall,
+        fontWeight: FontWeight.w800,
+        color: AppColors.of(context).textPrimary,
+      ),
+    );
+  }
+}
+
+/// La testata indaco di «Creazione profilo»: il bordo in basso ondulato, la
+/// freccia per uscire, «PASSO X DI 3», la barra che avanza e il titolo che
+/// cambia in dissolvenza.
+class _StepHeader extends StatelessWidget {
+  final int step;
+  final int steps;
+  final String title;
+
+  const _StepHeader({
+    required this.step,
+    required this.steps,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return ClipPath(
+      key: const Key('registration-header'),
+      clipper: const WaveBottomClipper(),
+      child: Container(
+        width: double.infinity,
+        color: c.headerBand,
+        padding: const EdgeInsets.only(bottom: 52),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 24, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BackButton(color: c.onHeaderBand),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PASSO ${step + 1} DI $steps',
+                        style: TextStyle(
+                          fontSize: AppText.bodyLarge,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.7,
+                          color: c.yellow,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: 220,
+                        child: ProgressBar(
+                          progress: (step + 1) / steps,
+                          height: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      AnimatedSwitcher(
+                        duration: AppMotion.duration(context, AppMotion.medium),
+                        switchInCurve: AppMotion.standard,
+                        switchOutCurve: AppMotion.standard,
+                        layoutBuilder: (current, previous) => Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [...previous, ?current],
+                        ),
+                        child: Semantics(
+                          key: ValueKey(title),
+                          header: true,
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontFamily: AppText.headingFont,
+                              fontSize: AppText.display,
+                              fontWeight: FontWeight.w600,
+                              color: c.onHeaderBand,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

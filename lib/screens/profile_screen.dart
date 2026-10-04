@@ -6,11 +6,13 @@ import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/avatar_picker.dart';
 import '../widgets/profile_avatar.dart';
+import '../widgets/shake.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
 import 'school_picker_screen.dart';
@@ -149,6 +151,7 @@ class _ProfileContentState extends State<_ProfileContent> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _accountIdController;
+  final _shakes = FieldShakes();
   late String _avatarId;
   bool _dirty = false;
   bool _saving = false;
@@ -270,30 +273,36 @@ class _ProfileContentState extends State<_ProfileContent> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _field(
-                  controller: _nameController,
-                  label: 'Nome e cognome',
-                  onChanged: _markDirty,
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Inserisci il tuo nome';
-                    if (v.length < 2) {
-                      return 'Il nome deve avere almeno 2 caratteri';
-                    }
-                    return null;
-                  },
+                ShakeWidget(
+                  trigger: _shakes.of(_nameController),
+                  child: _field(
+                    controller: _nameController,
+                    label: 'Nome e cognome',
+                    onChanged: _markDirty,
+                    validator: (value) {
+                      final v = value?.trim() ?? '';
+                      if (v.isEmpty) return 'Inserisci il tuo nome';
+                      if (v.length < 2) {
+                        return 'Il nome deve avere almeno 2 caratteri';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
                 const SizedBox(height: 12),
-                _field(
-                  controller: _accountIdController,
-                  label: 'ID account',
-                  autocorrect: false,
-                  helperText: 'Come ti trovano gli altri: 3-20 caratteri',
-                  onChanged: _markDirty,
-                  validator: (value) => AuthValidators.accountIdError(
-                    value,
-                    taken: AuthStore.instance.accountIdsInUse(
-                      exceptAccountId: widget.user.accountId,
+                ShakeWidget(
+                  trigger: _shakes.of(_accountIdController),
+                  child: _field(
+                    controller: _accountIdController,
+                    label: 'ID account',
+                    autocorrect: false,
+                    helperText: 'Come ti trovano gli altri: 3-20 caratteri',
+                    onChanged: _markDirty,
+                    validator: (value) => AuthValidators.accountIdError(
+                      value,
+                      taken: AuthStore.instance.accountIdsInUse(
+                        exceptAccountId: widget.user.accountId,
+                      ),
                     ),
                   ),
                 ),
@@ -404,9 +413,17 @@ class _ProfileContentState extends State<_ProfileContent> {
                 ),
               ),
               const SizedBox(height: 12),
+              // Il foglio si chiude dopo il rimbalzo della scelta, altrimenti
+              // l'animazione non si vedrebbe; subito col movimento ridotto.
               AvatarPicker(
                 value: _avatarId,
-                onChanged: (value) => Navigator.of(context).pop(value),
+                onChanged: (value) async {
+                  final navigator = Navigator.of(context);
+                  await Future<void>.delayed(
+                    AppMotion.duration(context, AppMotion.slow),
+                  );
+                  if (navigator.mounted) navigator.pop(value);
+                },
               ),
             ],
           ),
@@ -421,7 +438,12 @@ class _ProfileContentState extends State<_ProfileContent> {
   }
 
   Future<void> _save() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      setState(
+        () => _shakes.shakeEmpty([_nameController, _accountIdController]),
+      );
+      return;
+    }
     setState(() => _saving = true);
     try {
       await AuthStore.instance.updateProfile(

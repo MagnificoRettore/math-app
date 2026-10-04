@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 
 /// Da questa altezza in su la barra è quella del design: fondo giallo chiaro,
 /// riempimento a strisce e bordo. Sotto, strisce e bordo non si leggono più e
 /// la barra resta piena e arrotondata.
 const double _kStripedMinHeight = 10;
 
+/// Quando il valore cambia, il riempimento ci arriva in [AppMotion.slow]
+/// `easeOut`, strisce comprese; al primo disegno parte già al suo valore. Col
+/// movimento ridotto salta subito al valore nuovo.
 class ProgressBar extends StatelessWidget {
   final double progress; // 0.0 .. 1.0
   final double height;
@@ -29,21 +33,24 @@ class ProgressBar extends StatelessWidget {
     final striped = height >= _kStripedMinHeight;
     final radius = BorderRadius.circular(striped ? 4 : height);
 
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: c.yellowSoft,
-        borderRadius: radius,
-        border: striped ? Border.all(color: c.yellowDeep, width: 2) : null,
-      ),
-      child: ClipRRect(
-        // Dentro il bordo il raggio si accorcia di quanto è spesso il bordo.
-        borderRadius: BorderRadius.circular(striped ? 2 : height),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: FractionallySizedBox(
-            widthFactor: value,
-            heightFactor: 1,
+    return Semantics(
+      value: '${(value * 100).round()}%',
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: c.yellowSoft,
+          borderRadius: radius,
+          border: striped ? Border.all(color: c.yellowDeep, width: 2) : null,
+        ),
+        child: ClipRRect(
+          // Dentro il bordo il raggio si accorcia di quanto è spesso il bordo.
+          borderRadius: BorderRadius.circular(striped ? 2 : height),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(end: value),
+            duration: AppMotion.duration(context, AppMotion.slow),
+            curve: AppMotion.standard,
+            // Il riempimento non cambia mentre la barra si muove: lo passa una
+            // volta, e a ogni frame si ridisegna solo la larghezza.
             child: striped
                 ? CustomPaint(
                     painter: _Stripes(
@@ -52,6 +59,14 @@ class ProgressBar extends StatelessWidget {
                     ),
                   )
                 : ColoredBox(color: fill),
+            builder: (context, animated, child) => Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: animated,
+                heightFactor: 1,
+                child: child,
+              ),
+            ),
           ),
         ),
       ),

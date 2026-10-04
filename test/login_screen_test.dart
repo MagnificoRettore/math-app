@@ -6,6 +6,7 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/registration_screen.dart';
+import 'package:math_app/widgets/shake.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +60,13 @@ void main() {
     );
     expect(find.text('Scrivi la password'), findsOneWidget);
     expect(AuthStore.instance.isSignedIn, isFalse);
+    // E i due campi vuoti si scuotono.
+    expect(
+      tester
+          .widgetList<ShakeWidget>(find.byType(ShakeWidget))
+          .map((s) => s.trigger),
+      [1, 1],
+    );
   });
 
   testWidgets('password sbagliata: il messaggio resta nella card', (

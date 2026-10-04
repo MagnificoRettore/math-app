@@ -15,6 +15,7 @@ import '../theme/app_text.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mcq_option_tile.dart';
+import '../widgets/shake.dart';
 import '../widgets/notes_text.dart';
 import '../widgets/practice_quiz_view.dart';
 import '../widgets/prompt_view.dart';

@@ -136,6 +136,7 @@ class AuthStore extends ChangeNotifier {
     required String password,
     String? accountId,
     String schoolLevelId = '',
+    String avatarId = '',
   }) async {
     final mail = email.trim();
     final handle = _resolveAccountId(accountId, mail);
@@ -147,6 +148,7 @@ class AuthStore extends ChangeNotifier {
       accountId: handle,
       authMethod: AuthMethod.manual,
       schoolLevelId: schoolLevelId,
+      avatarId: avatarId,
       createdAt: DateTime.now(),
     );
     final salt = PasswordHasher.createSalt();

@@ -7,6 +7,7 @@ import '../models/practice_exercise.dart';
 import '../theme/app_text.dart';
 import 'math_text.dart';
 import 'mcq_option_tile.dart';
+import 'shake.dart';
 import 'prompt_view.dart';
 
 /// Corpo di uno step `practice_quiz`: mostra **un solo** esercizio per volta,

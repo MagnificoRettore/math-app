@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 
 enum AppButtonVariant {
@@ -18,11 +19,14 @@ enum AppButtonVariant {
 /// Il bottone del design: una pillola in Fredoka sollevata da un gradino di
 /// colore pieno sotto, non da un'ombra sfumata.
 ///
-/// Premuto, il bottone scende sul gradino: è l'unico movimento, e dice che il
-/// tocco è arrivato. Disabilitato perde il gradino e diventa grigio caldo.
+/// Premuto, il bottone scende di tutto il gradino e il gradino sparisce, poi al
+/// rilascio torna su ([AppMotion.fast], `easeOut`): è l'unico movimento, e dice
+/// che il tocco è arrivato. Disabilitato resta giù, grigio caldo e senza
+/// gradino. Col movimento ridotto il cambio è istantaneo.
 ///
 /// L'altezza totale è [height] più il gradino ([depth]): il gradino sta dentro
-/// lo spazio del bottone, così non tocca quello che c'è sotto.
+/// lo spazio del bottone, così non tocca quello che c'è sotto, e la faccia si
+/// sposta con una traslazione, che non rifà il layout.
 class AppButton extends StatefulWidget {
   /// Altezza del gradino sotto la faccia del bottone.
   static const double depth = 5;
@@ -80,7 +84,8 @@ class _AppButtonState extends State<AppButton> {
             AppButtonVariant.outline => (c.surface, c.accent, c.accent),
           };
     final raised = _enabled || widget.busy;
-    final step = !raised ? 0.0 : (_pressed ? 2.0 : AppButton.depth);
+    // Giù quando è premuto, e da disabilitato: senza gradino, schiacciato.
+    final down = !raised || _pressed;
     final shape = BorderRadius.circular(widget.height);
     final fontSize = widget.height >= 50
         ? AppText.titleLarge
@@ -130,14 +135,17 @@ class _AppButtonState extends State<AppButton> {
       enabled: _enabled,
       label: label == null ? widget.tooltip : null,
       child: Padding(
-        // Il gradino sta nello spazio del bottone: premuto, la faccia scende
-        // di quanto il gradino si accorcia, e l'altezza totale non cambia.
-        padding: EdgeInsets.only(
-          top: raised ? AppButton.depth - step : AppButton.depth,
-        ),
+        // Lo spazio del gradino sotto la faccia: l'altezza totale non cambia
+        // mai, premuto o no.
+        padding: const EdgeInsets.only(bottom: AppButton.depth),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 70),
-          margin: EdgeInsets.only(bottom: step),
+          duration: AppMotion.duration(context, AppMotion.fast),
+          curve: AppMotion.standard,
+          transform: Matrix4.translationValues(
+            0,
+            down ? AppButton.depth : 0,
+            0,
+          ),
           width: widget.expand ? double.infinity : null,
           // Il bordo del contorno sta davanti e non nella decorazione, che lo
           // aggiungerebbe all'altezza.
@@ -152,7 +160,11 @@ class _AppButtonState extends State<AppButton> {
             color: face,
             borderRadius: shape,
             boxShadow: [
-              if (raised) BoxShadow(color: deep, offset: Offset(0, step)),
+              if (raised)
+                BoxShadow(
+                  color: deep,
+                  offset: Offset(0, down ? 0 : AppButton.depth),
+                ),
             ],
           ),
           child: Material(
