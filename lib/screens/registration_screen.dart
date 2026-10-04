@@ -58,8 +58,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Text(
               'Crea il tuo profilo',
               style: TextStyle(
+                fontFamily: AppText.headingFont,
                 fontSize: AppText.hero,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
             ),

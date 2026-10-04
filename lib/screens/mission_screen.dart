@@ -22,8 +22,9 @@ class MissionScreen extends StatelessWidget {
             Text(
               'Cosa facciamo',
               style: TextStyle(
+                fontFamily: AppText.headingFont,
                 fontSize: AppText.title,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
             ),

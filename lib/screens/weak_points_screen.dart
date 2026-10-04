@@ -7,6 +7,7 @@ import '../models/weak_topic.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/illustration.dart';
 import '../widgets/weak_topic_row.dart';
 import 'weak_topic_screen.dart';
 import 'welcome_screen.dart';
@@ -31,8 +32,7 @@ class WeakPointsScreen extends StatelessWidget {
             final weakTopics = WeakTopicEngine.weakTopics();
             if (weakTopics.isEmpty) {
               return EmptyState(
-                icon: Icons.task_alt,
-                iconColor: AppColors.of(context).easy,
+                illustration: AppIllustration.razzo,
                 title: 'Tutto assimilato!',
                 subtitle: 'Non hai esercizi da ripassare. Ottimo lavoro!',
               );

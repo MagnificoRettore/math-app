@@ -104,8 +104,9 @@ class _Heading extends StatelessWidget {
           Text(
             argomento.title,
             style: TextStyle(
+              fontFamily: AppText.headingFont,
               fontSize: AppText.headline,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: c.textPrimary,
             ),
           ),

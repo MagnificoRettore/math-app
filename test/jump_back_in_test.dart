@@ -134,6 +134,19 @@ void main() {
     expect(find.text('Jump Back In'), findsOneWidget);
   });
 
+  testWidgets('la card è a filo del titolo della sezione', (tester) async {
+    await _registra();
+    await _pausa('eq1-intro');
+    await _pumpHome(tester);
+
+    // La lista della Home dà già i 20 di margine: con un margine proprio la
+    // card rientrava rispetto a «Jump Back In» e alle altre card.
+    expect(
+      tester.getTopLeft(_card).dx,
+      tester.getTopLeft(find.text('Jump Back In')).dx,
+    );
+  });
+
   testWidgets('il blocco sotto non è attaccato alla card', (tester) async {
     await _registra();
     await _pausa('eq1-intro');

@@ -49,8 +49,9 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               'Bentornato',
               style: TextStyle(
+                fontFamily: AppText.headingFont,
                 fontSize: AppText.hero,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: c.textPrimary,
               ),
             ),

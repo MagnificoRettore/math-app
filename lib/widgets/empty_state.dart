@@ -2,35 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'illustration.dart';
 
-/// Lo stato vuoto di una pagina: icona, titolo e una riga di spiegazione,
-/// centrati. L'icona di default è quella del libro, in grigio; gli stati di
-/// merito («tutto assimilato») passano `task_alt` in `easy`.
+/// Lo stato vuoto di una pagina: un'illustrazione del design, il titolo e una
+/// riga di spiegazione, centrati. Di default l'albero che cresce dal libro (le
+/// lezioni in arrivo); gli stati di merito («tutto assimilato») passano il
+/// razzo.
 class EmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
-  final IconData icon;
-  final Color? iconColor;
+  final AppIllustration illustration;
 
   const EmptyState({
     super.key,
     required this.title,
     required this.subtitle,
-    this.icon = Icons.menu_book_outlined,
-    this.iconColor,
+    this.illustration = AppIllustration.albero,
   });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    // Scorre se la pagina è bassa: l'illustrazione è alta, e un telefono
+    // in orizzontale o con il testo grande non la conterrebbe.
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 52, color: iconColor ?? c.textSecondary),
-            const SizedBox(height: 12),
+            IllustrationView(illustration, width: 150),
+            const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,

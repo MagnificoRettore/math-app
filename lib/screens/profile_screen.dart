@@ -73,8 +73,9 @@ class _GuestProfile extends StatelessWidget {
           child: Text(
             'Nessun profilo',
             style: TextStyle(
+              fontFamily: AppText.headingFont,
               fontSize: AppText.titleLarge,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: c.textPrimary,
             ),
           ),
@@ -223,8 +224,9 @@ class _ProfileContentState extends State<_ProfileContent> {
                     preview.name,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
+                      fontFamily: AppText.headingFont,
                       fontSize: AppText.title,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: c.textPrimary,
                     ),
                   ),

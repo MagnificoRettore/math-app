@@ -70,19 +70,6 @@ Future<void> _pumpHome(WidgetTester tester) async {
 final _cardRiprendi = find.byKey(const Key('jump-back-in-card'));
 final _ctaRiprendi = find.byKey(const Key('jump-back-in-button'));
 
-/// Il bordo della card che contiene il testo indicato.
-///
-/// Il finder parte dal testo e risale alla `AppCard`: chiedere i `Container`
-/// sotto un testo non trova niente, perché il testo sta *dentro* il contenitore
-/// e non lo contiene.
-Border _bordo(WidgetTester tester, Finder testo) {
-  final card = find.ancestor(of: testo, matching: find.byType(AppCard));
-  final box = tester.widget<Container>(
-    find.descendant(of: card.first, matching: find.byType(Container)).first,
-  );
-  return (box.decoration! as BoxDecoration).border! as Border;
-}
-
 TextStyle _stile(WidgetTester tester, Finder testo) =>
     tester.widget<Text>(testo).style!;
 
@@ -225,27 +212,31 @@ void main() {
       expect(ombra.offset, const Offset(0, 6));
     });
 
-    testWidgets('la card riprendi ha l\'alone nell\'angolo in alto a destra', (
+    testWidgets('la card riprendi è a quaderno: righe e spirale', (
       tester,
     ) async {
       await _registra();
       await _pausa('eq1-intro');
       await _pumpHome(tester);
 
-      final alone = find.descendant(
-        of: _cardRiprendi,
-        matching: find.byType(ImageFiltered),
-      );
-      expect(alone, findsOneWidget);
-
-      // È dentro la card e non sopra: il tappo deve arrivare alla card.
       expect(
-        tester.getTopLeft(alone).dx,
-        greaterThan(tester.getTopLeft(_cardRiprendi).dx),
+        find.descendant(
+          of: _cardRiprendi,
+          matching: find.byKey(const Key('jump-back-in-paper')),
+        ),
+        findsOneWidget,
+      );
+      // Niente alone: il design non ce l'ha e sulle righe stonerebbe.
+      expect(
+        find.descendant(
+          of: _cardRiprendi,
+          matching: find.byType(ImageFiltered),
+        ),
+        findsNothing,
       );
     });
 
-    testWidgets('su uno schermo stretto l\'alone non sfora', (tester) async {
+    testWidgets('su uno schermo stretto la card non sfora', (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -254,8 +245,8 @@ void main() {
       await _pausa('eq1-intro');
       await _pumpHome(tester);
 
-      // Ilalone esce di proposito dai bordi della card, quindi non può essere
-      // dentro i suoi stessi bordi: se la `Stack` tagliasse si vedrebbe.
+      // La spirale e il margine del quaderno tolgono 50 px al testo: su
+      // 360 px la card deve stare comunque senza sforare.
       expect(tester.takeException(), isNull);
     });
   });
@@ -384,19 +375,22 @@ void main() {
   });
 
   group('serie di giorni', () {
-    testWidgets('la card ha il bordo colorato', (tester) async {
+    testWidgets('la card è il traguardo arancio del design', (tester) async {
       await _registra();
       await _pausa('eq1-intro');
       await _pumpHome(tester);
       await _scrollaA(tester, find.byType(StreakCard));
 
-      // Il bordo colorato della serie di giorni è l'indaco di marca con
-      // opacità: se il colore tornasse quello del tema il test passerebbe
-      // anche senza la modifica.
-      expect(
-        _bordo(tester, find.textContaining('Serie di')).top.color,
-        AppPalette.light.accent.withValues(alpha: 0.35),
+      final card = tester.widget<Container>(
+        find.byKey(const Key('streak-card')),
       );
+      final box = card.decoration! as BoxDecoration;
+      expect(box.color, AppPalette.light.orange);
+      // Il gradino pieno sotto, come i bottoni e le card del design.
+      expect(box.boxShadow!.single.color, AppPalette.light.orangeDeep);
+      expect(box.boxShadow!.single.blurRadius, 0);
+      expect(find.text('TRAGUARDO'), findsOneWidget);
+      expect(find.textContaining('Serie di'), findsOneWidget);
     });
 
     testWidgets('obiettivi chiusi: spunta sulle due barre e banner', (

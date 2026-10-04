@@ -61,8 +61,9 @@ class MissionHero extends StatelessWidget {
                 child: Text(
                   'La nostra missione',
                   style: TextStyle(
+                    fontFamily: AppText.headingFont,
                     fontSize: AppText.title,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
                 ),

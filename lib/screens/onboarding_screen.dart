@@ -5,6 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
 import '../widgets/app_button.dart';
+import '../widgets/illustration.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,27 +18,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static List<({IconData icon, Color color, String title, String body})>
-  _slides(AppPalette c) => [
+  /// Una illustrazione del design per slide: il laptop per gli esercizi,
+  /// l'albero per la scuola, il razzo per la serie.
+  static const List<({AppIllustration illustration, String title, String body})>
+  _slides = [
     (
-      icon: Icons.calculate_outlined,
-      color: c.accent,
+      illustration: AppIllustration.lezione,
       title: 'Esercizi risolti passo passo',
       body:
           'Ogni esercizio mostra le formule chiave, i suggerimenti e la '
           'soluzione completa per imparare davvero.',
     ),
     (
-      icon: Icons.school_outlined,
-      color: c.indigo,
+      illustration: AppIllustration.albero,
       title: 'Studia per la tua scuola',
       body:
           'Scegli Scuola Media, Superiore o Università: ricevi lezioni ed '
           'esercizi consigliati su misura per te.',
     ),
     (
-      icon: Icons.local_fire_department,
-      color: c.medium,
+      illustration: AppIllustration.razzo,
       title: 'Costruisci una serie',
       body:
           'Allenati ogni giorno: raggiungi gli obiettivi di 5 esercizi e '
@@ -70,8 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
-    final slides = _slides(AppColors.of(context));
-    if (_page >= slides.length - 1) {
+    if (_page >= _slides.length - 1) {
       _finish();
       return;
     }
@@ -84,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final slides = _slides(c);
+    const slides = _slides;
     final isLast = _page >= slides.length - 1;
     return Scaffold(
       body: SafeArea(
@@ -142,45 +141,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildSlide(
-    ({IconData icon, Color color, String title, String body}) slide,
+    ({AppIllustration illustration, String title, String body}) slide,
   ) {
     final c = AppColors.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 128,
-            height: 128,
-            decoration: BoxDecoration(
-              color: slide.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(32),
+    // Scorre se lo schermo è basso: l'illustrazione da sola è alta 264.
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IllustrationView(slide.illustration, width: 220),
+            const SizedBox(height: 28),
+            Text(
+              slide.title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: AppText.headingFont,
+                fontSize: AppText.headline,
+                fontWeight: FontWeight.w600,
+                color: c.textPrimary,
+                height: 1.2,
+              ),
             ),
-            child: Icon(slide.icon, color: slide.color, size: 60),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            slide.title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppText.headline,
-              fontWeight: FontWeight.w800,
-              color: c.textPrimary,
-              height: 1.2,
+            const SizedBox(height: 12),
+            Text(
+              slide.body,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppText.bodyLarge,
+                height: 1.5,
+                color: c.textSecondary,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            slide.body,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: AppText.bodyLarge,
-              height: 1.5,
-              color: c.textSecondary,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

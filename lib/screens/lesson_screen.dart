@@ -412,8 +412,9 @@ class _TrophyCelebration extends StatelessWidget {
                 Text(
                   'Lezione completata!',
                   style: TextStyle(
+                    fontFamily: AppText.headingFont,
                     fontSize: AppText.title,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: c.textPrimary,
                   ),
                 ),
@@ -487,8 +488,9 @@ class _StepCard extends StatelessWidget {
                       Text(
                         step.title,
                         style: TextStyle(
+                          fontFamily: AppText.headingFont,
                           fontSize: AppText.headline * scale,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: c.textPrimary,
                         ),
                       ),

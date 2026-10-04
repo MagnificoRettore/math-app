@@ -62,8 +62,9 @@ Future<Level?> showSchoolChoiceSheet(
                           ? 'Lezioni per scuola'
                           : 'Esercizi per scuola'),
                 style: TextStyle(
+                  fontFamily: AppText.headingFont,
                   fontSize: AppText.titleLarge,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: c.textPrimary,
                 ),
               ),

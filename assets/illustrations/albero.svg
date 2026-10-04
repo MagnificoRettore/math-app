@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 600 720" width="600" height="720" xmlns="http://www.w3.org/2000/svg" font-family="Nunito" font-weight="800">
+<rect width="600" height="720" fill="#bfe9ff"></rect>
+<circle cx="510" cy="90" r="44" fill="#ffd93d"></circle>
+<circle cx="510" cy="90" r="62" fill="#ffd93d" opacity="0.25"></circle>
+<g fill="#ffffff">
+<circle cx="80" cy="110" r="22"></circle><circle cx="108" cy="98" r="28"></circle><circle cx="138" cy="112" r="20"></circle><rect x="80" y="110" width="58" height="22"></rect>
+</g>
+<g fill="#ffffff" opacity="0.8">
+<circle cx="470" cy="380" r="16"></circle><circle cx="492" cy="370" r="22"></circle><circle cx="516" cy="382" r="15"></circle><rect x="470" y="382" width="46" height="14"></rect>
+</g>
+<rect y="610" width="600" height="110" fill="#4caf7a"></rect>
+<path d="M0 620 Q150 590 300 612 Q450 634 600 604 L600 720 L0 720 Z" fill="#3e9a69"></path>
+<path d="M286 590 C292 500 280 440 258 380 L250 330 L272 350 L300 320 L328 350 L350 330 L342 380 C320 440 308 500 314 590 Z" fill="#8b5a3c"></path>
+<path d="M300 330 L300 470 M270 360 Q285 400 296 420" stroke="#6e4329" stroke-width="5" fill="none" stroke-linecap="round"></path>
+<g fill="#5bbf6f">
+<circle cx="300" cy="235" r="132"></circle>
+<circle cx="185" cy="285" r="88"></circle><circle cx="415" cy="285" r="88"></circle>
+</g>
+<g fill="#7bd389">
+<circle cx="300" cy="225" r="118"></circle>
+<circle cx="190" cy="275" r="76"></circle><circle cx="410" cy="275" r="76"></circle>
+<circle cx="235" cy="160" r="72"></circle><circle cx="365" cy="160" r="72"></circle>
+</g>
+<circle cx="240" cy="140" r="26" fill="#ffffff" opacity="0.15"></circle>
+<g font-size="26" text-anchor="middle">
+<circle cx="230" cy="170" r="24" fill="#ff6b6b"></circle><text x="230" y="179" fill="#ffffff">+</text>
+<circle cx="340" cy="140" r="24" fill="#ffd93d"></circle><text x="340" y="149" fill="#5a3a00">×</text>
+<circle cx="410" cy="240" r="24" fill="#6c63ff"></circle><text x="410" y="249" fill="#ffffff">÷</text>
+<circle cx="170" cy="270" r="24" fill="#ff9f43"></circle><text x="170" y="279" fill="#4a2600">−</text>
+<circle cx="300" cy="250" r="24" fill="#ffffff"></circle><text x="300" y="259" fill="#2f7d52">=</text>
+<circle cx="360" cy="320" r="22" fill="#ff6b6b"></circle><text x="360" y="329" fill="#ffffff">%</text>
+<circle cx="240" cy="330" r="22" fill="#6c63ff"></circle><text x="240" y="339" fill="#ffffff">π</text>
+</g>
+<g transform="translate(120 470) rotate(-20)">
+<polygon points="0,-26 25,18 -25,18" fill="#ff6b6b"></polygon>
+</g>
+<rect x="455" y="455" width="40" height="40" rx="6" fill="#6c63ff" transform="rotate(18 475 475)"></rect>
+<circle cx="520" cy="540" r="16" fill="#ffd93d"></circle>
+<path d="M300 582 Q210 550 120 570 L120 630 Q210 612 300 640 Z" fill="#ff6b6b"></path>
+<path d="M300 582 Q390 550 480 570 L480 630 Q390 612 300 640 Z" fill="#e85555"></path>
+<path d="M300 568 Q215 536 132 556 L132 616 Q215 598 300 626 Z" fill="#ffffff"></path>
+<path d="M300 568 Q385 536 468 556 L468 616 Q385 598 300 626 Z" fill="#eef1f6"></path>
+<path d="M160 574 Q220 560 280 580 M160 590 Q220 576 280 596 M320 580 Q380 560 440 574 M320 596 Q380 576 440 590" stroke="#c9d0dc" stroke-width="2.5" fill="none"></path>
+</svg>

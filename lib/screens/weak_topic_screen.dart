@@ -8,6 +8,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/illustration.dart';
 import '../widgets/exercise_card.dart';
 import '../widgets/progress_bar.dart';
 import '../widgets/section_header.dart';
@@ -55,8 +56,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
 
             if (current == null) {
               return EmptyState(
-                icon: Icons.task_alt,
-                iconColor: AppColors.of(context).easy,
+                illustration: AppIllustration.razzo,
                 title: 'Punto debole risolto!',
                 subtitle:
                     'Tutti gli esercizi di questo argomento sono assimilati.',

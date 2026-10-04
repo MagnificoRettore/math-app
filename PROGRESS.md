@@ -2,7 +2,17 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **485 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **490 test in 43 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-03 — Design del canvas, fase 3: le schermate
+
+- **Illustrazioni**: le quattro tavole del canvas (lampadina, razzo, laptop, albero) convertite in SVG statico in `assets/illustrations/` e mostrate con `flutter_svg`, ora dipendenza diretta. Nella conversione lo sfondo è fissato, i `<use>` espansi col colore scritto e i testi in Nunito, che ha `π √ Σ`.
+- **Splash** con la lampadina sopra «Math App»; **onboarding** con un'illustrazione per slide; **stati vuoti** con l'albero (lezioni in arrivo) o il razzo (merito) al posto dell'icona.
+- **Benvenuto**: la testata indaco di «Creazione profilo» col bordo ondulato, senza più i colori scritti a mano.
+- **Home**: la card «riprendi» è a quaderno (righe e spirale) e torna a filo del titolo, da cui rientrava di 20 px; la serie di giorni è la card arancio «Traguardo» con i sette giorni a blocchi.
+- **Titoli** di pagina e di riquadro in Fredoka 600 (14 schermate e widget).
+- Verificato anche a occhio: le schermate principali renderizzate a 390×844 con i font veri.
+- Test: nuovo `test/illustration_test.dart` (SVG senza segnaposto né `<use>`, illustrazioni giuste in stato vuoto e onboarding, testata del benvenuto); la serie di giorni e la card «riprendi» hanno test nuovi al posto di quelli su bordo e alone; un test fissa la card «riprendi» a filo del titolo. Suite a **490 test in 43 file**, `flutter analyze` pulito.
 
 ## 2026-10-03 — Design del canvas, fase 2: i componenti condivisi
 

@@ -15,6 +15,7 @@ import '../theme/app_text.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 import '../widgets/app_button.dart';
+import '../widgets/illustration.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -107,11 +108,14 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                const IllustrationView(AppIllustration.idea, width: 200),
+                const SizedBox(height: 24),
                 Text(
                   'Math App',
                   style: TextStyle(
+                    fontFamily: AppText.headingFont,
                     fontSize: AppText.display,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: c.onSplash,
                     letterSpacing: -0.5,
                   ),
@@ -140,7 +144,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   const SizedBox(height: 24),
                   Lottie.asset(
                     'assets/animations/splash_loading.json',
-                    width: 260,
+                    // Piccolo: sopra c'è l'illustrazione, e insieme devono
+                    // stare anche su un telefono basso.
+                    width: 160,
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) => const SizedBox(
                       width: 26,

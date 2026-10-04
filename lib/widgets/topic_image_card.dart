@@ -46,8 +46,9 @@ class TopicImageCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
+                    fontFamily: AppText.headingFont,
                     fontSize: AppText.headline,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     height: 1.15,
                     color: Colors.white,
                     shadows: const [
