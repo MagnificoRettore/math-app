@@ -83,9 +83,9 @@ String yearCircleText(String title) {
 
 /// Un anno: il quadrato della «Classe» del design, con la sua etichetta.
 ///
-/// Scegliendolo, colore, bordo e testi passano in [AppMotion.medium] e la
-/// spunta entra con un rimbalzo ([AppMotion.bounce], [AppMotion.slow]); col
-/// movimento ridotto il cambio è istantaneo.
+/// Scegliendolo, colore, bordo e testi passano in [AppMotion.medium]; col
+/// movimento ridotto il cambio è istantaneo. Nessuna spunta: lo stato lo
+/// dicono l'evidenziazione e, allo screen reader, «selezionato».
 class _YearTab extends StatelessWidget {
   final String circleText;
   final String label;
@@ -117,64 +117,35 @@ class _YearTab extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                AnimatedContainer(
-                  duration: change,
-                  curve: AppMotion.standard,
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  // Il quadrato arrotondato della «Classe» del design: giallo
-                  // con il bordo oro l'anno scelto, bianco con il bordo lilla
-                  // gli altri.
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: selected ? c.yellow : c.surface,
-                    border: Border.all(
-                      color: selected ? c.yellowDeep : c.border,
-                      width: 3,
-                    ),
-                  ),
-                  // Inchiostro sul giallo, indaco sul bianco.
-                  child: AnimatedDefaultTextStyle(
-                    duration: change,
-                    curve: AppMotion.standard,
-                    style: TextStyle(
-                      fontFamily: AppText.headingFont,
-                      fontSize: AppText.titleMedium,
-                      fontWeight: FontWeight.w600,
-                      color: selected ? c.textPrimary : c.accent,
-                    ),
-                    child: Text(circleText),
-                  ),
+            AnimatedContainer(
+              duration: change,
+              curve: AppMotion.standard,
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
+              // Il quadrato arrotondato della «Classe» del design: giallo
+              // con il bordo oro l'anno scelto, bianco con il bordo lilla
+              // gli altri.
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: selected ? c.yellow : c.surface,
+                border: Border.all(
+                  color: selected ? c.yellowDeep : c.border,
+                  width: 3,
                 ),
-                Positioned(
-                  top: -6,
-                  right: -6,
-                  child: AnimatedScale(
-                    key: const Key('year-tab-check'),
-                    scale: selected ? 1 : 0,
-                    duration: AppMotion.duration(context, AppMotion.slow),
-                    curve: AppMotion.bounce,
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: c.accent,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: c.surface, width: 2),
-                      ),
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 11,
-                        color: c.surface,
-                      ),
-                    ),
-                  ),
+              ),
+              // Inchiostro sul giallo, indaco sul bianco.
+              child: AnimatedDefaultTextStyle(
+                duration: change,
+                curve: AppMotion.standard,
+                style: TextStyle(
+                  fontFamily: AppText.headingFont,
+                  fontSize: AppText.titleMedium,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? c.textPrimary : c.accent,
                 ),
-              ],
+                child: Text(circleText),
+              ),
             ),
             const SizedBox(height: 5),
             ConstrainedBox(
@@ -185,9 +156,11 @@ class _YearTab extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
+                // Lo stile sostituisce quello ereditato: il carattere va detto.
                 style: TextStyle(
+                  fontFamily: AppText.bodyFont,
                   fontSize: AppText.micro,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                   color: selected ? c.textPrimary : c.textSecondary,
                 ),
                 child: Text(label),

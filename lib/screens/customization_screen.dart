@@ -49,7 +49,7 @@ class _Label extends StatelessWidget {
         text,
         style: TextStyle(
           fontSize: AppText.label,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: c.textSecondary,
         ),
       ),
@@ -76,7 +76,7 @@ class _HapticsCard extends StatelessWidget {
                   'Vibrazioni',
                   style: TextStyle(
                     fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),

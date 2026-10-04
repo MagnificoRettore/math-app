@@ -682,7 +682,7 @@ class _PillButton extends StatelessWidget {
                   // Era l'unico testo sotto `AppText.micro`, e a 10 px nella
                   // barra più stretta dell'app era il primo a soffrire.
                   fontSize: AppText.micro,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                   color: active ? c.accent : c.textSecondary,
                 ),
               ),

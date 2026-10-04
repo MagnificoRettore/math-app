@@ -61,130 +61,124 @@ class _JumpBackInCard extends StatelessWidget {
 
     // Niente margine proprio: la lista della Home dà già i suoi 20, e con altri
     // 20 qui la card rientrava rispetto al titolo e alle altre card.
-    // La card a quaderno del design: righe azzurre e la spirale a sinistra.
-    // Le righe sono dipinte sotto il contenuto e non coprono l'inchiostro
-    // del tocco, che sta sul `Material` della card.
+    // La card a quaderno del design: la spirale a sinistra, senza righe.
     return AppCard(
       key: const Key('jump-back-in-card'),
       padding: EdgeInsets.zero,
       onTap: () => _open(context),
-      child: CustomPaint(
-        key: const Key('jump-back-in-paper'),
-        painter: _NotebookLines(c.paperLine),
-        child: Stack(
-          children: [
-            Positioned(
-              left: 14,
-              top: 24,
-              bottom: 24,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  for (var i = 0; i < 5; i++)
-                    Container(
-                      width: 18,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: c.accent, width: 3),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
+      child: Stack(
+        children: [
+          Positioned(
+            left: 14,
+            top: 24,
+            bottom: 24,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (var i = 0; i < 5; i++)
+                  Container(
+                    width: 18,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: c.accent, width: 3),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(50, 22, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          // Il badge giallo del design, con l'inchiostro sopra.
-                          color: c.yellow,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          target.isPaused ? 'In corso' : 'Da iniziare',
-                          style: TextStyle(
-                            fontSize: AppText.label,
-                            fontWeight: FontWeight.w800,
-                            color: c.textPrimary,
-                          ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(50, 22, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        // Il badge giallo del design, con l'inchiostro sopra.
+                        color: c.yellow,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        target.isPaused ? 'In corso' : 'Da iniziare',
+                        style: TextStyle(
+                          fontSize: AppText.label,
+                          fontWeight: FontWeight.w500,
+                          color: c.textPrimary,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Il topic è il titolo grande e la lezione il sottotitolo: è
-                  // l'argomento che dice dove si sta, la lezione è una delle sue
-                  // card.
-                  Text(
-                    target.argomento.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: AppText.headingFont,
-                      fontSize: AppText.headline,
-                      fontWeight: FontWeight.w600,
-                      color: c.textPrimary,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Il topic è il titolo grande e la lezione il sottotitolo: è
+                // l'argomento che dice dove si sta, la lezione è una delle sue
+                // card.
+                Text(
+                  target.argomento.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: AppText.headingFont,
+                    fontSize: AppText.headline,
+                    fontWeight: FontWeight.w600,
+                    color: c.textPrimary,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    target.lesson.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.bodySmall,
-                      color: c.textSecondary,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  target.lesson.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: AppText.bodySmall,
+                    color: c.textSecondary,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          _progressoTesto(progresso, carte),
-                          style: TextStyle(
-                            fontSize: AppText.labelSmall,
-                            fontWeight: FontWeight.w600,
-                            color: c.textSecondary,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${(progresso * 100).round()}%',
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _progressoTesto(progresso, carte),
                         style: TextStyle(
                           fontSize: AppText.labelSmall,
-                          fontWeight: FontWeight.w700,
-                          color: c.accent,
+                          fontWeight: FontWeight.w500,
+                          color: c.textSecondary,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ProgressBar(progress: progresso, height: 10),
-                  const SizedBox(height: 16),
-                  // Il tappo della card e il bottone fanno la stessa cosa: il bottone
-                  // dice cosa succede, la card dice che si può anche premere tutto.
-                  AppButton(
-                    key: const Key('jump-back-in-button'),
-                    label: 'Riprendi',
-                    icon: Icons.play_arrow_rounded,
-                    expand: true,
-                    onPressed: () => _open(context),
-                  ),
-                ],
-              ),
+                    ),
+                    Text(
+                      '${(progresso * 100).round()}%',
+                      style: TextStyle(
+                        fontSize: AppText.labelSmall,
+                        fontWeight: FontWeight.w500,
+                        color: c.accent,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ProgressBar(progress: progresso, height: 10),
+                const SizedBox(height: 16),
+                // Il tappo della card e il bottone fanno la stessa cosa: il bottone
+                // dice cosa succede, la card dice che si può anche premere tutto.
+                AppButton(
+                  key: const Key('jump-back-in-button'),
+                  label: 'Riprendi',
+                  icon: Icons.play_arrow_rounded,
+                  expand: true,
+                  onPressed: () => _open(context),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -208,22 +202,4 @@ class _JumpBackInCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Le righe del quaderno: una ogni 35 px, alte 2, come la card del design.
-class _NotebookLines extends CustomPainter {
-  final Color color;
-
-  const _NotebookLines(this.color);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    for (var y = 33.0; y < size.height; y += 35) {
-      canvas.drawRect(Rect.fromLTWH(0, y, size.width, 2), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_NotebookLines old) => old.color != color;
 }

@@ -464,7 +464,7 @@ class _TermsRow extends StatelessWidget {
                     TextSpan(
                       text: 'Termini e Condizioni',
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: c.accent,
                       ),
                     ),
@@ -472,7 +472,7 @@ class _TermsRow extends StatelessWidget {
                     TextSpan(
                       text: 'Privacy Policy',
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: c.accent,
                       ),
                     ),
@@ -505,7 +505,7 @@ class _TermsRow extends StatelessWidget {
               'Termini e Condizioni, Privacy Policy',
               style: TextStyle(
                 fontSize: AppText.titleMedium,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: c.textPrimary,
               ),
             ),
@@ -546,7 +546,7 @@ class _Label extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: AppText.titleSmall,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w500,
         color: AppColors.of(context).textPrimary,
       ),
     );
@@ -594,7 +594,7 @@ class _StepHeader extends StatelessWidget {
                         'PASSO ${step + 1} DI $steps',
                         style: TextStyle(
                           fontSize: AppText.bodyLarge,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0.7,
                           color: c.yellow,
                         ),

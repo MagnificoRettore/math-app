@@ -456,7 +456,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                       'Calcolatrice',
                       style: TextStyle(
                         fontSize: AppText.bodyLarge,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: c.textPrimary,
                       ),
                     ),
@@ -503,7 +503,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                   key: const ValueKey('calc-memory'),
                   style: TextStyle(
                     fontSize: AppText.micro,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: c.accent,
                   ),
                 ),
@@ -537,7 +537,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontSize: AppText.hero,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: _result == 'Errore' ? c.hard : c.accent,
                   ),
                 ),
@@ -569,7 +569,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
             _deg ? 'DEG' : 'RAD',
             style: TextStyle(
               fontSize: AppText.micro,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: c.accent,
             ),
           ),
@@ -589,7 +589,7 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
             primary: second,
             accent: !second,
           ),
-          // Etichette che i font sanno disegnare: Nunito non ha `⁻ ˣ ʸ`, e sul
+          // Etichette che i font sanno disegnare: Plus Jakarta Sans non ha `ˣ ʸ`, e sul
           // web il carattere di riserva andrebbe scaricato.
           _fn(second ? 'asin' : 'sin', second ? 'asin(' : 'sin('),
           _fn(second ? 'acos' : 'cos', second ? 'acos(' : 'cos('),
@@ -700,7 +700,7 @@ class _CalcKey extends StatelessWidget {
   final bool primary;
   final bool destructive;
 
-  /// Al posto dell'etichetta: `⌫` non c'è in Nunito.
+  /// Al posto dell'etichetta: `⌫` non c'è in Plus Jakarta Sans.
   final IconData? icon;
 
   const _CalcKey({
@@ -759,10 +759,10 @@ class _CalcKey extends StatelessWidget {
                   ? Icon(icon, size: 20, color: foreground)
                   : Text(
                       label,
-                      // Nunito e non Fredoka: Fredoka non ha `π` né `√`.
+                      // Il carattere del testo e non quello dei titoli: Outfit non ha `π` né `√`.
                       style: TextStyle(
                         fontSize: AppText.titleMedium,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w500,
                         color: foreground,
                       ),
                     ),

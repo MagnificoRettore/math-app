@@ -15,7 +15,6 @@ class AppCard extends StatelessWidget {
   /// del design.
   final double borderWidth;
   final double radius;
-  final bool flat;
 
   /// Alone colorato nell'angolo in alto a destra, sotto il contenuto.
   final Color? glow;
@@ -29,7 +28,6 @@ class AppCard extends StatelessWidget {
     this.borderColor,
     this.borderWidth = 1,
     this.radius = kCardRadius,
-    this.flat = false,
     this.glow,
   });
 
@@ -46,13 +44,8 @@ class AppCard extends StatelessWidget {
         border: borderColor == null
             ? null
             : Border.all(color: borderColor!, width: borderWidth),
-        boxShadow: flat
-            ? const []
-            : [
-                // Un gradino pieno e dorato sotto la card, non un'ombra
-                // sfumata: è l'ombra del design, la stessa dei bottoni.
-                BoxShadow(color: c.cardShadow, offset: const Offset(0, 6)),
-              ],
+        // Nessuna ombra e nessun gradino: le card sono piatte, il gradino è
+        // solo dei bottoni.
       ),
       child: Material(
         color: Colors.transparent,

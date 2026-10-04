@@ -7,6 +7,7 @@ import 'package:math_app/data/browse_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
@@ -171,7 +172,7 @@ void main() {
     }
   });
 
-  testWidgets('loggato: nome in grassetto e titolo della scuola sotto', (
+  testWidgets('loggato: nome in Outfit e titolo della scuola sotto', (
     tester,
   ) async {
     await _register(tester);
@@ -182,7 +183,8 @@ void main() {
     expect(find.byKey(_scuolaKey), findsOneWidget);
 
     final stile = tester.widget<Text>(find.byKey(_nomeKey)).style!;
-    expect(stile.fontWeight, FontWeight.w700);
+    expect(stile.fontFamily, AppText.headingFont);
+    expect(stile.fontWeight, FontWeight.w600);
     expect(
       stile.color,
       AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,

@@ -206,28 +206,30 @@ void main() {
 
       expect(radius.topLeft.x, kCardRadius);
       expect(kCardRadius, 20);
-      // Un gradino pieno e dorato, non un'ombra sfumata.
-      final ombra = (box.decoration! as BoxDecoration).boxShadow!.single;
-      expect(ombra.color, AppPalette.light.cardShadow);
-      expect(ombra.blurRadius, 0);
-      expect(ombra.offset, const Offset(0, 6));
+      // Piatta: nessuna ombra e nessun gradino, quelli sono dei bottoni.
+      expect((box.decoration! as BoxDecoration).boxShadow, isNull);
     });
 
-    testWidgets('la card riprendi è a quaderno: righe e spirale', (
+    testWidgets('la card riprendi è a quaderno: la spirale, senza righe', (
       tester,
     ) async {
       await _registra();
       await _pausa('eq1-intro');
       await _pumpHome(tester);
 
-      expect(
-        find.descendant(
-          of: _cardRiprendi,
-          matching: find.byKey(const Key('jump-back-in-paper')),
+      // Il foglio a righe non c'è più; i cinque anelli della spirale sì.
+      expect(find.byKey(const Key('jump-back-in-paper')), findsNothing);
+      final anelli = find.descendant(
+        of: _cardRiprendi,
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.constraints?.maxWidth == 18 &&
+              w.constraints?.maxHeight == 10,
         ),
-        findsOneWidget,
       );
-      // Niente alone: il design non ce l'ha e sulle righe stonerebbe.
+      expect(anelli, findsNWidgets(5));
+      // Niente alone: il design non ce l'ha.
       expect(
         find.descendant(
           of: _cardRiprendi,
@@ -383,14 +385,12 @@ void main() {
   });
 
   group('carosello degli argomenti', () {
-    final carousel = find.byType(ArgomentoCarousel);
     final lista = find.byKey(const Key('argomento-carousel-list'));
     Finder slide() => find.byWidgetPredicate(
       (w) =>
           w.key is ValueKey<String> &&
           (w.key! as ValueKey<String>).value.startsWith('carousel-'),
     );
-    const titoli = ['Equazioni di primo grado', 'Moduli', 'Le rette'];
 
     testWidgets('con la scuola: tutti gli argomenti della scuola', (
       tester,
@@ -398,8 +398,16 @@ void main() {
       await _registra();
       await _pumpHome(tester);
 
-      // La Superiore ha un argomento per anno, tre in tutto.
-      expect(slide(), findsNWidgets(3));
+      // Tutti gli argomenti della Superiore: la lista li costruisce
+      // pigramente, quindi si contano i figli dichiarati, che in una lista
+      // `separated` sono le card più i separatori.
+      final superiore = LessonRepository.instance.argomenti
+          .where((a) => a.levelId == 'high-school')
+          .length;
+      expect(
+        tester.widget<ListView>(lista).childrenDelegate.estimatedChildCount,
+        superiore * 2 - 1,
+      );
       expect(find.text('Equazioni di primo grado'), findsOneWidget);
     });
 
@@ -425,15 +433,28 @@ void main() {
     testWidgets('da ospite: gli argomenti di un anno a caso', (tester) async {
       await _pumpHome(tester);
 
-      // Ogni anno con argomenti ne ha uno: una card sola.
-      expect(slide(), findsOneWidget);
-      final mostrati = titoli.where(
-        (t) => find
-            .descendant(of: carousel, matching: find.text(t))
-            .evaluate()
-            .isNotEmpty,
+      // Tutti gli argomenti di un solo anno, quello estratto.
+      final mostrati = [
+        for (final e in slide().evaluate())
+          (e.widget.key! as ValueKey<String>).value.substring(
+            'carousel-'.length,
+          ),
+      ];
+      final anni = {
+        for (final a in LessonRepository.instance.argomenti)
+          if (mostrati.contains(a.topicId)) a.yearId,
+      };
+      expect(anni, hasLength(1));
+      expect(
+        mostrati,
+        hasLength(
+          LessonRepository.instance.argomenti
+              .where(
+                (a) => a.yearId == anni.single && a.levelId == 'high-school',
+              )
+              .length,
+        ),
       );
-      expect(mostrati, hasLength(1));
     });
 
     testWidgets('una scuola senza argomenti non mostra il carosello', (
@@ -470,9 +491,8 @@ void main() {
       );
       final box = card.decoration! as BoxDecoration;
       expect(box.color, AppPalette.light.orange);
-      // Il gradino pieno sotto, come i bottoni e le card del design.
-      expect(box.boxShadow!.single.color, AppPalette.light.orangeDeep);
-      expect(box.boxShadow!.single.blurRadius, 0);
+      // Piatta come le altre card: il gradino è solo dei bottoni.
+      expect(box.boxShadow, isNull);
       expect(find.text('TRAGUARDO'), findsOneWidget);
       expect(find.textContaining('Serie di'), findsOneWidget);
     });

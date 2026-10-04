@@ -16,7 +16,7 @@ enum AppButtonVariant {
   outline,
 }
 
-/// Il bottone del design: una pillola in Fredoka sollevata da un gradino di
+/// Il bottone del design: una pillola in Outfit sollevata da un gradino di
 /// colore pieno sotto, non da un'ombra sfumata.
 ///
 /// Premuto, il bottone scende di tutto il gradino e il gradino sparisce, poi al

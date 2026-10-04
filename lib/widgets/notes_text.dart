@@ -242,7 +242,7 @@ class NotesText extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: AppText.bodyMedium,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: calloutColor,
                 ),
               ),
@@ -348,7 +348,9 @@ class NotesText extends StatelessWidget {
     final base = TextStyle(
       fontSize: styleDefaults.$1,
       fontWeight: styleDefaults.$2,
-      fontFamily: styleDefaults.$3,
+      // `RichText` non eredita il `DefaultTextStyle`: senza, il corpo delle
+      // lezioni andrebbe nel carattere di sistema.
+      fontFamily: styleDefaults.$3 ?? AppText.bodyFont,
       color: color,
       height: 1.35,
     );
@@ -420,15 +422,15 @@ class NotesText extends StatelessWidget {
     NotesBlockType type,
     double scale,
   ) => switch (type) {
-    NotesBlockType.title => (AppText.docTitle * scale, FontWeight.w800, null),
+    NotesBlockType.title => (AppText.docTitle * scale, FontWeight.w500, null),
     NotesBlockType.heading => (
       AppText.docHeading * scale,
-      FontWeight.w700,
+      FontWeight.w500,
       null,
     ),
     NotesBlockType.subheading => (
       AppText.docBody * scale,
-      FontWeight.w600,
+      FontWeight.w500,
       null,
     ),
     NotesBlockType.body => (baseFontSize * scale, FontWeight.w400, null),
@@ -494,7 +496,7 @@ class NotesText extends StatelessWidget {
   TextStyle _applyFlags(List<String> stack, TextStyle base, double scale) {
     var style = base;
     if (stack.contains('**')) {
-      style = style.copyWith(fontWeight: FontWeight.w700);
+      style = style.copyWith(fontWeight: FontWeight.w500);
     }
     if (stack.contains('*')) {
       style = style.copyWith(fontStyle: FontStyle.italic);

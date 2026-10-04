@@ -115,7 +115,7 @@ class ProfileAvatar extends StatelessWidget {
         initialsOf(user.name),
         style: TextStyle(
           fontSize: size * 0.3,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
           color: color,
         ),
       ),

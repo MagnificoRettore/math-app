@@ -69,7 +69,7 @@ void _text(
       style: TextStyle(
         fontFamily: AppText.bodyFont,
         fontSize: _kTickFont * style.textScale,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         fontStyle: fontStyle,
         color: halo == null ? (color ?? style.palette.label) : null,
         foreground: halo,

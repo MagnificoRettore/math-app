@@ -251,7 +251,7 @@ class _ResultCard extends StatelessWidget {
             titolo,
             style: TextStyle(
               fontSize: AppText.titleSmall,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: c.textPrimary,
             ),
           ),
@@ -323,7 +323,7 @@ class _TipoBadge extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontSize: AppText.caption,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

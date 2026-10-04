@@ -56,7 +56,7 @@ class WeakTopicsSection extends StatelessWidget {
                   total == 1 ? '1 da ripassare' : '$total da ripassare',
                   style: TextStyle(
                     fontSize: AppText.labelSmall,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: c.danger,
                   ),
                 ),
@@ -90,7 +90,7 @@ class WeakTopicsSection extends StatelessWidget {
                             'Vedi tutti (${weakTopics.length})',
                             style: TextStyle(
                               fontSize: AppText.bodySmall,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: c.accent,
                             ),
                           ),

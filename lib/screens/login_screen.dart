@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Registrati',
                           style: TextStyle(
                             fontSize: AppText.bodyLarge,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: c.accent,
                           ),
                         ),

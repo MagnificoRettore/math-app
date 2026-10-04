@@ -39,18 +39,13 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// L'arancio del design, per i traguardi e i bottoni tondi.
   final Color orange;
 
-  /// Il bordo e l'ombra piena di ciò che è [orange].
+  /// Il gradino del bottone play [orange] e l'arancio dei grafici, che con
+  /// [orange] su bianco non arriverebbe a 3:1.
   final Color orangeDeep;
 
   /// L'ombra piena dei bottoni [accent]: il design li solleva con un gradino
   /// di colore pieno sotto, non con un'ombra sfumata.
   final Color accentDeep;
-
-  /// L'ombra piena delle card, un oro che sta bene sul crema dello sfondo.
-  final Color cardShadow;
-
-  /// Le righe del quaderno nelle card a righe.
-  final Color paperLine;
 
   /// Il fondo e il testo di un bottone disabilitato: un grigio caldo, che sul
   /// crema non sembra un errore.
@@ -91,8 +86,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.orange,
     required this.orangeDeep,
     required this.accentDeep,
-    required this.cardShadow,
-    required this.paperLine,
     required this.disabled,
     required this.onDisabled,
     required this.headerBand,
@@ -126,8 +119,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
     orange: Color(0xFFEF7D1A),
     orangeDeep: Color(0xFFB65508),
     accentDeep: Color(0xFF160C3E),
-    cardShadow: Color(0xFFE3C46E),
-    paperLine: Color(0xFFCFDCF3),
     disabled: Color(0xFFE4DFD4),
     onDisabled: Color(0xFF6F6A86),
     headerBand: Color(0xFF2B1A6B),
@@ -170,8 +161,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? orange,
     Color? orangeDeep,
     Color? accentDeep,
-    Color? cardShadow,
-    Color? paperLine,
     Color? disabled,
     Color? onDisabled,
     Color? headerBand,
@@ -204,8 +193,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
       orange: orange ?? this.orange,
       orangeDeep: orangeDeep ?? this.orangeDeep,
       accentDeep: accentDeep ?? this.accentDeep,
-      cardShadow: cardShadow ?? this.cardShadow,
-      paperLine: paperLine ?? this.paperLine,
       disabled: disabled ?? this.disabled,
       onDisabled: onDisabled ?? this.onDisabled,
       headerBand: headerBand ?? this.headerBand,
@@ -243,8 +230,6 @@ class AppPalette extends ThemeExtension<AppPalette> {
       orange: Color.lerp(orange, other.orange, t)!,
       orangeDeep: Color.lerp(orangeDeep, other.orangeDeep, t)!,
       accentDeep: Color.lerp(accentDeep, other.accentDeep, t)!,
-      cardShadow: Color.lerp(cardShadow, other.cardShadow, t)!,
-      paperLine: Color.lerp(paperLine, other.paperLine, t)!,
       disabled: Color.lerp(disabled, other.disabled, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
       headerBand: Color.lerp(headerBand, other.headerBand, t)!,

@@ -237,7 +237,7 @@ class _Shortcut extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppText.label,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: c.textPrimary,
                 ),
               ),

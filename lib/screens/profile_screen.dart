@@ -268,7 +268,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                   'Modifica profilo',
                   style: TextStyle(
                     fontSize: AppText.titleSmall,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),
@@ -337,7 +337,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                   'Cambia la tua scuola',
                   style: TextStyle(
                     fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),
@@ -358,7 +358,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 'Esci',
                 style: TextStyle(
                   fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: c.hard,
                 ),
               ),
@@ -408,7 +408,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 'Scegli la foto profilo',
                 style: TextStyle(
                   fontSize: AppText.titleMedium,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: AppColors.of(context).textPrimary,
                 ),
               ),

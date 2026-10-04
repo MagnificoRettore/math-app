@@ -10,8 +10,8 @@ Il riferimento per com'è fatta l'app e per come vanno fatte le parti nuove: col
 
 La fonte è il canvas **«Illustrazioni App Educativa»** (claude.ai/artifact/UjtXU3sEDTVdSC7RuCYdjX): le tavole «Componenti UI» e «Creazione profilo» per l'interfaccia, quattro tavole di illustrazioni.
 
-- **Un quaderno colorato, non un'app da ufficio.** Indaco profondo e giallo su un fondo crema, caratteri tondi, oggetti di scuola (righe del quaderno, spirale, matite, il biglietto del traguardo).
-- **Le cose si sollevano con un gradino pieno, non con un'ombra sfumata.** Bottoni e card hanno sotto un gradino di colore pieno, più scuro del loro; premuto, il bottone scende sul gradino.
+- **Un quaderno colorato, non un'app da ufficio.** Indaco profondo e giallo su un fondo crema, caratteri geometrici, oggetti di scuola (la spirale, matite, il biglietto del traguardo).
+- **Solo i bottoni si sollevano, con un gradino pieno, non con un'ombra sfumata.** Sotto il bottone c'è un gradino di colore pieno, più scuro del suo; premuto, il bottone scende sul gradino. **Le card sono piatte, senza ombra.**
 - **Un tema solo, chiaro.** Il canvas non ha una versione scura.
 - **Il colore decora, il contrasto si rispetta.** I colori del canvas restano per riempimenti e decori; come testo si usano toni scuri della stessa famiglia, sempre oltre 4.5:1.
 - **Si muove poco e in fretta.** 120–300 ms, curve morbide, e niente movimento per chi l'ha chiesto al sistema.
@@ -43,10 +43,8 @@ Tutti in `AppPalette` (`lib/theme/app_colors.dart`), letti con `AppColors.of(con
 | `yellowDeep` | `#B98500` | Gradino e bordo del giallo, strisce della barra |
 | `yellowSoft` | `#FBE7A8` | Fondo della barra di avanzamento |
 | `orange` | `#EF7D1A` | Card «Traguardo», bottone tondo play. Sopra l'inchiostro (6.0:1) |
-| `orangeDeep` | `#B65508` | Gradino dell'arancio |
+| `orangeDeep` | `#B65508` | Gradino del bottone tondo play; l'arancio dei grafici, perché `orange` su bianco non arriva a 3:1 |
 | `accentDeep` | `#160C3E` | Gradino del bottone indaco |
-| `cardShadow` | `#E3C46E` | Gradino oro delle card |
-| `paperLine` | `#CFDCF3` | Righe del quaderno |
 | `disabled` / `onDisabled` | `#E4DFD4` / `#6F6A86` | Bottone disabilitato, grigio caldo (3.9:1: i controlli disabilitati sono esenti da WCAG) |
 
 ### Ruoli che finiscono come testo
@@ -74,10 +72,10 @@ In `ColorScheme` il primary, il secondario (giallo, con l'inchiostro sopra) e il
 
 Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, licenze OFL): l'app non va in rete.
 
-- **Fredoka** (500, 600) — `AppText.headingFont`: titoli di pagina e di riquadro, bottoni, `AppBar`. Sempre 600.
-- **Nunito** (400, 600, 700, 800) — `AppText.bodyFont`: tutto il resto. Le etichette dei controlli sono 800.
+- **Outfit** (SemiBold 600) — `AppText.headingFont`: titoli di pagina e di riquadro, bottoni, `AppBar` e il nome nella banda dell'header. Sempre 600.
+- **Plus Jakarta Sans** (Regular 400, Medium 500) — `AppText.bodyFont`: tutto il resto, compreso il corpo delle lezioni (titoli, intestazioni e grassetto a 500). Le etichette dei controlli sono Medium 500; non si usano pesi più alti.
 
-**Scala** (`AppText`, `lib/theme/app_text.dart`, mai un numero scritto):
+**Scala** (`AppText`, `lib/theme/app_text.dart`, mai un numero scritto). Le misure non cambiano:
 
 | Interfaccia | px | Documento delle lezioni | px |
 |---|---|---|---|
@@ -96,7 +94,9 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 | `caption` | 11.5 | | |
 | `micro` | 11 — il pavimento | | |
 
-**Caratteri che mancano.** Nunito non ha `⁻ ˣ ʸ ⁿ ⌫`; Fredoka non ha nemmeno `π √ ∞`. Sul web il carattere di riserva andrebbe scaricato, quindi le etichette li evitano (`1/x`, `x^y`, `asin`, ⌫ come icona) e dove servono `π` o `√` si usa Nunito.
+**Caratteri che mancano** (verificati sulla tabella `cmap` dei file). Outfit non ha `π √ ∞ ≤ ≥ Σ` né gli apici `⁻ ˣ ʸ ⁿ`; Plus Jakarta Sans ha `π √ ∞ ⁻ ≤ ≥` ma non `ˣ ʸ ⁿ Σ`; nessuno dei due ha `⌫`. Sul web il carattere di riserva andrebbe scaricato, quindi le etichette li evitano (`1/x`, `x^y`, `asin`, ⌫ come icona), dove servono `π` o `√` si usa il carattere del testo, e la `Σ` della tavola del razzo è disegnata come tracciato.
+
+**`RichText` non eredita il carattere**: il corpo delle lezioni (`NotesText`, `MathText`) e ogni stile che sostituisce quello ereditato (`AnimatedDefaultTextStyle`) dicono `AppText.bodyFont`, altrimenti finirebbero nel carattere di sistema.
 
 ---
 
@@ -105,16 +105,16 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 | Elemento | Raggio | Bordo | Gradino |
 |---|---|---|---|
 | Bottone (`AppButton`) | pillola | contorno: 3 `accent` | 5 px pieno, colore `…Deep` |
-| Card (`AppCard`) | 20 (`kCardRadius`) | nessuno; 3 `accent` se scelta | 6 px `cardShadow` |
+| Card (`AppCard`) | 20 (`kCardRadius`) | nessuno; 3 `accent` se scelta | nessuno: piatta |
 | Campo di testo | 14 | 3 `border`, 3 `accent` col fuoco, 3 `hard` in errore | — |
 | Anno (`YearTabs`) | 12 | 3 `border`; scelto 3 `yellowDeep` su `yellow` | — |
 | Opzione di risposta | 14 | 3 `border`, poi il colore dello stato | — |
 | Barra di avanzamento alta | 4 | 2 `yellowDeep` | — |
-| Card «Traguardo» | 18 | — | 6 px `orangeDeep` |
+| Card «Traguardo» | 18 | — | nessuno: piatta |
 | Banda dell'header | in basso 28 | — | — |
 | Illustrazione | 10% della larghezza | — | — |
 
-**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale). Le ombre sfumate non fanno parte del design.
+**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale) e **vale solo per i bottoni**. Le card non hanno nessuna ombra, né piena né sfumata; le ombre sfumate non fanno parte del design.
 
 ---
 
@@ -123,17 +123,17 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 - **Margine di pagina 20** (`EdgeInsets.fromLTRB(20, 8, 20, 24)`): titoli e card stanno sulla stessa linea, e le sezioni non aggiungono un margine proprio.
 - **24 fra le sezioni della Home**, 12–14 fra le card di una lista.
 - **Area di tocco almeno 44 px**: bottoni da 52 (o 44 più il gradino), anni da 44, avatar da 52.
-- Il carosello degli argomenti è l'unica striscia che **va da bordo a bordo**: scavalca i 20 di margine e li rimette come padding.
+- Il carosello degli argomenti è l'unica striscia che **va da bordo a bordo**: scavalca i 20 di margine e li rimette come padding. Senza ombra sulle card, sotto la striscia non serve più spazio per il gradino, e la lista taglia sul suo bordo.
 
 ---
 
 ## 6. Componenti
 
 ### Header — `MainHeaderAppBar` (`lib/widgets/main_header.dart`)
-Banda indaco appoggiata al bordo dello schermo, angoli in basso a 28, sotto gli angoli lo sfondo. Identità a sinistra (avatar con badge di modifica, nome, scuola all'80% di bianco), lente e personalizzazione bianche a destra. Gli anni stanno **sotto** la banda, sullo sfondo. Nelle sotto-pagine che la tengono (l'argomento) c'è la freccia indietro prima dell'avatar.
+Banda indaco appoggiata al bordo dello schermo, angoli in basso a 28, sotto gli angoli lo sfondo. Identità a sinistra (avatar con badge di modifica, nome in Outfit 600, scuola all'80% di bianco), lente e personalizzazione bianche a destra. Gli anni stanno **sotto** la banda, sullo sfondo. Nelle sotto-pagine che la tengono (l'argomento) c'è la freccia indietro prima dell'avatar.
 
 ### Bottone — `AppButton` (`lib/widgets/app_button.dart`)
-Pillola in Fredoka 600 alta 52, sollevata da un gradino di 5 px.
+Pillola in Outfit 600 alta 52, sollevata da un gradino di 5 px.
 - `primary`: indaco, testo bianco, gradino `accentDeep`.
 - `secondary`: giallo, testo inchiostro, gradino `yellowDeep`; anche sui fondi indaco, dove l'indaco sparirebbe.
 - `outline`: bianco, bordo e testo indaco.
@@ -143,27 +143,27 @@ Pillola in Fredoka 600 alta 52, sollevata da un gradino di 5 px.
 Nelle schermate non si usano `FilledButton` né `OutlinedButton`.
 
 ### Card — `AppCard` (`lib/widgets/app_card.dart`)
-Bianca, raggio 20, gradino oro. Varianti fatte nelle schermate:
-- **Quaderno** (card «riprendi»): righe `paperLine` ogni 35 px e cinque anelli della spirale a sinistra; il testo parte a 50.
-- **Traguardo** (`StreakCard`): arancio, tagliandi bianchi a sinistra, striscia chiara a destra; contenuti su riquadri bianchi.
+Bianca, raggio 20, **piatta: nessuna ombra e nessun gradino**, comprese quelle del carosello. Varianti fatte nelle schermate:
+- **Quaderno** (card «riprendi»): i cinque anelli della spirale a sinistra, **senza righe sullo sfondo**; il testo parte a 50.
+- **Traguardo** (`StreakCard`): arancio, piatta, tagliandi bianchi a sinistra, striscia chiara a destra; contenuti su riquadri bianchi.
 - **Scelta** (`SchoolLevelTile`): bordo indaco da 3.
 
 ### Campi — `AppTheme.fieldDecoration`
-Fondo bianco, bordo da 3 lilla, indaco col fuoco, rosso nell'errore; l'etichetta sale in indaco 800. I campi del dialog di Google restano sottolineati.
+Fondo bianco, bordo da 3 lilla, indaco col fuoco, rosso nell'errore; l'etichetta sale in indaco Medium 500. I campi del dialog di Google restano sottolineati.
 
 ### Barra di avanzamento — `ProgressBar` (`lib/widgets/progress_bar.dart`)
 Da 10 px in su: fondo `yellowSoft`, bordo `yellowDeep`, riempimento giallo a strisce verticali (2 px ogni 12). Sotto i 10 px: piena e arrotondata, nel colore che si passa.
 
 ### Selezioni
-- **Anni** (`YearTabs`): quadrati da 44, la «Classe» del canvas. Scelto: giallo, bordo oro, spunta indaco nell'angolo.
+- **Anni** (`YearTabs`): quadrati da 44, la «Classe» del canvas. Scelto: giallo con bordo oro, **senza spunta**: lo stato lo dice solo l'evidenziazione.
 - **Avatar** (`AvatarPicker`): cerchi colorati a turno (giallo, turchese, arancio, lilla) con l'icona inchiostro; scelto con bordo indaco e due anelli, bianco e giallo.
 - **Opzioni di risposta** (`McqOptionTile`): bordo da 3, verde giusta, rosso sbagliata, indaco scelta.
 
 ### Badge
-Pillola gialla con l'inchiostro 800 («In corso», «Da iniziare»). I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
+Pillola gialla con l'inchiostro Medium 500 («In corso», «Da iniziare»). I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
 
 ### Stati vuoti — `EmptyState`
-Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Fredoka e una riga di spiegazione; scorre se la pagina è bassa.
+Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Outfit e una riga di spiegazione; scorre se la pagina è bassa.
 
 ### Testata ondulata — `WaveBottomClipper` (`lib/widgets/wave_clipper.dart`)
 Il bordo in basso della testata di «Creazione profilo», scalato sul riquadro: nel benvenuto (con gli angoli in alto arrotondati) e nella registrazione a passi (a filo dello schermo).
@@ -173,7 +173,7 @@ Il FAB degli strumenti e il pannello che si apre sono **indaco come la barra di 
 
 ### Grafici — `GraphView` (`lib/widgets/graph/`)
 Grafici **non interattivi** dal JSON delle lezioni (riquadro `graph`), dentro una card bianca col titolo.
-- **Piano cartesiano**: assi per l'origine con le frecce e i nomi in LaTeX, griglia nei due sensi, numeri in Nunito 11 col meno «−» e un alone bianco, «O» all'origine. Funzioni a 2.6 px con i buchi rispettati (niente verticali agli asintoti), rette a 2 px (tratteggiate per asintoti e guide), punti pieni con un anello bianco.
+- **Piano cartesiano**: assi per l'origine con le frecce e i nomi in LaTeX, griglia nei due sensi, numeri in Plus Jakarta Sans 11 col meno «−» e un alone bianco, «O» all'origine. Funzioni a 2.6 px con i buchi rispettati (niente verticali agli asintoti), rette a 2 px (tratteggiate per asintoti e guide), punti pieni con un anello bianco.
 - **Geometria e regioni**: circonferenze e poligoni a 2.2 px, segmenti con gli estremi a punto, vettori con una punta piena da 11; aree, regioni e figure piene del colore dell'elemento al 16%, sotto tutto, così la griglia si vede attraverso. Il bordo di una regione è continuo per `≤`/`≥` e tratteggiato per `<`/`>`.
 - **Retta numerica**: la retta con la freccia e i soli numeri che contano sotto; sopra, una riga per intervallo con la barra da 4 e gli estremi da 5.5, pieni se inclusi e vuoti (fondo bianco, bordo del colore) se esclusi, e una guida tratteggiata alla retta; i punti stanno sulla retta. Etichette in LaTeX sopra la barra, con lo spazio per una frazione fra due righe.
 - **Barre**: griglia orizzontale, base sullo zero, barre a angoli superiori arrotondati (5), categorie sotto.
@@ -183,7 +183,7 @@ Grafici **non interattivi** dal JSON delle lezioni (riquadro `graph`), dentro un
 - **Movimento**: all'ingresso le curve si tracciano, i riempimenti si accendono e i punti compaiono (`slow`), una volta sola; col movimento ridotto è già tutto lì.
 
 ### Calcolatrice
-Tasti da 40: cifre bianche col bordo da 3, operatori gialli e `=` indaco col gradino pieno, funzioni lilla, AC e ⌫ in rosso. Etichette in Nunito 800.
+Tasti da 40: cifre bianche col bordo da 3, operatori gialli e `=` indaco col gradino pieno, funzioni lilla, AC e ⌫ in rosso. Etichette in Plus Jakarta Sans Medium 500. I tasti restano bottoni e quindi tengono il loro gradino.
 
 ---
 
@@ -198,7 +198,7 @@ Le quattro tavole del canvas, in SVG statico in `assets/illustrations/`, mostrat
 | `albero` | Albero che cresce dal libro | Onboarding, la scuola; stati vuoti «in arrivo» |
 | `razzo` | Razzo che decolla dal libro | Onboarding, la serie; stati vuoti di merito |
 
-Una tavola nuova si converte come le altre: sfondo fissato, `<use>` espansi col colore scritto, testi in Nunito.
+Una tavola nuova si converte come le altre: sfondo fissato, `<use>` espansi col colore scritto, testi in Plus Jakarta Sans 500; un carattere che manca (come la `Σ`) si disegna come tracciato.
 
 ---
 
@@ -219,7 +219,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 |---|---|
 | Bottone premuto | Scende di 5 px e il gradino va a zero; torna su al rilascio |
 | Avatar scelto | Cresce a 1.08 col rimbalzo; bordo e anelli crescono |
-| Anno scelto | Colore, bordo e testi in `medium`; spunta che entra col rimbalzo |
+| Anno scelto | Colore, bordo e testi in `medium`; nessuna spunta |
 | Barra di avanzamento | Il riempimento va al valore nuovo; al primo disegno è già lì |
 | Passi della registrazione | Il contenuto entra con dissolvenza e scorrimento laterale (avanti da destra, indietro da sinistra); il titolo cambia in dissolvenza |
 | Home | Le sezioni entrano in sequenza al primo caricamento, una volta sola |
@@ -238,7 +238,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 
 - Testo almeno 4.5:1 sul suo fondo; i colori del canvas non passano e restano decoro.
 - Area di tocco almeno 44 px.
-- I bottoni e i controlli di scelta (anni, avatar) si annunciano come bottoni allo screen reader, con lo stato «selezionato»; le barre dicono la percentuale; le illustrazioni sono decorative. Un componente nuovo fa lo stesso.
+- I bottoni e i controlli di scelta (anni, avatar) si annunciano come bottoni allo screen reader, con lo stato «selezionato»; le barre dicono la percentuale; le illustrazioni sono decorative. Un componente nuovo fa lo stesso. Senza la spunta, lo stato «selezionato» dell'anno passa solo dall'annuncio e dall'evidenziazione.
 - La scala del testo del sistema vale anche per le formule e i grafici.
 - Il movimento ridotto si rispetta ovunque.
 
@@ -249,11 +249,11 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Fare | Non fare |
 |---|---|
 | Colori da `AppPalette`, caratteri da `AppText`, tempi da `AppMotion` | Scrivere colori, misure di testo o durate nei widget |
-| Gradino pieno sotto bottoni e card | Ombre sfumate, aloni, sfumature di sfondo |
+| Gradino pieno sotto i bottoni; card piatte | Ombre sfumate, aloni, sfumature di sfondo, ombre o gradini sulle card |
 | Inchiostro sul giallo e sull'arancio | Bianco sul giallo |
 | `AppButton` per ogni bottone d'azione | `FilledButton`, `OutlinedButton`, `ElevatedButton` nelle schermate |
 | Bordo da 3 sui controlli che si scelgono | Bordi da 1 sui controlli |
-| Fredoka 600 per i titoli, Nunito per il resto | Altri caratteri, o Fredoka in grassetto oltre 600 |
+| Outfit 600 per i titoli, Plus Jakarta Sans 400 o 500 per il resto | Altri caratteri, Outfit oltre 600, Plus Jakarta Sans oltre 500 |
 | Un'illustrazione del canvas negli stati vuoti | Icone grandi in grigio |
 | Tema chiaro | Varianti scure di componenti |
 
@@ -283,6 +283,7 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-04 | Caratteri: Outfit (600) al posto di Fredoka, Plus Jakarta Sans (400, 500) al posto di Nunito; etichette dei controlli, badge e corpo delle lezioni (titoli, intestazioni, grassetto) a 500; il nome nella banda in Outfit. Card piatte, anche nel carosello e la card «Traguardo»; card «riprendi» senza righe; anno scelto senza spunta. Via `cardShadow` e `paperLine`; `orangeDeep` resta per il play e i grafici. La `Σ` del razzo è un tracciato. |
 | 2026-10-04 | Grafici, fase 3: retta numerica con intervalli a righe, estremi pieni o vuoti, punti sulla retta. |
 | 2026-10-04 | Grafici, fase 2: curve parametriche, circonferenze, segmenti e vettori, poligoni, aree e regioni di disequazioni; riempimenti al 16% e bordi continui o tratteggiati. |
 | 2026-10-04 | Grafici delle lezioni rifatti (`graph` al posto di `chart`): piano cartesiano vero con assi per l'origine, frecce, griglia nei due sensi e numeri in Nunito; etichette in LaTeX; colori ben distinti; niente sfumature sotto le curve; barre con lo stesso stile. |

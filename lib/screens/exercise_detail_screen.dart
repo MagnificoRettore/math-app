@@ -107,7 +107,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
             'Problema',
             style: TextStyle(
               fontSize: AppText.bodyLarge,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: c.textPrimary,
             ),
           ),
@@ -128,7 +128,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
             'Formule chiave',
             style: TextStyle(
               fontSize: AppText.bodyLarge,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: c.textPrimary,
             ),
           ),
@@ -160,7 +160,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                 child: Text(
                   'Suggerimenti',
                   style: TextStyle(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     fontSize: AppText.bodyLarge,
                     color: c.textPrimary,
                   ),
@@ -221,7 +221,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
                       child: Text(
                         '${index + 1}',
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           fontSize: AppText.label,
                           color: c.accent,
                         ),
@@ -335,7 +335,7 @@ class _StatusButton extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: AppText.caption,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: color,
               ),
             ),

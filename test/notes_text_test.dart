@@ -59,25 +59,25 @@ TextStyle _spanStyle(WidgetTester tester, String expected) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('titolo usa docTitle e peso 800', (tester) async {
+  testWidgets('titolo usa docTitle e peso 500', (tester) async {
     await _pump(tester, '# Ciao');
     final style = _spanStyle(tester, 'Ciao');
     expect(style.fontSize, AppText.docTitle);
-    expect(style.fontWeight, FontWeight.w800);
+    expect(style.fontWeight, FontWeight.w500);
   });
 
-  testWidgets('intestazione usa docHeading e peso 700', (tester) async {
+  testWidgets('intestazione usa docHeading e peso 500', (tester) async {
     await _pump(tester, '## Sezione');
     final style = _spanStyle(tester, 'Sezione');
     expect(style.fontSize, AppText.docHeading);
-    expect(style.fontWeight, FontWeight.w700);
+    expect(style.fontWeight, FontWeight.w500);
   });
 
-  testWidgets('sottointestazione usa docBody e peso 600', (tester) async {
+  testWidgets('sottointestazione usa docBody e peso 500', (tester) async {
     await _pump(tester, '### Sottosezione');
     final style = _spanStyle(tester, 'Sottosezione');
     expect(style.fontSize, AppText.docBody);
-    expect(style.fontWeight, FontWeight.w600);
+    expect(style.fontWeight, FontWeight.w500);
   });
 
   testWidgets('corpo usa il font di base', (tester) async {
@@ -93,12 +93,12 @@ void main() {
       _spanStyle(tester, 'Titolo').fontSize,
       closeTo(AppText.docTitle * 0.8, 0.01),
     );
-    expect(_spanStyle(tester, 'Titolo').fontWeight, FontWeight.w800);
+    expect(_spanStyle(tester, 'Titolo').fontWeight, FontWeight.w500);
     expect(
       _spanStyle(tester, 'Sezione').fontSize,
       closeTo(AppText.docHeading * 0.8, 0.01),
     );
-    expect(_spanStyle(tester, 'Sezione').fontWeight, FontWeight.w700);
+    expect(_spanStyle(tester, 'Sezione').fontWeight, FontWeight.w500);
     expect(
       _spanStyle(tester, 'Testo normale').fontSize,
       closeTo(AppText.docBody * 0.8, 0.01),
@@ -145,7 +145,7 @@ void main() {
 
   testWidgets('grassetto, corsivo, sottolineato e barrato', (tester) async {
     await _pump(tester, '**bold** *italic* __under__ ~~strike~~');
-    expect(_spanStyle(tester, 'bold').fontWeight, FontWeight.w700);
+    expect(_spanStyle(tester, 'bold').fontWeight, FontWeight.w500);
     expect(_spanStyle(tester, 'italic').fontStyle, FontStyle.italic);
     expect(_spanStyle(tester, 'under').decoration, TextDecoration.underline);
     expect(_spanStyle(tester, 'strike').decoration, TextDecoration.lineThrough);
@@ -154,7 +154,7 @@ void main() {
   testWidgets('stili combinabili dentro un solo run', (tester) async {
     await _pump(tester, '**__combo__**');
     final style = _spanStyle(tester, 'combo');
-    expect(style.fontWeight, FontWeight.w700);
+    expect(style.fontWeight, FontWeight.w500);
     expect(style.decoration, TextDecoration.underline);
   });
 

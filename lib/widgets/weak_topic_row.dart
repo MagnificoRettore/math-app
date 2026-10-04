@@ -48,7 +48,7 @@ class WeakTopicRow extends StatelessWidget {
               '$rank',
               style: TextStyle(
                 fontSize: AppText.bodyMedium,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: color,
               ),
             ),
@@ -74,7 +74,7 @@ class WeakTopicRow extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: c.textPrimary,
                 ),
               ),
@@ -107,7 +107,7 @@ class WeakTopicRow extends StatelessWidget {
               '${(ratio * 100).round()}%',
               style: TextStyle(
                 fontSize: AppText.micro,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: c.medium,
               ),
             ),

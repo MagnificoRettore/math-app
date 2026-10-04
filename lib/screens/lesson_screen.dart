@@ -584,7 +584,7 @@ class _StepCard extends StatelessWidget {
                           text: 'Completa la lezione',
                           style: TextStyle(
                             fontSize: AppText.bodyLarge,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         textDirection: Directionality.of(context),

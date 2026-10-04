@@ -33,10 +33,8 @@ class StreakCard extends StatelessWidget {
           key: const Key('streak-card'),
           decoration: BoxDecoration(
             color: c.orange,
+            // Piatta come le altre card: il gradino è solo dei bottoni.
             borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(color: c.orangeDeep, offset: const Offset(0, 6)),
-            ],
           ),
           child: Stack(
             children: [
@@ -87,7 +85,7 @@ class StreakCard extends StatelessWidget {
                             'TRAGUARDO',
                             style: TextStyle(
                               fontSize: AppText.label,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w500,
                               letterSpacing: 0.8,
                               color: c.medium,
                             ),
@@ -176,7 +174,7 @@ class StreakCard extends StatelessWidget {
                                     'Obiettivi di oggi raggiunti!',
                                     style: TextStyle(
                                       fontSize: AppText.bodySmall,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w500,
                                       color: c.easy,
                                     ),
                                   ),
@@ -244,7 +242,7 @@ class _GoalBar extends StatelessWidget {
           '$value/$max',
           style: TextStyle(
             fontSize: AppText.label,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: c.textSecondary,
           ),
         ),

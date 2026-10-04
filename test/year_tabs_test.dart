@@ -74,47 +74,54 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    List<double> spunte(WidgetTester tester) => tester
-        .widgetList<AnimatedScale>(find.byKey(const Key('year-tab-check')))
-        .map((s) => s.scale)
-        .toList();
+    BoxDecoration quadrato(WidgetTester tester, String lettera) =>
+        tester
+                .widget<AnimatedContainer>(
+                  find.ancestor(
+                    of: find.text(lettera),
+                    matching: find.byType(AnimatedContainer),
+                  ),
+                )
+                .decoration!
+            as BoxDecoration;
 
-    testWidgets('la spunta sta solo sull\'anno scelto e si sposta', (
+    testWidgets('lo scelto è giallo col bordo oro, senza spunta', (
       tester,
     ) async {
       await pumpAnni(tester);
-      expect(spunte(tester), [1, 0, 0]);
+      expect(quadrato(tester, 'I').color, AppPalette.light.yellow);
+      expect(quadrato(tester, 'III').color, AppPalette.light.surface);
+      expect(find.byIcon(Icons.check_rounded), findsNothing);
 
       await tester.tap(find.text('terza'));
       await tester.pumpAndSettle();
-      expect(spunte(tester), [0, 0, 1]);
+      expect(quadrato(tester, 'I').color, AppPalette.light.surface);
+      expect(quadrato(tester, 'III').color, AppPalette.light.yellow);
+      expect(
+        (quadrato(tester, 'III').border! as Border).top.color,
+        AppPalette.light.yellowDeep,
+      );
       expect(
         DefaultTextStyle.of(tester.element(find.text('III'))).style.color,
         AppPalette.light.textPrimary,
       );
+      expect(find.byIcon(Icons.check_rounded), findsNothing);
     });
 
     testWidgets('durate e curve da AppMotion, zero col movimento ridotto', (
       tester,
     ) async {
       await pumpAnni(tester);
-      final spunta = tester
-          .widgetList<AnimatedScale>(find.byKey(const Key('year-tab-check')))
+      final quadrato = tester
+          .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
           .first;
-      expect(spunta.duration, AppMotion.slow);
-      expect(spunta.curve, AppMotion.bounce);
-      expect(
-        tester
-            .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
-            .first
-            .duration,
-        AppMotion.medium,
-      );
+      expect(quadrato.duration, AppMotion.medium);
+      expect(quadrato.curve, AppMotion.standard);
 
       await pumpAnni(tester, reduced: true);
       expect(
         tester
-            .widgetList<AnimatedScale>(find.byKey(const Key('year-tab-check')))
+            .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
             .first
             .duration,
         Duration.zero,

@@ -76,22 +76,16 @@ flutter:
   # (canvas «Illustrazioni App Educativa»). Statici e in locale, perché l'app
   # non va in rete; licenze OFL accanto ai file.
   fonts:
-    - family: Fredoka
+    - family: Outfit
       fonts:
-        - asset: assets/fonts/Fredoka-500.ttf
-          weight: 500
-        - asset: assets/fonts/Fredoka-600.ttf
+        - asset: assets/fonts/Outfit-600.ttf
           weight: 600
-    - family: Nunito
+    - family: PlusJakartaSans
       fonts:
-        - asset: assets/fonts/Nunito-400.ttf
+        - asset: assets/fonts/PlusJakartaSans-400.ttf
           weight: 400
-        - asset: assets/fonts/Nunito-600.ttf
-          weight: 600
-        - asset: assets/fonts/Nunito-700.ttf
-          weight: 700
-        - asset: assets/fonts/Nunito-800.ttf
-          weight: 800
+        - asset: assets/fonts/PlusJakartaSans-500.ttf
+          weight: 500
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

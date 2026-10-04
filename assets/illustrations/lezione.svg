@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 600 720" width="600" height="720" xmlns="http://www.w3.org/2000/svg" font-family="Nunito" font-weight="800">
+<svg viewBox="0 0 600 720" width="600" height="720" xmlns="http://www.w3.org/2000/svg" font-family="PlusJakartaSans" font-weight="500">
 
 <rect width="600" height="720" fill="#b8a4f5"></rect>
 <path d="M235 500 C205 410 80 390 70 260 C60 120 170 40 300 40 C430 40 540 120 530 260 C520 390 395 410 365 500 Z" fill="#1e1b4b"></path>

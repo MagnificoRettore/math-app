@@ -147,7 +147,12 @@ class MathText extends StatelessWidget {
     return RichText(
       textAlign: textAlign,
       text: TextSpan(
-        style: TextStyle(color: effectiveColor, height: 1.5),
+        // `RichText` non eredita il `DefaultTextStyle`: il carattere va detto.
+        style: TextStyle(
+          fontFamily: AppText.bodyFont,
+          color: effectiveColor,
+          height: 1.5,
+        ),
         children: [
           for (final seg in segments)
             if (seg.isMath)
@@ -189,7 +194,7 @@ class MathText extends StatelessWidget {
       spans.add(
         TextSpan(
           text: match.group(1),
-          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w700),
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
         ),
       );
       last = match.end;

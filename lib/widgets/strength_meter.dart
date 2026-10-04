@@ -48,7 +48,7 @@ class StrengthMeter extends StatelessWidget {
             textAlign: TextAlign.end,
             style: TextStyle(
               fontSize: AppText.caption,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: password.isEmpty ? c.textSecondary : color,
             ),
           ),

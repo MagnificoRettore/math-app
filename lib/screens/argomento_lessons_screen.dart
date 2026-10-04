@@ -159,7 +159,7 @@ class _LessonCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppText.titleSmall,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),

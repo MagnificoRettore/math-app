@@ -46,7 +46,7 @@ class SchoolLevelTile extends StatelessWidget {
                   level.title,
                   style: TextStyle(
                     fontSize: AppText.titleSmall,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),

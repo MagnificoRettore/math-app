@@ -2,7 +2,15 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **542 test in 45 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **543 test in 45 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-04 — Design: Outfit e Plus Jakarta Sans, card piatte
+
+- Caratteri: **Outfit 600** per titoli, bottoni, `AppBar` e il nome nella banda; **Plus Jakarta Sans 400 e 500** per tutto il resto, in locale con le licenze OFL. Ogni peso oltre quelli dei file è sceso (Outfit a 600, il testo a 500, compreso il corpo delle lezioni), così Flutter non simula il grassetto. Via Fredoka e Nunito.
+- Copertura dei caratteri verificata: Plus Jakarta Sans non ha `Σ`, quindi nella tavola del razzo è un tracciato; le illustrazioni sono in Plus Jakarta Sans 500.
+- Il corpo delle lezioni (`NotesText`, `MathText`) e le etichette degli anni dichiarano il carattere: `RichText` e `AnimatedDefaultTextStyle` non lo ereditano e uscivano nel carattere di sistema.
+- Card piatte: `AppCard`, la card «Traguardo» e le card del carosello senza ombra né gradino; card «riprendi» senza righe; anno scelto senza spunta. Via `cardShadow` e `paperLine` da `AppPalette` e il parametro `flat` di `AppCard`; `orangeDeep` resta (gradino del play, arancio dei grafici).
+- Test: caratteri e pesi del tema, nome nella banda, pesi del corpo delle lezioni, card piatte, quaderno senza righe, anni senza spunta. I test del carosello contano gli argomenti dal repository: con l'argomento d'esempio la prima ha due argomenti e il test dell'ospite falliva quando estraeva la prima. Suite a **543 test in 45 file**, `flutter analyze` pulito.
 
 ## 2026-10-04 — Argomento d'esempio dei grafici
 

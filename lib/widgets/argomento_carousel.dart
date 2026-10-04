@@ -98,71 +98,60 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
 
     return SizedBox.square(
       dimension: side,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(kCardRadius),
-          boxShadow: [
-            BoxShadow(
-              color: c.shadow,
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(kCardRadius),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              key: ValueKey('carousel-${argomento.topicId}'),
-              onTap: () => _open(argomento),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  TopicBackground(image: null, color: color),
-                  Positioned(
-                    left: 14,
-                    right: 14,
-                    bottom: 14,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          argomento.title,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: AppText.headingFont,
-                            fontSize: AppText.titleLarge,
-                            fontWeight: FontWeight.w600,
-                            height: 1.15,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black45,
-                                blurRadius: 8,
-                                offset: Offset(0, 1),
-                              ),
-                            ],
-                          ),
+      // Piatta come tutte le card: nessuna ombra.
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(kCardRadius),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            key: ValueKey('carousel-${argomento.topicId}'),
+            onTap: () => _open(argomento),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                TopicBackground(image: null, color: color),
+                Positioned(
+                  left: 14,
+                  right: 14,
+                  bottom: 14,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        argomento.title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: AppText.headingFont,
+                          fontSize: AppText.titleLarge,
+                          fontWeight: FontWeight.w600,
+                          height: 1.15,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black45,
+                              blurRadius: 8,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          details,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: AppText.labelSmall,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        details,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppText.labelSmall,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -195,8 +184,6 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
               child: ListView.separated(
                 key: const Key('argomento-carousel-list'),
                 scrollDirection: Axis.horizontal,
-                // In basso l'ombra delle card: senza, il `ListView` la taglia.
-                clipBehavior: Clip.none,
                 padding: const EdgeInsets.symmetric(horizontal: _pageMargin),
                 itemCount: argomenti.length,
                 separatorBuilder: (_, _) => const SizedBox(width: _gap),

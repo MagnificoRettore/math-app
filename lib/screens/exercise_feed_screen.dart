@@ -114,7 +114,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
             selectedColor: c.accentSoft,
             labelStyle: TextStyle(
               color: _filter == null ? c.accent : c.textPrimary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -129,7 +129,7 @@ class _ExerciseFeedScreenState extends State<ExerciseFeedScreen> {
               selectedColor: c.accentSoft,
               labelStyle: TextStyle(
                 color: _filter == difficulty ? c.accent : c.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

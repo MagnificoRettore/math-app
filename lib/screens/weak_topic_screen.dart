@@ -126,7 +126,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
                 'Progresso',
                 style: TextStyle(
                   fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: c.textPrimary,
                 ),
               ),
@@ -135,7 +135,7 @@ class _WeakTopicScreenState extends State<WeakTopicScreen> {
                 toReview == 1 ? '1 da ripassare' : '$toReview da ripassare',
                 style: TextStyle(
                   fontSize: AppText.label,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: c.medium,
                 ),
               ),

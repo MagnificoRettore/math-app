@@ -21,7 +21,7 @@ class AppTheme {
       labelStyle: TextStyle(color: c.textSecondary),
       floatingLabelStyle: TextStyle(
         color: c.accent,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w500,
       ),
       helperStyle: TextStyle(fontSize: AppText.caption, color: c.textSecondary),
       border: border(c.border),
@@ -75,10 +75,12 @@ class AppTheme {
           ),
     );
 
-    // Titoli in Fredoka, il resto in Nunito: `fontFamily` del tema vale per
-    // tutti gli stili, quindi i titoli si rimettono a mano.
-    TextStyle? heading(TextStyle? style) =>
-        style?.copyWith(fontFamily: AppText.headingFont);
+    // Titoli in Outfit 600, il resto in Plus Jakarta Sans: `fontFamily` del
+    // tema vale per tutti gli stili, quindi i titoli si rimettono a mano.
+    TextStyle? heading(TextStyle? style) => style?.copyWith(
+      fontFamily: AppText.headingFont,
+      fontWeight: FontWeight.w600,
+    );
     final textTheme = base.textTheme
         .copyWith(
           displayLarge: heading(base.textTheme.displayLarge),
@@ -116,7 +118,7 @@ class AppTheme {
         backgroundColor: palette.surface,
         indicatorColor: palette.accentSoft,
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w700),
+          const TextStyle(fontSize: AppText.micro, fontWeight: FontWeight.w500),
         ),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
@@ -146,7 +148,7 @@ class AppTheme {
         labelColor: palette.textPrimary,
         unselectedLabelColor: palette.textSecondary,
         labelStyle: const TextStyle(
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
           fontSize: AppText.bodyLarge,
         ),
         unselectedLabelStyle: const TextStyle(fontSize: AppText.bodyLarge),

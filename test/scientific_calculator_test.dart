@@ -26,7 +26,7 @@ Finder _sheet() => find.byKey(const ValueKey('calc-sheet'));
 /// stesso testo (un `5` scritto è anche il tasto `5`).
 Future<void> _keys(WidgetTester tester, List<String> labels) async {
   for (final label in labels) {
-    // ⌫ è un'icona: Nunito non ha il carattere.
+    // ⌫ è un'icona: Plus Jakarta Sans non ha il carattere.
     await tester.tap(
       label == '⌫'
           ? find.byIcon(Icons.backspace_outlined)

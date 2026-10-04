@@ -62,8 +62,10 @@ class ProfileSummary extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
+                // Il nome è il titolo della banda: Outfit, come l'`AppBar`.
+                fontFamily: AppText.headingFont,
                 fontSize: kSummaryNameFontSize,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: c.onHeaderBand,
               ),
             ),
@@ -75,7 +77,7 @@ class ProfileSummary extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppText.label,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: c.onHeaderBand.withValues(
                     alpha: _kSummarySecondaryOpacity,
                   ),

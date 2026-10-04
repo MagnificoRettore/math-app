@@ -29,7 +29,7 @@ class DifficultyBadge extends StatelessWidget {
         style: TextStyle(
           color: color,
           fontSize: AppText.caption,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

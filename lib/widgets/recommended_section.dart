@@ -156,7 +156,7 @@ class _MiniHeader extends StatelessWidget {
         title,
         style: TextStyle(
           fontSize: AppText.bodyLarge,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w500,
           color: c.textSecondary,
         ),
       ),

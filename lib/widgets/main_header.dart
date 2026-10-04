@@ -239,7 +239,7 @@ class SchoolBrowseButton extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppText.label,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.of(context).onHeaderBand,
                     ),
                   ),

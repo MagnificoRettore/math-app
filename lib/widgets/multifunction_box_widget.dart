@@ -34,7 +34,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
                 box.title,
                 style: TextStyle(
                   fontSize: AppText.titleSmall,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: c.textPrimary,
                 ),
               ),
@@ -62,7 +62,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
               box.title,
               style: TextStyle(
                 fontSize: AppText.bodyLarge,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: c.textPrimary,
               ),
             ),
@@ -96,7 +96,7 @@ class _ImageView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: AppText.bodyLarge,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: c.textPrimary,
               ),
             ),

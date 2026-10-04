@@ -79,7 +79,7 @@ class _YearExercisesScreenState extends State<YearExercisesScreen> {
             selectedColor: c.accentSoft,
             labelStyle: TextStyle(
               color: _filter == null ? c.accent : c.textPrimary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -94,7 +94,7 @@ class _YearExercisesScreenState extends State<YearExercisesScreen> {
               selectedColor: c.accentSoft,
               labelStyle: TextStyle(
                 color: _filter == difficulty ? c.accent : c.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

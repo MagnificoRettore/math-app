@@ -252,7 +252,7 @@ class _ArgomentoCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: AppText.titleMedium,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: c.textPrimary,
                   ),
                 ),
@@ -306,7 +306,7 @@ class _ArgomentoCard extends StatelessWidget {
                     'Completata',
                     style: TextStyle(
                       fontSize: AppText.micro,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: c.easy,
                     ),
                   ),
