@@ -6,7 +6,7 @@ import '../models/multifunction_box/multifunction_box.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'app_card.dart';
-import 'chart/chart_view.dart';
+import 'graph/graph_view.dart';
 import 'image_source.dart';
 import 'math_text.dart';
 
@@ -23,7 +23,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
     final c = AppColors.of(context);
     if (box.payload is ImageBoxPayload) return _ImageView(box: box);
 
-    if (box.payload is ChartBoxPayload) {
+    if (box.payload is GraphPayload) {
       return AppCard(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,7 +40,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
               ),
               const SizedBox(height: 10),
             ],
-            ChartView(payload: box.payload as ChartBoxPayload),
+            GraphView(payload: box.payload as GraphPayload),
           ],
         ),
       );

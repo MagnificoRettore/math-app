@@ -1,8 +1,8 @@
 /// Logica dei grafici, senza `package:flutter`.
 ///
 /// Qui stanno i numeri: dominio, tick «belli», conversione in pixel,
-/// campionamento delle curve e larghezza delle barre. I painter disegnano, non
-/// calcolano, e i test di queste funzioni girano senza widget.
+/// campionamento delle funzioni e larghezza delle barre. I painter disegnano,
+/// non calcolano, e i test di queste funzioni girano senza widget.
 ///
 /// La regola dei buchi è la più importante del file: un valore che non esiste
 /// (`sqrt` di un negativo, divisione per zero, `tan` vicino ai poli) **non è
@@ -18,18 +18,18 @@ import '../expression_evaluator.dart';
 
 const double _epsilon = 1e-9;
 
-class ChartTick {
+class GraphTick {
   /// Valore del tick nei dati.
   final double value;
 
   /// Etichetta già formattata, senza zeri inutili (`2` e non `2.0`).
   final String label;
 
-  const ChartTick(this.value, this.label);
+  const GraphTick(this.value, this.label);
 }
 
-/// Estensione «bella» di un intervallo: stessa durata del dato, bordi su
-/// poteri di dieci moltiplicati per 1, 2, 2.5 o 5.
+/// Estensione «bella» di un intervallo: bordi su potenze di dieci moltiplicate
+/// per 1, 2, 2.5 o 5.
 ///
 /// Un dominio come `[0, 7]` diventa `[0, 8]`: le etichette dell'asse diventano
 /// numeri che si ricordano, e i tick restano equidistanti.
@@ -52,35 +52,38 @@ class ChartTick {
   // serie che parte da 0 spende un quinto dell'altezza per niente.
   if (min >= 0 && lo < 0) lo = 0;
   return (
-    min: (lo).floorToDouble() * step,
+    min: lo.floorToDouble() * step,
     max: ((max + span * pad) / step).ceilToDouble() * step,
   );
 }
 
-/// Passo «bello» più vicino ad almeno [target] passi sopra l'intervallo.
-double niceStep(double raw, {int target = 4}) {
+/// Passo «bello» più vicino ad almeno [raw]: 1, 2, 2.5 o 5 per una potenza di
+/// dieci.
+double niceStep(double raw) {
   if (!raw.isFinite || raw <= 0) return 1;
   final expo = (math.log(raw) / math.ln10).floor();
   final base = math.pow(10, expo).toDouble();
   for (final m in const [1.0, 2.0, 2.5, 5.0]) {
-    if (base * m >= raw) return base * m;
+    if (base * m >= raw - _epsilon) return base * m;
   }
   return base * 10;
 }
 
-/// Tick dell'asse su [min]..[max], con passo 1/2/2.5/5.
-List<ChartTick> niceTicks(double min, double max, {int count = 4}) {
-  final step = niceStep((max - min) / math.max(1, count));
-  final first = (min / step).ceilToDouble();
-  final out = <ChartTick>[];
-  for (var i = 0; ; i++) {
-    final v = first + i * step;
-    if (v > max + step * _epsilon) break;
-    out.add(ChartTick(_round(v), formatTick(v)));
-    if (out.length > 64) break;
+/// I multipli di [step] dentro [min]..[max].
+List<GraphTick> ticksEvery(double min, double max, double step) {
+  if (!step.isFinite || step <= 0) return const [];
+  final first = (min / step).ceilToDouble() * step;
+  final out = <GraphTick>[];
+  for (var v = first; v <= max + step * _epsilon; v += step) {
+    out.add(GraphTick(_round(v), formatTick(v)));
+    if (out.length > 200) break;
   }
   return out;
 }
+
+/// Tick dell'asse su [min]..[max], con passo 1/2/2.5/5.
+List<GraphTick> niceTicks(double min, double max, {int count = 4}) =>
+    ticksEvery(min, max, niceStep((max - min) / math.max(1, count)));
 
 double _round(double v) => (v * 1e6).roundToDouble() / 1e6;
 
@@ -89,26 +92,24 @@ double _round(double v) => (v * 1e6).roundToDouble() / 1e6;
 String formatTick(double v) {
   final r = _round(v);
   if ((r - r.roundToDouble()).abs() < _epsilon) return r.toStringAsFixed(0);
-  final text = r.toStringAsFixed(2);
-  var out = text;
+  var out = r.toStringAsFixed(2);
   while (out.contains('.') && (out.endsWith('0') || out.endsWith('.'))) {
     out = out.substring(0, out.length - 1);
   }
   return out;
 }
 
-/// Il dominio del grafico e la sua trasformazione in pixel.
+/// Il dominio del grafico e la sua trasformazione in pixel, sui due assi.
 ///
-/// [rect] è l'area di disegno utile: gli assi sono già fuori, e il painter
-/// chiede le conversioni con i pixel che ha disegnato.
-class ChartScale {
+/// [rect] è l'area dei dati: tutto ciò che è dentro il dominio finisce lì.
+class GraphScale {
   final double minX;
   final double maxX;
   final double minY;
   final double maxY;
   final RectD rect;
 
-  const ChartScale({
+  const GraphScale({
     required this.minX,
     required this.maxX,
     required this.minY,
@@ -116,19 +117,22 @@ class ChartScale {
     required this.rect,
   });
 
-  /// `true` se il dominio y attraversa lo zero: il painter ne fa una linea più
-  /// marcata, perché su un grafico di funzioni è l'asse degli ascisse.
-  bool get crossesZero => minY < 0 && maxY > 0;
+  double get spanX => maxX - minX;
+  double get spanY => maxY - minY;
 
-  double yToPx(double value) {
-    final t = (value - minY) / (maxY - minY);
-    return rect.bottom - t * rect.height;
-  }
+  bool containsX(double x) => x >= minX - _epsilon && x <= maxX + _epsilon;
+  bool containsY(double y) => y >= minY - _epsilon && y <= maxY + _epsilon;
 
-  double xToPx(double value) {
-    final t = (value - minX) / (maxX - minX);
-    return rect.left + t * rect.width;
-  }
+  /// Dove passa l'asse x: allo zero se c'è, altrimenti sul bordo più vicino.
+  double get axisY => minY > 0 ? minY : (maxY < 0 ? maxY : 0);
+
+  /// Dove passa l'asse y: allo zero se c'è, altrimenti sul bordo più vicino.
+  double get axisX => minX > 0 ? minX : (maxX < 0 ? maxX : 0);
+
+  double xToPx(double value) => rect.left + (value - minX) / spanX * rect.width;
+
+  double yToPx(double value) =>
+      rect.bottom - (value - minY) / spanY * rect.height;
 }
 
 /// Area di disegno in pixel, detta con numeri per non avere `Rect` (che viene da
@@ -149,38 +153,43 @@ class RectD {
 ///
 /// Un valore assente (parsing fallito, non finito, modulo per zero) **spezza il
 /// tratto**: i punti sono restituiti a gruppi e un gruppo vuoto è un buco.
-/// Restituisce gruppi perché è il path a dover sapere dove non passare la penna.
-List<List<ChartPoint>> sampledSegments(
+///
+/// Con [yMin] e [yMax], il dominio visibile, si spezza anche lontano da lì: un
+/// punto oltre un'altezza del grafico sopra o sotto è un asintoto e non va
+/// collegato al successivo, che sta dall'altra parte (`1/x` vicino a zero).
+/// Dentro quella fascia invece i punti restano, così una curva esce dal bordo
+/// e non si ferma un pixel prima.
+List<List<GraphXY>> sampledSegments(
   String expression,
   double xMin,
   double xMax, {
   int samples = 160,
-  double? clipMin,
-  double? clipMax,
+  double? yMin,
+  double? yMax,
 }) {
   if (expression.isEmpty || samples < 2 || !xMin.isFinite || !xMax.isFinite) {
     return const [];
   }
-  final out = <List<ChartPoint>>[];
-  var current = <ChartPoint>[];
+  final band = (yMin != null && yMax != null) ? (yMax - yMin) : null;
+  final out = <List<GraphXY>>[];
+  var current = <GraphXY>[];
   for (var i = 0; i < samples; i++) {
     final x = xMin + (xMax - xMin) * i / (samples - 1);
     final y = ExpressionEvaluator.tryEvaluate(expression, x: x);
     // `null` e i non finiti sono la stessa cosa: un valore assente. `sqrt` di un
-    // negativo arriva come NaN, e NaN passerebbe il confronto coi clip.
+    // negativo arriva come NaN, e NaN passerebbe ogni confronto.
     final missing =
         y == null ||
         !y.isFinite ||
-        (clipMin != null && y < clipMin) ||
-        (clipMax != null && y > clipMax);
+        (band != null && (y < yMin! - band || y > yMax! + band));
     if (missing) {
       if (current.isNotEmpty) {
         out.add(current);
-        current = <ChartPoint>[];
+        current = <GraphXY>[];
       }
       continue;
     }
-    current.add(ChartPoint(x, y));
+    current.add(GraphXY(x, y));
   }
   if (current.isNotEmpty) out.add(current);
   return out;
@@ -198,10 +207,7 @@ List<List<ChartPoint>> sampledSegments(
   return (width: math.max(1.0, width), gap: 2.0);
 }
 
-/// Numero di voci di [xLabels] (o di valori) su cui disegnare le barre.
-int barGroupCount(ChartBoxPayload payload) {
-  final fromLabels = payload.xLabels.length;
-  final fromValues = [for (final s in payload.series) s.values.length]
-      .fold<int>(0, math.max);
-  return math.max(1, math.max(fromLabels, fromValues));
-}
+/// Numero di caselle delle barre: le categorie, o la serie più lunga se le
+/// categorie mancano o sono meno. Mai zero.
+int barGroupCount(int categories, Iterable<int> seriesLengths) =>
+    math.max(1, math.max(categories, seriesLengths.fold<int>(0, math.max)));

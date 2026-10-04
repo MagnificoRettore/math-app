@@ -2,7 +2,29 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **525 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **542 test in 45 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-04 — Grafici delle lezioni, fase 3: retta numerica
+
+- `plane: "numberLine"`: intervalli scritti come sul libro (`"set": "]-1, 5/3]"`, con `-inf`/`+inf`), una riga ciascuno dall'alto, estremi pieni se inclusi e vuoti se esclusi, guide tratteggiate fino alla retta; i punti (`"at": 3`) stanno sulla retta. Sotto, solo i numeri degli estremi e dei punti come sono scritti; con `grid` anche quelli regolari, diradati.
+- `NumberLineLayout` e `NumberLinePainter`; `GraphInterval` nel modello.
+- Nella lezione «Moduli», all'esempio guidato $|x - 5| = 2$, la retta con le due soluzioni a distanza 2 da 5.
+- Test: in `test/graph_test.dart` la scrittura degli intervalli, quelli vuoti o sbagliati, il riquadro, righe e punti sulla retta, i numeri degli estremi, la griglia che cede e si dirada, il painter e la descrizione. Suite a **542 test in 45 file**, `flutter analyze` pulito.
+
+## 2026-10-04 — Grafici delle lezioni, fase 2: geometria, aree e regioni
+
+- Nuovi elementi del piano: `curve` (parametrica in `t`), `circle` (con `fill`), `segment` e `vector`, `polygon`, `area` (`under` una funzione o `between` due) e `region` (intersezione di condizioni `y >= x^2`, `x < 4`, …, bordo continuo per `≤`/`≥` e tratteggiato per `<`/`>`).
+- `CartesianLayout` calcola tracciati, riempimenti e bordi; i domini automatici tengono conto delle figure. Una condizione illeggibile salta la regione intera invece di allargarla.
+- Etichette delle figure sul piano (segmenti scostati in perpendicolare), curve in legenda.
+- Test: in `test/graph_test.dart` il formato dei nuovi elementi, gli scarti, la circonferenza chiusa, la regione dentro le sue condizioni, la regione vuota, l'area fra due curve, i domini dalle figure, legenda ed etichette. Suite a **535 test in 45 file**, `flutter analyze` pulito.
+
+## 2026-10-04 — Grafici delle lezioni, fase 1: piano cartesiano e barre
+
+- Il riquadro `graph` sostituisce `chart`, con un formato nuovo: `plane` (`cartesian` o `bars`), domini `x`/`y` (automatici se mancano), `aspect` (`fit` o `equal`), `grid`, nomi degli assi, e sul piano una lista di `items` — `function` (con `domain`), `point` (con `guides`), `line` (verticale, orizzontale o per due punti). Tutte le etichette sono LaTeX; un elemento che non si capisce si salta.
+- **Qualità**: piano cartesiano vero (assi per l'origine con le frecce, griglia nei due sensi, numeri in Nunito con il meno «−» e un alone, «O» all'origine, numeri diradati contando dallo zero); funzioni senza la sfumatura sotto e senza verticali agli asintoti; colori ben distinti, tutti oltre 3:1; legenda e etichette come formule. Prima i numeri degli assi non usavano il font dell'app.
+- Logica pura in `graph_scale.dart` (ex `chart_scale.dart`) e `graph_layout.dart`; painter in `graph_painter.dart`, widget in `graph_view.dart`. Via `chart_view.dart`, `chart_painters.dart`, `chart_payload.dart`.
+- I quattro grafici delle lezioni convertiti; nella retta di «Equazioni» il punto `(2, 0)` della soluzione, in «Due rette» i punti `q = 1` e `q = 3`.
+- Test: nuovo `test/graph_test.dart` (formato, elementi saltati, grafici delle lezioni, proporzioni, assi sul bordo, retta tagliata, domini automatici, colori distinti e 3:1, movimento ridotto, descrizione); `graph_scale_test.dart` al posto di `chart_scale_test.dart` (con l'asintoto di `1/x`); `multifunction_box_widget_test.dart` sul riquadro `graph`. Via `chart_box_test.dart` e `chart_painters_test.dart`. Suite a **524 test in 45 file**, `flutter analyze` pulito.
 
 ## 2026-10-04 — Toolbar delle lezioni indaco
 

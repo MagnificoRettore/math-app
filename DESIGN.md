@@ -171,6 +171,17 @@ Il bordo in basso della testata di «Creazione profilo», scalato sul riquadro: 
 ### Toolbar delle lezioni (`M3EToolbar` in `LessonScreen`)
 Il FAB degli strumenti e il pannello che si apre sono **indaco come la barra di avanzamento della lezione**, con le icone bianche. I colori del FAB vengono da `AppTheme.lessonToolbar`, un tema di `material_3_expressive`: il pacchetto non legge il `Theme` di Flutter, e senza resterebbe sul lilla di default di Material 3.
 
+### Grafici — `GraphView` (`lib/widgets/graph/`)
+Grafici **non interattivi** dal JSON delle lezioni (riquadro `graph`), dentro una card bianca col titolo.
+- **Piano cartesiano**: assi per l'origine con le frecce e i nomi in LaTeX, griglia nei due sensi, numeri in Nunito 11 col meno «−» e un alone bianco, «O» all'origine. Funzioni a 2.6 px con i buchi rispettati (niente verticali agli asintoti), rette a 2 px (tratteggiate per asintoti e guide), punti pieni con un anello bianco.
+- **Geometria e regioni**: circonferenze e poligoni a 2.2 px, segmenti con gli estremi a punto, vettori con una punta piena da 11; aree, regioni e figure piene del colore dell'elemento al 16%, sotto tutto, così la griglia si vede attraverso. Il bordo di una regione è continuo per `≤`/`≥` e tratteggiato per `<`/`>`.
+- **Retta numerica**: la retta con la freccia e i soli numeri che contano sotto; sopra, una riga per intervallo con la barra da 4 e gli estremi da 5.5, pieni se inclusi e vuoti (fondo bianco, bordo del colore) se esclusi, e una guida tratteggiata alla retta; i punti stanno sulla retta. Etichette in LaTeX sopra la barra, con lo spazio per una frazione fra due righe.
+- **Barre**: griglia orizzontale, base sullo zero, barre a angoli superiori arrotondati (5), categorie sotto.
+- **Etichette in LaTeX**: funzioni e curve in legenda sotto il grafico (trattino del colore più la formula), punti e rette accanto, figure sul piano (al centro, sopra il cerchio, accanto al segmento), su una piastrina bianca all'88%.
+- **Colori**: ogni elemento il suo, da una sequenza ben distinta — indaco, arancio scuro, turchese, rosa, verde, viola — tutti oltre 3:1 su bianco. L'arancio è `orangeDeep`.
+- **Proporzioni**: tre quarti della larghezza; con `aspect: equal` la stessa unità sui due assi (una circonferenza è rotonda).
+- **Movimento**: all'ingresso le curve si tracciano, i riempimenti si accendono e i punti compaiono (`slow`), una volta sola; col movimento ridotto è già tutto lì.
+
 ### Calcolatrice
 Tasti da 40: cifre bianche col bordo da 3, operatori gialli e `=` indaco col gradino pieno, funzioni lilla, AC e ⌫ in rosso. Etichette in Nunito 800.
 
@@ -262,6 +273,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Header, testata ondulata | `lib/widgets/main_header.dart`, `wave_clipper.dart` |
 | Illustrazioni | `lib/widgets/illustration.dart`, `assets/illustrations/` |
 | Stati vuoti | `lib/widgets/empty_state.dart` |
+| Grafici | `lib/widgets/graph/` (`graph_view.dart`, `graph_painter.dart`, `graph_layout.dart`, `graph_scale.dart`), `lib/theme/chart_palette.dart` |
 
 ---
 
@@ -271,6 +283,9 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-04 | Grafici, fase 3: retta numerica con intervalli a righe, estremi pieni o vuoti, punti sulla retta. |
+| 2026-10-04 | Grafici, fase 2: curve parametriche, circonferenze, segmenti e vettori, poligoni, aree e regioni di disequazioni; riempimenti al 16% e bordi continui o tratteggiati. |
+| 2026-10-04 | Grafici delle lezioni rifatti (`graph` al posto di `chart`): piano cartesiano vero con assi per l'origine, frecce, griglia nei due sensi e numeri in Nunito; etichette in LaTeX; colori ben distinti; niente sfumature sotto le curve; barre con lo stesso stile. |
 | 2026-10-04 | Toolbar delle lezioni indaco come la barra di avanzamento (FAB e pannello, icone bianche); prima restava sul lilla di default di Material 3. |
 | 2026-10-04 | Nasce `DESIGN.md`, a partire dal design già in uso. |
 | 2026-10-04 | Micro-interazioni: `AppMotion`; bottoni che scendono sul gradino; rimbalzo dell'avatar; anni animati con spunta; barra animata; registrazione a passi con testata ondulata e passi che entrano di lato; entrata in sequenza della Home; pop e scossa sulle risposte; scossa dei campi obbligatori vuoti. |

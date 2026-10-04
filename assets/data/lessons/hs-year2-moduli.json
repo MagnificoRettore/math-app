@@ -64,13 +64,13 @@
                         "Nelle barre sotto ogni altezza è un valore assoluto: i numeri negativi dal grafico sono comparsi, ma con il segno tolto.",
                         {
                             "id": "mod-chart-bars",
-                            "box_type": "chart",
+                            "box_type": "graph",
                             "title": "Valori assoluti da 0 a 5",
                             "payload": {
-                                "kind": "bar",
+                                "plane": "bars",
                                 "xLabel": "x",
                                 "yLabel": "|x|",
-                                "xLabels": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
+                                "categories": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
                                 "series": [
                                     {
                                         "label": "|x|",
@@ -97,7 +97,40 @@
                                 "tex": "|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}",
                                 "fontSizeMultiplier": 1.1
                             }
-                        }
+                        },
+                        {
+                            "id": "mod-graph-reflection",
+                            "box_type": "graph",
+                            "title": "y = x - 3 e y = |x - 3|",
+                            "payload": {
+                                "plane": "cartesian",
+                                "x": [-2, 8],
+                                "y": [-5, 6],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "x - 3",
+                                        "label": "y = x - 3",
+                                        "color": "orange",
+                                        "style": "dashed"
+                                    },
+                                    {
+                                        "type": "function",
+                                        "expr": "abs(x - 3)",
+                                        "label": "y = |x - 3|",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [3, 0],
+                                        "label": "V(3,\\,0)",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        },
+                        "A sinistra di $3$ l'argomento $x - 3$ è **negativo**: la retta tratteggiata scende sotto l'asse $x$, e il modulo la **ribalta** sopra. A destra di $3$ le due coincidono. Il punto di svolta è il **vertice** $V(3, 0)$."
                     ]
                 },
                 {
@@ -153,6 +186,37 @@
                         "- **Caso 1** ($x \\ge 5$): $x - 5 = 2 \\Rightarrow x = 7$ — valida perché $7 \\ge 5$.",
                         "- **Caso 2** ($x < 5$): $-(x - 5) = 2 \\Rightarrow x = 3$ — valida perché $3 < 5$.",
                         "## - Soluzioni: $x = 7$ e $x = 3$.",
+                        {
+                            "id": "mod-line-solutions",
+                            "box_type": "graph",
+                            "title": "I numeri a distanza 2 da 5",
+                            "payload": {
+                                "plane": "numberLine",
+                                "x": [0, 10],
+                                "grid": 1,
+                                "items": [
+                                    {
+                                        "type": "point",
+                                        "at": 5,
+                                        "label": "5",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": 3,
+                                        "label": "x = 3",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": 7,
+                                        "label": "x = 7",
+                                        "color": "accent"
+                                    }
+                                ]
+                            }
+                        },
+                        "$|x - 5| = 2$ chiede i numeri a **distanza 2 da 5**: sulla retta sono uno a sinistra e uno a destra di $5$.",
                         "",
                         "",
                         ":::takeaway",
@@ -167,32 +231,37 @@
                         "Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione.",
                         {
                             "id": "mod-chart-equation",
-                            "box_type": "chart",
+                            "box_type": "graph",
                             "title": "|x - 5| e 4x: dove si incontrano",
                             "payload": {
-                                "kind": "function",
-                                "xMin": -2,
-                                "xMax": 10,
-                                "yMin": -5,
-                                "yMax": 10,
-                                "samples": 240,
-                                "xLabel": "x",
-                                "yLabel": "y",
-                                "series": [
+                                "plane": "cartesian",
+                                "x": [-2, 10],
+                                "y": [-5, 10],
+                                "grid": 1,
+                                "items": [
                                     {
+                                        "type": "function",
+                                        "expr": "abs(x - 5)",
                                         "label": "y = |x - 5|",
-                                        "color": "accent",
-                                        "expression": "abs(x - 5)"
+                                        "color": "accent"
                                     },
                                     {
+                                        "type": "function",
+                                        "expr": "4 * x",
                                         "label": "y = 4x",
-                                        "color": "indigo",
-                                        "expression": "4 * x"
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [1, 4],
+                                        "label": "(1,\\,4)",
+                                        "guides": true,
+                                        "color": "accent"
                                     }
                                 ]
                             }
                         },
-                        "La curva $|x - 5|$ parte da $5$ sul asse $y$: il **vertice** del modulo è lì. Le due curve si incontrano in $x = \\frac{5}{3}$ e in $x = 5$, e solo $x = 5$ è accettata perché il modulo è sempre positivo."
+                        "La curva $|x - 5|$ taglia l'asse $y$ in $5$ e ha il **vertice** in $(5, 0)$. Le due curve si incontrano in un solo punto, $(1, 4)$: la soluzione è $x = 1$. Il caso $x \\ge 5$ darebbe $x = -\\frac{5}{3}$, che non è $\\ge 5$ e si scarta."
                     ]
                 },
                 {

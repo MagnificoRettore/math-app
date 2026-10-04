@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:math_app/models/multifunction_box/box_payload.dart';
-import 'package:math_app/widgets/chart/chart_scale.dart';
+import 'package:math_app/widgets/graph/graph_scale.dart';
 
 void main() {
   group('niceStep', () {
@@ -66,8 +65,8 @@ void main() {
     });
   });
 
-  group('ChartScale', () {
-    final scale = ChartScale(
+  group('GraphScale', () {
+    final scale = GraphScale(
       minX: -10,
       maxX: 10,
       minY: -4,
@@ -86,18 +85,18 @@ void main() {
       expect(scale.xToPx(10), 100);
     });
 
-    test('crossesZero solo se il dominio contiene lo zero', () {
-      expect(scale.crossesZero, isTrue);
-      expect(
-        ChartScale(
-          minX: 0,
-          maxX: 1,
-          minY: 1,
-          maxY: 2,
-          rect: const RectD(0, 0, 1, 1),
-        ).crossesZero,
-        isFalse,
+    test('gli assi passano per lo zero, o sul bordo se lo zero è fuori', () {
+      expect(scale.axisX, 0);
+      expect(scale.axisY, 0);
+      const fuori = GraphScale(
+        minX: 2,
+        maxX: 8,
+        minY: -9,
+        maxY: -1,
+        rect: RectD(0, 0, 1, 1),
       );
+      expect(fuori.axisX, 2);
+      expect(fuori.axisY, -1);
     });
   });
 
@@ -120,21 +119,28 @@ void main() {
       expect(segs.first.first.x, closeTo(-4, 1e-9));
     });
 
-    test('clipMin e clipMax tagliano fuori dal rettangolo', () {
-      final segs = sampledSegments(
-        'x',
-        -10,
-        10,
-        samples: 101,
-        clipMin: -2,
-        clipMax: 2,
-      );
-      for (final s in segs) {
-        for (final p in s) {
-          expect(p.y, inInclusiveRange(-2, 2));
-        }
-      }
-    });
+    test(
+      'vicino a un asintoto il tratto si spezza, dentro la fascia resta',
+      () {
+        // 1/x salta da -inf a +inf: collegare i due lati stamperebbe una
+        // verticale che nel grafico non c'è.
+        final segs = sampledSegments(
+          '1 / x',
+          -1,
+          1,
+          samples: 200,
+          yMin: -5,
+          yMax: 5,
+        );
+        expect(segs.length, 2);
+        expect(segs.first.every((p) => p.x < 0), isTrue);
+        expect(segs.last.every((p) => p.x > 0), isTrue);
+        // Un'altezza oltre il dominio i punti restano: la curva esce dal bordo
+        // invece di fermarsi un pixel prima.
+        final escono = sampledSegments('x', -10, 10, yMin: -2, yMax: 2);
+        expect(escono.single.any((p) => p.y > 2), isTrue);
+      },
+    );
 
     test('una funzione senza radici reali non produce punti', () {
       expect(sampledSegments('sqrt(x - 10)', 0, 4, samples: 20), isEmpty);
@@ -163,25 +169,26 @@ void main() {
   });
 
   group('barGroupCount', () {
-    ChartBoxPayload payload(List<String> labels, List<num> values) =>
-        ChartBoxPayload.fromJson({
-          'kind': 'bar',
-          if (labels.isNotEmpty) 'xLabels': labels,
-          'series': [
-            {'values': values},
-          ],
-        });
-
-    test('conti le voci dalle etichette', () {
-      expect(barGroupCount(payload(['a', 'b', 'c'], [1, 2])), 3);
+    test('conti le voci dalle categorie', () {
+      expect(barGroupCount(3, [2]), 3);
     });
 
-    test('conti i valori quando le etichette mancano', () {
-      expect(barGroupCount(payload([], [1, 2, 3, 4])), 4);
+    test('conti i valori quando le categorie mancano', () {
+      expect(barGroupCount(0, [4, 2]), 4);
     });
 
     test('mai zero caselle', () {
-      expect(barGroupCount(payload([], [])), 1);
+      expect(barGroupCount(0, const []), 1);
+    });
+  });
+
+  group('ticksEvery', () {
+    test('i multipli del passo dentro il dominio', () {
+      expect(
+        [for (final t in ticksEvery(-4, 8, 2)) t.value],
+        [-4, -2, 0, 2, 4, 6, 8],
+      );
+      expect(ticksEvery(0, 1, 0), isEmpty);
     });
   });
 }

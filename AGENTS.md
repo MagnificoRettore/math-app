@@ -120,22 +120,48 @@ assets/data/     # levels.json, middle_school.json, high_school.json, university
 
 ### Contenuto e formattazione
 
-- **Riquadri multifunzione**: fenced `::box` ... `::endbox` attorno a un nodo JSON `MultifunctionBox` (`box_type`: `image` | `math_formula` | `chart`); JSON invalido ricade su testo semplice.
-  - Sono tre tipi e sono quelli che i contenuti usano. `interactive_chart` ci è stato (`interactive_chart_view.dart`) ed è sparito con `chart`: i tipi si aggiungono quando un argomento li vuole, non prima. `align` e `caption` dell'immagine e il modo `inline` della formula sono andati per la stessa strada.
+- **Riquadri multifunzione**: fenced `::box` ... `::endbox` attorno a un nodo JSON `MultifunctionBox` (`box_type`: `image` | `math_formula` | `graph`); JSON invalido ricade su testo semplice.
+  - Sono tre tipi e sono quelli che i contenuti usano. `interactive_chart` ci è stato (`interactive_chart_view.dart`) ed è sparito, e `chart` è stato sostituito da `graph`: i tipi si aggiungono quando un argomento li vuole, non prima. `align` e `caption` dell'immagine e il modo `inline` della formula sono andati per la stessa strada.
   - `math_formula`: `"hidden": true` sopprime l'`AppCard` che avvolge e il titolo, la formula sta da sola; `title` vuoto = niente header e padding ridotto. `fontSizeMultiplier` scala il corpo della formula.
   - `image`: **nessuna card** — niente `AppCard` (bordo/ombra), niente `ClipRRect`, niente piastra `accentSoft`. L'immagine sta centrata nella colonna di testo col titolo in piano (15 w700).
-  - `chart`: dentro l'`AppCard` col titolo in `titleSmall` w700, e dentro `ChartView`. I tre tipi sono `function` (una curva per espressione), `line` (punti espliciti) e `bar` (un valore per voce di `xLabels`).
-    - **Nessuna interazione**: niente tap, tooltip, zoom, legenda cliccabile. L'unico movimento è l'entrata, 400ms (`ChartView._duration`), che traccia il path con `PathMetric.extractPath` e le barre crescendo in altezza. Una volta sola, al mount: rifarla a ogni scroll sarebbe mossa.
-    - **I buchi sono assenze, non zeri**: `sampledSegments` (`lib/widgets/chart/chart_scale.dart`) spezza il path dove `ExpressionEvaluator` non dà un valore, quindi `sqrt(x-2)` non stampa una retta verticale dove la funzione non c'è. `null` e i non finiti (NaN) si trattano allo stesso modo: il NaN di `sqrt` passerebbe il confronto coi limiti.
-    - Il file `chart_scale.dart` è **logica pura senza `package:flutter`** (numeri, tick, geometria): i painter disegnano e i suoi test girano senza widget. Il dominio y esce da `niceRange`, con passo 1/2/2.5/5 e, se i dati sono tutti non negativi, il basso a zero.
-    - I colori degli assi e della griglia vengono da `ChartPalette` (`lib/theme/chart_palette.dart`), una `ThemeExtension` registrata in `AppTheme`: sono una cosa sola dei grafici, quindi non entrano in `AppPalette`. I tracciati usano `color` della serie (`accent`, `indigo`, …) con `iconPalette` come riserva.
-    - `shouldRepaint` confronta i colori con `listEquals` e lo stile per valore: senza, ogni build ridisegnerebbe il grafico identico.
-- **`ImageSource`**, due modi:
-  - default: banda 200px, `BoxFit.cover`, piena larghezza, per le tracce esercizio di `PromptView`.
-  - `naturalSize: true`: dimensione naturale, `BoxFit.contain`, altezza limitata a 240px (`ImageSource.maxHeight`), così i grafici non vengono ritagliati.
-    - Lì il placeholder dell'asset mancante è fisso 240x180: `width: double.infinity` dentro un `Align` è un'eccezione.
-    - Layout `Center` + `ConstrainedBox` e non una width in percentuale: `RenderImage._sizeForConstraints` preserva il rapporto d'aspetto appena il genitore allenta i vincoli.
-- **`ExpressionEvaluator` (`lib/widgets/expression_evaluator.dart`) è il motore della calcolatrice scientifica** (`scientific_calculator.dart`) **e del box `chart`**, che gli passa le curve da campionare: `sampledSegments` chiama `tryEvaluate` con `x` e considera assente ciò che non torna. I suoi 45 test sono quelli della sola calcolatrice e restano tali.
+  - `graph`: dentro l'`AppCard` col titolo, e dentro `GraphView` (`lib/widgets/graph/`). Un grafico **non interattivo** di alta qualità dal JSON: piano cartesiano, barre o retta numerica. Il formato completo, per chi scrive le lezioni:
+    ```json
+    { "box_type": "graph", "title": "…", "payload": {
+        "plane": "cartesian",            // oppure "bars", "numberLine"
+        "x": [-4, 8], "y": [-10, 10],    // domini; se mancano si calcolano
+        "aspect": "fit",                 // "equal": stessa unità sui due assi
+        "grid": 2,                       // passo di griglia e numeri; se manca si calcola
+        "xLabel": "x", "yLabel": "y",    // nomi degli assi, LaTeX
+        "items": [
+          { "type": "function", "expr": "2*x - 4", "domain": [0, 5], "label": "y = 2x - 4", "color": "accent", "style": "dashed" },
+          { "type": "point", "at": [2, 0], "label": "(2,\\,0)", "guides": true },
+          { "type": "line", "x": 5 }, { "type": "line", "y": 1 },
+          { "type": "line", "through": [[0, 1], [1, 3]] },
+          { "type": "curve", "x": "2*cos(t)", "y": "sin(t)", "t": [0, 6.29] },
+          { "type": "circle", "center": [1, 1], "radius": 3, "fill": true },
+          { "type": "segment", "from": [0, 0], "to": [3, 1] },   // "vector": con la punta
+          { "type": "polygon", "points": [[0, 0], [2, 0], [1, 2]] },  // "fill": false per il solo contorno
+          { "type": "area", "under": "x^2", "from": 0, "to": 2 },     // oppure "between": ["x + 2", "x^2"]
+          { "type": "region", "where": ["y >= x^2 - 3", "y < x + 1", "x <= 4"] }
+        ],
+        // solo "numberLine": { "type": "interval", "set": "]-1, 5/3]" }, { "type": "point", "at": 3 }
+        "categories": ["a", "b"],        // solo "bars"
+        "series": [{ "label": "…", "color": "accent", "values": [3, null] }]  // solo "bars"
+    } }
+    ```
+    - `label` è **LaTeX senza `$`** e si disegna con `flutter_math_fork`: funzioni e curve in legenda sotto il grafico, punti e rette accanto, su una piastrina chiara. Le figure hanno l'etichetta sul piano: al centro di poligoni, aree e regioni (media dei vertici del pezzo più grande), sopra la circonferenza, a nord-est della punta di un vettore, e per un segmento accanto al punto medio **scostata in perpendicolare** verso l'alto, perché a nord-est starebbe sul segmento che sale. `color` è un nome (`accent`, `orange`, `teal`, `pink`, `green`, `purple`, `red`, `indigo`); senza, il colore viene da una sequenza di toni ben distinti, tutti oltre 3:1 su bianco (`graphColor`). `orange` è `orangeDeep`: l'arancio pieno su bianco non arriva a 3:1.
+    - **Un elemento che non si capisce si salta**, il resto del grafico resta: tipo sconosciuto, punto senza due numeri, funzione vuota, retta per due punti uguali, raggio non positivo, poligono con meno di tre vertici, area con `from` ≥ `to`, curva con `t` rovesciato. Un dominio rovesciato vale come nessun dominio.
+    - **La retta numerica** (`NumberLineLayout`, `NumberLinePainter`): l'intervallo si scrive **come sul libro** in `set` — `]a, b[` o `(a, b)` per gli estremi esclusi, `[a, b]` per gli inclusi, `-inf`/`+inf`/`∞` per l'infinito (sempre escluso), gli estremi anche come frazione `5/3`. Ogni intervallo ha **la sua riga**, dall'alto nell'ordine del JSON come le disequazioni di un sistema, con estremi a pallino **pieno se inclusi e vuoto se esclusi** e una guida tratteggiata fino alla retta; verso l'infinito la barra arriva al bordo. I **punti stanno sulla retta** (`"at": 3`), perché un insieme di soluzioni `{3, 7}` si disegna così. Sotto la retta ci sono **solo i numeri degli estremi e dei punti, scritti come nel JSON** (`5/3` resta `5/3`); con `grid` anche quelli a passo regolare, che si diradano contando dallo zero e cedono il posto agli estremi vicini. Senza `x` il dominio sta attorno agli estremi con un margine, così un intervallo verso l'infinito si vede andare avanti.
+    - **Le regioni** sono l'intersezione delle condizioni `where`, scritte `x|y op espressione` (`<`, `<=`, `>`, `>=`, anche `≤` `≥`): su `y` l'espressione è in `x`, su `x` è un numero. Il bordo è **continuo per `≤`/`≥` e tratteggiato per `<`/`>`**, disegnato su tutto il grafico come sul quaderno; l'ombra si spezza dove i bordi si incrociano o non esistono. **Una condizione illeggibile salta la regione intera**: togliendo solo lei si colorerebbe una regione più grande di quella scritta.
+    - Aree, regioni e figure piene sono del colore dell'elemento al 16% (`_kFillAlpha`), sotto tutto il resto; la circonferenza è piena solo con `"fill": true`, il poligono lo è salvo `"fill": false`. Una circonferenza è rotonda **solo con `aspect: equal`**. Gli estremi di un segmento sono due punti; il gambo di un vettore si ferma alla base della punta, che compare a fine entrata.
+    - Il piano è **un vero piano cartesiano**: assi per l'origine (sul bordo se lo zero è fuori, con margine per i numeri), frecce, nomi degli assi in LaTeX, griglia nei due sensi, numeri in Nunito con il meno tipografico «−» e un alone del colore della card, «O» all'origine. I numeri si diradano se non c'è spazio, **contando dallo zero** (0, 2, 4 e non 1, 3, 5), e saltano quelli che toccherebbero l'altro asse.
+    - **Nessuna interazione**: niente tap, tooltip, zoom. L'unico movimento è l'entrata (`AppMotion.slow`, `TweenAnimationBuilder`): curve e rette si tracciano con `PathMetric.extractPath`, punti ed etichette compaiono, le barre crescono. Una volta sola, al montaggio; col movimento ridotto il grafico è già lì.
+    - **I buchi sono assenze, non zeri**: `sampledSegments` (`graph_scale.dart`) spezza il path dove `ExpressionEvaluator` non dà un valore, e anche **un'altezza oltre il dominio** sopra o sotto, che è un asintoto: `1/x` non stampa la verticale fra −∞ e +∞. Dentro quella fascia i punti restano, così una curva esce dal bordo invece di fermarsi prima; il painter taglia sul riquadro.
+    - **Logica pura senza `package:flutter`**: `graph_scale.dart` (passi «belli» 1/2/2.5/5, tick, trasformazione dati↔pixel, campioni, barre) e `graph_layout.dart` (domini automatici col 5°–95° percentile così un asintoto non schiaccia il resto, e che tengono dentro vertici, estremi, il riquadro delle circonferenze e i campioni delle curve; proporzioni, margini, numeri diradati, rette tagliate; tracciati, riempimenti e bordi delle regioni già calcolati in `samples`, `fills` ed `edges`). I painter disegnano, i test misurano senza widget.
+    - Proporzioni: `fit` è alto tre quarti della larghezza; `equal` tiene la stessa unità e, se l'altezza uscirebbe da 0.5–1.3 volte la larghezza, allarga il dominio più corto invece di schiacciare il grafico.
+    - I colori di assi, griglia e numeri vengono da `ChartPalette` (`lib/theme/chart_palette.dart`). `GraphStyle` e i painter si confrontano per valore (`listEquals` sui colori): senza, ogni build ridisegnerebbe il grafico identico. Ogni `TextPainter` si libera con `dispose()`.
+    - Per lo screen reader il grafico è un'immagine con una descrizione («Piano cartesiano: y = 2x − 4, …»).
+- **`ExpressionEvaluator` (`lib/widgets/expression_evaluator.dart`) è il motore della calcolatrice scientifica** (`scientific_calculator.dart`) **e del box `graph`**, che gli passa le funzioni da campionare, le curve in `t`, le aree e le condizioni delle regioni: `sampledSegments` chiama `tryEvaluate` con `x` e considera assente ciò che non torna. I suoi 45 test sono quelli della sola calcolatrice e restano tali.
   - Oltre a `+ - * / ^ %` e alle funzioni di base ha `asin acos atan` (in gradi restituiscono gradi), il fattoriale postfisso `!` (interi da 0 a 170, lega più stretto di segno e potenza: `-3!` è `-(3!)`) e le potenze non finite come **errore**, non come zero: `0^-1` non vale 0. Sono aggiunte: un'espressione che prima era valida dà lo stesso valore, anche nei grafici.
   - Non fa la moltiplicazione implicita (`2 3` resta un errore): `2π` e `2(3)` li risolve la calcolatrice.
 - **La calcolatrice** (`ScientificCalculatorSheet`) è una scientifica classica, 8 righe da 5 tasti alti 40 (non 46, per non allungare il foglio): 2nd, trigonometriche e inverse, x², x^y, √, 1/x, n!, ln/e^x, log/10^x, π/e, parentesi, %, memoria (MC, MR, M+, M−, con «M» sul display quando è piena), Ans, ⌫, AC, ±, e le quattro operazioni.

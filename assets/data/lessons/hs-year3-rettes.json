@@ -35,38 +35,37 @@
                         "La pendenza $m$ dice quanto la retta sale (o scende) di 1 ogni volta che $x$ aumenta di 1: da $x = 0$ a $x = 4$ la prima sale di 8, la seconda scende di 4.",
                         {
                             "id": "retta-chart-lines",
-                            "box_type": "chart",
+                            "box_type": "graph",
                             "title": "y = 2x + 1 e y = -x + 3",
                             "payload": {
-                                "kind": "line",
-                                "smooth": false,
-                                "xLabel": "x",
-                                "yLabel": "y",
-                                "unit": "y",
-                                "series": [
+                                "plane": "cartesian",
+                                "x": [-2, 6],
+                                "y": [-3, 12],
+                                "grid": 1,
+                                "items": [
                                     {
+                                        "type": "function",
+                                        "expr": "2 * x + 1",
                                         "label": "y = 2x + 1",
-                                        "color": "accent",
-                                        "points": [
-                                            [0, 1],
-                                            [1, 3],
-                                            [2, 5],
-                                            [3, 7],
-                                            [4, 9],
-                                            [5, 11]
-                                        ]
+                                        "color": "accent"
                                     },
                                     {
+                                        "type": "function",
+                                        "expr": "-x + 3",
                                         "label": "y = -x + 3",
-                                        "color": "indigo",
-                                        "points": [
-                                            [0, 3],
-                                            [1, 2],
-                                            [2, 1],
-                                            [3, 0],
-                                            [4, -1],
-                                            [5, -2]
-                                        ]
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [0, 1],
+                                        "label": "q = 1",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [0, 3],
+                                        "label": "q = 3",
+                                        "color": "orange"
                                     }
                                 ]
                             }

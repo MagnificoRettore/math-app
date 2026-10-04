@@ -80,22 +80,25 @@
                         "Nel grafico la soluzione è il punto in cui la retta **tocca zero**: $x = 2$.",
                         {
                             "id": "eq1-chart-function",
-                            "box_type": "chart",
+                            "box_type": "graph",
                             "title": "La retta y = 2x - 4",
                             "payload": {
-                                "kind": "function",
-                                "xMin": -4,
-                                "xMax": 8,
-                                "yMin": -10,
-                                "yMax": 10,
-                                "samples": 200,
-                                "xLabel": "x",
-                                "yLabel": "y",
-                                "series": [
+                                "plane": "cartesian",
+                                "x": [-4, 8],
+                                "y": [-10, 10],
+                                "grid": 2,
+                                "items": [
                                     {
+                                        "type": "function",
+                                        "expr": "2 * x - 4",
                                         "label": "y = 2x - 4",
-                                        "color": "accent",
-                                        "expression": "2 * x - 4"
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [2, 0],
+                                        "label": "(2,\\,0)",
+                                        "color": "orange"
                                     }
                                 ]
                             }

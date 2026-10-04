@@ -1,7 +1,7 @@
 enum BoxType {
   image,
   mathFormula,
-  chart;
+  graph;
 
   static BoxType fromString(String value) {
     switch (value.toLowerCase()) {
@@ -9,8 +9,8 @@ enum BoxType {
         return BoxType.image;
       case 'math_formula':
         return BoxType.mathFormula;
-      case 'chart':
-        return BoxType.chart;
+      case 'graph':
+        return BoxType.graph;
       default:
         return BoxType.image;
     }
@@ -19,12 +19,12 @@ enum BoxType {
   String get key => switch (this) {
     BoxType.image => 'image',
     BoxType.mathFormula => 'math_formula',
-    BoxType.chart => 'chart',
+    BoxType.graph => 'graph',
   };
 
   String get label => switch (this) {
     BoxType.image => 'Immagine',
     BoxType.mathFormula => 'Formula',
-    BoxType.chart => 'Grafico',
+    BoxType.graph => 'Grafico',
   };
 }

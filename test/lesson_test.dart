@@ -490,8 +490,8 @@ void main() {
     expect(lesson.steps[4].content, contains('x = 5'));
     // il nuovo step del grafico sta fra i due esempi e non porta testo
     // copiato da un'altra card
-    expect(lesson.steps[2].content, contains('"box_type":"chart"'));
-    expect(lesson.steps[2].content, contains('"kind":"bar"'));
+    expect(lesson.steps[2].content, contains('"box_type":"graph"'));
+    expect(lesson.steps[2].content, contains('"plane":"bars"'));
   });
 
   testWidgets('la toolbar compatta è allineata a Completa la lezione', (

@@ -1,6 +1,6 @@
 library;
 
-part 'payloads/chart_payload.dart';
+part 'payloads/graph_payload.dart';
 part 'payloads/image_payload.dart';
 part 'payloads/math_formula_payload.dart';
 
