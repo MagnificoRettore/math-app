@@ -4,6 +4,11 @@ Changelog e roadmap del progetto.
 
 Stato della suite: **524 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
+## 2026-10-04 — DESIGN.md
+
+- Nuovo `DESIGN.md`, il riferimento del sistema visivo: principi, colori con ruolo e contrasto, caratteri e scala, forme e gradini, spazi, componenti, illustrazioni, movimento (`AppMotion` e regole), accessibilità, fare e non fare, mappa dei file e uno storico datato delle modifiche al design.
+- `AGENTS.md` lo indica come riferimento del design e chiede di aggiornarlo, storico compreso, a ogni modifica all'aspetto o al movimento.
+
 ## 2026-10-04 — Micro-interazioni, 9: i campi di testo
 
 - **Shake dei campi obbligatori vuoti**: premendo «Continua», «Accedi» o «Salva modifiche» con un campo obbligatorio vuoto, quel campo si scuote (registrazione, login, profilo). Il campo resta lo stesso widget: tiene fuoco, testo ed errore.

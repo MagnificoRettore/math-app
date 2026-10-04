@@ -46,7 +46,7 @@
 Flutter application for **Italian students** with solved math exercises (Scuola Media, Scuola Superiore, Università) and interactive step-by-step guided lessons. All content is bundled offline as JSON assets; UI text is in **Italian**.
 
 - **Framework**: Flutter 3.47.2 (stable) · **Dart SDK**: 3.13.2
-- **UI style**: Material 3 con il design del canvas «Illustrazioni App Educativa» (indaco, giallo, crema; Fredoka e Nunito), solo tema chiaro
+- **UI style**: Material 3 con il design del canvas «Illustrazioni App Educativa» (indaco, giallo, crema; Fredoka e Nunito), solo tema chiaro. **Il riferimento del design è `DESIGN.md`**: colori, caratteri, forme, componenti, illustrazioni e movimento.
 - **Architectural Constraints**: no network calls, no code generation (`build_runner`, `freezed`, `json_serializable`), no third-party state management (Riverpod/Bloc/Provider)
 - **LaTeX**: `flutter_math_fork` ^0.7.4 (KaTeX pure Dart, offline, no WebView) · inline nei content con `$$...$$`
 - **Persistence**: `shared_preferences` ^2.5.5
@@ -342,5 +342,6 @@ Version the key when the schema changes (e.g. `settings_v2`), keep a migration p
 - Messages in Italian or mixed Italian/English.
 - Single branch: `main`.
 - Update `PROGRESS.md` (the project changelog/roadmap) when adding features. Test counts live there and nowhere else.
+- **Update `DESIGN.md` with every change to how the app looks or moves** (colors, type, shapes, components, illustrations, motion): fix the section it touches and add a dated line at the top of its «Storico». A new token, component or animation is not done until `DESIGN.md` describes it.
 - Note: Only the **web** build is confirmed working (`flutter build web`); do not attempt Linux desktop builds.
 - Note: `utils/latex.dart` was removed — always use `MathText`.
