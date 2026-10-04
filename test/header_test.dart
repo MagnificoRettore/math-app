@@ -62,7 +62,7 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('LEZIONI'));
+    await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
     expect(find.byType(LessonListScreen), findsOneWidget);
 
@@ -77,7 +77,7 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('ESERCIZI'));
+    await tester.tap(find.byKey(const ValueKey('pill-exercises')));
     await tester.pumpAndSettle();
     expect(find.byType(CourseScreen), findsOneWidget);
 
@@ -159,7 +159,7 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('LEZIONI'));
+    await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
 
     final lens = tester.getRect(find.byKey(const Key('header-search')));
@@ -182,7 +182,7 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('ESERCIZI'));
+    await tester.tap(find.byKey(const ValueKey('pill-exercises')));
     await tester.pumpAndSettle();
 
     final lens = tester.getRect(find.byKey(const Key('header-search')));
@@ -203,8 +203,8 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    for (final sezione in ['LEZIONI', 'ESERCIZI']) {
-      await tester.tap(find.text(sezione));
+    for (final sezione in ['pill-lessons', 'pill-exercises']) {
+      await tester.tap(find.byKey(ValueKey(sezione)));
       await tester.pumpAndSettle();
 
       expect(_customizzazione, findsOneWidget, reason: sezione);
@@ -236,8 +236,8 @@ void main() {
     // sta sopra l'header e il tap sulle icone finirebbe sul barrier.
     await _pumpHome(tester);
 
-    for (final sezione in ['LEZIONI', 'ESERCIZI']) {
-      await tester.tap(find.text(sezione));
+    for (final sezione in ['pill-lessons', 'pill-exercises']) {
+      await tester.tap(find.byKey(ValueKey(sezione)));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Scuola Media').last);
       await tester.pumpAndSettle();

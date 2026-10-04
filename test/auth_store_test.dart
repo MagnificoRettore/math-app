@@ -8,7 +8,6 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/user_profile.dart';
-import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/welcome_screen.dart';
 
 void main() {
@@ -459,39 +458,5 @@ void main() {
     expect(find.text('Continua con Google'), findsOneWidget);
     expect(find.text('Registrati con email'), findsOneWidget);
     expect(find.text('Scopri come ospite'), findsOneWidget);
-  });
-
-  testWidgets('home mostra l\'invito all\'ospite e poi i consigli', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
-    await tester.pumpAndSettle();
-
-    final listView = find.byType(ListView);
-    await tester.dragUntilVisible(
-      find.textContaining('Crea il tuo profilo'),
-      listView,
-      const Offset(0, -80),
-    );
-    // La sezione non sparisce da ospite: cambia titolo e contenuto, non
-    // esistenza.
-    expect(find.textContaining('Crea il tuo profilo'), findsOneWidget);
-    expect(find.text('Per iniziare'), findsOneWidget);
-    expect(find.textContaining('Per te ·'), findsNothing);
-
-    await AuthStore.instance.registerManual(
-      name: 'Anna',
-      email: 'anna@example.com',
-      password: 'segreta1',
-      schoolLevelId: 'high-school',
-    );
-    await tester.pumpAndSettle();
-
-    await tester.dragUntilVisible(
-      find.text('Per te · Scuola Superiore'),
-      listView,
-      const Offset(0, -80),
-    );
-    expect(find.text('Per te · Scuola Superiore'), findsOneWidget);
   });
 }

@@ -7,6 +7,7 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/settings_store.dart';
 import 'package:math_app/app.dart';
+import 'package:math_app/screens/home_screen.dart';
 
 void main() {
   setUp(() async {
@@ -39,9 +40,7 @@ void main() {
     expect(quadratic, isNotEmpty);
   });
 
-  testWidgets('avvio: dallo splash si arriva alla sezione missione', (
-    tester,
-  ) async {
+  testWidgets('avvio: dallo splash si arriva alla Home', (tester) async {
     SearchIndex.instance.build(ContentRepository.instance.levels);
     await SettingsStore.instance.completeOnboarding();
 
@@ -54,7 +53,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    expect(find.text('La nostra missione'), findsOneWidget);
+    expect(find.byType(HomeScreen), findsOneWidget);
     expect(find.text('Livelli'), findsNothing);
   });
 }

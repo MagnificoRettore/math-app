@@ -2,7 +2,13 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **543 test in 45 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **502 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-04 — Home a tre sezioni e barra di navigazione del canvas
+
+- **Home**: la serie di giorni, poi gli argomenti con la testata «Argomenti», poi la missione con le scorciatoie. «Jump Back In», «Per te» e «I tuoi punti deboli» sono tolte e `JumpBackInSection`, `RecommendedSection` e `WeakTopicsSection` cancellati. `WeakTopicRow` perde `inGroup` e `rank`, che servivano solo alla sezione. Tolti anche `LessonResumeEngine` (con `LessonTarget`) e `RecommendationEngine`, rimasti senza lettori, con i loro test; il punto di ripresa si salva ancora.
+- **Barra di navigazione** (`PillNavBar`) rifatta dalla tavola «Navbar» del canvas: fascia indaco a tutta larghezza con gli angoli in alto a 28, Lezioni ed Esercizi ai lati con l'icona a tratto e il trattino giallo, Home in un cerchio da 70 che sporge con il bordo crema e il gradino pieno, e che premuto scende come un bottone. Un filo più bassa del canvas: fascia 72, barra 92. Via la pillola in vetro, l'indicatore e il trascinamento: il tocco naviga subito. Nuovo colore `borderDeep` (`#9A92C2`) per il gradino di Home spenta.
+- Test: ordine delle sezioni della Home, testata a filo della prima card; la barra (fascia, cerchio che sporge, Home al centro, tab acceso letto dalla semantica, pressione di Home). I test dei punti deboli aprono `WeakPointsScreen` invece della Home; tolti quelli della card «riprendi», dei consigli, della sezione dei punti deboli e del trascinamento, e quelli dei due motori. Suite a **502 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-04 — Design: Outfit e Plus Jakarta Sans, card piatte
 

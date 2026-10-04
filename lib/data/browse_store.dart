@@ -11,8 +11,7 @@ import 'auth_store.dart';
 /// una scelta.
 ///
 /// La lezione aperta su un'altra scuola **non** scrive il punto di ripresa:
-/// quello è uno solo e appartiene alla scuola del profilo
-/// (`LessonResumeEngine`).
+/// quello è uno solo e appartiene alla scuola del profilo.
 ///
 /// Da ospite [levelId] è sempre `null`: l'ospite sceglie la scuola dal foglio
 /// e quella scelta resta quella finché non entra. Se la sessione si chiude

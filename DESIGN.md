@@ -45,6 +45,7 @@ Tutti in `AppPalette` (`lib/theme/app_colors.dart`), letti con `AppColors.of(con
 | `orange` | `#EF7D1A` | Card «Traguardo», bottone tondo play. Sopra l'inchiostro (6.0:1) |
 | `orangeDeep` | `#B65508` | Gradino del bottone tondo play; l'arancio dei grafici, perché `orange` su bianco non arriva a 3:1 |
 | `accentDeep` | `#160C3E` | Gradino del bottone indaco |
+| `borderDeep` | `#9A92C2` | Gradino del lilla: sotto il cerchio di Home spento nella barra di navigazione |
 | `disabled` / `onDisabled` | `#E4DFD4` / `#6F6A86` | Bottone disabilitato, grigio caldo (3.9:1: i controlli disabilitati sono esenti da WCAG) |
 
 ### Ruoli che finiscono come testo
@@ -112,16 +113,17 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 | Barra di avanzamento alta | 4 | 2 `yellowDeep` | — |
 | Card «Traguardo» | 18 | — | nessuno: piatta |
 | Banda dell'header | in basso 28 | — | — |
+| Barra di navigazione | in alto 28; Home tonda | Home: 6 `background` | Home: 5 px pieno, `yellowDeep` accesa, `borderDeep` spenta |
 | Illustrazione | 10% della larghezza | — | — |
 
-**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale) e **vale solo per i bottoni**. Le card non hanno nessuna ombra, né piena né sfumata; le ombre sfumate non fanno parte del design.
+**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale) e **vale solo per i bottoni**, compreso il cerchio di Home della barra di navigazione. Le card non hanno nessuna ombra, né piena né sfumata; le ombre sfumate non fanno parte del design.
 
 ---
 
 ## 5. Spazi e impaginazione
 
 - **Margine di pagina 20** (`EdgeInsets.fromLTRB(20, 8, 20, 24)`): titoli e card stanno sulla stessa linea, e le sezioni non aggiungono un margine proprio.
-- **24 fra le sezioni della Home**, 12–14 fra le card di una lista.
+- **La Home è tre sezioni**, in quest'ordine: la serie di giorni (card «Traguardo»), gli argomenti con la testata «Argomenti», la missione. **24 fra le sezioni**, 12–14 fra le card di una lista.
 - **Area di tocco almeno 44 px**: bottoni da 52 (o 44 più il gradino), anni da 44, avatar da 52.
 - Il carosello degli argomenti è l'unica striscia che **va da bordo a bordo**: scavalca i 20 di margine e li rimette come padding. Senza ombra sulle card, sotto la striscia non serve più spazio per il gradino, e la lista taglia sul suo bordo.
 
@@ -131,6 +133,12 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 
 ### Header — `MainHeaderAppBar` (`lib/widgets/main_header.dart`)
 Banda indaco appoggiata al bordo dello schermo, angoli in basso a 28, sotto gli angoli lo sfondo. Identità a sinistra (avatar con badge di modifica, nome in Outfit 600, scuola all'80% di bianco), lente e personalizzazione bianche a destra. Gli anni stanno **sotto** la banda, sullo sfondo. Nelle sotto-pagine che la tengono (l'argomento) c'è la freccia indietro prima dell'avatar.
+
+### Barra di navigazione — `PillNavBar` (`lib/widgets/pill_nav_bar.dart`)
+Dalla tavola «Navbar» del canvas. È alta 92 e ha una fascia `headerBand` di 72 a tutta larghezza, con gli angoli in alto a 28; sotto gli angoli c'è la pagina. Sta solo sulle tre pagine principali, e il contenuto sta sopra di lei.
+- **Lezioni ed Esercizi** stanno ai lati, sulla fascia. Hanno un'icona a tratto da 28 (il libro aperto, il foglio con la spunta e la matita), il nome in Outfit 600 da 14 e sotto un trattino 22×4. Quella scelta è `yellow` col trattino; le altre sono `border`, senza trattino.
+- **Home** sta al centro: un cerchio da 70 che sporge sopra la fascia, con il bordo `background` da 6, il gradino pieno da 5 e la casa a tratto `textPrimary` da 30. Acceso è `yellow` su `yellowDeep`, spento `surface` su `borderDeep`. **Premuto scende sul gradino come un bottone**; i lati no. Sotto il cerchio c'è il nome, colorato come i lati.
+- Lo stato lo dicono il colore e, allo screen reader, «selezionato». Non c'è un indicatore che scorre né il trascinamento.
 
 ### Bottone — `AppButton` (`lib/widgets/app_button.dart`)
 Pillola in Outfit 600 alta 52, sollevata da un gradino di 5 px.
@@ -144,7 +152,6 @@ Nelle schermate non si usano `FilledButton` né `OutlinedButton`.
 
 ### Card — `AppCard` (`lib/widgets/app_card.dart`)
 Bianca, raggio 20, **piatta: nessuna ombra e nessun gradino**, comprese quelle del carosello. Varianti fatte nelle schermate:
-- **Quaderno** (card «riprendi»): i cinque anelli della spirale a sinistra, **senza righe sullo sfondo**; il testo parte a 50.
 - **Traguardo** (`StreakCard`): arancio, piatta, tagliandi bianchi a sinistra, striscia chiara a destra; contenuti su riquadri bianchi.
 - **Scelta** (`SchoolLevelTile`): bordo indaco da 3.
 
@@ -160,7 +167,7 @@ Da 10 px in su: fondo `yellowSoft`, bordo `yellowDeep`, riempimento giallo a str
 - **Opzioni di risposta** (`McqOptionTile`): bordo da 3, verde giusta, rosso sbagliata, indaco scelta.
 
 ### Badge
-Pillola gialla con l'inchiostro Medium 500 («In corso», «Da iniziare»). I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
+Pillola gialla con l'inchiostro Medium 500. I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
 
 ### Stati vuoti — `EmptyState`
 Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Outfit e una riga di spiegazione; scorre se la pagina è bassa.
@@ -220,6 +227,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Bottone premuto | Scende di 5 px e il gradino va a zero; torna su al rilascio |
 | Avatar scelto | Cresce a 1.08 col rimbalzo; bordo e anelli crescono |
 | Anno scelto | Colore, bordo e testi in `medium`; nessuna spunta |
+| Sezione della barra di navigazione | Il trattino dei lati cambia colore in `medium`; il cerchio di Home in `fast`, e premuto scende di 5 px col gradino a zero |
 | Barra di avanzamento | Il riempimento va al valore nuovo; al primo disegno è già lì |
 | Passi della registrazione | Il contenuto entra con dissolvenza e scorrimento laterale (avanti da destra, indietro da sinistra); il titolo cambia in dissolvenza |
 | Home | Le sezioni entrano in sequenza al primo caricamento, una volta sola |
@@ -271,6 +279,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Selezioni | `lib/widgets/year_tabs.dart`, `avatar_picker.dart`, `mcq_option_tile.dart`, `school_level_tile.dart` |
 | Scossa | `lib/widgets/shake.dart` |
 | Header, testata ondulata | `lib/widgets/main_header.dart`, `wave_clipper.dart` |
+| Barra di navigazione | `lib/widgets/pill_nav_bar.dart` |
 | Illustrazioni | `lib/widgets/illustration.dart`, `assets/illustrations/` |
 | Stati vuoti | `lib/widgets/empty_state.dart` |
 | Grafici | `lib/widgets/graph/` (`graph_view.dart`, `graph_painter.dart`, `graph_layout.dart`, `graph_scale.dart`), `lib/theme/chart_palette.dart` |
@@ -283,6 +292,7 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-04 | Barra di navigazione rifatta dalla tavola «Navbar» del canvas: fascia indaco a tutta larghezza con gli angoli in alto a 28, Lezioni ed Esercizi ai lati col trattino giallo, Home in un cerchio che sporge col bordo crema e il gradino pieno, che premuto scende come un bottone; fascia da 72, barra da 92. Via la pillola in vetro e il trascinamento; nuovo `borderDeep`. La Home è serie, argomenti (con la testata «Argomenti») e missione: via la card «riprendi», «Per te» e i punti deboli. |
 | 2026-10-04 | Caratteri: Outfit (600) al posto di Fredoka, Plus Jakarta Sans (400, 500) al posto di Nunito; etichette dei controlli, badge e corpo delle lezioni (titoli, intestazioni, grassetto) a 500; il nome nella banda in Outfit. Card piatte, anche nel carosello e la card «Traguardo»; card «riprendi» senza righe; anno scelto senza spunta. Via `cardShadow` e `paperLine`; `orangeDeep` resta per il play e i grafici. La `Σ` del razzo è un tracciato. |
 | 2026-10-04 | Grafici, fase 3: retta numerica con intervalli a righe, estremi pieni o vuoti, punti sulla retta. |
 | 2026-10-04 | Grafici, fase 2: curve parametriche, circonferenze, segmenti e vettori, poligoni, aree e regioni di disequazioni; riempimenti al 16% e bordi continui o tratteggiati. |

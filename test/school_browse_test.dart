@@ -41,12 +41,12 @@ Future<void> _pumpHome(WidgetTester tester) async {
 }
 
 Future<void> _vaiAllezioni(WidgetTester tester) async {
-  await tester.tap(find.text('LEZIONI'));
+  await tester.tap(find.byKey(const ValueKey('pill-lessons')));
   await tester.pumpAndSettle();
 }
 
 Future<void> _vaiAgliEsercizi(WidgetTester tester) async {
-  await tester.tap(find.text('ESERCIZI'));
+  await tester.tap(find.byKey(const ValueKey('pill-exercises')));
   await tester.pumpAndSettle();
 }
 
@@ -394,26 +394,5 @@ void main() {
       isTrue,
     );
     expect(ProgressStore.instance.lessonResume!.lessonId, 'eq1-intro');
-  });
-
-  testWidgets('la lezione in visita non fa sparire «Jump Back In»', (
-    tester,
-  ) async {
-    await _registra(school: 'high-school');
-    await ProgressStore.instance.saveLessonResume(
-      LessonResume(levelId: 'high-school', lessonId: 'eq1-intro', step: 1),
-    );
-    final lezione = _primaLezione(step: 1);
-
-    await _pumpLezione(
-      tester,
-      LessonScreen(lesson: lezione, levelId: 'university'),
-    );
-    BrowseStore.instance.reset();
-
-    await _pumpHome(tester);
-
-    expect(find.byKey(const Key('jump-back-in-card')), findsOneWidget);
-    expect(find.text('Jump Back In'), findsOneWidget);
   });
 }

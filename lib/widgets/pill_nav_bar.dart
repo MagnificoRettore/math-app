@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 import '../data/auth_store.dart';
 import '../data/browse_store.dart';
@@ -17,18 +17,22 @@ import 'school_choice_sheet.dart';
 
 enum PillTab { lessons, home, exercises }
 
-const _pillLabels = {
-  PillTab.home: 'HOME',
-  PillTab.lessons: 'LEZIONI',
-  PillTab.exercises: 'ESERCIZI',
+const _labels = {
+  PillTab.lessons: 'Lezioni',
+  PillTab.home: 'Home',
+  PillTab.exercises: 'Esercizi',
 };
 
-/// Spazio riservato sotto il contenuto per la pillola in overlay.
-const double kPillBottomReserve = 96;
+/// Altezza della barra: la fascia indaco ([_kBandHeight]) più i 20 px di cui
+/// il bottone Home sporge sopra di lei.
+const double kPillBottomReserve = 92;
 
-/// Larghezza massima della pillola: non deve stare a filo con i bordi dello
-/// schermo, resta una barra compatta e centrata anche sui tablet.
-const double kPillMaxWidth = 320;
+/// La fascia indaco, alta quanto i bottoni laterali.
+const double _kBandHeight = 72;
+
+/// Il cerchio di Home, bordo crema compreso, e il suo gradino.
+const double _kHomeSize = 70;
+const double _kHomeStep = 5;
 
 /// Transizione sobria per il cambio sezione: la pagina nuova sfuma sopra
 /// quella attuale, così la pillola resta visivamente in sovraimpressione
@@ -50,8 +54,8 @@ Route<T> _fadeRoute<T>(Widget page) {
   );
 }
 
-/// Inquadra il body a schermo intero con la pillola in overlay in basso:
-/// il contenuto scorre sotto la barra in vetro (effetto Liquid Glass).
+/// Inquadra il body con la barra di navigazione in basso: il contenuto sta
+/// sopra la barra, che sotto gli angoli smussati lascia vedere la pagina.
 class PillNavOverlay extends StatelessWidget {
   final PillTab selected;
   final Widget child;
@@ -64,8 +68,8 @@ class PillNavOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inset di sistema in basso: con la barra di navigazione Android
-    // persistente il contenuto deve restare sopra, non dietro.
+    // Inset di sistema in basso: la fascia indaco ci scende sotto, i bottoni
+    // e il contenuto restano sopra.
     final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
 
     return Stack(
@@ -87,6 +91,11 @@ class PillNavOverlay extends StatelessWidget {
   }
 }
 
+/// La barra di navigazione del design: una fascia indaco a tutta larghezza
+/// con gli angoli in alto smussati a 28, Lezioni ed Esercizi ai lati (icona,
+/// nome e un trattino giallo sotto quella scelta) e Home al centro, un cerchio
+/// che sporge sopra la fascia con il bordo crema e il gradino pieno dei
+/// bottoni: giallo quando si è in Home, bianco altrimenti.
 class PillNavBar extends StatefulWidget {
   final PillTab selected;
 
@@ -97,72 +106,39 @@ class PillNavBar extends StatefulWidget {
 }
 
 class _PillNavBarState extends State<PillNavBar> {
-  static final int _itemCount = PillTab.values.length;
-
-  // La sezione selezionata è derivata da [PillNavBar.selected]: la barra
-  // riflette sempre la schermata corrente, quindi l'indicatore non può
-  // rimanere "bloccato" su una vecchia sezione quando la schermata torna
-  // visibile dopo un pop.
-  //
-  // Queste variabili sono transitorie: valgono solo durante una singola
-  // interazione (un tap in attesa dello snap o un drag in corso).
-  bool _dragging = false;
-  double? _dragLeft;
-  int? _activeIndex;
-
-  // Sezione richiesta dall'utente, in carico alla pillola finché la
-  // schermata da cui si parte non è sparita. Non azzerarla alla fine dello
-  // scorrimento: [_PillNavBarState._performNavigation] può lasciare questa
-  // schermata in vista ancora un po' (il ritorno animato alla home, il
-  // foglio della scelta scuola) e in quel tratto l'indicatore deve restare
-  // sulla sezione richiesta, altrimenti torna su quella di partenza e poi
-  // scatta avanti.
-  int? _pendingTabIndex;
-
-  int get _selectedIndex => widget.selected.index;
+  // Sezione richiesta dall'utente, in carico alla barra finché la schermata
+  // da cui si parte non è sparita. [_performNavigation] può lasciare questa
+  // schermata in vista ancora un po' (il ritorno animato alla home, il foglio
+  // della scelta scuola) e in quel tratto la barra deve restare sulla sezione
+  // richiesta, altrimenti torna su quella di partenza e poi scatta avanti.
+  PillTab? _pending;
 
   @override
   void didUpdateWidget(covariant PillNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selected != widget.selected) {
-      _dragging = false;
-      _dragLeft = null;
-      _activeIndex = null;
-      _pendingTabIndex = null;
-    }
+    if (oldWidget.selected != widget.selected) _pending = null;
   }
 
-  /// Seleziona la sezione al tocco: l'indicatore scivola sulla nuova
-  /// posizione, poi (a fine snap) la pagina viene caricata sotto la pillola.
-  void _commit(int index) {
-    if (_pendingTabIndex != null || index == _selectedIndex) return;
+  void _select(PillTab tab) {
+    if (_pending != null || tab == widget.selected) return;
     AppHaptics.selectionClick();
-    setState(() => _pendingTabIndex = index);
-  }
-
-  void _onSnapComplete() {
-    if (!mounted) return;
-    final pending = _pendingTabIndex;
-    if (pending == null) return;
-    _performNavigation(pending);
+    setState(() => _pending = tab);
+    _performNavigation(tab);
   }
 
   void _clearPending() {
-    if (!mounted || _pendingTabIndex == null) return;
-    setState(() => _pendingTabIndex = null);
+    if (!mounted || _pending == null) return;
+    setState(() => _pending = null);
   }
 
-  /// Esegue la navigazione esattamente una volta per interazione: parte
-  /// sempre a scorrimento finito, sia per il tap sia per il drag.
-  void _performNavigation(int index) {
-    final tab = PillTab.values[index];
+  void _performNavigation(PillTab tab) {
     final navigator = Navigator.of(context);
 
     if (tab == PillTab.home) {
       // Qui il ritorno alla home è voluto e deve restare animato. Il pending
       // resta: la schermata uscente è ancora in vista per la durata del
-      // ritorno e deve mostrarsi con la pillola già su HOME. Non serve
-      // azzerarlo, la rotta che esce viene rimossa insieme alla pillola.
+      // ritorno e deve mostrarsi con la barra già su Home. Non serve
+      // azzerarlo, la rotta che esce viene rimossa insieme alla barra.
       navigator.popUntil((route) => route.isFirst);
       return;
     }
@@ -170,7 +146,7 @@ class _PillNavBarState extends State<PillNavBar> {
     final user = AuthStore.instance.currentUser;
     // La scuola in visita viene prima di quella del profilo: cambiando sezione
     // non si deve ripartire da capo su un'altra scuola, altrimenti la visita
-    // finirebbe al primo tocco della pillola.
+    // finirebbe al primo tocco della barra.
     final levelId =
         BrowseStore.instance.levelId ??
         ((user?.schoolLevelId ?? '').isNotEmpty ? user!.schoolLevelId : null);
@@ -196,7 +172,7 @@ class _PillNavBarState extends State<PillNavBar> {
   /// le precedenti, quindi la home non viene mai riportata in cima.
   void _resetTo(NavigatorState navigator, Widget page) {
     // La schermata che chiama sparisce subito, ma la home resta viva: senza
-    // azzerare qui la pillola della root mostrerebbe la sezione appena
+    // azzerare qui la barra della root mostrerebbe la sezione appena
     // richiesta quando il back riporta in vista quella schermata.
     _clearPending();
     navigator.pushAndRemoveUntil<void>(
@@ -216,13 +192,8 @@ class _PillNavBarState extends State<PillNavBar> {
     );
     if (!mounted) return;
     if (chosen == null) {
-      // Scelta annullata: la pillola torna sulla sezione della schermata.
-      setState(() {
-        _dragging = false;
-        _dragLeft = null;
-        _activeIndex = null;
-        _pendingTabIndex = null;
-      });
+      // Scelta annullata: la barra torna sulla sezione della schermata.
+      _clearPending();
       return;
     }
     _resetTo(Navigator.of(context), _screenFor(tab, chosen));
@@ -238,416 +209,107 @@ class _PillNavBarState extends State<PillNavBar> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
+    final current = _pending ?? widget.selected;
 
-    // ―― Liquid Glass ――――――――――――――――――――――――――――――――――――――
-    // Tinta del vetro: semi-trasparente e più spessa in alto, così la
-    // sfocatura del contenuto sottostante resta ben visibile.
-    final glassTop = c.surface.withValues(alpha: 0.18);
-    final glassBottom = c.surface.withValues(alpha: 0.08);
-    // Riflessi di luce: più marcati in chiaro, soffusi in scuro.
-    final rim = 0.6;
-    final glare = 0.2;
-
-    return SafeArea(
-      minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: kPillMaxWidth),
-          child: Container(
-            key: const ValueKey('pill-surface'),
-            height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                // Ombra di profondità molto morbida: stacca la pillola dallo sfondo.
-                BoxShadow(
-                  color: c.shadow,
-                  blurRadius: 28,
-                  offset: const Offset(0, 12),
+    return SizedBox(
+      height: kPillBottomReserve + systemBottom,
+      child: Stack(
+        // Il gradino di Home esce di poco sopra la barra.
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: _kBandHeight + systemBottom,
+            child: DecoratedBox(
+              key: const ValueKey('pill-surface'),
+              decoration: BoxDecoration(
+                color: c.headerBand,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
                 ),
-                // Ombra di contatto più corta per "ancorare" il vetro.
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: systemBottom,
+            height: kPillBottomReserve,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final tab in PillTab.values)
+                  Expanded(
+                    child: tab == PillTab.home
+                        ? _HomeButton(
+                            active: current == tab,
+                            onTap: () => _select(tab),
+                          )
+                        : _SideButton(
+                            tab: tab,
+                            active: current == tab,
+                            onTap: () => _select(tab),
+                          ),
+                  ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              // Un unico BackdropFilter ristretto al "buco" della pillola: sfoca in
-              // tempo reale ciò che scorre sotto, con sigma moderato per non pesare
-              // sul framerate.
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Stack(
-                  children: [
-                    // 1) Corpo di vetro: gradiente verticale semi-trasparente.
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [glassTop, glassBottom],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 2) Tinta "liquida": leggera sfumatura d'accento che simula
-                    //    lo spessore e la rifrazione del vetro.
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: const [0.25, 1],
-                            colors: [
-                              c.accent.withValues(alpha: 0.05),
-                              c.accent.withValues(alpha: 0.015),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 3) Bordo esterno sottile e nitido.
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.55),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 4) Riflesso superiore: linea di luce sul bordo alto.
-                    Positioned(
-                      left: 4,
-                      right: 4,
-                      top: 0,
-                      height: 22,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(28),
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withValues(alpha: rim),
-                              Colors.white.withValues(alpha: 0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 5) Riflessi laterali: bordi verticali del vetro.
-                    Positioned(
-                      left: 0,
-                      top: 8,
-                      bottom: 8,
-                      width: 12,
-                      child: _EdgeGlare(alpha: glare),
-                    ),
-                    Positioned(
-                      right: 0,
-                      top: 8,
-                      bottom: 8,
-                      width: 12,
-                      child: _EdgeGlare(alpha: glare, flip: true),
-                    ),
-                    // 6) Bagliore diagonale: rifrazione "liquida" sulla superficie.
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              stops: const [0, 0.45, 1],
-                              colors: [
-                                Colors.white.withValues(alpha: glare),
-                                Colors.white.withValues(alpha: 0),
-                                Colors.white.withValues(alpha: glare * 0.6),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 7) Ombra interna al fondo: spessore percepito del vetro.
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      height: 18,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(28),
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [
-                              Colors.black.withValues(alpha: 0.06),
-                              Colors.black.withValues(alpha: 0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 6,
-                      ),
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final segWidth = (constraints.maxWidth / _itemCount)
-                              .clamp(1.0, double.infinity);
-                          final maxLeft = constraints.maxWidth - segWidth;
-
-                          double clampLeft(double left) =>
-                              left.clamp(0.0, maxLeft);
-                          int segmentAt(double x) =>
-                              (x / segWidth).floor().clamp(0, _itemCount - 1);
-                          double indicatorLeft(int index) => index * segWidth;
-
-                          final draggingFrom =
-                              _dragLeft ??
-                              indicatorLeft(_pendingTabIndex ?? _selectedIndex);
-                          final activeIndex =
-                              _activeIndex ??
-                              _pendingTabIndex ??
-                              _selectedIndex;
-                          final snapDuration = (!_dragging && !reduceMotion)
-                              ? const Duration(milliseconds: 260)
-                              : Duration.zero;
-                          final snapCurve = Curves.easeOutCubic;
-
-                          return GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onHorizontalDragStart: (details) {
-                              final x = details.localPosition.dx;
-                              setState(() {
-                                _dragging = true;
-                                _dragLeft = clampLeft(x - segWidth / 2);
-                                _activeIndex = segmentAt(x);
-                                _pendingTabIndex = null;
-                              });
-                            },
-                            onHorizontalDragUpdate: (details) {
-                              setState(() {
-                                _dragLeft = clampLeft(
-                                  (_dragLeft ?? indicatorLeft(_selectedIndex)) +
-                                      details.delta.dx,
-                                );
-                                final index = segmentAt(
-                                  _dragLeft! + segWidth / 2,
-                                );
-                                if (index != _activeIndex) {
-                                  AppHaptics.selectionClick();
-                                  _activeIndex = index;
-                                }
-                              });
-                            },
-                            onHorizontalDragEnd: (_) {
-                              final releasedIndex =
-                                  _activeIndex ??
-                                  segmentAt(
-                                    indicatorLeft(_selectedIndex) +
-                                        segWidth / 2,
-                                  );
-                              if (releasedIndex == _selectedIndex) {
-                                // Rilascio sulla sezione attuale: niente navigazione,
-                                // l'indicatore torna centrato sul segmento.
-                                setState(() {
-                                  _dragging = false;
-                                  _dragLeft = null;
-                                  _activeIndex = null;
-                                });
-                                return;
-                              }
-                              // Al rilascio avviene la selezione: [_activeIndex]
-                              // è già sul segmento scelto, quindi basta passarlo
-                              // come sezione richiesta e lasciare che
-                              // [_onSnapComplete] navighi a fine assestamento
-                              // (identico al tap, e con un solo punto di uscita
-                              // per la navigazione). Lo stato di trascinamento
-                              // viene azzerato qui, così quando la schermata
-                              // tornerà visibile l'evidenziazione e l'indicatore
-                              // saranno di nuovo sulla sezione corrente.
-                              AppHaptics.selectionClick();
-                              // Se l'indicatore è già allineato al segmento
-                              // scelto non c'è scorrimento da aspettare e
-                              // `AnimatedPositioned.onEnd` non parte: in quel caso
-                              // si naviga qui. Nei due rami la navigazione parte
-                              // una volta sola.
-                              // Tolleranza di mezzo pixel: il confronto
-                              // esatto sbaglia per arrotondamento e
-                              // l'indicatore, già fermo sul segmento, non
-                              // ripartirebbe: `onEnd` non chiamerebbe nessuno
-                              // e la navigazione non partirebbe mai.
-                              final alreadySettled =
-                                  (clampLeft(
-                                            _dragLeft ??
-                                                indicatorLeft(_selectedIndex),
-                                          ) -
-                                          indicatorLeft(releasedIndex))
-                                      .abs() <
-                                  0.5;
-                              setState(() {
-                                _dragging = false;
-                                _dragLeft = null;
-                                _activeIndex = null;
-                                _pendingTabIndex = releasedIndex;
-                              });
-                              if (alreadySettled) {
-                                _performNavigation(releasedIndex);
-                              }
-                            },
-                            onHorizontalDragCancel: () {
-                              setState(() {
-                                _dragging = false;
-                                _dragLeft = null;
-                                _activeIndex = null;
-                                _pendingTabIndex = null;
-                              });
-                            },
-                            child: Stack(
-                              children: [
-                                AnimatedPositioned(
-                                  key: const ValueKey('pill-indicator'),
-                                  duration: snapDuration,
-                                  curve: snapCurve,
-                                  onEnd: _onSnapComplete,
-                                  left: clampLeft(draggingFrom) + 3,
-                                  top: 0,
-                                  bottom: 0,
-                                  width: segWidth - 6,
-                                  child: _GlassIndicator(),
-                                ),
-                                Row(
-                                  children: [
-                                    for (var i = 0; i < _itemCount; i++)
-                                      Expanded(
-                                        child: _PillButton(
-                                          tab: PillTab.values[i],
-                                          active: i == activeIndex,
-                                          onTap: () => _commit(i),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _GlassIndicator extends StatelessWidget {
-  const _GlassIndicator();
+/// Le icone del design, a tratto: un libro aperto e un foglio con la spunta e
+/// la matita. `{c}` è il colore del tratto.
+const _icons = {
+  PillTab.lessons:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="2.4" '
+      'stroke-linejoin="round"><path d="M12 6 C9 4 5 4 3 5 V19 C5 18 9 18 12 '
+      '20 C15 18 19 18 21 19 V5 C19 4 15 4 12 6 Z M12 6 V20"/></svg>',
+  PillTab.home:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="2.6" '
+      'stroke-linejoin="round"><path d="M4 11 L12 4 L20 11 V20 H14 V14 H10 V20 '
+      'H4 Z"/></svg>',
+  PillTab.exercises:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="{c}" stroke-width="2.4" '
+      'stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" '
+      'width="13" height="18" rx="2"/><path d="M7.5 12 l2.5 2.5 4-5"/><path '
+      'd="M19 8 L21 10 L15 16 L13 16 L13 14 Z"/></svg>',
+};
 
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(22),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          // Capsula di vetro "accesa": traslucida ma ben visibile, con un
-          // riflesso di luce sul bordo alto come il vetro liquido.
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white.withValues(alpha: 0.9),
-              Colors.white.withValues(alpha: 0.45),
-            ],
-          ),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
-          boxShadow: [
-            BoxShadow(
-              color: c.shadow,
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            height: 16,
-            constraints: const BoxConstraints(maxWidth: double.infinity),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(18),
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withValues(alpha: 0.7),
-                  Colors.white.withValues(alpha: 0),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+Widget _icon(PillTab tab, Color color, double size) {
+  final hex = (color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0');
+  return SvgPicture.string(
+    _icons[tab]!.replaceAll('{c}', '#$hex'),
+    width: size,
+    height: size,
+  );
 }
 
-/// Riflesso verticale lungo un bordo laterale del vetro:
-/// un gradiente orizzontale che sfuma verso il centro.
-class _EdgeGlare extends StatelessWidget {
-  final double alpha;
-  final bool flip;
+/// Il nome della sezione sotto l'icona: Outfit 600 da 14.
+Widget _label(PillTab tab, Color color) => Text(
+  _labels[tab]!,
+  style: TextStyle(
+    fontFamily: AppText.headingFont,
+    fontSize: AppText.bodyLarge,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    color: color,
+  ),
+);
 
-  const _EdgeGlare({required this.alpha, this.flip = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: flip ? Alignment.centerRight : Alignment.centerLeft,
-          end: flip ? Alignment.centerLeft : Alignment.centerRight,
-          colors: [
-            Colors.white.withValues(alpha: alpha),
-            Colors.white.withValues(alpha: 0),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PillButton extends StatelessWidget {
+/// Lezioni o Esercizi: icona, nome e il trattino giallo sotto quella scelta,
+/// sulla fascia indaco. Giallo la scelta, lilla le altre.
+class _SideButton extends StatelessWidget {
   final PillTab tab;
   final bool active;
   final VoidCallback onTap;
 
-  const _PillButton({
+  const _SideButton({
     required this.tab,
     required this.active,
     required this.onTap,
@@ -656,34 +318,34 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    final color = active ? c.yellow : c.border;
     return Semantics(
-      selected: active,
       button: true,
-      child: InkWell(
+      selected: active,
+      label: _labels[tab],
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        key: ValueKey('pill-${tab.name}'),
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(vertical: 6),
+        child: SizedBox(
+          height: _kBandHeight,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                active ? _filledIcon : _outlinedIcon,
-                size: 20,
-                color: active ? c.accent : c.textSecondary,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                _label,
-                style: TextStyle(
-                  // Era l'unico testo sotto `AppText.micro`, e a 10 px nella
-                  // barra più stretta dell'app era il primo a soffrire.
-                  fontSize: AppText.micro,
-                  fontWeight: FontWeight.w500,
-                  color: active ? c.accent : c.textSecondary,
+              _icon(tab, color, 28),
+              const SizedBox(height: 4),
+              _label(tab, color),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: AppMotion.duration(context, AppMotion.medium),
+                curve: AppMotion.standard,
+                width: 22,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: active ? c.yellow : c.yellow.withValues(alpha: 0),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ],
@@ -692,28 +354,91 @@ class _PillButton extends StatelessWidget {
       ),
     );
   }
+}
 
-  String get _label => _pillLabels[tab] ?? tab.name.toUpperCase();
+/// Home: il cerchio da 70 che sporge sopra la fascia, con il bordo crema da 6
+/// e il gradino pieno da 5 dei bottoni. Giallo su oro quando si è in Home,
+/// bianco su lilla altrimenti; il nome sotto, sulla fascia.
+class _HomeButton extends StatefulWidget {
+  final bool active;
+  final VoidCallback onTap;
 
-  IconData get _outlinedIcon {
-    switch (tab) {
-      case PillTab.home:
-        return Symbols.home_rounded;
-      case PillTab.lessons:
-        return Symbols.book_2_rounded;
-      case PillTab.exercises:
-        return Icons.calculate_outlined;
-    }
+  const _HomeButton({required this.active, required this.onTap});
+
+  @override
+  State<_HomeButton> createState() => _HomeButtonState();
+}
+
+class _HomeButtonState extends State<_HomeButton> {
+  bool _pressed = false;
+
+  void _press(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
   }
 
-  IconData get _filledIcon {
-    switch (tab) {
-      case PillTab.home:
-        return Symbols.home_rounded;
-      case PillTab.lessons:
-        return Symbols.book_2_rounded;
-      case PillTab.exercises:
-        return Icons.calculate;
-    }
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final active = widget.active;
+    return Semantics(
+      button: true,
+      selected: active,
+      label: _labels[PillTab.home],
+      excludeSemantics: true,
+      onTap: widget.onTap,
+      child: GestureDetector(
+        key: const ValueKey('pill-home'),
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => _press(true),
+        onTapUp: (_) => _press(false),
+        onTapCancel: () => _press(false),
+        onTap: widget.onTap,
+        // Cerchio, nome e il margine sotto superano di poco l'altezza della
+        // barra: come nel design, il cerchio sporge in alto invece di
+        // schiacciarsi.
+        child: OverflowBox(
+          alignment: Alignment.bottomCenter,
+          maxHeight: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Premuto, come `AppButton`: il cerchio scende di tutto il
+                // gradino e il gradino va a zero; al rilascio torna su. La
+                // discesa è una traslazione, così il nome sotto non si muove.
+                AnimatedContainer(
+                  duration: AppMotion.duration(context, AppMotion.fast),
+                  curve: AppMotion.standard,
+                  width: _kHomeSize,
+                  height: _kHomeSize,
+                  alignment: Alignment.center,
+                  transform: Matrix4.translationValues(
+                    0,
+                    _pressed ? _kHomeStep : 0,
+                    0,
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: active ? c.yellow : c.surface,
+                    border: Border.all(color: c.background, width: 6),
+                    // Il gradino pieno dei bottoni, non un'ombra sfumata.
+                    boxShadow: [
+                      BoxShadow(
+                        color: active ? c.yellowDeep : c.borderDeep,
+                        offset: Offset(0, _pressed ? 0 : _kHomeStep),
+                      ),
+                    ],
+                  ),
+                  child: _icon(PillTab.home, c.textPrimary, 30),
+                ),
+                const SizedBox(height: 4),
+                _label(PillTab.home, active ? c.yellow : c.border),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

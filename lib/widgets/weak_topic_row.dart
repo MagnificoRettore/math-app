@@ -7,24 +7,11 @@ import 'app_card.dart';
 import 'progress_bar.dart';
 
 /// Una riga della lista dei punti deboli.
-///
-/// [inGroup] dice se la riga sta dentro una card che ne contiene altre: in quel
-/// caso la riga non porta bordo, ombra e raggio suoi, sennò la lista si legge
-/// come una pila di card dentro una card. [rank] è il numero in testa, la
-/// posizione nella lista.
 class WeakTopicRow extends StatelessWidget {
   final WeakTopic weakTopic;
   final VoidCallback onTap;
-  final bool inGroup;
-  final int? rank;
 
-  const WeakTopicRow({
-    super.key,
-    required this.weakTopic,
-    required this.onTap,
-    this.inGroup = false,
-    this.rank,
-  });
+  const WeakTopicRow({super.key, required this.weakTopic, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -35,34 +22,15 @@ class WeakTopicRow extends StatelessWidget {
 
     final row = Row(
       children: [
-        if (rank != null)
-          Container(
-            width: 32,
-            height: 32,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              '$rank',
-              style: TextStyle(
-                fontSize: AppText.bodyMedium,
-                fontWeight: FontWeight.w500,
-                color: color,
-              ),
-            ),
-          )
-        else
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(11),
-            ),
-            child: Icon(icon, color: color, size: 20),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(11),
           ),
+          child: Icon(icon, color: color, size: 20),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -117,16 +85,6 @@ class WeakTopicRow extends StatelessWidget {
         ],
       ],
     );
-
-    if (inGroup) {
-      return InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: row,
-        ),
-      );
-    }
 
     return AppCard(
       onTap: onTap,

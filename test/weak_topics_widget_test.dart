@@ -8,7 +8,6 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
 import 'package:math_app/models/progress.dart';
-import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/weak_points_screen.dart';
 import 'package:math_app/screens/weak_topic_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
@@ -32,20 +31,21 @@ Future<void> _registra() => AuthStore.instance.registerManual(
   schoolLevelId: 'middle-school',
 );
 
-Future<void> _pumpHome(WidgetTester tester) async {
+Future<void> _pumpPagina(WidgetTester tester) async {
   await tester.pumpWidget(
-    MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
+    MaterialApp(theme: AppTheme.light, home: const WeakPointsScreen()),
   );
   await tester.pumpAndSettle();
 }
 
-Future<void> _scrollToWeakSection(WidgetTester tester) async {
-  await tester.dragUntilVisible(
-    find.text('I tuoi punti deboli'),
-    find.byType(ListView),
-    const Offset(0, -120),
-  );
-  await tester.pumpAndSettle();
+Future<void> _ripassa(List<String> ids) async {
+  for (final id in ids) {
+    await ProgressStore.instance.setStatus(
+      'middle-school',
+      id,
+      ExerciseStatus.needsReview,
+    );
+  }
 }
 
 void main() {
@@ -53,31 +53,24 @@ void main() {
 
   setUp(_resetStores);
 
-  testWidgets('la sezione punti deboli è nascosta senza progressi', (
+  testWidgets('senza esercizi da ripassare la pagina dice tutto assimilato', (
     tester,
   ) async {
-    await _pumpHome(tester);
+    await _registra();
+    await _pumpPagina(tester);
 
-    expect(find.text('I tuoi punti deboli'), findsNothing);
-    expect(find.textContaining('Vedi tutti'), findsNothing);
+    expect(find.text('Tutto assimilato!'), findsOneWidget);
     expect(find.byType(WeakTopicRow), findsNothing);
   });
 
-  testWidgets('la sezione appare con un esercizio da ripassare', (
+  testWidgets('un esercizio da ripassare fa comparire il suo topic', (
     tester,
   ) async {
-    await _pumpHome(tester);
-    await ProgressStore.instance.setStatus(
-      'middle-school',
-      'ms-frac-compare-1',
-      ExerciseStatus.needsReview,
-    );
+    await _registra();
+    await _pumpPagina(tester);
+    await _ripassa(['ms-frac-compare-1']);
     await tester.pumpAndSettle();
 
-    await _scrollToWeakSection(tester);
-
-    expect(find.text('I tuoi punti deboli'), findsOneWidget);
-    expect(find.text('1 da ripassare'), findsWidgets);
     expect(find.byType(WeakTopicRow), findsOneWidget);
     expect(find.text('Frazioni'), findsOneWidget);
   });
@@ -85,15 +78,10 @@ void main() {
   testWidgets('toccando la riga si apre il dettaglio del topic', (
     tester,
   ) async {
-    await _pumpHome(tester);
-    await ProgressStore.instance.setStatus(
-      'middle-school',
-      'ms-frac-compare-1',
-      ExerciseStatus.needsReview,
-    );
-    await tester.pumpAndSettle();
+    await _registra();
+    await _ripassa(['ms-frac-compare-1']);
+    await _pumpPagina(tester);
 
-    await _scrollToWeakSection(tester);
     await tester.tap(find.byType(WeakTopicRow));
     await tester.pumpAndSettle();
 
@@ -103,50 +91,24 @@ void main() {
     expect(find.text('Confronto di frazioni'), findsOneWidget);
   });
 
-  testWidgets('Vedi tutti apre la lista completa dei punti deboli', (
-    tester,
-  ) async {
+  testWidgets('la pagina elenca tutti i punti deboli', (tester) async {
     await _registra();
-    await _pumpHome(tester);
-    const weakIds = [
+    await _ripassa([
       'ms-frac-compare-1',
       'ms-frac-sum-1',
       'ms-perc-1',
       'ms-prop-1',
       'ms-eq-1',
-    ];
-    for (final id in weakIds) {
-      await ProgressStore.instance.setStatus(
-        'middle-school',
-        id,
-        ExerciseStatus.needsReview,
-      );
-    }
-    await tester.pumpAndSettle();
+    ]);
+    await _pumpPagina(tester);
 
-    await _scrollToWeakSection(tester);
-
-    expect(find.byType(WeakTopicRow), findsNWidgets(3));
-    expect(find.text('Vedi tutti (4)'), findsOneWidget);
-
-    await tester.tap(find.text('Vedi tutti (4)'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(WeakPointsScreen), findsOneWidget);
     expect(find.byType(WeakTopicRow), findsNWidgets(4));
   });
 
-  testWidgets('la sezione scompare quando il topic non è più debole', (
-    tester,
-  ) async {
-    await _pumpHome(tester);
-    await ProgressStore.instance.setStatus(
-      'middle-school',
-      'ms-frac-compare-1',
-      ExerciseStatus.needsReview,
-    );
-    await tester.pumpAndSettle();
-    await _scrollToWeakSection(tester);
+  testWidgets('il topic sparisce quando non è più debole', (tester) async {
+    await _registra();
+    await _ripassa(['ms-frac-compare-1']);
+    await _pumpPagina(tester);
     expect(find.byType(WeakTopicRow), findsOneWidget);
 
     await ProgressStore.instance.setStatus(
@@ -157,6 +119,5 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(WeakTopicRow), findsNothing);
-    expect(find.text('I tuoi punti deboli'), findsNothing);
   });
 }

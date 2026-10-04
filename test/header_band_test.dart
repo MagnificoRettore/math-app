@@ -291,7 +291,7 @@ void main() {
     await _pumpHome(tester);
     expect(find.byKey(_scuolaKey), findsNothing);
 
-    await tester.tap(find.text('LEZIONI'));
+    await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Scuola Media').last);
     await tester.pumpAndSettle();

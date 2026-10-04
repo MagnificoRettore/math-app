@@ -7,27 +7,20 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
-import 'package:math_app/data/recommendation_engine.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
-import 'package:math_app/models/lesson_resume.dart';
-import 'package:math_app/models/progress.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
-import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/screens/mission_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/screens/welcome_screen.dart';
 import 'package:math_app/screens/weak_points_screen.dart';
 import 'package:math_app/theme/app_colors.dart';
-import 'package:math_app/theme/app_text.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/argomento_carousel.dart';
-import 'package:math_app/widgets/recommendation_row.dart';
 import 'package:math_app/widgets/section_header.dart';
 import 'package:math_app/widgets/streak_card.dart';
-import 'package:math_app/widgets/weak_topic_row.dart';
 
 /// Rapporto di contrasto WCAG fra due colori opachi.
 double _contrasto(Color a, Color b) {
@@ -56,23 +49,12 @@ Future<void> _registra({String levelId = 'high-school'}) =>
       schoolLevelId: levelId,
     );
 
-Future<void> _pausa(String lessonId, {int step = 0}) =>
-    ProgressStore.instance.saveLessonResume(
-      LessonResume(levelId: 'high-school', lessonId: lessonId, step: step),
-    );
-
 Future<void> _pumpHome(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(theme: AppTheme.light, home: const HomeScreen()),
   );
   await tester.pumpAndSettle();
 }
-
-final _cardRiprendi = find.byKey(const Key('jump-back-in-card'));
-final _ctaRiprendi = find.byKey(const Key('jump-back-in-button'));
-
-TextStyle _stile(WidgetTester tester, Finder testo) =>
-    tester.widget<Text>(testo).style!;
 
 /// Le scorciatoie dentro la card missione.
 ///
@@ -85,16 +67,6 @@ Finder _scorciatoia(IconData icon) => find.descendant(
   ),
   matching: find.byIcon(icon),
 );
-
-/// Il bottone play dentro la riga: è la stessa misura in ogni riga, quindi
-/// confrontarlo dice se le due Home hanno la stessa forma.
-Size _play(WidgetTester tester, Finder riga) => tester.getSize(
-  find.descendant(of: riga, matching: find.byIcon(Icons.play_arrow_rounded)),
-);
-
-/// La riga della sezione dei consigli che contiene il testo indicato.
-Finder _riga(WidgetTester tester, Finder testo) =>
-    find.ancestor(of: testo, matching: find.byType(RecommendationRow));
 
 Future<void> _scrollaA(WidgetTester tester, Finder target) async {
   await tester.dragUntilVisible(
@@ -168,37 +140,44 @@ void main() {
   });
 
   group('testate', () {
-    testWidgets('il titolo di sezione è a filo della card sotto', (
+    testWidgets('il titolo degli argomenti è a filo della prima card', (
       tester,
     ) async {
       await _registra();
       await _pumpHome(tester);
-      final testata = find.text('Per te \u00b7 Scuola Superiore');
+      final testata = find.text('Argomenti');
       await _scrollaA(tester, testata);
 
       // I 20 px orizzontali della testata, sommati a quelli della pagina,
       // mettevano il titolo a 40 mentre le card erano a 20: disallineati e con
       // 20 px in meno per il testo.
-      // La `AppCard` è dentro la riga, non sopra.
-      final card = find.descendant(
-        of: find.byType(RecommendationRow).first,
-        matching: find.byType(AppCard),
+      expect(find.byType(SectionHeader), findsOneWidget);
+      final card = find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('carousel-'),
       );
-      expect(tester.getTopLeft(testata).dx, tester.getTopLeft(card).dx);
+      expect(tester.getTopLeft(testata).dx, tester.getTopLeft(card.first).dx);
     });
   });
 
   group('superfici', () {
-    testWidgets('la card ha il raggio e l\'ombra piena del design', (
-      tester,
-    ) async {
+    testWidgets('la card ha il raggio del design ed è piatta', (tester) async {
       await _registra();
-      await _pausa('eq1-intro');
       await _pumpHome(tester);
+      await _scrollaA(tester, find.text('La nostra missione'));
 
       final box = tester.widget<Container>(
         find
-            .descendant(of: _cardRiprendi, matching: find.byType(Container))
+            .descendant(
+              of: find
+                  .ancestor(
+                    of: find.text('La nostra missione'),
+                    matching: find.byType(AppCard),
+                  )
+                  .first,
+              matching: find.byType(Container),
+            )
             .first,
       );
       final radius =
@@ -210,94 +189,37 @@ void main() {
       expect((box.decoration! as BoxDecoration).boxShadow, isNull);
     });
 
-    testWidgets('la card riprendi è a quaderno: la spirale, senza righe', (
-      tester,
-    ) async {
-      await _registra();
-      await _pausa('eq1-intro');
-      await _pumpHome(tester);
-
-      // Il foglio a righe non c'è più; i cinque anelli della spirale sì.
-      expect(find.byKey(const Key('jump-back-in-paper')), findsNothing);
-      final anelli = find.descendant(
-        of: _cardRiprendi,
-        matching: find.byWidgetPredicate(
-          (w) =>
-              w is Container &&
-              w.constraints?.maxWidth == 18 &&
-              w.constraints?.maxHeight == 10,
-        ),
-      );
-      expect(anelli, findsNWidgets(5));
-      // Niente alone: il design non ce l'ha.
-      expect(
-        find.descendant(
-          of: _cardRiprendi,
-          matching: find.byType(ImageFiltered),
-        ),
-        findsNothing,
-      );
-    });
-
-    testWidgets('su uno schermo stretto la card non sfora', (tester) async {
+    testWidgets('su uno schermo stretto la Home non sfora', (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
       await _registra();
-      await _pausa('eq1-intro');
       await _pumpHome(tester);
 
-      // La spirale e il margine del quaderno tolgono 50 px al testo: su
-      // 360 px la card deve stare comunque senza sforare.
       expect(tester.takeException(), isNull);
     });
   });
 
-  group('riprendi', () {
-    testWidgets('il bottone apre la lezione al passo salvato', (tester) async {
+  group('ordine delle sezioni', () {
+    testWidgets('serie, argomenti, missione e nient\'altro', (tester) async {
+      // Uno schermo alto abbastanza da avere tutta la Home costruita.
+      tester.view.physicalSize = const Size(400, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
       await _registra();
-      await _pausa('eq1-intro', step: 2);
       await _pumpHome(tester);
 
-      await tester.tap(_ctaRiprendi);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.byType(LessonScreen), findsOneWidget);
-      expect(find.text('3 di 4'), findsOneWidget);
-    });
-
-    testWidgets('il badge dice se la lezione era già aperta', (tester) async {
-      await _registra();
-      await _pausa('mod-equations-intro', step: 1);
-      await _pumpHome(tester);
-      expect(find.text('In corso'), findsOneWidget);
-
-      // Completata altrove: la sezione ripesca una lezione mai aperta, che non
-      // è «in corso» perché l'utente non ci è mai arrivato.
-      await ProgressStore.instance.completeLesson(
-        'high-school',
-        'mod-equations-intro',
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('In corso'), findsNothing);
-      expect(find.text('Da iniziare'), findsOneWidget);
-    });
-
-    testWidgets('il testo di progresso conta card, non esercizi', (
-      tester,
-    ) async {
-      await _registra();
-      await _pausa('mod-equations-intro', step: 3);
-      await _pumpHome(tester);
-
-      // 1 card di Definizione + 3 superate, su 10: il conteggio è posizionale
-      // e `LessonResumeEngine` lo dice già nei suoi test.
-      expect(find.text('4 di 10 card'), findsOneWidget);
-      expect(find.text('40%'), findsOneWidget);
-      expect(find.textContaining('esercizi'), findsNothing);
+      final serie = tester.getTopLeft(find.byType(StreakCard)).dy;
+      final argomenti = tester.getTopLeft(find.text('Argomenti')).dy;
+      final missione = tester.getTopLeft(find.text('La nostra missione')).dy;
+      expect(serie, lessThan(argomenti));
+      expect(argomenti, lessThan(missione));
+      // Le sezioni tolte non tornano.
+      expect(find.text('Jump Back In'), findsNothing);
+      expect(find.textContaining('Per te'), findsNothing);
+      expect(find.text('I tuoi punti deboli'), findsNothing);
     });
   });
 
@@ -331,7 +253,6 @@ void main() {
 
     testWidgets('le sezioni entrano una dopo l\'altra', (tester) async {
       await _registra();
-      await _pausa('eq1-intro');
       await pumpPrimoFrame(tester);
       // `Animate` parte al frame dopo che l'orologio è avanzato: due frame
       // per avviarla, poi l'entrata corre.
@@ -340,13 +261,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 150));
 
       // La prima sezione è più avanti della seconda, che parte 60 ms dopo.
-      final prima = opacita(tester, _cardRiprendi);
+      final prima = opacita(tester, find.byType(StreakCard));
       final seconda = opacita(tester, find.byType(ArgomentoCarousel));
       expect(prima, greaterThan(seconda));
       expect(prima, lessThan(1));
 
       await tester.pumpAndSettle();
-      expect(opacita(tester, _cardRiprendi), 1);
+      expect(opacita(tester, find.byType(StreakCard)), 1);
       expect(opacita(tester, find.byType(ArgomentoCarousel)), 1);
     });
 
@@ -354,31 +275,32 @@ void main() {
       tester,
     ) async {
       await _registra();
-      await _pausa('eq1-intro');
       await _pumpHome(tester);
 
-      // Giù abbastanza perché la lista butti la card «riprendi», poi su:
-      // la card è ricreata e deve essere già al suo posto.
+      // Giù abbastanza perché la lista butti la serie, poi su: la card è
+      // ricreata e deve essere già al suo posto.
       final lista = find.byType(ListView).first;
       await tester.drag(lista, const Offset(0, -2000));
       await tester.pumpAndSettle();
-      expect(_cardRiprendi, findsNothing);
+      expect(find.byType(StreakCard), findsNothing);
       await tester.drag(lista, const Offset(0, 2000));
       await tester.pump();
 
-      expect(opacita(tester, _cardRiprendi), 1);
+      expect(opacita(tester, find.byType(StreakCard)), 1);
       // Lo scroll ha ancora i suoi timer brevi: si lasciano finire.
       await tester.pumpAndSettle();
     });
 
     testWidgets('col movimento ridotto niente entrata', (tester) async {
       await _registra();
-      await _pausa('eq1-intro');
       await pumpPrimoFrame(tester, reduced: true);
       await tester.pump();
 
       expect(
-        find.ancestor(of: _cardRiprendi, matching: find.byType(Animate)),
+        find.ancestor(
+          of: find.byType(StreakCard),
+          matching: find.byType(Animate),
+        ),
         findsNothing,
       );
     });
@@ -472,6 +394,7 @@ void main() {
       await _registra();
       await _pumpHome(tester);
 
+      await _scrollaA(tester, find.text('Equazioni di primo grado'));
       await tester.tap(find.text('Equazioni di primo grado'));
       await tester.pumpAndSettle();
 
@@ -482,7 +405,6 @@ void main() {
   group('serie di giorni', () {
     testWidgets('la card è il traguardo arancio del design', (tester) async {
       await _registra();
-      await _pausa('eq1-intro');
       await _pumpHome(tester);
       await _scrollaA(tester, find.byType(StreakCard));
 
@@ -501,7 +423,6 @@ void main() {
       tester,
     ) async {
       await _registra();
-      await _pausa('eq1-intro');
       for (var i = 0; i < StudyStore.exerciseGoal; i++) {
         await StudyStore.instance.recordExerciseCompleted('ex$i');
       }
@@ -518,6 +439,7 @@ void main() {
     testWidgets('da collegato ci sono le quattro scorciatoie', (tester) async {
       await _registra();
       await _pumpHome(tester);
+      await _scrollaA(tester, find.text('Profilo'));
 
       expect(find.text('Lezioni'), findsWidgets);
       expect(find.text('Esercizi'), findsWidgets);
@@ -599,149 +521,7 @@ void main() {
     });
   });
 
-  group('ospite e collegato', () {
-    testWidgets('la sezione dei consigli ha la stessa anatomia', (
-      tester,
-    ) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('Per iniziare'));
-
-      expect(find.text('Per iniziare'), findsOneWidget);
-      expect(find.text('Da dove cominciare'), findsOneWidget);
-      expect(find.text('Crea il tuo profilo'), findsOneWidget);
-      expect(find.byKey(const Key('guest-join-play')), findsOneWidget);
-      expect(find.byType(SectionHeader), findsOneWidget);
-      expect(find.text('Esplora'), findsOneWidget);
-      // La card «riprendi» è l'unica sezione che l'ospite non ha.
-      expect(_cardRiprendi, findsNothing);
-
-      // Le misure dell'ospite si leggono prima di accedere: dopo, la sezione
-      // dell'invito non c'è più.
-      final playOspite = _play(
-        tester,
-        _riga(tester, find.text('Crea il tuo profilo')),
-      );
-      final titoloOspite = _stile(tester, find.text('Crea il tuo profilo'));
-
-      await _registra();
-      await _pumpHome(tester);
-      final primo = RecommendationEngine.recommendedExercises('high-school')
-          .first
-          .exercise
-          .title;
-      await _scrollaA(tester, find.text(primo));
-      final playCollegato = _play(tester, _riga(tester, find.text(primo)));
-      final titoloCollegato = _stile(tester, find.text(primo));
-
-      // Stessa riga e stesso play: la geometria è di `RecommendationRow`, non
-      // due widget che si somigliano.
-      expect(titoloOspite.fontSize, AppText.bodyLarge);
-      expect(titoloCollegato.fontSize, titoloOspite.fontSize);
-      expect(titoloCollegato.fontWeight, titoloOspite.fontWeight);
-      expect(playCollegato, playOspite);
-    });
-
-    testWidgets('l\'ospite esplora scegliendo la scuola', (tester) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('Per iniziare'));
-
-      await tester.tap(find.text('Esplora'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Esercizi per scuola'), findsOneWidget);
-      // Il footer da ospite promette che la scuola verrà ricordata: qui la
-      // scelta è una visita e non viene salvata.
-      expect(find.textContaining('non ti verrà più richiesta'), findsOneWidget);
-    });
-
-    testWidgets('l\'invito dell\'ospite apre il benvenuto', (tester) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('Per iniziare'));
-
-      await tester.tap(find.byKey(const Key('guest-join-play')));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(WelcomeScreen), findsOneWidget);
-    });
-  });
-
   group('punti deboli', () {
-    Future<void> daRipassare(WidgetTester tester, {required int count}) async {
-      await _registra(levelId: 'middle-school');
-      const ids = [
-        'ms-frac-compare-1',
-        'ms-frac-sum-1',
-        'ms-perc-1',
-        'ms-prop-1',
-        'ms-eq-1',
-      ];
-      for (final id in ids.take(count)) {
-        await ProgressStore.instance.setStatus(
-          'middle-school',
-          id,
-          ExerciseStatus.needsReview,
-        );
-      }
-      await _pumpHome(tester);
-    }
-
-    testWidgets('le righe stanno in una card sola', (tester) async {
-      await daRipassare(tester, count: 5);
-      await _scrollaA(tester, find.text('I tuoi punti deboli'));
-
-      // Tre righe e un solo bordo: se ogni riga avesse la sua card, i bordi
-      // sarebbero quattro.
-      final bordi = tester
-          .widgetList<Container>(
-            find.descendant(
-              of: find.ancestor(
-                of: find.byType(WeakTopicRow).first,
-                matching: find.byType(AppCard),
-              ),
-              matching: find.byType(Container),
-            ),
-          )
-          .map((c) => (c.decoration! as BoxDecoration).border)
-          .whereType<Border>()
-          .toList();
-      expect(bordi, isNotEmpty);
-      expect(find.byType(Divider), findsNWidgets(2));
-    });
-
-    testWidgets('il bottone dei punti deboli sta dentro la card', (
-      tester,
-    ) async {
-      await daRipassare(tester, count: 5);
-      await _scrollaA(tester, find.text('Vedi tutti (4)'));
-
-      final card = find.ancestor(
-        of: find.text('Vedi tutti (4)'),
-        matching: find.byType(AppCard),
-      );
-      expect(card, findsOneWidget);
-      expect(
-        find.descendant(of: card, matching: find.byType(WeakTopicRow)),
-        findsNWidgets(3),
-      );
-    });
-
-    testWidgets('le righe sono numerate', (tester) async {
-      await daRipassare(tester, count: 5);
-      await _scrollaA(tester, find.text('I tuoi punti deboli'));
-
-      final numeri = tester
-          .widgetList<Text>(
-            find.descendant(
-              of: find.byType(WeakTopicRow),
-              matching: find.byType(Text),
-            ),
-          )
-          .map((t) => t.data)
-          .where((d) => d == '1' || d == '2' || d == '3')
-          .toList();
-      expect(numeri, ['1', '2', '3']);
-    });
-
     testWidgets('da ospite non gli dice che ha assimilato tutto', (
       tester,
     ) async {

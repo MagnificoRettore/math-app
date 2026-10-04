@@ -80,7 +80,7 @@ void main() {
     await _register();
     await _pumpHome(tester);
 
-    await tester.tap(find.text('LEZIONI'));
+    await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(_lente));
     await tester.pumpAndSettle();
@@ -89,7 +89,7 @@ void main() {
     await tester.tap(find.byKey(const Key('search-overlay-close')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('ESERCIZI'));
+    await tester.tap(find.byKey(const ValueKey('pill-exercises')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(_lente));
     await tester.pumpAndSettle();

@@ -11,6 +11,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import 'app_card.dart';
+import 'section_header.dart';
 import 'topic_background.dart';
 
 /// Margine orizzontale della pagina che ospita il carosello (il padding della
@@ -31,7 +32,8 @@ const double _visibleCards = 2.2;
 /// ordine. Da ospite (o senza scuola) quelli di **un anno a caso** fra gli anni
 /// che hanno argomenti, così il carosello non è mai vuoto. Se non c'è niente da
 /// mostrare (una scuola ancora senza argomenti) la sezione sparisce, e con lei
-/// lo spazio sotto, che per questo sta dentro e non nella lista della Home.
+/// la testata «Argomenti», che per questo sta dentro e non nella lista della
+/// Home.
 ///
 /// Le card sono quadrate e se ne vedono circa due: è una lista orizzontale, non
 /// un `PageView`, che aggancerebbe e centrerebbe una card per volta.
@@ -172,25 +174,29 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
         final side =
             (screen - _pageMargin - _gap * (_visibleCards.ceil() - 1)) /
             _visibleCards;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          // La lista della Home dà 20 di margine per lato: la striscia li
-          // scavalca e prende tutto lo schermo, così le card scorrono fino al
-          // bordo invece di sparire a 20 px da esso.
-          child: SizedBox(
-            height: side,
-            child: OverflowBox(
-              maxWidth: screen,
-              child: ListView.separated(
-                key: const Key('argomento-carousel-list'),
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: _pageMargin),
-                itemCount: argomenti.length,
-                separatorBuilder: (_, _) => const SizedBox(width: _gap),
-                itemBuilder: (context, index) => _card(argomenti[index], side),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SectionHeader('Argomenti'),
+            // La lista della Home dà 20 di margine per lato: la striscia li
+            // scavalca e prende tutto lo schermo, così le card scorrono fino
+            // al bordo invece di sparire a 20 px da esso.
+            SizedBox(
+              height: side,
+              child: OverflowBox(
+                maxWidth: screen,
+                child: ListView.separated(
+                  key: const Key('argomento-carousel-list'),
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: _pageMargin),
+                  itemCount: argomenti.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: _gap),
+                  itemBuilder: (context, index) =>
+                      _card(argomenti[index], side),
+                ),
               ),
             ),
-          ),
+          ],
         );
       },
     );

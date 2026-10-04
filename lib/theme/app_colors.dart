@@ -47,6 +47,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// di colore pieno sotto, non con un'ombra sfumata.
   final Color accentDeep;
 
+  /// Il gradino del lilla: sotto il bottone Home spento della barra in basso.
+  final Color borderDeep;
+
   /// Il fondo e il testo di un bottone disabilitato: un grigio caldo, che sul
   /// crema non sembra un errore.
   final Color disabled;
@@ -86,6 +89,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.orange,
     required this.orangeDeep,
     required this.accentDeep,
+    required this.borderDeep,
     required this.disabled,
     required this.onDisabled,
     required this.headerBand,
@@ -119,6 +123,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     orange: Color(0xFFEF7D1A),
     orangeDeep: Color(0xFFB65508),
     accentDeep: Color(0xFF160C3E),
+    borderDeep: Color(0xFF9A92C2),
     disabled: Color(0xFFE4DFD4),
     onDisabled: Color(0xFF6F6A86),
     headerBand: Color(0xFF2B1A6B),
@@ -161,6 +166,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? orange,
     Color? orangeDeep,
     Color? accentDeep,
+    Color? borderDeep,
     Color? disabled,
     Color? onDisabled,
     Color? headerBand,
@@ -193,6 +199,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       orange: orange ?? this.orange,
       orangeDeep: orangeDeep ?? this.orangeDeep,
       accentDeep: accentDeep ?? this.accentDeep,
+      borderDeep: borderDeep ?? this.borderDeep,
       disabled: disabled ?? this.disabled,
       onDisabled: onDisabled ?? this.onDisabled,
       headerBand: headerBand ?? this.headerBand,
@@ -230,6 +237,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       orange: Color.lerp(orange, other.orange, t)!,
       orangeDeep: Color.lerp(orangeDeep, other.orangeDeep, t)!,
       accentDeep: Color.lerp(accentDeep, other.accentDeep, t)!,
+      borderDeep: Color.lerp(borderDeep, other.borderDeep, t)!,
       disabled: Color.lerp(disabled, other.disabled, t)!,
       onDisabled: Color.lerp(onDisabled, other.onDisabled, t)!,
       headerBand: Color.lerp(headerBand, other.headerBand, t)!,
