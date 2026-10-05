@@ -251,4 +251,81 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  group('pagine che si espandono dal pulsante', () {
+    Future<void> apriPersonalizzazione(WidgetTester tester) async {
+      await _pumpHome(tester);
+      await tester.tap(_customizzazione);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    testWidgets('la personalizzazione cresce dal pulsante', (tester) async {
+      await apriPersonalizzazione(tester);
+      expect(find.byType(CustomizationScreen), findsOneWidget);
+
+      // A metà strada il cerchio non copre ancora la pagina.
+      await tester.pump(const Duration(milliseconds: 100));
+      final clipper = tester.widget<ClipPath>(
+        find
+            .ancestor(
+              of: find.byType(CustomizationScreen),
+              matching: find.byType(ClipPath),
+            )
+            .first,
+      );
+      final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+      final path = clipper.clipper!.getClip(size);
+      final pulsante = tester.getCenter(_customizzazione);
+      expect(path.contains(pulsante), isTrue);
+      expect(path.contains(Offset.zero), isFalse);
+
+      await tester.pumpAndSettle();
+      expect(find.byType(CustomizationScreen), findsOneWidget);
+      final fine = tester
+          .widget<ClipPath>(
+            find
+                .ancestor(
+                  of: find.byType(CustomizationScreen),
+                  matching: find.byType(ClipPath),
+                )
+                .first,
+          )
+          .clipper!
+          .getClip(size);
+      expect(fine.contains(Offset.zero), isTrue);
+    });
+
+    testWidgets('col movimento ridotto la pagina compare senza strada', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: const HomeScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(_customizzazione);
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(CustomizationScreen), findsOneWidget);
+    });
+
+    testWidgets('la ricerca si apre dalla lente e si chiude', (tester) async {
+      await _pumpHome(tester);
+      await tester.tap(find.byKey(const Key('header-search')));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byKey(const Key('search-overlay-close')), findsOneWidget);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('search-overlay-close')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('search-overlay-close')), findsNothing);
+    });
+  });
 }

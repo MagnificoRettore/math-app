@@ -111,7 +111,11 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
           ),
           if (exercise.text.isNotEmpty) ...[
             const SizedBox(height: 10),
-            MathText(exercise.text, fontSize: AppText.bodyLarge * scale),
+            MathText(
+              exercise.text,
+              fontSize: AppText.bodyLarge * scale,
+              inline: true,
+            ),
           ],
           const SizedBox(height: 16),
           for (var i = 0; i < exercise.options.length; i++)

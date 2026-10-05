@@ -8,14 +8,12 @@ import 'topic_background.dart';
 
 class TopicImageCard extends StatelessWidget {
   final String title;
-  final String? image;
   final Color color;
   final VoidCallback onTap;
 
   const TopicImageCard({
     super.key,
     required this.title,
-    required this.image,
     required this.color,
     required this.onTap,
   });
@@ -35,7 +33,7 @@ class TopicImageCard extends StatelessWidget {
             children: [
               ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                child: TopicBackground(image: image, color: color),
+                child: TopicBackground(color: color),
               ),
               Positioned(
                 left: 16,

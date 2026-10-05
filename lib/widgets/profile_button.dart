@@ -6,6 +6,7 @@ import '../screens/login_screen.dart';
 import '../screens/profile_screen.dart';
 import '../theme/app_colors.dart';
 import 'profile_avatar.dart';
+import 'reveal.dart';
 
 /// Diametro dell'avatar del profilo: stessa misura su tutte le pagine, così
 /// l'icona non cambia grandezza passando da una schermata all'altra.
@@ -35,7 +36,7 @@ class ProfileButton extends StatelessWidget {
                 key: const Key('profile-button-guest'),
                 icon: Icon(
                   Icons.person_outline,
-                  color: AppColors.of(context).onHeaderBand,
+                  color: AppColors.of(context).textPrimary,
                   size: 32,
                 ),
                 tooltip: 'Accedi',
@@ -50,8 +51,7 @@ class ProfileButton extends StatelessWidget {
   }
 
   void _openLogin(BuildContext context) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const LoginScreen()));
+    pushRevealed(context, (_) => const LoginScreen());
   }
 }
 
@@ -70,8 +70,7 @@ class _ProfileAvatar extends StatelessWidget {
 
   /// Avatar e badge portano allo stesso posto.
   void _open(BuildContext context) =>
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+      pushRevealed(context, (_) => const ProfileScreen());
 
   @override
   Widget build(BuildContext context) {
@@ -81,48 +80,52 @@ class _ProfileAvatar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          InkWell(
-            key: const Key('home-profile-avatar'),
-            customBorder: const CircleBorder(),
-            onTap: () => _open(context),
-            child: Container(
-              width: kProfileAvatarSize,
-              height: kProfileAvatarSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                // Anello bianco: sulla banda indaco il bordo del tema sparirebbe.
-                border: Border.all(color: c.onHeaderBand, width: 2),
-              ),
-              child: ProfileAvatar(
-                user: user,
-                size: kProfileAvatarSize,
-                color: c.accent,
-                plateColor: c.accentSoft,
+          Builder(
+            // La pagina si espande dal centro dell'avatar, non dello slot.
+            builder: (avatarContext) => InkWell(
+              key: const Key('home-profile-avatar'),
+              customBorder: const CircleBorder(),
+              onTap: () => _open(avatarContext),
+              child: Container(
+                width: kProfileAvatarSize,
+                height: kProfileAvatarSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: c.border, width: 2),
+                ),
+                child: ProfileAvatar(
+                  user: user,
+                  size: kProfileAvatarSize,
+                  color: c.accent,
+                  plateColor: c.accentSoft,
+                ),
               ),
             ),
           ),
           Positioned(
             right: -2,
             bottom: -2,
-            child: GestureDetector(
-              // Il badge è sopra l'avatar quindi lo copre: senza un gesto suo
-              // il tap finirebbe a terra e non aprirebbe niente. `GestureDetector`
-              // e non `InkWell` perché lo schermo dell'acqua si disegnerebbe
-              // sul `Material` della pagina, fuori dal badge.
-              onTap: () => _open(context),
-              child: Container(
-                key: const Key('home-profile-edit-badge'),
-                width: _kEditBadgeSize,
-                height: _kEditBadgeSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: scheme.primary,
-                  border: Border.all(color: c.onHeaderBand, width: 1.5),
-                ),
-                child: Icon(
-                  Icons.edit_rounded,
-                  size: 12,
-                  color: scheme.onPrimary,
+            child: Builder(
+              builder: (badgeContext) => GestureDetector(
+                // Il badge è sopra l'avatar quindi lo copre: senza un gesto suo
+                // il tap finirebbe a terra e non aprirebbe niente. `GestureDetector`
+                // e non `InkWell` perché lo schermo dell'acqua si disegnerebbe
+                // sul `Material` della pagina, fuori dal badge.
+                onTap: () => _open(badgeContext),
+                child: Container(
+                  key: const Key('home-profile-edit-badge'),
+                  width: _kEditBadgeSize,
+                  height: _kEditBadgeSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: scheme.primary,
+                    border: Border.all(color: c.background, width: 1.5),
+                  ),
+                  child: Icon(
+                    Icons.edit_rounded,
+                    size: 12,
+                    color: scheme.onPrimary,
+                  ),
                 ),
               ),
             ),

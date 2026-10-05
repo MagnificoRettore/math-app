@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:material_symbols_icons/material_symbols_icons.dart';
 
 import '../data/auth_store.dart';
 import '../data/auth_validators.dart';
 import '../data/content_repository.dart';
+import '../models/course.dart';
+import '../models/level.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
@@ -11,27 +14,31 @@ import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/avatar_picker.dart';
-import '../widgets/google_button.dart';
 import '../widgets/password_field.dart';
-import '../widgets/progress_bar.dart';
+import '../widgets/profile_avatar.dart';
 import '../widgets/school_level_tile.dart';
 import '../widgets/shake.dart';
 import '../widgets/strength_meter.dart';
 import '../widgets/wave_clipper.dart';
-import 'school_picker_screen.dart';
 
-/// Creazione del profilo in tre passi, come «Creazione profilo» del design:
-/// chi sei (avatar e nome), l'account (email, ID, password, termini) e la
-/// scuola, che decide lezioni, esercizi e consigli.
+/// Creazione del profilo in quattro passi, come «Creazione profilo» del
+/// design: chi sei (avatar e nome), l'account (email, ID, password, termini),
+/// la scuola e, per medie e superiori, l'anno. All'università l'anno non c'è e
+/// i passi sono tre.
 ///
-/// La testata indaco dice il passo e la barra avanza; fra un passo e l'altro
-/// il contenuto scorre con una dissolvenza (avanti da destra, indietro da
-/// sinistra) e il titolo cambia in dissolvenza. Col movimento ridotto il passo
-/// cambia e basta.
+/// La testata indaco ha solo la freccia e il titolo del passo, al centro, che
+/// cambia in dissolvenza; il passo nuovo entra con una dissolvenza e uno
+/// scorrimento (avanti da destra, indietro da sinistra). Col movimento ridotto
+/// il passo cambia e basta.
 ///
-/// «Continua» controlla il passo al tocco e mostra gli errori nei campi; al
-/// passo della scuola resta spento finché la scuola non è scelta. Il back di
-/// sistema, dal secondo passo in poi, torna al passo prima invece di uscire.
+/// Gli errori dei campi compaiono solo dopo un «Continua» a vuoto, non mentre
+/// si scrive; da lì in poi il passo li aggiorna a ogni modifica. Al passo
+/// della scuola e dell'anno «Continua» resta spento finché non si sceglie.
+/// Il back di sistema, dal secondo passo in poi, torna al passo prima invece
+/// di uscire.
+///
+/// A profilo creato la schermata diventa un riepilogo animato dei dati scelti;
+/// da lì «Inizia» torna alla radice.
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -40,7 +47,12 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  static const _titles = ['Chi sei?', 'Il tuo account', 'La tua scuola'];
+  static const _titles = [
+    'Chi sei?',
+    'Il tuo account',
+    'La tua scuola',
+    'Il tuo anno',
+  ];
 
   /// Di quanto, in frazione della larghezza, il passo nuovo entra di lato.
   static const double _slide = 0.08;
@@ -55,9 +67,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _shakes = FieldShakes();
   String _avatarId = '';
   String _schoolId = '';
+  String _courseId = '';
+  bool _avatarOpen = false;
   bool _termsAccepted = false;
   bool _busy = false;
+  bool _done = false;
   int _step = 0;
+
+  /// I passi con un «Continua» già fallito: lì gli errori si aggiornano
+  /// mentre si scrive.
+  final Set<int> _failed = {};
 
   /// Il verso dell'ultimo cambio di passo: avanti il passo nuovo entra da
   /// destra, indietro da sinistra.
@@ -67,7 +86,29 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   /// l'email: il suggerimento è buono e nessuno lo scrive da solo.
   bool _accountIdTouched = false;
 
-  bool get _last => _step == _titles.length - 1;
+  Level? get _level => ContentRepository.instance.levelById(_schoolId);
+
+  /// Medie e superiori chiedono l'anno; l'università no.
+  bool get _needsYear {
+    final level = _level;
+    return level != null &&
+        level.id != 'university' &&
+        level.courses.isNotEmpty;
+  }
+
+  int get _stepCount => _needsYear ? 4 : 3;
+  bool get _last => _step == _stepCount - 1;
+
+  /// «Continua» è spento finché la scuola o l'anno non sono scelti.
+  bool get _canContinue => switch (_step) {
+    2 => _schoolId.isNotEmpty,
+    3 => _courseId.isNotEmpty,
+    _ => true,
+  };
+
+  AutovalidateMode get _mode => _failed.contains(_step)
+      ? AutovalidateMode.onUserInteraction
+      : AutovalidateMode.disabled;
 
   @override
   void dispose() {
@@ -90,19 +131,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void _continue() {
     if (_busy) return;
     if (_step == 0 && !(_whoForm.currentState?.validate() ?? false)) {
-      setState(() => _shakes.shakeEmpty([_nameController]));
+      setState(() {
+        _failed.add(0);
+        _shakes.shakeEmpty([_nameController]);
+      });
       return;
     }
     if (_step == 1) {
       if (!(_accountForm.currentState?.validate() ?? false)) {
-        setState(
-          () => _shakes.shakeEmpty([
+        setState(() {
+          _failed.add(1);
+          _shakes.shakeEmpty([
             _emailController,
             _accountIdController,
             _passwordController,
             _confirmController,
-          ]),
-        );
+          ]);
+        });
         return;
       }
       if (!_termsAccepted) {
@@ -120,12 +165,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    if (_done) return _doneView(c);
     Widget content = KeyedSubtree(
       key: ValueKey('registration-step-$_step'),
       child: switch (_step) {
         0 => _whoStep(c),
         1 => _accountStep(c),
-        _ => _schoolStep(),
+        2 => _schoolStep(),
+        _ => _yearStep(),
       },
     );
     if (!AppMotion.reduced(context)) {
@@ -148,11 +195,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            _StepHeader(
-              step: _step,
-              steps: _titles.length,
-              title: _titles[_step],
-            ),
+            _StepHeader(title: _titles[_step]),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
@@ -180,9 +223,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         label: _last ? 'Crea il mio profilo' : 'Continua',
                         expand: true,
                         busy: _busy,
-                        onPressed: _last && _schoolId.isEmpty
-                            ? null
-                            : _continue,
+                        onPressed: _canContinue ? _continue : null,
                       ),
                     ),
                   ],
@@ -195,67 +236,95 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
+  /// Avatar al centro e sotto il nome. Il tocco sull'avatar apre, subito
+  /// sopra, il rettangolo con tutti quelli disponibili.
   Widget _whoStep(AppPalette c) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        AppCard(
-          child: Form(
-            key: _whoForm,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Label('Scegli il tuo avatar'),
-                const SizedBox(height: 14),
-                AvatarPicker(
-                  value: _avatarId,
-                  onChanged: (value) => setState(() => _avatarId = value),
-                ),
-                const SizedBox(height: 22),
-                ShakeWidget(
-                  trigger: _shakes.of(_nameController),
-                  child: _field(
-                    controller: _nameController,
-                    label: 'Come ti chiami?',
-                    textCapitalization: TextCapitalization.words,
-                    validator: (value) {
-                      final v = value?.trim() ?? '';
-                      if (v.isEmpty) return 'Inserisci il tuo nome';
-                      if (v.length < 2) {
-                        return 'Il nome deve avere almeno 2 caratteri';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
+    return Form(
+      key: _whoForm,
+      autovalidateMode: _mode,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AnimatedSize(
+            duration: AppMotion.duration(context, AppMotion.medium),
+            curve: AppMotion.standard,
+            alignment: Alignment.bottomCenter,
+            child: _avatarOpen
+                ? Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AppCard(
+                      key: const Key('registration-avatar-panel'),
+                      child: Center(
+                        child: AvatarPicker(
+                          value: _avatarId,
+                          onChanged: _pickAvatar,
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
+          Center(
+            child: _AvatarButton(
+              avatarId: _avatarId,
+              name: _nameController.text,
+              open: _avatarOpen,
+              onTap: () => setState(() => _avatarOpen = !_avatarOpen),
             ),
           ),
-        ),
-        const SizedBox(height: 20),
-        const OrSeparator(label: 'Oppure registrati con'),
-        const SizedBox(height: 12),
-        GoogleButton(
-          label: 'Registrati con Google',
-          onTap: _continueWithGoogle,
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            'Il profilo è salvato solo su questo dispositivo.',
-            style: TextStyle(fontSize: AppText.caption, color: c.textSecondary),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Tocca per scegliere l\'avatar',
+              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 22),
+          ShakeWidget(
+            trigger: _shakes.of(_nameController),
+            child: _field(
+              controller: _nameController,
+              label: 'Come ti chiami?',
+              textCapitalization: TextCapitalization.words,
+              onChanged: (_) => setState(() {}),
+              validator: (value) {
+                final v = value?.trim() ?? '';
+                if (v.isEmpty) return 'Inserisci il tuo nome';
+                if (v.length < 2) {
+                  return 'Il nome deve avere almeno 2 caratteri';
+                }
+                return null;
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(
+              'Il profilo è salvato solo su questo dispositivo.',
+              style: TextStyle(
+                fontSize: AppText.caption,
+                color: c.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  /// La scelta si vede un attimo, poi il rettangolo si chiude (subito col
+  /// movimento ridotto), come il foglio dell'avatar nel profilo.
+  Future<void> _pickAvatar(String value) async {
+    setState(() => _avatarId = value);
+    await Future<void>.delayed(AppMotion.duration(context, AppMotion.slow));
+    if (mounted) setState(() => _avatarOpen = false);
   }
 
   Widget _accountStep(AppPalette c) {
     return AppCard(
       child: Form(
         key: _accountForm,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autovalidateMode: _mode,
         child: Column(
           children: [
             ShakeWidget(
@@ -315,7 +384,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 controller: _confirmController,
                 label: 'Conferma password',
                 textInputAction: TextInputAction.done,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) => AuthValidators.confirmError(
                   value,
                   _passwordController.text,
@@ -342,7 +410,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: SchoolLevelTile(
               level: level,
               selected: _schoolId == level.id,
-              onTap: () => setState(() => _schoolId = level.id),
+              onTap: () => setState(() {
+                // L'anno vale dentro la sua scuola.
+                if (_schoolId != level.id) _courseId = '';
+                _schoolId = level.id;
+              }),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _yearStep() {
+    return Column(
+      children: [
+        for (final course in _level?.courses ?? const <Course>[])
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _YearTile(
+              course: course,
+              selected: _courseId == course.id,
+              onTap: () => setState(() => _courseId = course.id),
             ),
           ),
       ],
@@ -389,6 +477,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         accountId: _accountIdController.text,
         password: _passwordController.text,
         schoolLevelId: _schoolId,
+        courseId: _needsYear ? _courseId : '',
         avatarId: _avatarId,
       );
     } on AuthException catch (error) {
@@ -398,16 +487,125 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       return;
     }
     if (!mounted) return;
-    // La Home è la radice: il profilo è completo, scuola compresa.
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = false;
+      _done = true;
+    });
   }
 
-  Future<void> _continueWithGoogle() async {
-    final user = await signInWithGoogleDemo(context);
-    if (user == null || !mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => const SchoolPickerScreen(onboarding: true),
+  /// La Home è la radice: il profilo è completo, scuola compresa.
+  void _finish() => Navigator.of(context).popUntil((route) => route.isFirst);
+
+  /// Il riepilogo dei dati scelti: l'avatar rimbalza in scena e le righe
+  /// entrano una dopo l'altra. Col movimento ridotto è già tutto lì.
+  Widget _doneView(AppPalette c) {
+    final level = _level;
+    final course = level?.courses.where((x) => x.id == _courseId).firstOrNull;
+    final rows = <(IconData, String, String)>[
+      (Icons.person_outline, 'Nome', _nameController.text.trim()),
+      (Icons.tag, 'ID account', _accountIdController.text.trim()),
+      if (level != null) (Icons.school_outlined, 'Scuola', level.title),
+      if (course != null && _needsYear)
+        (Icons.event_outlined, 'Anno', _yearLabel(course)),
+    ];
+
+    Widget enter(int index, Widget child) {
+      if (AppMotion.reduced(context)) return child;
+      final delay = AppMotion.stagger * (index + 3);
+      return child
+          .animate()
+          .fadeIn(
+            delay: delay,
+            duration: AppMotion.slow,
+            curve: AppMotion.standard,
+          )
+          .slideY(
+            delay: delay,
+            begin: 0.2,
+            end: 0,
+            duration: AppMotion.slow,
+            curve: AppMotion.standard,
+          );
+    }
+
+    Widget avatar = _AvatarCircle(
+      key: const Key('registration-done-avatar'),
+      avatarId: _avatarId,
+      name: _nameController.text,
+      size: 120,
+    );
+    Widget title = Text(
+      'Profilo creato!',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: AppText.headingFont,
+        fontSize: AppText.display,
+        fontWeight: FontWeight.w600,
+        color: c.textPrimary,
+      ),
+    );
+    if (!AppMotion.reduced(context)) {
+      avatar = avatar
+          .animate()
+          .scale(
+            begin: const Offset(0.3, 0.3),
+            end: const Offset(1, 1),
+            duration: AppMotion.slow * 2,
+            curve: AppMotion.bounce,
+          )
+          .fadeIn(duration: AppMotion.slow);
+      title = title.animate().fadeIn(
+        delay: AppMotion.stagger * 2,
+        duration: AppMotion.slow,
+        curve: AppMotion.standard,
+      );
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _finish();
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 48, 20, 16),
+                  children: [
+                    Center(child: avatar),
+                    const SizedBox(height: 24),
+                    title,
+                    const SizedBox(height: 24),
+                    for (final (i, row) in rows.indexed)
+                      enter(
+                        i,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _SummaryRow(
+                            icon: row.$1,
+                            label: row.$2,
+                            value: row.$3,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                child: AppButton(
+                  key: const Key('registration-done'),
+                  label: 'Inizia',
+                  expand: true,
+                  onPressed: _finish,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -535,37 +733,215 @@ class _TermsRow extends StatelessWidget {
       'resta solo una derivata crittografica.';
 }
 
-class _Label extends StatelessWidget {
-  final String text;
+/// «prima» → «Prima»: i titoli degli anni nei dati sono in minuscolo.
+String _yearLabel(Course course) => course.title.isEmpty
+    ? course.title
+    : course.title[0].toUpperCase() + course.title.substring(1);
 
-  const _Label(this.text);
+/// L'avatar scelto, o le iniziali del nome, o la persona se non c'è niente.
+class _AvatarCircle extends StatelessWidget {
+  final String avatarId;
+  final String name;
+  final double size;
+
+  const _AvatarCircle({
+    super.key,
+    required this.avatarId,
+    required this.name,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: AppText.titleSmall,
-        fontWeight: FontWeight.w500,
-        color: AppColors.of(context).textPrimary,
+    final c = AppColors.of(context);
+    final trimmed = name.trim();
+    Widget content;
+    if (avatarId.isNotEmpty) {
+      content = Icon(
+        avatarIcon(avatarId),
+        size: size * 0.44,
+        color: c.textPrimary,
+      );
+    } else if (trimmed.isNotEmpty) {
+      content = Text(
+        initialsOf(trimmed),
+        style: TextStyle(
+          fontFamily: AppText.headingFont,
+          fontSize: size * 0.34,
+          fontWeight: FontWeight.w600,
+          color: c.textPrimary,
+        ),
+      );
+    } else {
+      content = Icon(
+        Symbols.person_rounded,
+        size: size * 0.44,
+        color: c.textPrimary,
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: c.yellow,
+        border: Border.all(color: c.accent, width: 4),
+      ),
+      child: content,
+    );
+  }
+}
+
+/// L'avatar grande al centro del primo passo, con la matita che dice che si
+/// tocca.
+class _AvatarButton extends StatelessWidget {
+  final String avatarId;
+  final String name;
+  final bool open;
+  final VoidCallback onTap;
+
+  const _AvatarButton({
+    required this.avatarId,
+    required this.name,
+    required this.open,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Semantics(
+      button: true,
+      expanded: open,
+      label: 'Scegli il tuo avatar',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        key: const Key('registration-avatar'),
+        onTap: onTap,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _AvatarCircle(avatarId: avatarId, name: name, size: 112),
+            Positioned(
+              right: -2,
+              bottom: -2,
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c.accent,
+                  border: Border.all(color: c.surface, width: 3),
+                ),
+                child: Icon(
+                  open ? Icons.close_rounded : Icons.edit_rounded,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Una riga del riepilogo: icona, etichetta e valore scelto.
+class _SummaryRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _SummaryRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Icon(icon, color: c.accent),
+          const SizedBox(width: 14),
+          Text(
+            label,
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: AppText.titleSmall,
+                fontWeight: FontWeight.w500,
+                color: c.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Un anno della scuola scelta, nello stile della scelta della scuola.
+class _YearTile extends StatelessWidget {
+  final Course course;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _YearTile({
+    required this.course,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      onTap: onTap,
+      borderColor: selected ? c.accent : null,
+      borderWidth: 3,
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              _yearLabel(course),
+              style: TextStyle(
+                fontSize: AppText.titleSmall,
+                fontWeight: FontWeight.w500,
+                color: c.textPrimary,
+              ),
+            ),
+          ),
+          Icon(
+            selected ? Icons.radio_button_checked : Icons.radio_button_off,
+            color: selected ? c.accent : c.textSecondary,
+          ),
+        ],
       ),
     );
   }
 }
 
 /// La testata indaco di «Creazione profilo»: il bordo in basso ondulato, la
-/// freccia per uscire, «PASSO X DI 3», la barra che avanza e il titolo che
-/// cambia in dissolvenza.
+/// freccia per uscire e il titolo del passo al centro, che cambia in
+/// dissolvenza.
 class _StepHeader extends StatelessWidget {
-  final int step;
-  final int steps;
   final String title;
 
-  const _StepHeader({
-    required this.step,
-    required this.steps,
-    required this.title,
-  });
+  const _StepHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -580,57 +956,35 @@ class _StepHeader extends StatelessWidget {
         child: SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 24, 0),
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BackButton(color: c.onHeaderBand),
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'PASSO ${step + 1} DI $steps',
-                        style: TextStyle(
-                          fontSize: AppText.bodyLarge,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.7,
-                          color: c.yellow,
-                        ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BackButton(color: c.onHeaderBand),
+                ),
+                const SizedBox(height: 4),
+                AnimatedSwitcher(
+                  duration: AppMotion.duration(context, AppMotion.medium),
+                  switchInCurve: AppMotion.standard,
+                  switchOutCurve: AppMotion.standard,
+                  layoutBuilder: (current, previous) => Stack(
+                    alignment: Alignment.center,
+                    children: [...previous, ?current],
+                  ),
+                  child: Semantics(
+                    key: ValueKey(title),
+                    header: true,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: AppText.headingFont,
+                        fontSize: AppText.display,
+                        fontWeight: FontWeight.w600,
+                        color: c.onHeaderBand,
                       ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: 220,
-                        child: ProgressBar(
-                          progress: (step + 1) / steps,
-                          height: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      AnimatedSwitcher(
-                        duration: AppMotion.duration(context, AppMotion.medium),
-                        switchInCurve: AppMotion.standard,
-                        switchOutCurve: AppMotion.standard,
-                        layoutBuilder: (current, previous) => Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [...previous, ?current],
-                        ),
-                        child: Semantics(
-                          key: ValueKey(title),
-                          header: true,
-                          child: Text(
-                            title,
-                            style: TextStyle(
-                              fontFamily: AppText.headingFont,
-                              fontSize: AppText.display,
-                              fontWeight: FontWeight.w600,
-                              color: c.onHeaderBand,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ],

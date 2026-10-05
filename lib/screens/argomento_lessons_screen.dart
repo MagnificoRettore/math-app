@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../data/content_repository.dart';
 import '../models/argomento.dart';
+import '../models/course.dart';
+import '../models/level.dart';
+import '../models/topic.dart';
 import '../models/lesson.dart';
 import '../data/progress_store.dart';
+import '../screens/course_screen.dart';
+import '../screens/exercise_feed_screen.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
+import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
+import '../widgets/completed_badge.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/main_header.dart';
 
@@ -27,6 +35,7 @@ class ArgomentoLessonsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final color = topicColor(c, argomento.icon);
+    final exercises = _exercises();
 
     return Scaffold(
       appBar: MainHeaderAppBar(
@@ -35,18 +44,78 @@ class ArgomentoLessonsScreen extends StatelessWidget {
         actions: const [HeaderSearchButton(), HeaderCustomizationButton()],
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
           children: [
-            _Heading(argomento: argomento),
-            Expanded(child: _body(context, color)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Heading(argomento: argomento),
+                Expanded(child: _body(context, color, exercises != null)),
+              ],
+            ),
+            if (exercises != null)
+              Positioned(
+                right: 20,
+                bottom: 16,
+                child: AppButton(
+                  key: const Key('vai-agli-esercizi'),
+                  label: 'Vai agli esercizi',
+                  icon: Icons.fitness_center_rounded,
+                  onPressed: () => _openExercises(context, exercises),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _body(BuildContext context, Color color) {
+  /// Gli esercizi dello stesso argomento (stesso anno, stesso topic), se ci
+  /// sono: senza, il pulsante prometterebbe una pagina vuota.
+  ({Level level, Course course, Topic topic})? _exercises() {
+    final level = ContentRepository.instance.levelById(argomento.levelId);
+    if (level == null) return null;
+    for (final course in level.courses) {
+      if (course.id != argomento.yearId) continue;
+      for (final topic in course.topics) {
+        if (topic.id == argomento.topicId && topic.exercises.isNotEmpty) {
+          return (level: level, course: course, topic: topic);
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Porta alla sezione Esercizi, sull'anno dell'argomento, e apre gli esercizi
+  /// del suo topic: da lì il back torna all'elenco dell'anno. La Home resta la
+  /// radice, come per la barra di navigazione.
+  void _openExercises(
+    BuildContext context,
+    ({Level level, Course course, Topic topic}) target,
+  ) {
+    final navigator = Navigator.of(context);
+    navigator.pushAndRemoveUntil<void>(
+      MaterialPageRoute(
+        builder: (_) => CourseScreen(
+          level: target.level,
+          showPill: true,
+          initialCourseId: target.course.id,
+        ),
+      ),
+      (route) => route.isFirst,
+    );
+    navigator.push<void>(
+      MaterialPageRoute(
+        builder: (_) => ExerciseFeedScreen(
+          level: target.level,
+          course: target.course,
+          topic: target.topic,
+        ),
+      ),
+    );
+  }
+
+  Widget _body(BuildContext context, Color color, bool hasExercises) {
     final lessons = argomento.lessons;
     return lessons.isEmpty
         ? EmptyState(
@@ -56,7 +125,8 @@ class ArgomentoLessonsScreen extends StatelessWidget {
         : ListenableBuilder(
             listenable: ProgressStore.instance,
             builder: (context, _) => ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              // Col pulsante «Vai agli esercizi» sotto, la lista scorre oltre.
+              padding: EdgeInsets.fromLTRB(20, 8, 20, hasExercises ? 88 : 24),
               children: [
                 for (var i = 0; i < lessons.length; i++)
                   Padding(
@@ -142,11 +212,10 @@ class _LessonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
 
-    return AppCard(
+    final card = AppCard(
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       borderColor: color.withValues(alpha: 0.25),
-      glow: color.withValues(alpha: 0.10),
       child: Row(
         children: [
           Expanded(
@@ -195,12 +264,12 @@ class _LessonCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          if (completed)
-            Icon(Icons.check_circle_rounded, size: 22, color: c.easy)
-          else
-            Icon(Icons.chevron_right, color: c.textSecondary),
+          Icon(Icons.chevron_right, color: c.textSecondary),
         ],
       ),
     );
+    if (!completed) return card;
+    // Il segno «completata» nell'angolo in alto a destra, sopra la card.
+    return Stack(children: [card, CompletedBadge.corner()]);
   }
 }

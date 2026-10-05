@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
+import 'package:math_app/data/math_facts.dart';
+import 'package:math_app/models/lesson_resume.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/screens/mission_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/screens/welcome_screen.dart';
@@ -162,7 +165,9 @@ void main() {
   });
 
   group('superfici', () {
-    testWidgets('la card ha il raggio del design ed è piatta', (tester) async {
+    testWidgets('la card ha il raggio del design e un\'ombra fine', (
+      tester,
+    ) async {
       await _registra();
       await _pumpHome(tester);
       await _scrollaA(tester, find.text('La nostra missione'));
@@ -185,8 +190,12 @@ void main() {
 
       expect(radius.topLeft.x, kCardRadius);
       expect(kCardRadius, 20);
-      // Piatta: nessuna ombra e nessun gradino, quelli sono dei bottoni.
-      expect((box.decoration! as BoxDecoration).boxShadow, isNull);
+      // Un'ombra fine, sfumata e bassa: non un gradino pieno, che è dei
+      // bottoni.
+      final ombra = (box.decoration! as BoxDecoration).boxShadow!.single;
+      expect(ombra.color, AppPalette.light.shadow);
+      expect(ombra.blurRadius, inInclusiveRange(1, 12));
+      expect(ombra.offset.dy, inInclusiveRange(1, 4));
     });
 
     testWidgets('su uno schermo stretto la Home non sfora', (tester) async {
@@ -202,24 +211,100 @@ void main() {
   });
 
   group('ordine delle sezioni', () {
-    testWidgets('serie, argomenti, missione e nient\'altro', (tester) async {
+    void schermoAlto(WidgetTester tester) {
       // Uno schermo alto abbastanza da avere tutta la Home costruita.
-      tester.view.physicalSize = const Size(400, 2400);
+      tester.view.physicalSize = const Size(400, 2800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
+    }
 
+    testWidgets('serie, Jump Back In, argomenti, missione, curiosità', (
+      tester,
+    ) async {
+      schermoAlto(tester);
       await _registra();
       await _pumpHome(tester);
 
-      final serie = tester.getTopLeft(find.byType(StreakCard)).dy;
-      final argomenti = tester.getTopLeft(find.text('Argomenti')).dy;
-      final missione = tester.getTopLeft(find.text('La nostra missione')).dy;
-      expect(serie, lessThan(argomenti));
-      expect(argomenti, lessThan(missione));
+      double y(Finder f) => tester.getTopLeft(f).dy;
+      final ordine = [
+        y(find.byType(StreakCard)),
+        y(find.text('Jump Back In')),
+        y(find.text('Argomenti')),
+        y(find.text('La nostra missione')),
+        y(find.byKey(const Key('math-fact-card'))),
+      ];
+      expect(ordine, [...ordine]..sort());
       // Le sezioni tolte non tornano.
-      expect(find.text('Jump Back In'), findsNothing);
       expect(find.textContaining('Per te'), findsNothing);
       expect(find.text('I tuoi punti deboli'), findsNothing);
+    });
+  });
+
+  group('Jump Back In', () {
+    void schermoAlto(WidgetTester tester) {
+      tester.view.physicalSize = const Size(400, 2800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+    }
+
+    testWidgets('l\'ospite trova il perché', (tester) async {
+      schermoAlto(tester);
+      await _pumpHome(tester);
+
+      expect(find.text('Jump Back In'), findsOneWidget);
+      expect(find.byKey(const Key('jump-back-in-guest')), findsOneWidget);
+      expect(find.text('Accedi per riprendere'), findsOneWidget);
+    });
+
+    testWidgets('con un profilo ma senza lezioni aperte lo dice', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      await _registra();
+      await _pumpHome(tester);
+
+      expect(find.byKey(const Key('jump-back-in-empty')), findsOneWidget);
+      expect(find.text('Niente da riprendere'), findsOneWidget);
+    });
+
+    testWidgets('con una lezione a metà propone di riprenderla', (
+      tester,
+    ) async {
+      schermoAlto(tester);
+      await _registra();
+      await ProgressStore.instance.saveLessonResume(
+        const LessonResume(
+          levelId: 'high-school',
+          lessonId: 'eq1-intro',
+          step: 0,
+        ),
+      );
+      await _pumpHome(tester);
+
+      expect(find.byKey(const Key('jump-back-in-card')), findsOneWidget);
+      expect(find.textContaining('Card 1 di'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('jump-back-in-button')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(LessonScreen), findsOneWidget);
+    });
+  });
+
+  group('Lo sapevi?', () {
+    testWidgets('il tocco passa alla curiosità successiva', (tester) async {
+      tester.view.physicalSize = const Size(400, 2800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await _pumpHome(tester);
+
+      String testo() =>
+          mathFacts.firstWhere((f) => find.text(f).evaluate().isNotEmpty);
+      final prima = testo();
+      await tester.tap(find.byKey(const Key('math-fact-card')));
+      await tester.pumpAndSettle();
+      expect(testo(), isNot(prima));
+      expect(find.text('Lo sapevi?'), findsOneWidget);
     });
   });
 
@@ -333,15 +418,17 @@ void main() {
       expect(find.text('Equazioni di primo grado'), findsOneWidget);
     });
 
-    testWidgets('le card sono quadrate e se ne vedono circa due', (
-      tester,
-    ) async {
+    testWidgets('le card sono un poco più alte che larghe, tutte uguali, e se '
+        'ne vedono circa due', (tester) async {
       await _registra();
       await _pumpHome(tester);
 
       final schermo = tester.getSize(find.byType(HomeScreen)).width;
       final card = tester.getSize(slide().first);
-      expect(card.width, card.height);
+      expect(card.height / card.width, closeTo(1.15, 0.01));
+      for (final e in slide().evaluate()) {
+        expect(tester.getSize(find.byWidget(e.widget)), card);
+      }
       // Due card intere e un pezzo della terza.
       expect(schermo / card.width, inInclusiveRange(2, 3));
       // La striscia scavalca i 20 di margine della pagina: va da bordo a bordo,
@@ -388,6 +475,26 @@ void main() {
       expect(lista, findsNothing);
     });
 
+    testWidgets('un argomento completato ha la spunta nell\'angolo', (
+      tester,
+    ) async {
+      await _registra();
+      await _pumpHome(tester);
+      final segno = find.byKey(const Key('completed-badge'));
+      expect(segno, findsNothing);
+
+      // Equazioni di primo grado ha una lezione sola.
+      await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
+      await tester.pump();
+
+      final card = tester.getRect(
+        find.byKey(const ValueKey('carousel-year1-equations')),
+      );
+      expect(segno, findsOneWidget);
+      expect(tester.getRect(segno).topRight.dy - card.top, 10);
+      expect(card.right - tester.getRect(segno).right, 10);
+    });
+
     testWidgets('il tap su una slide apre le lezioni dell\'argomento', (
       tester,
     ) async {
@@ -413,25 +520,29 @@ void main() {
       );
       final box = card.decoration! as BoxDecoration;
       expect(box.color, AppPalette.light.orange);
-      // Piatta come le altre card: il gradino è solo dei bottoni.
-      expect(box.boxShadow, isNull);
+      // La stessa ombra fine delle altre card.
+      expect(box.boxShadow, cardShadow(AppPalette.light));
       expect(find.text('TRAGUARDO'), findsOneWidget);
       expect(find.textContaining('Serie di'), findsOneWidget);
     });
 
-    testWidgets('obiettivi chiusi: spunta sulle due barre e banner', (
+    testWidgets('la card è bassa: serie, record e settimana, niente barre', (
       tester,
     ) async {
       await _registra();
-      for (var i = 0; i < StudyStore.exerciseGoal; i++) {
-        await StudyStore.instance.recordExerciseCompleted('ex$i');
-      }
-      await StudyStore.instance.addMinutes(StudyStore.minutesGoal);
       await _pumpHome(tester);
 
-      await _scrollaA(tester, find.byType(StreakCard));
-      expect(find.text('Obiettivi di oggi raggiunti!'), findsOneWidget);
-      expect(find.byIcon(Icons.check_circle), findsWidgets);
+      final card = find.byKey(const Key('streak-card'));
+      expect(find.textContaining('Record:'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.byType(LinearProgressIndicator),
+        ),
+        findsNothing,
+      );
+      // Era alta circa 280: ora la metà.
+      expect(tester.getSize(card).height, lessThan(150));
     });
   });
 

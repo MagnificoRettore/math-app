@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../data/lesson_repository.dart';
+import '../data/progress_store.dart';
 import '../models/argomento.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import 'app_card.dart';
+import 'completed_badge.dart';
 import 'section_header.dart';
 import 'topic_background.dart';
 
@@ -26,6 +28,11 @@ const double _gap = 12;
 /// che la striscia si scorre.
 const double _visibleCards = 2.2;
 
+/// Quanto la card è più alta che larga: leggermente, perché il titolo fino a
+/// tre righe e la riga «anno · lezioni» ci stiano senza schiacciarsi. Tutte le
+/// card hanno la stessa misura.
+const double _heightFactor = 1.15;
+
 /// Il carosello degli argomenti in Home.
 ///
 /// Con la scuola nel profilo mostra tutti gli argomenti di quella scuola, in
@@ -35,7 +42,7 @@ const double _visibleCards = 2.2;
 /// la testata «Argomenti», che per questo sta dentro e non nella lista della
 /// Home.
 ///
-/// Le card sono quadrate e se ne vedono circa due: è una lista orizzontale, non
+/// Le card sono un poco più alte che larghe e se ne vedono circa due: è una lista orizzontale, non
 /// un `PageView`, che aggancerebbe e centrerebbe una card per volta.
 class ArgomentoCarousel extends StatefulWidget {
   const ArgomentoCarousel({super.key});
@@ -98,62 +105,71 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
       count == 1 ? '1 lezione' : '$count lezioni',
     ].join(' · ');
 
-    return SizedBox.square(
-      dimension: side,
-      // Piatta come tutte le card: nessuna ombra.
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(kCardRadius),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            key: ValueKey('carousel-${argomento.topicId}'),
-            onTap: () => _open(argomento),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                TopicBackground(image: null, color: color),
-                Positioned(
-                  left: 14,
-                  right: 14,
-                  bottom: 14,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        argomento.title,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: AppText.headingFont,
-                          fontSize: AppText.titleLarge,
-                          fontWeight: FontWeight.w600,
-                          height: 1.15,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black45,
-                              blurRadius: 8,
-                              offset: Offset(0, 1),
-                            ),
-                          ],
+    return SizedBox(
+      width: side,
+      height: side * _heightFactor,
+      // L'ombra fine delle card sta fuori dal ritaglio, che la taglierebbe.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(kCardRadius),
+          boxShadow: cardShadow(c),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(kCardRadius),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: ValueKey('carousel-${argomento.topicId}'),
+              onTap: () => _open(argomento),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  TopicBackground(color: color),
+                  if (ProgressStore.instance.isArgomentoCompleted(argomento))
+                    CompletedBadge.corner(),
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          argomento.title,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: AppText.headingFont,
+                            fontSize: AppText.titleLarge,
+                            fontWeight: FontWeight.w600,
+                            height: 1.15,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black45,
+                                blurRadius: 8,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        details,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: AppText.labelSmall,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.9),
+                        const SizedBox(height: 4),
+                        Text(
+                          details,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: AppText.labelSmall,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -165,8 +181,13 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
   Widget build(BuildContext context) {
     // Si ascolta da sé: in Home è `const`, e il rebuild della lista non lo
     // raggiungerebbe quando l'utente entra, esce o cambia scuola.
+    // Anche i progressi: il segno «completata» compare finendo l'ultima
+    // lezione di un argomento.
     return ListenableBuilder(
-      listenable: AuthStore.instance,
+      listenable: Listenable.merge([
+        AuthStore.instance,
+        ProgressStore.instance,
+      ]),
       builder: (context, _) {
         final argomenti = _argomenti();
         if (argomenti.isEmpty) return const SizedBox.shrink();
@@ -182,12 +203,15 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
             // scavalca e prende tutto lo schermo, così le card scorrono fino
             // al bordo invece di sparire a 20 px da esso.
             SizedBox(
-              height: side,
+              height: side * _heightFactor,
               child: OverflowBox(
                 maxWidth: screen,
                 child: ListView.separated(
                   key: const Key('argomento-carousel-list'),
                   scrollDirection: Axis.horizontal,
+                  // L'ombra delle card scende sotto la striscia: senza, la
+                  // lista la taglierebbe sul suo bordo.
+                  clipBehavior: Clip.none,
                   padding: const EdgeInsets.symmetric(horizontal: _pageMargin),
                   itemCount: argomenti.length,
                   separatorBuilder: (_, _) => const SizedBox(width: _gap),

@@ -33,6 +33,6 @@ class PromptView extends StatelessWidget {
         child: ImageSource(source: prompt),
       );
     }
-    return MathText(prompt, fontSize: fontSize);
+    return MathText(prompt, fontSize: fontSize, inline: true);
   }
 }

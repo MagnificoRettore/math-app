@@ -44,8 +44,9 @@ class AppCard extends StatelessWidget {
         border: borderColor == null
             ? null
             : Border.all(color: borderColor!, width: borderWidth),
-        // Nessuna ombra e nessun gradino: le card sono piatte, il gradino è
-        // solo dei bottoni.
+        // Un'ombra fine e bassa, che stacca la card dal crema senza farla
+        // galleggiare. Il gradino pieno resta solo dei bottoni.
+        boxShadow: cardShadow(c),
       ),
       child: Material(
         color: Colors.transparent,
@@ -80,6 +81,13 @@ class AppCard extends StatelessWidget {
 
 /// Raggio delle card dell'app: le card del design stanno fra 18 e 22.
 const double kCardRadius = 20;
+
+/// L'ombra delle card: una sfumatura fine sotto, indaco al 12% (`shadow`),
+/// blur 10 e scostata di 3 in basso. La usano `AppCard`, la card «Traguardo»
+/// e le card del carosello.
+List<BoxShadow> cardShadow(AppPalette c) => [
+  BoxShadow(color: c.shadow, blurRadius: 10, offset: const Offset(0, 3)),
+];
 
 /// Alone colorato nell'angolo in alto a destra di una card.
 ///

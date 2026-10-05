@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../data/study_store.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'app_card.dart';
 
 /// La serie di giorni come la card «Traguardo» del design: arancio con il
 /// gradino pieno sotto, i tagliandi bianchi sul bordo sinistro e una striscia
-/// chiara a destra. Dentro, su riquadri bianchi perché sull'arancio i colori
-/// delle barre non si leggerebbero: la serie, i sette giorni della settimana e
-/// gli obiettivi di oggi.
+/// chiara a destra. Dentro, su un riquadro bianco, la serie e il record, e
+/// sotto i sette giorni della settimana. Bassa: niente barre degli obiettivi.
 class StreakCard extends StatelessWidget {
   const StreakCard({super.key});
 
@@ -22,7 +22,6 @@ class StreakCard extends StatelessWidget {
       builder: (context, _) {
         final c = AppColors.of(context);
         final store = StudyStore.instance;
-        final allDone = store.allGoalsReached;
         final streak = store.currentStreak;
         final light = Color.lerp(c.orange, Colors.white, 0.45)!;
         final white = BoxDecoration(
@@ -33,8 +32,8 @@ class StreakCard extends StatelessWidget {
           key: const Key('streak-card'),
           decoration: BoxDecoration(
             color: c.orange,
-            // Piatta come le altre card: il gradino è solo dei bottoni.
             borderRadius: BorderRadius.circular(18),
+            boxShadow: cardShadow(c),
           ),
           child: Stack(
             children: [
@@ -51,12 +50,12 @@ class StreakCard extends StatelessWidget {
               ),
               Positioned(
                 left: 0,
-                top: 22,
-                bottom: 22,
+                top: 16,
+                bottom: 16,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    for (var i = 0; i < 6; i++)
+                    for (var i = 0; i < 4; i++)
                       Container(
                         width: 22,
                         height: 8,
@@ -71,26 +70,44 @@ class StreakCard extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(48, 24, 50, 24),
+                padding: const EdgeInsets.fromLTRB(48, 16, 50, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                       decoration: white,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'TRAGUARDO',
-                            style: TextStyle(
-                              fontSize: AppText.label,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.8,
-                              color: c.medium,
-                            ),
+                          // Il record sta sulla riga dell'occhiello: una riga
+                          // in meno, e la card resta bassa.
+                          Row(
+                            children: [
+                              Text(
+                                'TRAGUARDO',
+                                style: TextStyle(
+                                  fontSize: AppText.label,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.8,
+                                  color: c.medium,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Record: ${store.bestStreak}',
+                                  textAlign: TextAlign.right,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: AppText.label,
+                                    color: c.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
                           Text(
                             'Serie di $streak ${streak == 1 ? 'giorno' : 'giorni'}',
                             style: TextStyle(
@@ -100,17 +117,10 @@ class StreakCard extends StatelessWidget {
                               color: c.textPrimary,
                             ),
                           ),
-                          Text(
-                            'Record personale: ${store.bestStreak}',
-                            style: TextStyle(
-                              fontSize: AppText.label,
-                              color: c.textSecondary,
-                            ),
-                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
                     // I giorni della serie nella settimana: indaco quelli
                     // fatti, arancio chiaro quelli che mancano.
                     Semantics(
@@ -123,7 +133,7 @@ class StreakCard extends StatelessWidget {
                               if (i > 0) const SizedBox(width: 8),
                               Expanded(
                                 child: Container(
-                                  height: 34,
+                                  height: 26,
                                   decoration: BoxDecoration(
                                     color: i < streak ? c.accent : light,
                                     borderRadius: BorderRadius.circular(8),
@@ -135,56 +145,6 @@ class StreakCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _GoalBar(
-                            label: 'Esercizi',
-                            icon: Icons.edit_outlined,
-                            value: store.todayExercises,
-                            max: StudyStore.exerciseGoal,
-                            progress: store.exerciseGoalProgress,
-                            color: c.easy,
-                          ),
-                          const SizedBox(height: 12),
-                          _GoalBar(
-                            label: 'Tempo',
-                            icon: Icons.schedule,
-                            value: store.todayMinutes,
-                            max: StudyStore.minutesGoal,
-                            progress: store.minutesGoalProgress,
-                            color: c.accent,
-                          ),
-                          if (allDone) ...[
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: c.easy,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Obiettivi di oggi raggiunti!',
-                                    style: TextStyle(
-                                      fontSize: AppText.bodySmall,
-                                      fontWeight: FontWeight.w500,
-                                      color: c.easy,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -192,61 +152,6 @@ class StreakCard extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _GoalBar extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final int value;
-  final int max;
-  final double progress;
-  final Color color;
-
-  const _GoalBar({
-    required this.label,
-    required this.icon,
-    required this.value,
-    required this.max,
-    required this.progress,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 18),
-        const SizedBox(width: 8),
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: color.withValues(alpha: 0.14),
-              valueColor: AlwaysStoppedAnimation(color),
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        // La spunta arriva quando l'obiettivo è chiuso: è l'unico segnale che
-        // distingue «sto andando bene» da «ho finito».
-        if (value >= max) ...[
-          Icon(Icons.check_circle, color: color, size: 15),
-          const SizedBox(width: 5),
-        ],
-        Text(
-          '$value/$max',
-          style: TextStyle(
-            fontSize: AppText.label,
-            fontWeight: FontWeight.w500,
-            color: c.textSecondary,
-          ),
-        ),
-      ],
     );
   }
 }

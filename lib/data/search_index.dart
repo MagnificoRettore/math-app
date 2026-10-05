@@ -175,7 +175,7 @@ class SearchIndex {
           ...ex.tags,
           ...ex.formulas,
           ex.problem,
-          ...ex.steps,
+          for (final step in ex.steps) step.text,
           ...ex.hints,
         ].join(' ').toLowerCase();
         return haystack.contains(q);

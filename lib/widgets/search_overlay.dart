@@ -7,8 +7,10 @@ import '../data/search_index.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 import 'app_card.dart';
+import 'reveal.dart';
 
 /// Cosa vede la ricerca: argomenti e lezioni, per titolo.
 const _tipiRicerca = [ResultType.argomento, ResultType.lesson];
@@ -32,13 +34,17 @@ const _debounce = Duration(milliseconds: 300);
 /// trasparente per lo stesso motivo — la chiusura toccando «fuori» non esiste,
 /// e una configurazione che promette un'uscita inesistente è peggio di nessuna.
 Future<void> showSearchOverlay(BuildContext context) {
+  final origin = revealOrigin(context);
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: false,
     barrierLabel: 'Chiudi la ricerca',
     barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 200),
+    transitionDuration: AppMotion.duration(context, AppMotion.slow),
     pageBuilder: (context, _, _) => const SearchOverlay(),
+    // Si espande dalla lente, e tornando indietro vi si ritira.
+    transitionBuilder: (context, animation, _, child) =>
+        revealTransition(animation, origin, child),
   );
 }
 

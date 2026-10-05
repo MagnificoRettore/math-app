@@ -11,8 +11,8 @@ import '../models/lesson.dart';
 import '../models/lesson_resume.dart';
 import '../models/lesson_step.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
-import '../theme/app_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_card.dart';
 import '../widgets/mcq_option_tile.dart';
@@ -21,12 +21,26 @@ import '../widgets/notes_text.dart';
 import '../widgets/practice_quiz_view.dart';
 import '../widgets/prompt_view.dart';
 import '../widgets/scientific_calculator.dart';
+import '../widgets/tools_bar.dart';
 
-/// Altezza di «Completa la lezione» (padding 14 sopra e sotto più il
-/// contenuto). Serve a dare alla toolbar compatta la stessa altezza: il suo
-/// FAB collassato è `M3EToolbarTokens.fabMedium`, cioè 80 (da espanso scende a
-/// `fabBaseline`, 56).
-const double _kFooterControlHeight = 49;
+/// Altezza di «Completa la lezione» e della toolbar compatta: la stessa.
+const double _kFooterControlHeight = kToolsBarHeight;
+
+/// La `PageView` mostra il 92% della larghezza: si intravedono le card vicine.
+const double _kViewportFraction = 0.92;
+
+/// Margini della card nella sua pagina: 4 ai lati, 12 sopra e sotto, più i 12
+/// sotto la `PageView`.
+const double _kCardSideMargin = 4;
+const double _kCardGapBottom = 12;
+
+/// Padding interno della card: anche la colonna di testo a cui si allineano i
+/// bottoni galleggianti.
+const double _kCardPadding = 24;
+
+/// Dal fondo dello schermo al fondo dei bottoni galleggianti: dove stava il
+/// piede della card, cioè i due 12 sotto la card più il suo padding.
+const double _kCardControlsBottom = 2 * _kCardGapBottom + _kCardPadding;
 
 /// Quanto dura la celebrazione a schermo intero: i 71 frame del trofeo a
 /// 30fps durano 2.37s, quindi si chiude poco dopo l'ultimo fotogramma.
@@ -69,8 +83,8 @@ class _LessonScreenState extends State<LessonScreen> {
   bool _celebrating = false;
   Timer? _celebrationTimer;
 
-  /// La toolbar vive nel footer di ogni card, quindi ce n'è una per pagina
-  /// costruita: senza stato condiviso ogni nuova card nascerebbe collassata.
+  /// Se la toolbar degli strumenti è aperta: resta com'è cambiando card,
+  /// perché la toolbar galleggia sopra le card ed è una sola.
   bool _toolbarExpanded = false;
 
   /// Quanto la card è tirata a sinistra dal dito, da 0 a 1: a 1 la lezione è
@@ -80,7 +94,7 @@ class _LessonScreenState extends State<LessonScreen> {
   late final Listenable _pageAnimations;
   Offset? _swipeStart;
 
-  /// Una chiave per step quiz: il bottone di reload sta nel footer della card,
+  /// Una chiave per step quiz: il bottone di reload galleggia sopra le card,
   /// fuori dal widget che possiede lo stato degli esercizi.
   final Map<int, GlobalKey<PracticeQuizViewState>> _quizKeys = {};
 
@@ -92,7 +106,7 @@ class _LessonScreenState extends State<LessonScreen> {
     super.initState();
     _page = _clampStep(widget.initialStep);
     _pageController = PageController(
-      viewportFraction: 0.92,
+      viewportFraction: _kViewportFraction,
       initialPage: _page,
     );
     _pageAnimations = Listenable.merge([_pageController, _swipeProgress]);
@@ -234,6 +248,158 @@ class _LessonScreenState extends State<LessonScreen> {
     });
   }
 
+  /// I bottoni della lezione, in sovraimpressione sulle card e fermi mentre
+  /// le card scorrono: la toolbar degli strumenti a sinistra, il reload della
+  /// verifica e «Completa la lezione» a destra. Stanno dove stava il piede
+  /// della card ferma, a filo della colonna di testo.
+  ///
+  /// Ognuno c'è solo dove serve, per la card corrente ([_page]): il reload
+  /// sulle verifiche con più di un esercizio, «Completa la lezione» quando
+  /// [_canCompleteAt]. Comparendo e sparendo si dissolvono e scalano in
+  /// [AppMotion.medium]; col movimento ridotto cambiano e basta.
+  Widget _floatingControls(AppPalette c) {
+    final step = widget.lesson.steps[_page];
+    final showReload = step.isPracticeQuiz && step.exercises.length > 1;
+    final showComplete = _canCompleteAt(_page);
+    final bottom =
+        _kCardControlsBottom + MediaQuery.viewPaddingOf(context).bottom;
+    final duration = AppMotion.duration(context, AppMotion.medium);
+
+    Widget appear(String key, bool visible, Widget child) => AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: AppMotion.standard,
+      switchOutCurve: AppMotion.standard,
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.8, end: 1).animate(animation),
+          child: child,
+        ),
+      ),
+      child: visible
+          ? KeyedSubtree(key: ValueKey('$key-$_page'), child: child)
+          : SizedBox.shrink(key: ValueKey('$key-none')),
+    );
+
+    return Positioned.fill(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // La colonna di testo della card ferma: il margine della `PageView`
+          // (4% per lato con `viewportFraction` 0.92), quello della card e il
+          // suo padding interno.
+          final inner =
+              constraints.maxWidth * (1 - _kViewportFraction) / 2 +
+              _kCardSideMargin +
+              _kCardPadding;
+          return Stack(
+            children: [
+              Positioned(
+                left: inner,
+                right: inner,
+                bottom: bottom,
+                child: Row(
+                  children: [
+                    // Lo spazio della toolbar, che sta qui sotto da sola.
+                    const SizedBox(width: _kFooterControlHeight + 8),
+                    const Spacer(),
+                    appear(
+                      'reload',
+                      showReload,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: AppButton(
+                          icon: Icons.refresh_rounded,
+                          tooltip: 'Altro esercizio',
+                          variant: AppButtonVariant.outline,
+                          height: _kFooterControlHeight - AppButton.depth,
+                          onPressed: () =>
+                              _quizKeys[_page]?.currentState?.reload(),
+                        ),
+                      ),
+                    ),
+                    appear(
+                      'complete',
+                      showComplete,
+                      _completeButton(
+                        compact: _completeDoesNotFit(
+                          context,
+                          constraints.maxWidth - 2 * inner,
+                          showReload,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: inner,
+                bottom: bottom,
+                width: M3EToolbarTokens.fabMedium,
+                child: _toolsBar(),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Se «Completa la lezione» per intero non ci sta in [width] accanto alla
+  /// toolbar e, quando c'è, al reload: allora resta solo l'icona.
+  bool _completeDoesNotFit(BuildContext context, double width, bool reload) {
+    // Larghezza già occupata a sinistra: la toolbar dipinta, il reload (44
+    // più 8 di scarto) quando c'è, più un piccolo scarto perché il bottone
+    // non tocchi il FAB.
+    final taken = _kFooterControlHeight + (reload ? 52 : 0) + 8;
+    // «Completa la lezione» per intero: 20 di padding per lato, icona da 20,
+    // 8 di scarto, più il testo misurato.
+    final painter = TextPainter(
+      text: const TextSpan(
+        text: 'Completa la lezione',
+        style: TextStyle(
+          fontSize: AppText.bodyLarge,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final full = 40 + 20 + 8 + painter.width;
+    painter.dispose();
+    return width - taken < full;
+  }
+
+  /// Toolbar della lezione: la stessa degli esercizi (`AppToolsBar`). Sta in una
+  /// `Positioned` sua e non nella `Row` dei bottoni: vedi il suo commento.
+  Widget _toolsBar() {
+    return AppToolsBar(
+      toolbarKey: const ValueKey('lesson_toolbar'),
+      expanded: _toolbarExpanded,
+      onExpandedChanged: (value) => setState(() => _toolbarExpanded = value),
+      onCalculator: () => setState(() => _calcOpen = true),
+    );
+  }
+
+  Widget _completeButton({required bool compact}) {
+    // Faccia da 44 più il gradino: insieme fanno l'altezza della toolbar.
+    const height = _kFooterControlHeight - AppButton.depth;
+    if (compact) {
+      // Niente spazio per il testo: resta solo l'icona, col testo nel tooltip.
+      return AppButton(
+        icon: Icons.check_circle_outline,
+        tooltip: 'Completa la lezione',
+        height: height,
+        onPressed: _complete,
+      );
+    }
+    return AppButton(
+      label: 'Completa la lezione',
+      icon: Icons.check_circle_outline,
+      height: height,
+      onPressed: _complete,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
@@ -260,14 +426,18 @@ class _LessonScreenState extends State<LessonScreen> {
                             color: c.textSecondary,
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          widget.lesson.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: AppText.label,
-                            color: c.textSecondary,
+                        const SizedBox(width: 12),
+                        // Il titolo lungo cede spazio invece di sforare.
+                        Expanded(
+                          child: Text(
+                            widget.lesson.title,
+                            textAlign: TextAlign.end,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: AppText.label,
+                              color: c.textSecondary,
+                            ),
                           ),
                         ),
                       ],
@@ -302,11 +472,10 @@ class _LessonScreenState extends State<LessonScreen> {
                       final step = widget.lesson.steps[index];
                       final card = Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 12,
+                          horizontal: _kCardSideMargin,
+                          vertical: _kCardGapBottom,
                         ),
                         child: _StepCard(
-                          index: index,
                           step: step,
                           solved: _solved,
                           attempted: _attempted,
@@ -314,13 +483,6 @@ class _LessonScreenState extends State<LessonScreen> {
                           wrongOptions: _wrongOptions,
                           selectedOption: _selectedOption,
                           onSelectOption: _selectOption,
-                          showComplete: _canCompleteAt(index),
-                          onComplete: _complete,
-                          toolbarExpanded: _toolbarExpanded,
-                          onToolbarExpandedChanged: (value) =>
-                              setState(() => _toolbarExpanded = value),
-                          onOpenCalculator: () =>
-                              setState(() => _calcOpen = true),
                           practiceQuizKey: step.isPracticeQuiz
                               ? _quizKeys.putIfAbsent(
                                   index,
@@ -364,9 +526,10 @@ class _LessonScreenState extends State<LessonScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: _kCardGapBottom),
             ],
           ),
+          _floatingControls(c),
           if (_calcOpen)
             Positioned.fill(
               child: ScientificCalculatorSheet(
@@ -438,7 +601,6 @@ class _TrophyCelebration extends StatelessWidget {
 }
 
 class _StepCard extends StatelessWidget {
-  final int index;
   final LessonStep step;
   final bool solved;
   final bool attempted;
@@ -446,15 +608,9 @@ class _StepCard extends StatelessWidget {
   final Set<int> wrongOptions;
   final int? selectedOption;
   final ValueChanged<int> onSelectOption;
-  final bool showComplete;
-  final VoidCallback onComplete;
-  final bool toolbarExpanded;
-  final ValueChanged<bool> onToolbarExpandedChanged;
-  final VoidCallback onOpenCalculator;
   final GlobalKey<PracticeQuizViewState>? practiceQuizKey;
 
   const _StepCard({
-    required this.index,
     required this.step,
     required this.solved,
     required this.attempted,
@@ -462,11 +618,6 @@ class _StepCard extends StatelessWidget {
     required this.wrongOptions,
     required this.selectedOption,
     required this.onSelectOption,
-    required this.showComplete,
-    required this.onComplete,
-    required this.toolbarExpanded,
-    required this.onToolbarExpandedChanged,
-    required this.onOpenCalculator,
     this.practiceQuizKey,
   });
 
@@ -476,216 +627,85 @@ class _StepCard extends StatelessWidget {
     final scale = step.fontSizeMultiplier;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return AppCard(
-      padding: const EdgeInsets.all(24),
-      child: Stack(
-        children: [
-          Column(
+      padding: const EdgeInsets.all(_kCardPadding),
+      child: SizedBox.expand(
+        child: SingleChildScrollView(
+          // I bottoni galleggiano sul fondo della card: il testo può
+          // scorrere fin sopra di loro, non finire sotto.
+          padding: EdgeInsets.only(
+            bottom: 16 + _kFooterControlHeight + bottomInset,
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        step.title,
-                        style: TextStyle(
-                          fontFamily: AppText.headingFont,
-                          fontSize: AppText.headline * scale,
-                          fontWeight: FontWeight.w600,
-                          color: c.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (step.type == LessonStepType.info)
-                        NotesText(step.content, fontScale: scale)
-                      else if (step.isPracticeQuiz)
-                        PracticeQuizView(
-                          key: practiceQuizKey,
-                          exercises: step.exercises,
-                          scale: scale,
-                        )
-                      else ...[
-                        NotesText(step.content, fontScale: scale),
-                        if (step.prompt.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          PromptView(
-                            prompt: step.prompt,
-                            fontSize: AppText.titleMedium * scale,
-                          ),
-                        ],
-                        const SizedBox(height: 24),
-                        for (var i = 0; i < step.options.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: McqOptionTile(
-                              key: ValueKey('option_$i'),
-                              label: step.options[i],
-                              state: _stateFor(i),
-                              enabled: !solved,
-                              scale: scale,
-                              onTap: () => onSelectOption(i),
-                            ),
-                          ),
-                        const SizedBox(height: 8),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 280),
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(opacity: animation, child: child),
-                          child: solved
-                              ? McqFeedbackCard(
-                                  key: const ValueKey('correct'),
-                                  correct: true,
-                                  message: step.explanation,
-                                  scale: scale,
-                                )
-                              : attempted
-                              ? ShakeWidget(
-                                  key: ValueKey('wrong-$attemptId'),
-                                  child: McqFeedbackCard(
-                                    correct: false,
-                                    message: 'Non è corretto. Riprova!',
-                                    scale: scale,
-                                  ),
-                                )
-                              : const SizedBox.shrink(key: ValueKey('idle')),
-                        ),
-                      ],
-                    ],
-                  ),
+              Text(
+                step.title,
+                style: TextStyle(
+                  fontFamily: AppText.headingFont,
+                  fontSize: AppText.headline * scale,
+                  fontWeight: FontWeight.w600,
+                  color: c.textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
-              // Fascia footer alta quanto «Completa la lezione»: la toolbar ci
-              // sta sopra (vedi `_toolsBar`), dentro solo reload e bottone.
-              Padding(
-                padding: EdgeInsets.only(bottom: bottomInset),
-                // Altezza minima quella di «Completa la lezione», ma la fascia
-                // cresce se il bottone con una font scale più grande la supera.
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: _kFooterControlHeight,
+              if (step.type == LessonStepType.info)
+                NotesText(step.content, fontScale: scale)
+              else if (step.isPracticeQuiz)
+                PracticeQuizView(
+                  key: practiceQuizKey,
+                  exercises: step.exercises,
+                  scale: scale,
+                )
+              else ...[
+                NotesText(step.content, fontScale: scale),
+                if (step.prompt.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  PromptView(
+                    prompt: step.prompt,
+                    fontSize: AppText.titleMedium * scale,
                   ),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // Larghezza già occupata a sinistra: la toolbar dipinta,
-                      // il reload (48 più 8 di padding) quando c'è, più un
-                      // piccolo scarto perché il bottone non tocchi il FAB.
-                      final taken =
-                          _kFooterControlHeight +
-                          (step.isPracticeQuiz && step.exercises.length > 1
-                              ? 56
-                              : 0) +
-                          8;
-                      // «Completa la lezione» per intero: 20 di padding per
-                      // lato, icona da 20, 8 di scarto, più il testo misurato.
-                      final labelWidth = (TextPainter(
-                        text: const TextSpan(
-                          text: 'Completa la lezione',
-                          style: TextStyle(
-                            fontSize: AppText.bodyLarge,
-                            fontWeight: FontWeight.w500,
+                ],
+                const SizedBox(height: 24),
+                for (var i = 0; i < step.options.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: McqOptionTile(
+                      key: ValueKey('option_$i'),
+                      label: step.options[i],
+                      state: _stateFor(i),
+                      enabled: !solved,
+                      scale: scale,
+                      onTap: () => onSelectOption(i),
+                    ),
+                  ),
+                const SizedBox(height: 8),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 280),
+                  transitionBuilder: (child, animation) =>
+                      FadeTransition(opacity: animation, child: child),
+                  child: solved
+                      ? McqFeedbackCard(
+                          key: const ValueKey('correct'),
+                          correct: true,
+                          message: step.explanation,
+                          scale: scale,
+                        )
+                      : attempted
+                      ? ShakeWidget(
+                          key: ValueKey('wrong-$attemptId'),
+                          child: McqFeedbackCard(
+                            correct: false,
+                            message: 'Non è corretto. Riprova!',
+                            scale: scale,
                           ),
-                        ),
-                        textDirection: Directionality.of(context),
-                        textScaler: MediaQuery.textScalerOf(context),
-                      )..layout()).width;
-                      final full = 40 + 20 + 8 + labelWidth;
-                      return Row(
-                        children: [
-                          const Spacer(),
-                          if (step.isPracticeQuiz && step.exercises.length > 1)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: IconButton(
-                                onPressed: () =>
-                                    practiceQuizKey?.currentState?.reload(),
-                                icon: const Icon(Icons.refresh_rounded),
-                                tooltip: 'Altro esercizio',
-                                color: c.textSecondary,
-                              ),
-                            ),
-                          if (showComplete)
-                            _completeButton(
-                              compact: constraints.maxWidth - taken < full,
-                            ),
-                        ],
-                      );
-                    },
-                  ),
+                        )
+                      : const SizedBox.shrink(key: ValueKey('idle')),
                 ),
-              ),
+              ],
             ],
           ),
-          Positioned(
-            left: 0,
-            bottom: bottomInset,
-            width: M3EToolbarTokens.fabMedium,
-            child: _toolsBar(c),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Toolbar della lezione: overlay dentro la card, ancorato al suo fondo, con
-  /// il FAB compatto della stessa altezza di «Completa la lezione».
-  ///
-  /// Non sta nella `Row` del footer perché `M3EToolbar` riserva in layout
-  /// l'altezza della pila anche da collassato (136px, di cui 80 di FAB) pur
-  /// clip-paintandola a zero: in layout ruberebbe 87px a ogni card. E con
-  /// larghezza illimitata, come vuole una `Row`, il suo layout verticale va in
-  /// `Infinity`: da qui il `width` nella `Positioned`. La scala parte dal basso
-  /// a sinistra, così il FAB dipinto è a filo del padding della card e ha lo
-  /// stesso spigolo inferiore del bottone, e la pila si rivela in alto.
-  Widget _toolsBar(AppPalette c) {
-    return Transform.scale(
-      alignment: Alignment.bottomLeft,
-      scale: _kFooterControlHeight / M3EToolbarTokens.fabMedium,
-      // Indaco come la barra di avanzamento: il FAB prende i colori da
-      // `AppTheme.lessonToolbar` (dal `Theme` di Flutter non gli arriverebbero),
-      // il pannello espanso quelli qui sotto.
-      child: M3ETheme(
-        data: AppTheme.lessonToolbar,
-        child: M3EToolbar(
-          backgroundColor: c.accent,
-          foregroundColor: Colors.white,
-          key: ValueKey('lesson_toolbar_$index'),
-          axis: Axis.vertical,
-          fabPosition: M3EToolbarFabPosition.bottom,
-          expanded: toolbarExpanded,
-          onExpandedChanged: onToolbarExpandedChanged,
-          fabExpandIcon: const Icon(M3EIcons.handyman_rounded),
-          fabCollapseIcon: const Icon(M3EIcons.close_rounded),
-          actions: [
-            M3EToolbarAction(
-              icon: M3EIcons.calculate_rounded,
-              tooltip: 'Calcolatrice',
-              onPressed: onOpenCalculator,
-            ),
-          ],
         ),
       ),
-    );
-  }
-
-  Widget _completeButton({required bool compact}) {
-    // Faccia da 44 più il gradino: insieme fanno la fascia del footer.
-    const height = _kFooterControlHeight - AppButton.depth;
-    if (compact) {
-      // Niente spazio per il testo: resta solo l'icona, col testo nel tooltip.
-      return AppButton(
-        icon: Icons.check_circle_outline,
-        tooltip: 'Completa la lezione',
-        height: height,
-        onPressed: onComplete,
-      );
-    }
-    return AppButton(
-      label: 'Completa la lezione',
-      icon: Icons.check_circle_outline,
-      height: height,
-      onPressed: onComplete,
     );
   }
 

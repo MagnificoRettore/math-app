@@ -5,7 +5,6 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
 import '../widgets/app_button.dart';
-import '../widgets/illustration.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -18,26 +17,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  /// Una illustrazione del design per slide: il laptop per gli esercizi,
-  /// l'albero per la scuola, il razzo per la serie.
-  static const List<({AppIllustration illustration, String title, String body})>
-  _slides = [
+  static const List<({String title, String body})> _slides = [
     (
-      illustration: AppIllustration.lezione,
       title: 'Esercizi risolti passo passo',
       body:
           'Ogni esercizio mostra le formule chiave, i suggerimenti e la '
           'soluzione completa per imparare davvero.',
     ),
     (
-      illustration: AppIllustration.albero,
       title: 'Studia per la tua scuola',
       body:
           'Scegli Scuola Media, Superiore o Università: ricevi lezioni ed '
           'esercizi consigliati su misura per te.',
     ),
     (
-      illustration: AppIllustration.razzo,
       title: 'Costruisci una serie',
       body:
           'Allenati ogni giorno: raggiungi gli obiettivi di 5 esercizi e '
@@ -140,19 +133,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildSlide(
-    ({AppIllustration illustration, String title, String body}) slide,
-  ) {
+  Widget _buildSlide(({String title, String body}) slide) {
     final c = AppColors.of(context);
-    // Scorre se lo schermo è basso: l'illustrazione da sola è alta 264.
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            IllustrationView(slide.illustration, width: 220),
-            const SizedBox(height: 28),
             Text(
               slide.title,
               textAlign: TextAlign.center,

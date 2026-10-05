@@ -93,7 +93,7 @@ assets/
 
 ### Modelli dati
 - **Level** → Livello scolastico (`id`, `title`, `subtitle`, `icon`, `dataFile`) che punta al JSON del corso.
-- **Course / Section / Topic / Exercise** → gerarchia corso-anno → sezione → argomento → esercizio (con `difficulty`, `tags`, `formulas`, `hints`, `steps`). `Course` e `Topic` hanno un campo opzionale `image` per i cerchi degli anni / le copertine.
+- **Course / Section / Topic / Exercise** → gerarchia corso-anno → sezione → argomento → esercizio (con `difficulty`, `tags`, `formulas`, `hints`, `steps`). `steps` è un array di stringhe (la soluzione di sempre) oppure di oggetti `{ "text", "prompt", "options", "correctIndex" }`: se **tutti** i passaggi hanno una domanda la soluzione è guidata (un passaggio compare solo dopo aver indovinato la sua domanda). `Course` e `Topic` non hanno più un campo `image`: gli sfondi sono solo colori.
 - **Difficulty** → enum `easy` / `medium` / `hard` con `fromString()` e label italiane (Facile / Medio / Difficile).
 - **ExerciseProgress** → stato (`ExerciseStatus`: `none` / `mastered` / `needsReview`) per esercizio, con **chiave composita** `levelId::exerciseId`.
 - **Argomento / Lesson / LessonStep** → lezione guidata: `Argomento` collega un gruppo di lezioni a un argomento del corso; `LessonStep` può essere `info` o `mcq` (vedi [Struttura del JSON delle lezioni](#struttura-del-json-delle-lezioni)).

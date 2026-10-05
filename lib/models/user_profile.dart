@@ -14,6 +14,11 @@ class UserProfile {
   /// significa iniziali.
   final String avatarId;
   final String schoolLevelId;
+
+  /// L'anno (`Course.id`) scelto alla registrazione, dentro `schoolLevelId`;
+  /// vuoto per l'università e per chi non l'ha scelto. Decide l'anno con cui
+  /// si aprono Lezioni ed Esercizi.
+  final String courseId;
   final DateTime createdAt;
 
   const UserProfile({
@@ -24,6 +29,7 @@ class UserProfile {
     this.photoUrl,
     this.avatarId = '',
     this.schoolLevelId = '',
+    this.courseId = '',
     required this.createdAt,
   });
 
@@ -35,6 +41,7 @@ class UserProfile {
     String? photoUrl,
     String? avatarId,
     String? schoolLevelId,
+    String? courseId,
     DateTime? createdAt,
   }) {
     return UserProfile(
@@ -45,6 +52,7 @@ class UserProfile {
       photoUrl: photoUrl ?? this.photoUrl,
       avatarId: avatarId ?? this.avatarId,
       schoolLevelId: schoolLevelId ?? this.schoolLevelId,
+      courseId: courseId ?? this.courseId,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -58,6 +66,7 @@ class UserProfile {
       'photoUrl': photoUrl,
       'avatarId': avatarId,
       'schoolLevelId': schoolLevelId,
+      'courseId': courseId,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -73,6 +82,7 @@ class UserProfile {
       photoUrl: json['photoUrl'] as String?,
       avatarId: json['avatarId'] as String? ?? '',
       schoolLevelId: json['schoolLevelId'] as String? ?? '',
+      courseId: json['courseId'] as String? ?? '',
       createdAt:
           DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),

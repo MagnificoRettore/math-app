@@ -15,7 +15,6 @@ class TopicRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return TopicImageCard(
       title: topic.title,
-      image: topic.image,
       color: topicColor(AppColors.of(context), topic.icon),
       onTap: onTap,
     );

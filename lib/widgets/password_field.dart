@@ -50,6 +50,7 @@ class _PasswordFieldState extends State<PasswordField> {
       autovalidateMode: widget.autovalidateMode,
       decoration: AppTheme.fieldDecoration(c).copyWith(
         labelText: widget.label,
+        prefixIcon: Icon(Icons.lock_outline, color: c.textSecondary),
         suffixIcon: IconButton(
           tooltip: _hidden ? 'Mostra la password' : 'Nascondi la password',
           icon: Icon(

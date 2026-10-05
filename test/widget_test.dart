@@ -48,7 +48,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Math App'), findsOneWidget);
-    expect(find.byType(Lottie), findsOneWidget);
+    expect(find.byType(Lottie), findsNothing);
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();

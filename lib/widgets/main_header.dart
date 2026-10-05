@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'profile_button.dart';
 import 'profile_summary.dart';
+import 'reveal.dart';
 import 'school_choice_sheet.dart';
 import 'search_overlay.dart';
 
@@ -107,12 +108,12 @@ class MainHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: AppBar(
             automaticallyImplyLeading: false,
             toolbarHeight: kHeaderToolbarHeight,
-            leading: showBack ? BackButton(color: c.onHeaderBand) : null,
+            leading: showBack ? BackButton(color: c.textPrimary) : null,
             // Con la freccia il margine lo dà già lei: 30 in più staccherebbero
             // l'avatar dalla freccia come se fossero due cose diverse.
             titleSpacing: showBack ? 0 : kHeaderHorizontalMargin,
-            backgroundColor: c.headerBand,
-            foregroundColor: c.onHeaderBand,
+            backgroundColor: c.background,
+            foregroundColor: c.textPrimary,
             // Senza ombra: sotto gli angoli c'è lo sfondo della pagina, e
             // l'ombra lo sporcherebbe.
             elevation: 0,
@@ -149,7 +150,7 @@ class HeaderSearchButton extends StatelessWidget {
         Icons.search_rounded,
         // Bianco come il testo dell'header: l'icona sta sulla banda indaco, non
         // sullo sfondo della pagina.
-        color: AppColors.of(context).onHeaderBand,
+        color: AppColors.of(context).textPrimary,
       ),
       tooltip: 'Cerca',
       onPressed: () => showSearchOverlay(context),
@@ -169,10 +170,10 @@ class HeaderCustomizationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: const Key('header-customization'),
-      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).onHeaderBand),
+      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).textPrimary),
       tooltip: 'Personalizzazione',
-      onPressed: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => const CustomizationScreen())),
+      onPressed: () =>
+          pushRevealed(context, (_) => const CustomizationScreen()),
     );
   }
 }
@@ -225,7 +226,7 @@ class SchoolBrowseButton extends StatelessWidget {
                 key: const Key('header-school-browse'),
                 icon: Icon(
                   other ? Icons.visibility_outlined : Icons.school_outlined,
-                  color: AppColors.of(context).onHeaderBand,
+                  color: AppColors.of(context).textPrimary,
                 ),
                 tooltip: other ? 'Guardi $title' : 'Altre scuole',
                 onPressed: () => _pick(context),
@@ -240,7 +241,7 @@ class SchoolBrowseButton extends StatelessWidget {
                     style: TextStyle(
                       fontSize: AppText.label,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.of(context).onHeaderBand,
+                      color: AppColors.of(context).textPrimary,
                     ),
                   ),
                 ),

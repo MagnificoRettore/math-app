@@ -1,4 +1,5 @@
 import 'difficulty.dart';
+import 'exercise_step.dart';
 
 class Exercise {
   final String id;
@@ -8,7 +9,7 @@ class Exercise {
   final String problem;
   final List<String> formulas;
   final List<String> hints;
-  final List<String> steps;
+  final List<ExerciseStep> steps;
 
   const Exercise({
     required this.id,
@@ -37,8 +38,13 @@ class Exercise {
           .map((e) => e as String)
           .toList(),
       steps: (json['steps'] as List<dynamic>? ?? const [])
-          .map((e) => e as String)
+          .map(ExerciseStep.fromJson)
           .toList(),
     );
   }
+
+  /// La soluzione si fa passo dopo passo (ogni passaggio compare dopo aver
+  /// indovinato la sua domanda) solo se **tutti** i passaggi hanno una domanda:
+  /// con un passaggio senza, la guida si interromperebbe a metà.
+  bool get isGuided => steps.isNotEmpty && steps.every((s) => s.isGuided);
 }

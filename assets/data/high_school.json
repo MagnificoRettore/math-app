@@ -83,10 +83,30 @@
                     "Isola la variabile x portando i termini noti a destra."
                   ],
                   "steps": [
-                    "Porta il termine noto a destra cambiando segno: $$2x = 13 - 5$$",
-                    "Calcola: $$2x = 8$$",
-                    "Dividi per il coefficiente: $$x = \\frac{8}{2} = 4$$",
-                    "Verifica: $$2 \\cdot 4 + 5 = 8 + 5 = 13$$. Corretta."
+                    {
+                      "prompt": "Porta il termine noto $$5$$ a destra dell'uguale. Come diventa l'equazione?",
+                      "options": ["$$2x = 13 - 5$$", "$$2x = 13 + 5$$", "$$7x = 13$$"],
+                      "correctIndex": 0,
+                      "text": "Porta il termine noto a destra cambiando segno: $$2x = 13 - 5$$"
+                    },
+                    {
+                      "prompt": "Calcola $$13 - 5$$. Che equazione ottieni?",
+                      "options": ["$$2x = 18$$", "$$2x = 8$$", "$$x = 8$$"],
+                      "correctIndex": 1,
+                      "text": "Calcola: $$2x = 8$$"
+                    },
+                    {
+                      "prompt": "Dividi entrambi i membri per il coefficiente di $$x$$, cioè $$2$$. Quanto vale $$x$$?",
+                      "options": ["$$x = 16$$", "$$x = 6$$", "$$x = 4$$"],
+                      "correctIndex": 2,
+                      "text": "Dividi per il coefficiente: $$x = \\frac{8}{2} = 4$$"
+                    },
+                    {
+                      "prompt": "Verifica: sostituisci $$x = 4$$ in $$2x + 5$$. Quanto ottieni?",
+                      "options": ["$$9$$", "$$13$$", "$$8$$"],
+                      "correctIndex": 1,
+                      "text": "Verifica: $$2 \\cdot 4 + 5 = 8 + 5 = 13$$. Corretta."
+                    }
                   ]
                 }
               ]
@@ -147,7 +167,6 @@
               "title": "Moduli",
               "subtitle": "Variabile reale e valore assoluto",
               "icon": "functions",
-              "image": "assets/images/moduli.jpg",
               "exercises": [
                 {
                   "id": "mod-easy-1",

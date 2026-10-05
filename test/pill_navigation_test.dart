@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
+import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/course_screen.dart';
@@ -18,6 +19,7 @@ Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
   await ContentRepository.instance.resetForTest();
+  await LessonRepository.instance.resetForTest();
   await ProgressStore.instance.resetForTest();
   SearchIndex.instance.build(ContentRepository.instance.levels);
 }
@@ -497,4 +499,94 @@ void main() {
       expect(_attiva(tester), 'Home');
     },
   );
+
+  group('swipe fra le pagine principali', () {
+    Future<void> registra() => AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      password: 'segreta1',
+      schoolLevelId: 'high-school',
+    );
+
+    Future<void> swipe(WidgetTester tester, {required bool verso}) async {
+      // `verso` true: verso sinistra, la pagina successiva.
+      await tester.fling(
+        find.byKey(const Key('pill-swipe')),
+        Offset(verso ? -300 : 300, 0),
+        1000,
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('da Home: sinistra Esercizi, destra Lezioni', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+
+      await swipe(tester, verso: true);
+      expect(find.byType(CourseScreen), findsOneWidget);
+      expect(_attiva(tester), 'Esercizi');
+    });
+
+    testWidgets('da Home: verso destra apre Lezioni', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+
+      await swipe(tester, verso: false);
+      expect(find.byType(LessonListScreen), findsOneWidget);
+      expect(_attiva(tester), 'Lezioni');
+    });
+
+    testWidgets('da Lezioni: verso sinistra torna alla Home', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+      await swipe(tester, verso: false);
+      expect(find.byType(LessonListScreen), findsOneWidget);
+
+      await swipe(tester, verso: true);
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(LessonListScreen), findsNothing);
+    });
+
+    testWidgets('da Esercizi: verso destra torna alla Home', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+      await swipe(tester, verso: true);
+      expect(find.byType(CourseScreen), findsOneWidget);
+
+      await swipe(tester, verso: false);
+      expect(find.byType(HomeScreen), findsOneWidget);
+    });
+
+    testWidgets('trascinare il carosello degli argomenti scorre e basta', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(400, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await registra();
+      await _pumpHome(tester);
+
+      final lista = find.byKey(const Key('argomento-carousel-list'));
+      await tester.fling(lista, const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(CourseScreen), findsNothing);
+    });
+
+    testWidgets('ai capi non succede niente', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+      await swipe(tester, verso: false);
+      await swipe(tester, verso: false);
+      expect(find.byType(LessonListScreen), findsOneWidget);
+    });
+
+    testWidgets('l\'anno non si cambia più con lo swipe', (tester) async {
+      await registra();
+      await _pumpHome(tester);
+      await tester.tap(find.byKey(const ValueKey('pill-lessons')));
+      await tester.pumpAndSettle();
+      expect(find.byType(PageView), findsNothing);
+    });
+  });
 }

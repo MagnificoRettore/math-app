@@ -6,8 +6,9 @@ import '../theme/app_text.dart';
 class SectionHeader extends StatelessWidget {
   final String title;
   final Widget? trailing;
+  final double top;
 
-  const SectionHeader(this.title, {super.key, this.trailing});
+  const SectionHeader(this.title, {super.key, this.trailing, this.top = 24});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class SectionHeader extends StatelessWidget {
     // mentre le card sotto stavano a 20 — disallineati e con 20px in meno per
     // il testo, che è la metà delle volte finiva con i puntini.
     return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 12),
+      padding: EdgeInsets.only(top: top, bottom: 12),
       child: Row(
         children: [
           Expanded(

@@ -2,26 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_text.dart';
 
+/// Lo sfondo di un argomento o di un topic: il suo colore sfumato, con una
+/// velatura scura sopra e sotto perché il testo bianco si legga. Niente
+/// immagini: i topic non hanno più uno sfondo a scelta.
 class TopicBackground extends StatelessWidget {
-  final String? image;
   final Color color;
 
-  const TopicBackground({super.key, required this.image, required this.color});
+  const TopicBackground({super.key, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final bgImage = image;
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (bgImage != null && bgImage.isNotEmpty)
-          Image.asset(
-            bgImage,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _Gradient(color: color),
-          )
-        else
-          _Gradient(color: color),
+        _Gradient(color: color),
         DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -44,14 +38,12 @@ class TopicBackground extends StatelessWidget {
 class TopicHeader extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final String? image;
   final Color color;
   final double height;
 
   const TopicHeader({
     super.key,
     required this.title,
-    required this.image,
     required this.color,
     this.subtitle,
     this.height = 200,
@@ -65,7 +57,7 @@ class TopicHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          TopicBackground(image: image, color: color),
+          TopicBackground(color: color),
           Positioned(
             left: 20,
             right: 20,

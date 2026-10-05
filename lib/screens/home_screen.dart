@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../data/content_repository.dart';
 import '../theme/app_motion.dart';
 import '../widgets/argomento_carousel.dart';
+import '../widgets/jump_back_in_card.dart';
+import '../widgets/math_fact_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
@@ -93,17 +95,20 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
         _enter(context, 0, const StreakCard()),
-        _enter(context, 1, const ArgomentoCarousel()),
+        _enter(context, 1, const JumpBackInCard()),
+        _enter(context, 2, const ArgomentoCarousel()),
         const SizedBox(height: 24),
         _enter(
           context,
-          2,
+          3,
           MissionHero(
             showShortcuts: true,
             onTap: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const MissionScreen())),
           ),
         ),
+        const SizedBox(height: 24),
+        _enter(context, 4, const MathFactCard()),
       ],
     );
   }

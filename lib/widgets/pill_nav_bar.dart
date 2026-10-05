@@ -34,6 +34,9 @@ const double _kBandHeight = 72;
 const double _kHomeSize = 70;
 const double _kHomeStep = 5;
 
+/// Il rientro delle tre colonne dai bordi, che avvicina i lati a Home.
+const double _kSideInset = 28;
+
 /// Transizione sobria per il cambio sezione: la pagina nuova sfuma sopra
 /// quella attuale, così la pillola resta visivamente in sovraimpressione
 /// mentre il contenuto cambia sotto di essa.
@@ -54,9 +57,20 @@ Route<T> _fadeRoute<T>(Widget page) {
   );
 }
 
+/// Velocità minima, in px/s, perché un trascinamento orizzontale valga come
+/// swipe fra le pagine principali.
+const double _kSwipeVelocity = 300;
+
 /// Inquadra il body con la barra di navigazione in basso: il contenuto sta
 /// sopra la barra, che sotto gli angoli smussati lascia vedere la pagina.
-class PillNavOverlay extends StatelessWidget {
+///
+/// Fra le tre pagine principali si passa anche con lo swipe orizzontale, nello
+/// stesso ordine della barra (Lezioni, Home, Esercizi): scorrendo verso
+/// sinistra si va alla successiva, verso destra alla precedente. Lo swipe fa
+/// quello che farebbe il tocco sulla barra. È un `GestureDetector` fuori dal
+/// contenuto: una lista orizzontale dentro (il carosello, gli anni) vince
+/// l'arena con il suo trascinamento e scorre da sé, senza cambiare pagina.
+class PillNavOverlay extends StatefulWidget {
   final PillTab selected;
   final Widget child;
 
@@ -67,6 +81,23 @@ class PillNavOverlay extends StatelessWidget {
   });
 
   @override
+  State<PillNavOverlay> createState() => _PillNavOverlayState();
+}
+
+class _PillNavOverlayState extends State<PillNavOverlay> {
+  final _bar = GlobalKey<_PillNavBarState>();
+
+  void _onSwipe(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() < _kSwipeVelocity) return;
+    final tabs = PillTab.values;
+    // Verso sinistra (velocità negativa) la pagina successiva.
+    final next = tabs.indexOf(widget.selected) + (velocity < 0 ? 1 : -1);
+    if (next < 0 || next >= tabs.length) return;
+    _bar.currentState?._select(tabs[next]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Inset di sistema in basso: la fascia indaco ci scende sotto, i bottoni
     // e il contenuto restano sopra.
@@ -75,16 +106,23 @@ class PillNavOverlay extends StatelessWidget {
     return Stack(
       children: [
         Positioned.fill(
-          child: Padding(
-            padding: EdgeInsets.only(bottom: kPillBottomReserve + systemBottom),
-            child: child,
+          child: GestureDetector(
+            key: const Key('pill-swipe'),
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: _onSwipe,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: kPillBottomReserve + systemBottom,
+              ),
+              child: widget.child,
+            ),
           ),
         ),
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: PillNavBar(selected: selected),
+          child: PillNavBar(key: _bar, selected: widget.selected),
         ),
       ],
     );
@@ -238,23 +276,28 @@ class _PillNavBarState extends State<PillNavBar> {
             right: 0,
             bottom: systemBottom,
             height: kPillBottomReserve,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                for (final tab in PillTab.values)
-                  Expanded(
-                    child: tab == PillTab.home
-                        ? _HomeButton(
-                            active: current == tab,
-                            onTap: () => _select(tab),
-                          )
-                        : _SideButton(
-                            tab: tab,
-                            active: current == tab,
-                            onTap: () => _select(tab),
-                          ),
-                  ),
-              ],
+            // Le tre colonne non arrivano ai bordi: Lezioni ed Esercizi stanno
+            // più vicine a Home che a un terzo esatto dello schermo.
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _kSideInset),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (final tab in PillTab.values)
+                    Expanded(
+                      child: tab == PillTab.home
+                          ? _HomeButton(
+                              active: current == tab,
+                              onTap: () => _select(tab),
+                            )
+                          : _SideButton(
+                              tab: tab,
+                              active: current == tab,
+                              onTap: () => _select(tab),
+                            ),
+                    ),
+                ],
+              ),
             ),
           ),
         ],
@@ -293,6 +336,11 @@ Widget _icon(PillTab tab, Color color, double size) {
 /// Il nome della sezione sotto l'icona: Outfit 600 da 14.
 Widget _label(PillTab tab, Color color) => Text(
   _labels[tab]!,
+  // Una riga sola: con le colonne rientrate, su un telefono stretto e il
+  // testo ingrandito «Esercizi» andrebbe a capo e sforerebbe la fascia.
+  maxLines: 1,
+  softWrap: false,
+  overflow: TextOverflow.ellipsis,
   style: TextStyle(
     fontFamily: AppText.headingFont,
     fontSize: AppText.bodyLarge,

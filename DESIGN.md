@@ -11,7 +11,7 @@ Il riferimento per com'è fatta l'app e per come vanno fatte le parti nuove: col
 La fonte è il canvas **«Illustrazioni App Educativa»** (claude.ai/artifact/UjtXU3sEDTVdSC7RuCYdjX): le tavole «Componenti UI» e «Creazione profilo» per l'interfaccia, quattro tavole di illustrazioni.
 
 - **Un quaderno colorato, non un'app da ufficio.** Indaco profondo e giallo su un fondo crema, caratteri geometrici, oggetti di scuola (la spirale, matite, il biglietto del traguardo).
-- **Solo i bottoni si sollevano, con un gradino pieno, non con un'ombra sfumata.** Sotto il bottone c'è un gradino di colore pieno, più scuro del suo; premuto, il bottone scende sul gradino. **Le card sono piatte, senza ombra.**
+- **Solo i bottoni si sollevano, con un gradino pieno, non con un'ombra sfumata.** Sotto il bottone c'è un gradino di colore pieno, più scuro del suo; premuto, il bottone scende sul gradino. **Le card hanno solo un'ombra fine e bassa**, che le stacca dal crema senza farle galleggiare.
 - **Un tema solo, chiaro.** Il canvas non ha una versione scura.
 - **Il colore decora, il contrasto si rispetta.** I colori del canvas restano per riempimenti e decori; come testo si usano toni scuri della stessa famiglia, sempre oltre 4.5:1.
 - **Si muove poco e in fretta.** 120–300 ms, curve morbide, e niente movimento per chi l'ha chiesto al sistema.
@@ -33,7 +33,7 @@ Tutti in `AppPalette` (`lib/theme/app_colors.dart`), letti con `AppColors.of(con
 | `accent` | `#2B1A6B` | Indaco: primary, bottone principale, bordo col fuoco | 14.4 / 13.1 |
 | `accentSoft` | `#ECE7FA` | Lilla chiaro: fondi di funzioni e piastre | — |
 | `border` | `#CFC7E6` | Bordo lilla dei controlli a riposo | — |
-| `headerBand` / `onHeaderBand` | `#2B1A6B` / `#FFFFFF` | Banda dell'header e i suoi testi (bianco 14.4:1, all'80% 9.6:1) | — |
+| `headerBand` / `onHeaderBand` | `#2B1A6B` / `#FFFFFF` | Fascia della barra di navigazione e testata di registrazione e benvenuto, coi loro testi (bianco 14.4:1). **Non** l'header delle pagine principali | — |
 
 ### Colori del canvas (decoro, riempimento, gradini)
 
@@ -106,17 +106,17 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 | Elemento | Raggio | Bordo | Gradino |
 |---|---|---|---|
 | Bottone (`AppButton`) | pillola | contorno: 3 `accent` | 5 px pieno, colore `…Deep` |
-| Card (`AppCard`) | 20 (`kCardRadius`) | nessuno; 3 `accent` se scelta | nessuno: piatta |
+| Card (`AppCard`) | 20 (`kCardRadius`) | nessuno; 3 `accent` se scelta | nessuno; ombra fine (`cardShadow`) |
 | Campo di testo | 14 | 3 `border`, 3 `accent` col fuoco, 3 `hard` in errore | — |
 | Anno (`YearTabs`) | 12 | 3 `border`; scelto 3 `yellowDeep` su `yellow` | — |
 | Opzione di risposta | 14 | 3 `border`, poi il colore dello stato | — |
 | Barra di avanzamento alta | 4 | 2 `yellowDeep` | — |
-| Card «Traguardo» | 18 | — | nessuno: piatta |
+| Card «Traguardo» | 18 | — | nessuno; ombra fine (`cardShadow`) |
 | Banda dell'header | in basso 28 | — | — |
 | Barra di navigazione | in alto 28; Home tonda | Home: 6 `background` | Home: 5 px pieno, `yellowDeep` accesa, `borderDeep` spenta |
 | Illustrazione | 10% della larghezza | — | — |
 
-**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale) e **vale solo per i bottoni**, compreso il cerchio di Home della barra di navigazione. Le card non hanno nessuna ombra, né piena né sfumata; le ombre sfumate non fanno parte del design.
+**Il gradino è un'ombra senza sfumatura** (`BoxShadow` con `blurRadius` 0 e uno scostamento verticale) e **vale solo per i bottoni**, compreso il cerchio di Home della barra di navigazione. Le card non hanno gradino ma **un'ombra fine**, l'unica sfumata del design: `cardShadow` (`lib/widgets/app_card.dart`), `shadow` (indaco al 12%) con blur 10, scostata di 3 in basso. Vale per `AppCard`, la card «Traguardo» e le card del carosello, che ha la lista senza ritaglio (`Clip.none`) perché l'ombra scenda sotto la striscia. Nessun'altra ombra sfumata.
 
 ---
 
@@ -132,11 +132,11 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 ## 6. Componenti
 
 ### Header — `MainHeaderAppBar` (`lib/widgets/main_header.dart`)
-Banda indaco appoggiata al bordo dello schermo, angoli in basso a 28, sotto gli angoli lo sfondo. Identità a sinistra (avatar con badge di modifica, nome in Outfit 600, scuola all'80% di bianco), lente e personalizzazione bianche a destra. Gli anni stanno **sotto** la banda, sullo sfondo. Nelle sotto-pagine che la tengono (l'argomento) c'è la freccia indietro prima dell'avatar.
+Banda **del colore dello sfondo**, a tutta larghezza (non si stacca dalla pagina). Identità a sinistra (avatar con anello lilla e badge di modifica, nome in Outfit 600 `textPrimary`, scuola `textSecondary`), lente e personalizzazione in `textPrimary` a destra. Profilo, personalizzazione e ricerca **si espandono dal pulsante**: un cerchio che cresce dal suo centro in `AppMotion.slow` e tornando indietro si ritira (`reveal.dart`). Gli anni stanno **sotto** la banda, sullo sfondo. Nelle sotto-pagine che la tengono (l'argomento) c'è la freccia indietro prima dell'avatar.
 
 ### Barra di navigazione — `PillNavBar` (`lib/widgets/pill_nav_bar.dart`)
 Dalla tavola «Navbar» del canvas. È alta 92 e ha una fascia `headerBand` di 72 a tutta larghezza, con gli angoli in alto a 28; sotto gli angoli c'è la pagina. Sta solo sulle tre pagine principali, e il contenuto sta sopra di lei.
-- **Lezioni ed Esercizi** stanno ai lati, sulla fascia. Hanno un'icona a tratto da 28 (il libro aperto, il foglio con la spunta e la matita), il nome in Outfit 600 da 14 e sotto un trattino 22×4. Quella scelta è `yellow` col trattino; le altre sono `border`, senza trattino.
+- **Lezioni ed Esercizi** stanno ai lati, sulla fascia, avvicinati a Home: le tre colonne rientrano di 28 dai bordi. Hanno un'icona a tratto da 28 (il libro aperto, il foglio con la spunta e la matita), il nome in Outfit 600 da 14 e sotto un trattino 22×4. Quella scelta è `yellow` col trattino; le altre sono `border`, senza trattino.
 - **Home** sta al centro: un cerchio da 70 che sporge sopra la fascia, con il bordo `background` da 6, il gradino pieno da 5 e la casa a tratto `textPrimary` da 30. Acceso è `yellow` su `yellowDeep`, spento `surface` su `borderDeep`. **Premuto scende sul gradino come un bottone**; i lati no. Sotto il cerchio c'è il nome, colorato come i lati.
 - Lo stato lo dicono il colore e, allo screen reader, «selezionato». Non c'è un indicatore che scorre né il trascinamento.
 
@@ -151,8 +151,8 @@ Pillola in Outfit 600 alta 52, sollevata da un gradino di 5 px.
 Nelle schermate non si usano `FilledButton` né `OutlinedButton`.
 
 ### Card — `AppCard` (`lib/widgets/app_card.dart`)
-Bianca, raggio 20, **piatta: nessuna ombra e nessun gradino**, comprese quelle del carosello. Varianti fatte nelle schermate:
-- **Traguardo** (`StreakCard`): arancio, piatta, tagliandi bianchi a sinistra, striscia chiara a destra; contenuti su riquadri bianchi.
+Bianca, raggio 20, **senza gradino e con l'ombra fine** `cardShadow`, comprese quelle del carosello. Varianti fatte nelle schermate:
+- **Traguardo** (`StreakCard`): arancio, con l'ombra fine, quattro tagliandi bianchi a sinistra, striscia chiara a destra. È **bassa** (circa 136): un riquadro bianco con «TRAGUARDO» e il record sulla stessa riga e la serie in Outfit sotto, poi i sette blocchi della settimana alti 26. Niente barre degli obiettivi.
 - **Scelta** (`SchoolLevelTile`): bordo indaco da 3.
 
 ### Campi — `AppTheme.fieldDecoration`
@@ -166,6 +166,9 @@ Da 10 px in su: fondo `yellowSoft`, bordo `yellowDeep`, riempimento giallo a str
 - **Avatar** (`AvatarPicker`): cerchi colorati a turno (giallo, turchese, arancio, lilla) con l'icona inchiostro; scelto con bordo indaco e due anelli, bianco e giallo.
 - **Opzioni di risposta** (`McqOptionTile`): bordo da 3, verde giusta, rosso sbagliata, indaco scelta.
 
+### Segno «completata» — `CompletedBadge` (`lib/widgets/completed_badge.dart`)
+Una spunta bianca in un tondino `easy` da 26, con il bordo bianco da 2 perché si legga anche sui fondi colorati. Sta **nell'angolo in alto a destra**, a 10 dai bordi, di ogni card completata: gli argomenti nella pagina Lezioni e nel carosello della Home (completato = tutte le sue lezioni) e le lezioni nella pagina dell'argomento. La freccia a destra resta. Allo screen reader dice «Completata».
+
 ### Badge
 Pillola gialla con l'inchiostro Medium 500. I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
 
@@ -175,7 +178,9 @@ Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Outfit e una 
 ### Testata ondulata — `WaveBottomClipper` (`lib/widgets/wave_clipper.dart`)
 Il bordo in basso della testata di «Creazione profilo», scalato sul riquadro: nel benvenuto (con gli angoli in alto arrotondati) e nella registrazione a passi (a filo dello schermo).
 
-### Toolbar delle lezioni (`M3EToolbar` in `LessonScreen`)
+### Bottoni della lezione (`LessonScreen`)
+**Galleggiano sopra le card e restano fermi** mentre le card scorrono, sul fondo della card e a filo della sua colonna di testo: la toolbar degli strumenti a sinistra, il reload della verifica (`AppButton` `outline` solo icona) e «Completa la lezione» a destra, tutti alti 49 col gradino. Ognuno c'è solo dove serve per la card corrente, e compare o sparisce con una dissolvenza e una scala da 0.8 in `medium`. Il testo della card scorre fin sopra di loro.
+
 Il FAB degli strumenti e il pannello che si apre sono **indaco come la barra di avanzamento della lezione**, con le icone bianche. I colori del FAB vengono da `AppTheme.lessonToolbar`, un tema di `material_3_expressive`: il pacchetto non legge il `Theme` di Flutter, e senza resterebbe sul lilla di default di Material 3.
 
 ### Grafici — `GraphView` (`lib/widgets/graph/`)
@@ -201,9 +206,9 @@ Le quattro tavole del canvas, in SVG statico in `assets/illustrations/`, mostrat
 | `AppIllustration` | Soggetto | Dove |
 |---|---|---|
 | `idea` | Lampadina con gli strumenti | Splash |
-| `lezione` | Laptop con calcolatrice e grafici | Onboarding, gli esercizi |
-| `albero` | Albero che cresce dal libro | Onboarding, la scuola; stati vuoti «in arrivo» |
-| `razzo` | Razzo che decolla dal libro | Onboarding, la serie; stati vuoti di merito |
+| `lezione` | Laptop con calcolatrice e grafici | Gli esercizi |
+| `albero` | Albero che cresce dal libro | La scuola; stati vuoti «in arrivo» |
+| `razzo` | Razzo che decolla dal libro | La serie; stati vuoti di merito |
 
 Una tavola nuova si converte come le altre: sfondo fissato, `<use>` espansi col colore scritto, testi in Plus Jakarta Sans 500; un carattere che manca (come la `Σ`) si disegna come tracciato.
 
@@ -227,6 +232,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Bottone premuto | Scende di 5 px e il gradino va a zero; torna su al rilascio |
 | Avatar scelto | Cresce a 1.08 col rimbalzo; bordo e anelli crescono |
 | Anno scelto | Colore, bordo e testi in `medium`; nessuna spunta |
+| Bottoni della lezione | Compaiono e spariscono con dissolvenza e scala da 0.8 in `medium`, solo sulle card dove servono |
 | Sezione della barra di navigazione | Il trattino dei lati cambia colore in `medium`; il cerchio di Home in `fast`, e premuto scende di 5 px col gradino a zero |
 | Barra di avanzamento | Il riempimento va al valore nuovo; al primo disegno è già lì |
 | Passi della registrazione | Il contenuto entra con dissolvenza e scorrimento laterale (avanti da destra, indietro da sinistra); il titolo cambia in dissolvenza |
@@ -257,7 +263,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Fare | Non fare |
 |---|---|
 | Colori da `AppPalette`, caratteri da `AppText`, tempi da `AppMotion` | Scrivere colori, misure di testo o durate nei widget |
-| Gradino pieno sotto i bottoni; card piatte | Ombre sfumate, aloni, sfumature di sfondo, ombre o gradini sulle card |
+| Gradino pieno sotto i bottoni; sotto le card solo `cardShadow` | Altre ombre sfumate, ombre larghe o scure, aloni, sfumature di sfondo, gradini sulle card |
 | Inchiostro sul giallo e sull'arancio | Bianco sul giallo |
 | `AppButton` per ogni bottone d'azione | `FilledButton`, `OutlinedButton`, `ElevatedButton` nelle schermate |
 | Bordo da 3 sui controlli che si scelgono | Bordi da 1 sui controlli |
@@ -282,6 +288,7 @@ Durate e curve stanno in **`AppMotion`** (`lib/theme/app_motion.dart`), mai un l
 | Barra di navigazione | `lib/widgets/pill_nav_bar.dart` |
 | Illustrazioni | `lib/widgets/illustration.dart`, `assets/illustrations/` |
 | Stati vuoti | `lib/widgets/empty_state.dart` |
+| Segno «completata» | `lib/widgets/completed_badge.dart` |
 | Grafici | `lib/widgets/graph/` (`graph_view.dart`, `graph_painter.dart`, `graph_layout.dart`, `graph_scale.dart`), `lib/theme/chart_palette.dart` |
 
 ---
@@ -292,6 +299,17 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-05 | Pagina dell'esercizio: soluzione guidata passo dopo passo (una domanda a scelta multipla alla volta, il passaggio si appende quando si indovina) per gli esercizi che hanno le domande; il percorso in alto va a capo. |
+| 2026-10-05 | Esercizi: topic senza immagine di sfondo (solo il colore sfumato); toolbar degli strumenti identica a quella delle lezioni (`AppToolsBar`) su elenco e pagina dell'esercizio, con la calcolatrice funzionante al posto delle azioni vuote. |
+| 2026-10-05 | Argomenti: card del carosello più alte (1,15 × la larghezza, tutte uguali); barra di progresso nelle card degli argomenti; card delle lezioni senza alone; pulsante «Vai agli esercizi» in basso a destra della pagina dell'argomento; formule sole nei quiz delle lezioni alla stessa altezza del testo. |
+| 2026-10-05 | Home e navigazione: header del colore dello sfondo (via l'indaco, che resta alla barra di navigazione); pagine che si espandono dal pulsante di profilo, personalizzazione e ricerca; «Jump Back In» sempre dopo la serie, con gli stati ospite e vuoto; card «Lo sapevi?» dopo la missione (design provvisorio); swipe orizzontale fra Lezioni, Home ed Esercizi, mentre l'anno si cambia solo dagli `YearTabs`. |
+| 2026-10-05 | Registrazione rifatta: testata con la sola freccia e il titolo al centro (via «PASSO X DI N» e barra), avatar grande al centro che apre sopra di sé il rettangolo degli avatar, errori dei campi solo dopo «Continua», metro della password a tutta larghezza con la scritta sotto, passo dell'anno per medie e superiori e riepilogo animato a profilo creato. Barra di progresso nelle card degli argomenti (pagina Lezioni). |
+| 2026-10-05 | Piccole correzioni: onboarding senza illustrazioni e splash senza animazione Lottie; campo password con il lucchetto; «Password dimenticata?» centrata; registrazione senza Google; card delle lezioni senza alone; meno spazio fra serie e «Argomenti» (`SectionHeader.top`). |
+| 2026-10-04 | Bottoni della lezione fuori dalle card: toolbar, reload e «Completa la lezione» galleggiano fermi sul fondo della card, ognuno solo dove serve, e compaiono con dissolvenza e scala. Il reload diventa un `AppButton` `outline`. |
+| 2026-10-04 | Segno «completata» uguale per tutte le card di argomenti e lezioni: spunta bianca in un tondino verde nell'angolo in alto a destra, anche nel carosello. Prima l'argomento aveva una pillola «Completata» e la lezione una spunta al posto della freccia. |
+| 2026-10-04 | Card con un'ombra fine (`cardShadow`: `shadow`, blur 10, 3 in basso) su `AppCard`, la card «Traguardo» e le card del carosello; prima erano piatte. |
+| 2026-10-04 | Card «Traguardo» alta la metà: via le barre degli obiettivi di oggi, record sulla riga di «TRAGUARDO», settimana a 26, quattro tagliandi. |
+| 2026-10-04 | Barra di navigazione: Lezioni ed Esercizi più vicini a Home (colonne rientrate di 28 dai bordi). |
 | 2026-10-04 | Barra di navigazione rifatta dalla tavola «Navbar» del canvas: fascia indaco a tutta larghezza con gli angoli in alto a 28, Lezioni ed Esercizi ai lati col trattino giallo, Home in un cerchio che sporge col bordo crema e il gradino pieno, che premuto scende come un bottone; fascia da 72, barra da 92. Via la pillola in vetro e il trascinamento; nuovo `borderDeep`. La Home è serie, argomenti (con la testata «Argomenti») e missione: via la card «riprendi», «Per te» e i punti deboli. |
 | 2026-10-04 | Caratteri: Outfit (600) al posto di Fredoka, Plus Jakarta Sans (400, 500) al posto di Nunito; etichette dei controlli, badge e corpo delle lezioni (titoli, intestazioni, grassetto) a 500; il nome nella banda in Outfit. Card piatte, anche nel carosello e la card «Traguardo»; card «riprendi» senza righe; anno scelto senza spunta. Via `cardShadow` e `paperLine`; `orangeDeep` resta per il play e i grafici. La `Σ` del razzo è un tracciato. |
 | 2026-10-04 | Grafici, fase 3: retta numerica con intervalli a righe, estremi pieni o vuoti, punti sulla retta. |

@@ -25,32 +25,35 @@ class StrengthMeter extends StatelessWidget {
       _ => c.teal,
     };
 
-    return Row(
+    // I quattro segmenti prendono tutta la larghezza; la scritta sta sotto.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (var i = 0; i < 4; i++) ...[
-          if (i > 0) const SizedBox(width: 4),
-          Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              height: 4,
-              decoration: BoxDecoration(
-                color: password.isEmpty || i >= score ? c.border : color,
-                borderRadius: BorderRadius.circular(2),
+        Row(
+          children: [
+            for (var i = 0; i < 4; i++) ...[
+              if (i > 0) const SizedBox(width: 4),
+              Expanded(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: password.isEmpty || i >= score ? c.border : color,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
-        const SizedBox(width: 10),
-        SizedBox(
-          width: 74,
-          child: Text(
-            label ?? '',
-            textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: AppText.caption,
-              fontWeight: FontWeight.w500,
-              color: password.isEmpty ? c.textSecondary : color,
-            ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Riga sempre presente, anche vuota: il form sotto non salta.
+        Text(
+          label ?? ' ',
+          style: TextStyle(
+            fontSize: AppText.caption,
+            fontWeight: FontWeight.w500,
+            color: password.isEmpty ? c.textSecondary : color,
           ),
         ),
       ],

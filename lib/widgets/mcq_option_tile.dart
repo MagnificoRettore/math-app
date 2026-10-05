@@ -68,7 +68,11 @@ class McqOptionTile extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: MathText(label, fontSize: AppText.titleSmall * scale),
+                  child: MathText(
+                    label,
+                    fontSize: AppText.titleSmall * scale,
+                    inline: true,
+                  ),
                 ),
                 if (check != null) ...[
                   const SizedBox(width: 10),
@@ -159,7 +163,11 @@ class McqFeedbackCard extends StatelessWidget {
           ),
           if (message.isNotEmpty) ...[
             const SizedBox(height: 8),
-            MathText(message, fontSize: AppText.bodyMedium * scale),
+            MathText(
+              message,
+              fontSize: AppText.bodyMedium * scale,
+              inline: true,
+            ),
           ],
         ],
       ),

@@ -137,9 +137,24 @@
                     "Porta il termine noto a destra cambiando segno."
                   ],
                   "steps": [
-                    "Sottrai 4 da entrambi i membri: $$3x = 13 - 4$$",
-                    "Calcola: $$3x = 9$$",
-                    "Dividi per 3: $$x = 3$$"
+                    {
+                      "prompt": "Per isolare $$3x$$, cosa fai ai due membri di $$3x + 4 = 13$$?",
+                      "options": ["Sommo $$4$$", "Sottraggo $$4$$", "Divido per $$4$$"],
+                      "correctIndex": 1,
+                      "text": "Sottrai 4 da entrambi i membri: $$3x = 13 - 4$$"
+                    },
+                    {
+                      "prompt": "Calcola $$13 - 4$$. Che equazione ottieni?",
+                      "options": ["$$3x = 17$$", "$$3x = 9$$", "$$x = 9$$"],
+                      "correctIndex": 1,
+                      "text": "Calcola: $$3x = 9$$"
+                    },
+                    {
+                      "prompt": "Dividi entrambi i membri per $$3$$. Quanto vale $$x$$?",
+                      "options": ["$$x = 27$$", "$$x = 6$$", "$$x = 3$$"],
+                      "correctIndex": 2,
+                      "text": "Dividi per 3: $$x = 3$$"
+                    }
                   ]
                 }
               ]

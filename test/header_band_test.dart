@@ -24,10 +24,6 @@ const _avatarKey = Key('home-profile-avatar');
 const _badgeKey = Key('home-profile-edit-badge');
 const _ospiteKey = Key('profile-button-guest');
 
-/// L'indaco del design, il colore della banda dell'header. Dentro la banda i
-/// colori sono bianchi.
-const Color _bluHeader = Color(0xFF2B1A6B);
-
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
   await AuthStore.instance.resetForTest();
@@ -66,7 +62,9 @@ double _contrastoSu(Color sopra, Color sotto) {
   final composto = Color.lerp(sotto, sopra, sopra.a)!;
   final la = composto.computeLuminance();
   final lb = sotto.computeLuminance();
-  return (la + 0.05) / (lb + 0.05);
+  final chiaro = la > lb ? la : lb;
+  final scuro = la > lb ? lb : la;
+  return (chiaro + 0.05) / (scuro + 0.05);
 }
 
 /// Larghezza dello schermo in pixel logici, come la vede il layout.
@@ -78,26 +76,24 @@ void main() {
 
   setUp(_prepare);
 
-  testWidgets('l\'header è una banda indaco che attraversa tutta la larghezza', (
-    tester,
-  ) async {
-    await _register(tester);
+  testWidgets(
+    'l\'header è una banda color sfondo che attraversa tutta la larghezza',
+    (tester) async {
+      await _register(tester);
 
-    // Il blu sta sull'`AppBar`, non in una scatola attorno al testo: parte dai
-    // due bordi dello schermo, quindi non è una pilla con i bordi curvi dentro
-    // una pagina colorata.
-    final appBar = tester.widget<AppBar>(find.byType(AppBar));
-    expect(appBar.backgroundColor, _bluHeader);
-    expect(
-      appBar.foregroundColor,
-      AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
-    );
+      // Il colore sta sull'`AppBar`, non in una scatola attorno al testo, ed è
+      // quello dello sfondo della pagina: la banda non si stacca.
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      final colori = AppColors.of(tester.element(find.byKey(_identitaKey)));
+      expect(appBar.backgroundColor, colori.background);
+      expect(appBar.foregroundColor, colori.textPrimary);
 
-    final banda = tester.getRect(find.byType(AppBar));
-    expect(banda.left, 0);
-    expect(banda.right, closeTo(_schermo(tester), 1));
-    expect(banda.height, closeTo(kHeaderToolbarHeight, 1));
-  });
+      final banda = tester.getRect(find.byType(AppBar));
+      expect(banda.left, 0);
+      expect(banda.right, closeTo(_schermo(tester), 1));
+      expect(banda.height, closeTo(kHeaderToolbarHeight, 1));
+    },
+  );
 
   testWidgets('gli angoli in basso sono smussati e sotto c\'è lo sfondo', (
     tester,
@@ -148,7 +144,7 @@ void main() {
 
     final tabs = find.byType(YearTabs);
     expect(tabs, findsOneWidget);
-    // Fuori dall'`AppBar`, quindi fuori dal blu.
+    // Fuori dall'`AppBar`.
     expect(
       find.ancestor(of: tabs, matching: find.byType(AppBar)),
       findsNothing,
@@ -157,7 +153,7 @@ void main() {
     expect(tester.getRect(tabs).top, greaterThanOrEqualTo(banda.bottom));
   });
 
-  testWidgets('le icone stanno sulla banda e sono bianche come il testo', (
+  testWidgets('le icone dell\'header hanno il colore del testo', (
     tester,
   ) async {
     await _register(tester);
@@ -166,7 +162,7 @@ void main() {
       final widget = tester.widget<Icon>(find.byIcon(icona).first);
       expect(
         widget.color,
-        AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
+        AppColors.of(tester.element(find.byKey(_identitaKey))).textPrimary,
         reason: '$icona',
       );
     }
@@ -187,7 +183,7 @@ void main() {
     expect(stile.fontWeight, FontWeight.w600);
     expect(
       stile.color,
-      AppColors.of(tester.element(find.byKey(_identitaKey))).onHeaderBand,
+      AppColors.of(tester.element(find.byKey(_identitaKey))).textPrimary,
     );
 
     // Le due righe sono impilate e alliniate a sinistra, non affiancate.
@@ -197,27 +193,25 @@ void main() {
     expect(scuola.left, closeTo(nome.left, 1));
   });
 
-  testWidgets(
-    'contrasto: bianco e bianco all\'80% sull\'indaco passano 4.5:1',
-    (tester) async {
-      // Il secondario del tema sull'indaco non legge: dentro l'header la riga
-      // sotto è bianco all'80%, non il colore secondario della pagina.
-      await _register(tester);
+  testWidgets('contrasto: nome e scuola sullo sfondo passano 4.5:1', (
+    tester,
+  ) async {
+    await _register(tester);
 
-      final scuola = tester.widget<Text>(find.byKey(_scuolaKey)).style!;
-      expect(scuola.color!.a, lessThan(1.0));
-      expect(
-        _contrastoSu(scuola.color!, _bluHeader),
-        greaterThan(4.5),
-        reason: 'riga della scuola',
-      );
-      expect(
-        _contrastoSu(Colors.white, _bluHeader),
-        greaterThan(4.5),
-        reason: 'nome',
-      );
-    },
-  );
+    final colori = AppColors.of(tester.element(find.byKey(_identitaKey)));
+    final scuola = tester.widget<Text>(find.byKey(_scuolaKey)).style!;
+    expect(
+      _contrastoSu(scuola.color!, colori.background),
+      greaterThan(4.5),
+      reason: 'riga della scuola',
+    );
+    final nome = tester.widget<Text>(find.byKey(_nomeKey)).style!;
+    expect(
+      _contrastoSu(nome.color!, colori.background),
+      greaterThan(4.5),
+      reason: 'nome',
+    );
+  });
 
   testWidgets('avatar a sinistra del nome, sulla stessa riga', (tester) async {
     await _register(tester);

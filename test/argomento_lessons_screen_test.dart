@@ -2,19 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:math_app/data/auth_store.dart';
+import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
+import 'package:math_app/screens/course_screen.dart';
+import 'package:math_app/screens/exercise_feed_screen.dart';
+import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
+import 'package:math_app/widgets/app_card.dart';
+import 'package:math_app/widgets/completed_badge.dart';
 import 'package:math_app/widgets/main_header.dart';
+import 'package:math_app/widgets/progress_bar.dart';
+import 'package:math_app/widgets/year_tabs.dart';
+
+final _segno = find.byKey(const Key('completed-badge'));
+
+/// Il segno sta nell'angolo in alto a destra della card che contiene [testo],
+/// a [CompletedBadge.inset] dai due bordi.
+void _nellAngolo(WidgetTester tester, Finder testo) {
+  final card = tester.getRect(
+    find.ancestor(of: testo, matching: find.byType(AppCard)).first,
+  );
+  final segno = tester.getRect(_segno);
+  expect(segno.top - card.top, closeTo(CompletedBadge.inset, 0.5));
+  expect(card.right - segno.right, closeTo(CompletedBadge.inset, 0.5));
+  expect(segno.width, CompletedBadge.size);
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    await AuthStore.instance.resetForTest();
     await ProgressStore.instance.resetForTest();
     await LessonRepository.instance.resetForTest();
+    await ContentRepository.instance.resetForTest();
   });
 
   Widget host(String levelId) {
@@ -53,12 +78,87 @@ void main() {
     expect(find.byType(LessonScreen), findsOneWidget);
   });
 
-  testWidgets('lezione completata mostra il badge', (tester) async {
-    await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
-    await tester.pumpWidget(host('high-school'));
-    await tester.pump();
+  testWidgets(
+    'lezione completata: spunta verde nell\'angolo in alto a destra',
+    (tester) async {
+      await tester.pumpWidget(host('high-school'));
+      await tester.pump();
+      expect(_segno, findsNothing);
 
-    expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
+      await tester.pump();
+
+      expect(_segno, findsOneWidget);
+      _nellAngolo(tester, find.text('Concetti e risoluzione guidata'));
+    },
+  );
+
+  testWidgets('argomento completato: la stessa spunta sulla sua card', (
+    tester,
+  ) async {
+    await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LessonListScreen(levelId: 'high-school', showPill: false),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Equazioni di primo grado ha una lezione sola: completata quella, lo è
+    // l'argomento. L'argomento d'esempio dello stesso anno no.
+    expect(_segno, findsOneWidget);
+    _nellAngolo(tester, find.text('Equazioni di primo grado'));
+  });
+
+  testWidgets('la card dell\'argomento ha la barra delle lezioni completate', (
+    tester,
+  ) async {
+    Future<double> barra() async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: LessonListScreen(levelId: 'high-school', showPill: false),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final card = find
+          .ancestor(
+            of: find.text('Equazioni di primo grado'),
+            matching: find.byType(AppCard),
+          )
+          .first;
+      return tester
+          .widget<ProgressBar>(
+            find.descendant(of: card, matching: find.byType(ProgressBar)),
+          )
+          .progress;
+    }
+
+    expect(await barra(), 0);
+    await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
+    expect(await barra(), 1);
+  });
+
+  testWidgets('Lezioni si apre sull\'anno scelto alla registrazione', (
+    tester,
+  ) async {
+    final corsi = ContentRepository.instance.levelById('high-school')!.courses;
+    await AuthStore.instance.resetForTest();
+    await AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      password: 'Segreta1',
+      schoolLevelId: 'high-school',
+      courseId: corsi[1].id,
+    );
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LessonListScreen(levelId: 'high-school', showPill: false),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final tabs = tester.widget<YearTabs>(find.byType(YearTabs));
+    expect(tabs.selectedIndex, 1);
   });
 
   testWidgets('Moduli mostra le lezioni Definizione e Modulo e Equazioni', (
@@ -136,5 +236,89 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.byType(ArgomentoLessonsScreen), findsNothing);
+  });
+
+  group('Vai agli esercizi', () {
+    final vai = find.byKey(const Key('vai-agli-esercizi'));
+
+    /// L'argomento aperto da una radice vera: «Vai agli esercizi» azzera lo
+    /// stack tranne la radice.
+    Widget hostArgomento(String titolo) {
+      final argomento = LessonRepository.instance.argomenti.firstWhere(
+        (a) => a.title == titolo,
+      );
+      return MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => ArgomentoLessonsScreen(
+                    argomento: argomento,
+                    levelId: 'high-school',
+                  ),
+                ),
+              ),
+              child: const Text('radice'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('c\'è in basso a destra se l\'argomento ha esercizi', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host('high-school'));
+      await tester.pump();
+
+      expect(vai, findsOneWidget);
+      final schermo = tester.view.physicalSize / tester.view.devicePixelRatio;
+      final rect = tester.getRect(vai);
+      expect(schermo.width - rect.right, closeTo(20, 1));
+      expect(rect.center.dy, greaterThan(schermo.height / 2));
+    });
+
+    testWidgets('non c\'è se l\'argomento non ha esercizi', (tester) async {
+      final argomento = LessonRepository.instance.argomenti.firstWhere(
+        (a) => a.topicId == 'year1-esempio-argomento',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ArgomentoLessonsScreen(
+            argomento: argomento,
+            levelId: 'high-school',
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(vai, findsNothing);
+    });
+
+    testWidgets('porta agli esercizi di quell\'anno e di quell\'argomento', (
+      tester,
+    ) async {
+      await tester.pumpWidget(hostArgomento('Equazioni di primo grado'));
+      await tester.tap(find.text('radice'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(vai);
+      await tester.pumpAndSettle();
+
+      // Gli esercizi del topic, con sotto la sezione Esercizi sull'anno giusto.
+      expect(find.byType(ExerciseFeedScreen), findsOneWidget);
+      final corso = tester.widget<CourseScreen>(
+        find.byType(CourseScreen, skipOffstage: false),
+      );
+      expect(corso.initialCourseId, 'year1');
+      expect(corso.showPill, isTrue);
+      expect(find.text('radice', skipOffstage: false), findsOneWidget);
+
+      // Il back torna all'elenco dell'anno, non all'argomento.
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(CourseScreen), findsOneWidget);
+      expect(find.byType(ArgomentoLessonsScreen), findsNothing);
+    });
   });
 }

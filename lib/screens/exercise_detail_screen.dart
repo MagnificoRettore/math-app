@@ -12,8 +12,10 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import '../widgets/difficulty_badge.dart';
+import '../widgets/exercise_step_card.dart';
+import '../widgets/guided_solution.dart';
 import '../widgets/math_text.dart';
-import '../widgets/exercise_tools_bar.dart';
+import '../widgets/tools_bar.dart';
 import '../widgets/section_header.dart';
 
 class ExerciseDetailScreen extends StatefulWidget {
@@ -42,43 +44,36 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return Scaffold(
       appBar: AppBar(),
-      body: Stack(
-        children: [
-          ListenableBuilder(
-            listenable: ProgressStore.instance,
-            builder: (context, _) {
-              final status = ProgressStore.instance.statusOf(
-                widget.level.id,
-                widget.exercise.id,
-              );
-              return ListView(
-                padding: EdgeInsets.fromLTRB(20, 8, 20, 112 + bottomInset),
-                children: [
-                  _buildMetaRow(),
-                  const SizedBox(height: 16),
-                  _buildProblem(),
-                  if (widget.exercise.formulas.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    _buildFormulas(),
-                  ],
-                  if (widget.exercise.hints.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    _buildHints(),
-                  ],
+      body: ToolsOverlay(
+        child: ListenableBuilder(
+          listenable: ProgressStore.instance,
+          builder: (context, _) {
+            final status = ProgressStore.instance.statusOf(
+              widget.level.id,
+              widget.exercise.id,
+            );
+            return ListView(
+              padding: EdgeInsets.fromLTRB(20, 8, 20, 112 + bottomInset),
+              children: [
+                _buildMetaRow(),
+                const SizedBox(height: 16),
+                _buildProblem(),
+                if (widget.exercise.formulas.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  _buildSolution(title: 'Soluzione'),
-                  const SizedBox(height: 24),
-                  _buildStatusActions(status),
+                  _buildFormulas(),
                 ],
-              );
-            },
-          ),
-          Positioned(
-            left: 16,
-            bottom: 16 + bottomInset,
-            child: ExerciseToolsBar(),
-          ),
-        ],
+                if (widget.exercise.hints.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _buildHints(),
+                ],
+                const SizedBox(height: 24),
+                _buildSolution(title: 'Soluzione'),
+                const SizedBox(height: 24),
+                _buildStatusActions(status),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -89,9 +84,12 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
       children: [
         DifficultyBadge(difficulty: widget.exercise.difficulty),
         const SizedBox(width: 12),
-        Text(
-          '${widget.level.title} · ${widget.course.title} · ${widget.topic.title}',
-          style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+        // Il percorso va a capo invece di sforare sui telefoni stretti.
+        Expanded(
+          child: Text(
+            '${widget.level.title} · ${widget.course.title} · ${widget.topic.title}',
+            style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
+          ),
         ),
       ],
     );
@@ -189,11 +187,12 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
 
   Widget _buildSolution({required String title}) {
     final c = AppColors.of(context);
+    final exercise = widget.exercise;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionHeader(title),
-        if (widget.exercise.steps.isEmpty)
+        if (exercise.steps.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
@@ -201,43 +200,13 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen> {
               style: TextStyle(color: c.textSecondary),
             ),
           )
+        else if (exercise.isGuided)
+          GuidedSolution(steps: exercise.steps)
         else
-          for (final (index, step) in widget.exercise.steps.indexed)
+          for (final (index, step) in exercise.steps.indexed)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: AppCard(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: c.accentSoft,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${index + 1}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: AppText.label,
-                          color: c.accent,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: MathText(
-                        step,
-                        fontSize: AppText.bodyLarge,
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: ExerciseStepCard(number: index + 1, text: step.text),
             ),
       ],
     );

@@ -7,7 +7,9 @@ import 'package:math_app/data/auth_store.dart';
 import 'package:math_app/data/content_repository.dart';
 import 'package:math_app/screens/registration_screen.dart';
 import 'package:math_app/widgets/app_button.dart';
+import 'package:math_app/widgets/progress_bar.dart';
 import 'package:math_app/widgets/shake.dart';
+import 'package:math_app/widgets/strength_meter.dart';
 
 final _avanti = find.byKey(const Key('registration-next'));
 final _indietro = find.byKey(const Key('registration-back'));
@@ -74,9 +76,12 @@ void main() {
 
   /// Passo 1: l'avatar del razzo e il nome, poi avanti.
   Future<void> chiSei(WidgetTester tester, {String name = 'Anna Rossi'}) async {
+    await tester.tap(find.byKey(const Key('registration-avatar')));
+    await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(const ValueKey('avatar-option-rocket_launch_rounded')),
     );
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).first, name);
     await avanti(tester);
   }
@@ -111,13 +116,16 @@ void main() {
   }
 
   group('testata', () {
-    testWidgets('dice il passo e il titolo, e la barra avanza', (tester) async {
+    testWidgets('ha il titolo del passo al centro, senza passo né barra', (
+      tester,
+    ) async {
       await pumpRegistration(tester);
-      expect(find.text('PASSO 1 DI 3'), findsOneWidget);
-      expect(find.text('Chi sei?'), findsOneWidget);
+      expect(find.textContaining('PASSO'), findsNothing);
+      expect(find.byType(ProgressBar), findsNothing);
+      final titolo = tester.getCenter(find.text('Chi sei?'));
+      expect(titolo.dx, 200);
 
       await chiSei(tester);
-      expect(find.text('PASSO 2 DI 3'), findsOneWidget);
       expect(find.text('Il tuo account'), findsOneWidget);
       expect(find.text('Chi sei?'), findsNothing);
     });
@@ -131,7 +139,7 @@ void main() {
       await avanti(tester);
 
       expect(find.text('Inserisci il tuo nome'), findsOneWidget);
-      expect(find.text('PASSO 1 DI 3'), findsOneWidget);
+      expect(find.text('Chi sei?'), findsOneWidget);
     });
 
     testWidgets('il nome vuoto si scuote premendo «Continua»', (tester) async {
@@ -151,19 +159,54 @@ void main() {
       expect(trigger(), 2);
     });
 
-    testWidgets('il pulsante Google apre il dialog dimostrativo', (
+    testWidgets('l\'avatar è al centro e il rettangolo si apre sopra', (
       tester,
     ) async {
       await pumpRegistration(tester);
-      expect(find.text('Oppure registrati con'), findsOneWidget);
+      final avatar = find.byKey(const Key('registration-avatar'));
+      expect(tester.getCenter(avatar).dx, 200);
+      expect(find.byKey(const Key('registration-avatar-panel')), findsNothing);
+      // Il nome sta sotto l'avatar.
+      expect(
+        tester.getTopLeft(find.byType(TextFormField)).dy,
+        greaterThan(tester.getBottomLeft(avatar).dy),
+      );
 
-      await tester.tap(find.text('Registrati con Google'));
+      await tester.tap(avatar);
       await tester.pumpAndSettle();
-      expect(find.text('Account Google (demo)'), findsOneWidget);
+      final pannello = find.byKey(const Key('registration-avatar-panel'));
+      expect(pannello, findsOneWidget);
+      expect(
+        tester.getBottomLeft(pannello).dy,
+        lessThanOrEqualTo(tester.getTopLeft(avatar).dy),
+      );
 
-      await tester.tap(find.text('Annulla'));
+      // Scelto un avatar, il rettangolo si chiude.
+      await tester.tap(
+        find.byKey(const ValueKey('avatar-option-rocket_launch_rounded')),
+      );
       await tester.pumpAndSettle();
-      expect(AuthStore.instance.isSignedIn, isFalse);
+      expect(pannello, findsNothing);
+    });
+
+    testWidgets('l\'errore del nome compare solo dopo «Continua»', (
+      tester,
+    ) async {
+      await pumpRegistration(tester);
+      await tester.enterText(find.byType(TextFormField).first, 'A');
+      await tester.pumpAndSettle();
+      expect(find.text('Il nome deve avere almeno 2 caratteri'), findsNothing);
+
+      await avanti(tester);
+      expect(
+        find.text('Il nome deve avere almeno 2 caratteri'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('non offre la registrazione con Google', (tester) async {
+      await pumpRegistration(tester);
+      expect(find.text('Registrati con Google'), findsNothing);
     });
   });
 
@@ -211,7 +254,7 @@ void main() {
         find.text('Accetta i Termini e la Privacy Policy per continuare.'),
         findsOneWidget,
       );
-      expect(find.text('PASSO 2 DI 3'), findsOneWidget);
+      expect(find.text('Il tuo account'), findsOneWidget);
     });
 
     testWidgets('il foglio dei termini si apre e si chiude', (tester) async {
@@ -240,7 +283,9 @@ void main() {
       );
       await tester.enterText(find.byType(TextFormField).at(1), 'mario');
       await tester.pumpAndSettle();
+      expect(find.text('Questo ID account è già in uso'), findsNothing);
 
+      await avanti(tester);
       expect(find.text('Questo ID account è già in uso'), findsOneWidget);
     });
 
@@ -253,21 +298,41 @@ void main() {
         'mario@example.com',
       );
       await tester.pumpAndSettle();
+      expect(find.text('Questa email è già presente'), findsNothing);
 
+      await avanti(tester);
       expect(find.text('Questa email è già presente'), findsOneWidget);
     });
 
-    testWidgets('password diverse: la conferma lo dice subito', (tester) async {
+    testWidgets('password diverse: la conferma lo dice solo dopo «Continua»', (
+      tester,
+    ) async {
       await pumpRegistration(tester);
       await chiSei(tester);
+      await tester.enterText(find.byType(TextFormField).at(0), 'a@example.com');
       await tester.enterText(find.byType(TextFormField).at(2), 'Segreta1');
       await tester.enterText(find.byType(TextFormField).at(3), 'Segreta2');
       await tester.pumpAndSettle();
+      expect(find.text('Le password non coincidono'), findsNothing);
+
+      await avanti(tester);
       expect(find.text('Le password non coincidono'), findsOneWidget);
 
+      // Da lì l'errore segue ciò che si scrive.
       await tester.enterText(find.byType(TextFormField).at(3), 'Segreta1');
       await tester.pumpAndSettle();
       expect(find.text('Le password non coincidono'), findsNothing);
+    });
+
+    testWidgets('il metro di forza occupa tutta la larghezza della card', (
+      tester,
+    ) async {
+      await pumpRegistration(tester);
+      await chiSei(tester);
+      final campo = tester.getRect(find.byType(TextFormField).at(2));
+      final metro = tester.getRect(find.byType(StrengthMeter));
+      expect(metro.left, campo.left);
+      expect(metro.right, campo.right);
     });
   });
 
@@ -281,7 +346,7 @@ void main() {
 
       await tester.tap(_indietro);
       await tester.pumpAndSettle();
-      expect(find.text('PASSO 1 DI 3'), findsOneWidget);
+      expect(find.text('Chi sei?'), findsOneWidget);
       expect(find.text('Luca Bianchi'), findsOneWidget);
     });
 
@@ -294,7 +359,7 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.byType(RegistrationScreen), findsOneWidget);
-      expect(find.text('PASSO 1 DI 3'), findsOneWidget);
+      expect(find.text('Chi sei?'), findsOneWidget);
 
       // Dal primo passo la freccia esce davvero.
       await tester.tap(find.byType(BackButton));
@@ -303,34 +368,93 @@ void main() {
     });
   });
 
-  group('passo 3, scuola', () {
-    testWidgets('scelta la scuola, il profilo si crea completo e si torna '
-        'alla radice', (tester) async {
-      await pumpRegistrationOnRoute(tester);
+  group('passo 3 e 4, scuola e anno', () {
+    Future<void> finoAllaScuola(WidgetTester tester) async {
       await chiSei(tester);
       await account(tester);
       await avanti(tester);
-      expect(find.text('PASSO 3 DI 3'), findsOneWidget);
+      expect(find.text('La tua scuola'), findsOneWidget);
+    }
 
-      AppButton crea() => tester.widget<AppButton>(_avanti);
-      // Spento finché la scuola non è scelta: il tap prima sarebbe un no-op.
-      expect(crea().label, 'Crea il mio profilo');
-      expect(crea().onPressed, isNull);
+    AppButton bottone(WidgetTester tester) => tester.widget<AppButton>(_avanti);
+
+    testWidgets('senza scuola il bottone è spento', (tester) async {
+      await pumpRegistration(tester);
+      await finoAllaScuola(tester);
+      expect(bottone(tester).onPressed, isNull);
+    });
+
+    testWidgets('superiori: dopo la scuola si sceglie l\'anno, poi il profilo '
+        'si crea con riepilogo animato', (tester) async {
+      await pumpRegistrationOnRoute(tester);
+      await finoAllaScuola(tester);
 
       await tester.tap(find.text('Scuola Superiore'));
       await tester.pumpAndSettle();
-      expect(crea().onPressed, isNotNull);
-
+      expect(bottone(tester).label, 'Continua');
       await avanti(tester);
-      expect(tester.takeException(), isNull);
-      expect(find.byType(RegistrationScreen), findsNothing);
-      expect(find.text('radice'), findsOneWidget);
 
+      expect(find.text('Il tuo anno'), findsOneWidget);
+      expect(find.text('Seconda'), findsOneWidget);
+      // Spento finché l'anno non è scelto.
+      expect(bottone(tester).label, 'Crea il mio profilo');
+      expect(bottone(tester).onPressed, isNull);
+
+      await tester.tap(find.text('Seconda'));
+      await tester.pumpAndSettle();
+      await avanti(tester);
+
+      // Il profilo è creato ma la schermata resta, col riepilogo.
       final user = AuthStore.instance.currentUser!;
       expect(user.name, 'Anna Rossi');
       expect(user.accountId, 'anna.rossi');
       expect(user.avatarId, 'rocket_launch_rounded');
       expect(user.schoolLevelId, 'high-school');
+      expect(user.courseId, isNotEmpty);
+      expect(find.text('Profilo creato!'), findsOneWidget);
+      expect(find.text('Anna Rossi'), findsOneWidget);
+      expect(find.text('Scuola Superiore'), findsOneWidget);
+      expect(find.text('Seconda'), findsOneWidget);
+      expect(find.byKey(const Key('registration-done-avatar')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('registration-done')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(RegistrationScreen), findsNothing);
+      expect(find.text('radice'), findsOneWidget);
+    });
+
+    testWidgets('università: niente anno, il profilo si crea alla scuola', (
+      tester,
+    ) async {
+      await pumpRegistration(tester);
+      await finoAllaScuola(tester);
+
+      await tester.tap(find.text('Università'));
+      await tester.pumpAndSettle();
+      expect(bottone(tester).label, 'Crea il mio profilo');
+      await avanti(tester);
+
+      expect(find.text('Profilo creato!'), findsOneWidget);
+      expect(find.text('Anno'), findsNothing);
+      expect(AuthStore.instance.currentUser!.courseId, '');
+    });
+
+    testWidgets('cambiando scuola l\'anno scelto si azzera', (tester) async {
+      await pumpRegistration(tester);
+      await finoAllaScuola(tester);
+      await tester.tap(find.text('Scuola Superiore'));
+      await tester.pumpAndSettle();
+      await avanti(tester);
+      await tester.tap(find.text('Seconda'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(_indietro);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Scuola Media'));
+      await tester.pumpAndSettle();
+      await avanti(tester);
+      expect(bottone(tester).onPressed, isNull);
     });
   });
 
@@ -365,7 +489,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(Animate), findsNothing);
-      expect(find.text('PASSO 2 DI 3'), findsOneWidget);
+      expect(find.text('Il tuo account'), findsOneWidget);
     });
   });
 }

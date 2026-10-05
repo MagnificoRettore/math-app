@@ -105,6 +105,12 @@ class MathText extends StatelessWidget {
   final TextAlign textAlign;
   final FontWeight? fontWeight;
 
+  /// Una formula da sola resta una riga di testo: stessa dimensione e stessa
+  /// altezza di una riga di parole. Senza, una formula sola è «in display»,
+  /// ingrandita del 10% e con 8 px sopra e sotto, e la sua riga risulta più
+  /// alta di quelle di testo accanto (le opzioni di un quiz, per esempio).
+  final bool inline;
+
   const MathText(
     this.data, {
     super.key,
@@ -112,6 +118,7 @@ class MathText extends StatelessWidget {
     this.color,
     this.textAlign = TextAlign.left,
     this.fontWeight,
+    this.inline = false,
   });
 
   @override
@@ -120,7 +127,7 @@ class MathText extends StatelessWidget {
     final effectiveColor = color ?? c.textPrimary;
     final size = fontSize * textScaleFactorOf(context);
     final segments = splitMath(data);
-    if (segments.length == 1 && segments.first.isMath) {
+    if (!inline && segments.length == 1 && segments.first.isMath) {
       return Align(
         alignment: Alignment.centerLeft,
         child: Padding(

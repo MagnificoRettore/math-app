@@ -18,6 +18,36 @@ void main() {
     await ProgressStore.instance.resetForTest();
   });
 
+  test(
+    'l\'anno scelto si salva e preferredCourseIndex lo restituisce',
+    () async {
+      await AuthStore.instance.load();
+      final level = ContentRepository.instance.levelById('high-school')!;
+      await AuthStore.instance.registerManual(
+        name: 'Anna',
+        email: 'anna@example.com',
+        password: 'Segreta1',
+        schoolLevelId: 'high-school',
+        courseId: level.courses[2].id,
+      );
+
+      final store = AuthStore.instance;
+      expect(store.currentUser!.courseId, level.courses[2].id);
+      expect(store.preferredCourseIndex('high-school', level.courses), 2);
+      // Un'altra scuola non è la propria: si parte dal primo anno.
+      expect(store.preferredCourseIndex('middle-school', level.courses), 0);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('user_profile_v1'), contains(level.courses[2].id));
+
+      // Cambiando scuola l'anno non ha più senso; riscegliendo la stessa resta.
+      await store.updateSchool('high-school');
+      expect(store.currentUser!.courseId, level.courses[2].id);
+      await store.updateSchool('university');
+      expect(store.currentUser!.courseId, '');
+    },
+  );
+
   test('registrazione manuale crea e persiste il profilo', () async {
     await AuthStore.instance.load();
     await AuthStore.instance.registerManual(

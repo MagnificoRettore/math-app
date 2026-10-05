@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/course.dart';
 import '../models/local_account.dart';
 import '../models/user_profile.dart';
 import 'auth_validators.dart';
@@ -136,6 +137,7 @@ class AuthStore extends ChangeNotifier {
     required String password,
     String? accountId,
     String schoolLevelId = '',
+    String courseId = '',
     String avatarId = '',
   }) async {
     final mail = email.trim();
@@ -148,6 +150,7 @@ class AuthStore extends ChangeNotifier {
       accountId: handle,
       authMethod: AuthMethod.manual,
       schoolLevelId: schoolLevelId,
+      courseId: courseId,
       avatarId: avatarId,
       createdAt: DateTime.now(),
     );
@@ -232,10 +235,25 @@ class AuthStore extends ChangeNotifier {
     return SignInResult.success;
   }
 
+  /// L'indice dell'anno con cui aprire Lezioni ed Esercizi di [levelId]: quello
+  /// scelto alla registrazione se la scuola è la propria, altrimenti il primo.
+  int preferredCourseIndex(String levelId, List<Course> courses) {
+    final user = _currentUser;
+    if (user == null || user.schoolLevelId != levelId) return 0;
+    final index = courses.indexWhere((course) => course.id == user.courseId);
+    return index < 0 ? 0 : index;
+  }
+
   Future<void> updateSchool(String schoolLevelId) async {
     final user = _currentUser;
     if (user == null) return;
-    _replaceSessionProfile(user.copyWith(schoolLevelId: schoolLevelId));
+    // L'anno vale dentro la sua scuola: cambiando scuola non ha più senso.
+    _replaceSessionProfile(
+      user.copyWith(
+        schoolLevelId: schoolLevelId,
+        courseId: schoolLevelId == user.schoolLevelId ? user.courseId : '',
+      ),
+    );
     await _persistAll();
   }
 

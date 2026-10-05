@@ -2,7 +2,45 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **502 test in 42 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **553 test in 44 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-05 — Esercizi
+
+- **Toolbar unica**: `AppToolsBar` estratta dalla lezione, e `ToolsOverlay` per le pagine degli esercizi; via `ExerciseToolsBar` (due azioni vuote) e il suo test.
+- **Topic senza sfondo a scelta**: via `Topic.image`, la chiave nel JSON e il parametro `image` dei widget di sfondo. Il file `assets/images/moduli.jpg` resta, usato dalle fixture dei test.
+- **Soluzione guidata**: `ExerciseStep` (stringa o oggetto con domanda), `Exercise.isGuided`, `GuidedSolution` e `ExerciseStepCard` (estratta dalla pagina). Convertiti due esercizi di equazioni (`eq-medium-1`, `ms-eq-1`); gli altri restano con la soluzione di sempre.
+- Corretto un overflow della riga del percorso («Scuola Superiore · prima · …») nella pagina dell'esercizio su 400 px.
+- Test: `tools_bar_test.dart` (toolbar su elenco e pagina, colore, calcolatrice) e `guided_solution_test.dart` (modello, risposta sbagliata e giusta, soluzione completa, movimento ridotto, pagina). Suite a **553 test in 44 file**, `flutter analyze` pulito.
+
+## 2026-10-05 — Argomenti e lezioni
+
+- **«Vai agli esercizi»** nella pagina di un argomento (solo se ha esercizi dello stesso anno e topic): apre la sezione Esercizi sull'anno giusto con gli esercizi del topic. `CourseScreen.initialCourseId`.
+- **Card del carosello** più alte (1,15 × la larghezza), tutte uguali.
+- **Formule in linea**: `MathText(inline: true)` per quiz e prompt delle lezioni, così una formula da sola non alza la riga.
+- Test: pulsante presente/assente e destinazione, proporzioni delle card, altezza delle formule sole (`math_text_test.dart`). Suite a **533 test in 43 file**, `flutter analyze` pulito.
+
+## 2026-10-05 — Home e navigazione
+
+- **Header** del colore dello sfondo; **espansione dal pulsante** per profilo, personalizzazione e ricerca (`reveal.dart`).
+- **Home a cinque sezioni**: «Jump Back In» sempre presente (ospite, vuoto, ripresa) e «Lo sapevi?» con dodici curiosità offline.
+- **Swipe fra le pagine principali** (Lezioni · Home · Esercizi); via lo swipe fra gli anni.
+- Corretto un overflow della riga sotto l'`AppBar` della lezione con il titolo lungo su 400 px.
+- Test: ordine delle sezioni, stati di Jump Back In, curiosità, swipe nelle due direzioni e ai capi, carosello che scorre senza cambiare pagina, espansione e movimento ridotto. Suite a **528 test in 42 file**, `flutter analyze` pulito.
+
+## 2026-10-05 — Registrazione a quattro passi, piccole correzioni
+
+- **Registrazione**: via «PASSO X DI N» e barra, titolo al centro; avatar grande al centro con il rettangolo che si apre sopra; errori solo dopo «Continua»; metro della password a tutta larghezza; quarto passo con l'anno (medie e superiori); riepilogo animato a profilo creato. `UserProfile.courseId` (anno scelto), `AuthStore.preferredCourseIndex`: Lezioni ed Esercizi si aprono sull'anno scelto.
+- **Piccole correzioni**: login con il lucchetto e «Password dimenticata?» centrata; registrazione senza Google; onboarding senza illustrazioni; splash senza l'animazione del razzo; card delle lezioni senza alone; meno spazio fra serie e «Argomenti»; barra di progresso nelle card degli argomenti.
+- Test: registrazione riscritta sui nuovi passi e sugli errori differiti, anno nel profilo, anno iniziale delle Lezioni, barra di progresso. Suite a **514 test in 42 file**, `flutter analyze` pulito.
+
+## 2026-10-04 — Card «Traguardo» bassa, ombre fini, segno «completata», bottoni della lezione galleggianti
+
+- **Bottoni della lezione in sovraimpressione**: toolbar degli strumenti, reload della verifica e «Completa la lezione» escono dalle card e galleggiano fermi sul loro fondo mentre le card scorrono; ognuno compare (dissolvenza e scala, `AppMotion.medium`) solo sulla card dove serve. Una toolbar sola (`lesson_toolbar`) invece di una per card; il reload è un `AppButton` `outline`.
+- **Segno «completata»** (`CompletedBadge`): spunta bianca in un tondino verde nell'angolo in alto a destra di tutte le card completate, argomenti (pagina Lezioni e carosello) e lezioni. `ProgressStore.isArgomentoCompleted` al posto del calcolo nella pagina.
+- **Ombra fine sotto le card**: `cardShadow` (`shadow` al 12%, blur 10, 3 in basso) su `AppCard`, la card «Traguardo» e le card del carosello, la cui lista non ritaglia più per lasciar scendere l'ombra. I test della card e della «Traguardo» la controllano al posto della card piatta.
+- **`StreakCard`** alta la metà (circa 136 invece di 282): via le barre degli obiettivi di oggi e il banner «Obiettivi di oggi raggiunti!»; il record sta sulla riga di «TRAGUARDO», la settimana scende a 26, i tagliandi a quattro. `StudyStore` conta ancora esercizi e minuti, senza una schermata che li mostri.
+- **Barra di navigazione**: Lezioni ed Esercizi più vicini a Home (colonne rientrate di 28); i nomi su una riga sola, perché su 360 px col testo grande «Esercizi» andava a capo.
+- Test: la card è bassa e senza barre, al posto di quello degli obiettivi chiusi. Test del segno su lezione, argomento e carosello; i bottoni della lezione fuori dalle card e fermi cambiando card. Suite a **505 test in 42 file**, `flutter analyze` pulito.
 
 ## 2026-10-04 — Home a tre sezioni e barra di navigazione del canvas
 

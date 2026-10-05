@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/argomento.dart';
 import '../models/lesson_resume.dart';
 import '../models/progress.dart';
 
@@ -137,6 +138,19 @@ class ProgressStore extends ChangeNotifier {
 
   bool isLessonCompleted(String levelId, String lessonId) =>
       _completedLessons.contains(scopedKey(levelId, lessonId));
+
+  /// Quante lezioni dell'argomento sono completate.
+  int completedLessonCount(Argomento argomento) => argomento.lessons
+      .where((lesson) => isLessonCompleted(argomento.levelId, lesson.id))
+      .length;
+
+  /// Un argomento è completato quando lo sono tutte le sue lezioni; uno senza
+  /// lezioni no, perché non c'è niente da completare.
+  bool isArgomentoCompleted(Argomento argomento) =>
+      argomento.lessons.isNotEmpty &&
+      argomento.lessons.every(
+        (lesson) => isLessonCompleted(argomento.levelId, lesson.id),
+      );
 
   Future<void> completeLesson(String levelId, String lessonId) async {
     if (!_completedLessons.add(scopedKey(levelId, lessonId))) return;

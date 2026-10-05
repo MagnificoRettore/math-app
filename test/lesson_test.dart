@@ -374,7 +374,7 @@ void main() {
     expect(find.byType(McqOptionTile), findsNWidgets(4));
     expect(tester.takeException(), isNull);
 
-    // il reload del footer estrae un altro esercizio
+    // il reload galleggiante estrae un altro esercizio
     final before = tester
         .widget<McqOptionTile>(find.byKey(const ValueKey('quiz_option_0')))
         .label;
@@ -389,38 +389,39 @@ void main() {
     );
   });
 
-  testWidgets('il footer della card quiz mette il reload a sinistra', (
-    tester,
-  ) async {
-    final lesson = LessonRepository.instance.argomenti
-        .firstWhere((a) => a.title == 'Moduli')
-        .lessons
-        .firstWhere((l) => l.id == 'mod-equations-intro');
-    await tester.pumpWidget(
-      MaterialApp(
-        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 300));
-    for (var i = 0; i < lesson.steps.length - 1; i++) {
-      await _swipeNext(tester);
-    }
-    await tester.pump(const Duration(seconds: 3));
+  testWidgets(
+    'sulla verifica il reload sta a sinistra di Completa la lezione',
+    (tester) async {
+      final lesson = LessonRepository.instance.argomenti
+          .firstWhere((a) => a.title == 'Moduli')
+          .lessons
+          .firstWhere((l) => l.id == 'mod-equations-intro');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      for (var i = 0; i < lesson.steps.length - 1; i++) {
+        await _swipeNext(tester);
+      }
+      await tester.pump(const Duration(seconds: 3));
 
-    final reload = tester.getTopLeft(find.byIcon(Icons.refresh_rounded));
-    final complete = tester.getTopLeft(
-      find.widgetWithText(AppButton, 'Completa la lezione'),
-    );
-    expect(reload.dx, lessThan(complete.dx));
-    // il bottone è ancorato al padding interno della card, non a piena larghezza
-    final card = tester.widget<AppCard>(find.byType(AppCard).last);
-    final padding = (card.padding as EdgeInsets).right;
-    final cardRight = tester.getTopRight(find.byType(AppCard).last).dx;
-    final completeSize = tester.getSize(
-      find.widgetWithText(AppButton, 'Completa la lezione'),
-    );
-    expect(complete.dx + completeSize.width, closeTo(cardRight - padding, 1));
-  });
+      final reload = tester.getTopLeft(find.byIcon(Icons.refresh_rounded));
+      final complete = tester.getTopLeft(
+        find.widgetWithText(AppButton, 'Completa la lezione'),
+      );
+      expect(reload.dx, lessThan(complete.dx));
+      // il bottone è ancorato al padding interno della card, non a piena larghezza
+      final card = tester.widget<AppCard>(find.byType(AppCard).last);
+      final padding = (card.padding as EdgeInsets).right;
+      final cardRight = tester.getTopRight(find.byType(AppCard).last).dx;
+      final completeSize = tester.getSize(
+        find.widgetWithText(AppButton, 'Completa la lezione'),
+      );
+      expect(complete.dx + completeSize.width, closeTo(cardRight - padding, 1));
+    },
+  );
 
   testWidgets('la lezione Definizione è una card vuota con solo il titolo', (
     tester,
@@ -516,9 +517,7 @@ void main() {
     // `getRect` ritorna i bordi dipinti: il pacchetto include la pila
     // clip-paintata a zero, quindi la larghezza è il lato del FAB compatto,
     // che è quadrato, e l'altezza è quella del bottone.
-    final toolbar = tester.getRect(
-      find.byKey(ValueKey('lesson_toolbar_${lesson.steps.length - 1}')),
-    );
+    final toolbar = tester.getRect(find.byKey(ValueKey('lesson_toolbar')));
     final complete = tester.getRect(
       find.widgetWithText(AppButton, 'Completa la lezione'),
     );
@@ -548,7 +547,7 @@ void main() {
     final barra = tester.widget<M3EProgressIndicator>(
       find.byType(M3EProgressIndicator),
     );
-    const key = ValueKey('lesson_toolbar_0');
+    const key = ValueKey('lesson_toolbar');
     final toolbar = tester.widget<M3EToolbar>(find.byKey(key));
     // Il pannello espanso e il FAB sono dell'indaco della barra; il FAB lo
     // prende dal tema del pacchetto, che non legge il `Theme` di Flutter.
@@ -560,7 +559,7 @@ void main() {
     expect(tema.data.colorScheme.onPrimaryContainer, Colors.white);
   });
 
-  testWidgets('la toolbar sta nel footer della card e il FAB la espande', (
+  testWidgets('la toolbar galleggia sul fondo della card e il FAB la espande', (
     tester,
   ) async {
     final lesson = LessonRepository.instance.argomenti
@@ -575,12 +574,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
-    const key = ValueKey('lesson_toolbar_0');
+    const key = ValueKey('lesson_toolbar');
     final bar = tester.getRect(find.byKey(key));
     expect(bar.center.dx, lessThan(screen.width / 2));
     expect(bar.bottom, greaterThan(screen.height / 2));
 
-    // dentro la card, non più ancorata allo Stack della pagina
+    // sul fondo della card ferma, a filo della sua colonna di testo
     final card = tester.getRect(find.byType(AppCard).first);
     expect(bar.left, greaterThan(card.left));
     expect(bar.bottom, lessThanOrEqualTo(card.bottom));
@@ -623,11 +622,11 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
 
-    // una toolbar per ogni card costruita dal PageView
-    expect(find.byType(M3EToolbar), findsWidgets);
+    // una toolbar sola, sopra le card
+    expect(find.byType(M3EToolbar), findsOneWidget);
     expect(find.byType(ScientificCalculatorSheet), findsNothing);
 
-    const key = ValueKey('lesson_toolbar_0');
+    const key = ValueKey('lesson_toolbar');
     await tester.tap(
       find.descendant(
         of: find.byKey(key),
@@ -655,5 +654,44 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
     expect(find.byType(ScientificCalculatorSheet), findsNothing);
+  });
+
+  testWidgets('i bottoni galleggiano fuori dalle card e restano fermi', (
+    tester,
+  ) async {
+    final lesson = LessonRepository.instance.argomenti
+        .firstWhere((a) => a.title == 'Moduli')
+        .lessons
+        .firstWhere((l) => l.id == 'mod-equations-intro');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LessonScreen(lesson: lesson, levelId: 'high-school'),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    const toolbar = ValueKey('lesson_toolbar');
+    // nessun bottone dentro una card
+    for (final bottone in [find.byKey(toolbar), find.byType(AppButton)]) {
+      expect(
+        find.descendant(of: find.byType(AppCard), matching: bottone),
+        findsNothing,
+      );
+    }
+    // sulla prima card niente reload né «Completa la lezione»
+    expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+    expect(find.text('Completa la lezione'), findsNothing);
+    final prima = tester.getRect(find.byKey(toolbar));
+
+    for (var i = 0; i < lesson.steps.length - 1; i++) {
+      await _swipeNext(tester);
+    }
+    await tester.pump(const Duration(seconds: 3));
+
+    // la toolbar non si è mossa con le card; sulla verifica, l'ultima card,
+    // compaiono reload e «Completa la lezione»
+    expect(tester.getRect(find.byKey(toolbar)), prima);
+    expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
+    expect(find.text('Completa la lezione'), findsOneWidget);
   });
 }

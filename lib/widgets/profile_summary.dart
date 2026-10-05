@@ -9,13 +9,6 @@ import '../theme/app_text.dart';
 /// Misura della riga 1 del riepilogo, cioè il nome.
 const double kSummaryNameFontSize = AppText.titleLarge;
 
-/// Opacità della riga 2, il titolo della scuola.
-///
-/// Dentro la banda indaco i colori del tema non arrivano: il secondario del
-/// tema sull'indaco non passa 4.5:1, quindi la riga è bianco all'80%, che
-/// sull'indaco dà 9.6:1 e resta un gradino sotto il nome.
-const double _kSummarySecondaryOpacity = 0.8;
-
 /// Le due righe dentro la pilla dell'header: il nome e la scuola.
 ///
 /// Niente saluto di cortesia: la pilla è una tessera, non una frase. Il nome
@@ -66,7 +59,7 @@ class ProfileSummary extends StatelessWidget {
                 fontFamily: AppText.headingFont,
                 fontSize: kSummaryNameFontSize,
                 fontWeight: FontWeight.w600,
-                color: c.onHeaderBand,
+                color: c.textPrimary,
               ),
             ),
             if (school.isNotEmpty)
@@ -78,9 +71,7 @@ class ProfileSummary extends StatelessWidget {
                 style: TextStyle(
                   fontSize: AppText.label,
                   fontWeight: FontWeight.w500,
-                  color: c.onHeaderBand.withValues(
-                    alpha: _kSummarySecondaryOpacity,
-                  ),
+                  color: c.textSecondary,
                 ),
               ),
           ],

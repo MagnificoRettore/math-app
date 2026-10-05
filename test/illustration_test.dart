@@ -58,9 +58,9 @@ void main() {
     expect(find.byKey(const ValueKey('illustration-razzo')), findsOneWidget);
   });
 
-  testWidgets('la prima slide dell\'onboarding ha il laptop', (tester) async {
+  testWidgets('l\'onboarding non ha illustrazioni', (tester) async {
     await _pump(tester, const OnboardingScreen());
-    expect(find.byKey(const ValueKey('illustration-lezione')), findsOneWidget);
+    expect(find.byType(IllustrationView), findsNothing);
   });
 
   testWidgets('il benvenuto ha la testata indaco ondulata', (tester) async {

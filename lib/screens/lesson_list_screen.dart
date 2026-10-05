@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/auth_store.dart';
 import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../data/lesson_repository.dart';
@@ -11,6 +12,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import '../widgets/app_card.dart';
+import '../widgets/progress_bar.dart';
+import '../widgets/completed_badge.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
@@ -28,7 +31,6 @@ class LessonListScreen extends StatefulWidget {
 }
 
 class _LessonListScreenState extends State<LessonListScreen> {
-  late PageController _pageController;
   int _selectedIndex = 0;
 
   /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
@@ -38,33 +40,30 @@ class _LessonListScreenState extends State<LessonListScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    final level = ContentRepository.instance.levelById(_levelId ?? '');
+    if (level != null && BrowseStore.instance.levelId == null) {
+      _selectedIndex = AuthStore.instance.preferredCourseIndex(
+        level.id,
+        level.courses,
+      );
+    }
     BrowseStore.instance.addListener(_onBrowseChanged);
   }
 
   @override
   void dispose() {
     BrowseStore.instance.removeListener(_onBrowseChanged);
-    _pageController.dispose();
     super.dispose();
   }
 
   /// Cambiando scuola cambia il numero di corsi, quindi l'indice dell'anno
-  /// corrente può finire fuori range: si torna al primo e si rifà il
-  /// `PageController`, che altrimenti resterebbe sulla pagina vecchia.
+  /// corrente può finire fuori range: si torna al primo.
   void _onBrowseChanged() {
     if (!mounted) return;
-    setState(() {
-      _selectedIndex = 0;
-      _pageController.dispose();
-      _pageController = PageController();
-    });
+    setState(() => _selectedIndex = 0);
   }
 
-  void _selectYear(int index) {
-    setState(() => _selectedIndex = index);
-    _pageController.jumpToPage(index);
-  }
+  void _selectYear(int index) => setState(() => _selectedIndex = index);
 
   void _openArgomento(Argomento argomento) {
     if (argomento.lessons.isEmpty) return;
@@ -127,17 +126,15 @@ class _LessonListScreenState extends State<LessonListScreen> {
         actions: _actions(),
       ),
       body: _wrapBody(
-        PageView(
-          controller: _pageController,
-          onPageChanged: (index) => setState(() => _selectedIndex = index),
-          children: [
-            for (final course in courses)
-              _YearArgumenti(
-                levelId: levelId,
-                course: course,
-                onTapArgomento: _openArgomento,
-              ),
-          ],
+        // L'anno si cambia dagli `YearTabs`: lo swipe orizzontale è della
+        // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
+        _YearArgumenti(
+          key: ValueKey(
+            courses[_selectedIndex.clamp(0, courses.length - 1)].id,
+          ),
+          levelId: levelId,
+          course: courses[_selectedIndex.clamp(0, courses.length - 1)],
+          onTapArgomento: _openArgomento,
         ),
       ),
     );
@@ -165,6 +162,7 @@ class _YearArgumenti extends StatelessWidget {
   final ValueChanged<Argomento> onTapArgomento;
 
   const _YearArgumenti({
+    super.key,
     required this.levelId,
     required this.course,
     required this.onTapArgomento,
@@ -193,14 +191,9 @@ class _YearArgumenti extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 14),
               child: _ArgomentoCard(
                 argomento: argomento,
-                completed:
-                    argomento.lessons.isNotEmpty &&
-                    argomento.lessons.every(
-                      (lesson) => ProgressStore.instance.isLessonCompleted(
-                        argomento.levelId,
-                        lesson.id,
-                      ),
-                    ),
+                completed: ProgressStore.instance.isArgomentoCompleted(
+                  argomento,
+                ),
                 onTap: () => onTapArgomento(argomento),
               ),
             ),
@@ -227,7 +220,7 @@ class _ArgomentoCard extends StatelessWidget {
     final color = topicColor(c, argomento.icon);
     final lessonCount = argomento.lessons.length;
 
-    return AppCard(
+    final card = AppCard(
       onTap: onTap,
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -268,6 +261,14 @@ class _ArgomentoCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (lessonCount > 0) ...[
+                  const SizedBox(height: 8),
+                  ProgressBar(
+                    progress:
+                        ProgressStore.instance.completedLessonCount(argomento) /
+                        lessonCount,
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Row(
                   children: [
@@ -290,34 +291,13 @@ class _ArgomentoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          if (completed)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: c.easy.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle, size: 14, color: c.easy),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Completata',
-                    style: TextStyle(
-                      fontSize: AppText.micro,
-                      fontWeight: FontWeight.w500,
-                      color: c.easy,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else
-            Icon(Icons.chevron_right, color: c.textSecondary),
+          Icon(Icons.chevron_right, color: c.textSecondary),
         ],
       ),
     );
+    if (!completed) return card;
+    // Il segno «completata» nell'angolo in alto a destra, sopra la card.
+    return Stack(children: [card, CompletedBadge.corner()]);
   }
 
   IconData _iconFor(String name) {
