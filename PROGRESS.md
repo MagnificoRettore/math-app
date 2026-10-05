@@ -2,7 +2,7 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **574 test in 47 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **570 test in 47 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
 ## 2026-10-05 — Lezioni ed Esercizi, nuova impaginazione
 
@@ -13,6 +13,9 @@ Stato della suite: **574 test in 47 file**, tutti verdi. I conteggi sparati nell
 - **Calcolatrice trascinabile**: il trascinamento verso il basso non si muoveva (un `AnimationController` non può tenere pixel, il suo valore si ferma a 1). Ora segue il dito, solo verso il basso, e lasciata oltre il 35% dell'altezza (o con uno strattone) si chiude, altrimenti torna su. `calculator_drag_test.dart`.
 - **Ricerca** tolta dall'header della Home: resta solo nella barra dei filtri di Lezioni ed Esercizi.
 - **Feedback** nelle impostazioni (`FeedbackScreen`, `FeedbackStore`): salvato solo sul dispositivo, la pagina lo dice. **Pillole** della barra con gradino e pressione simulata; **ricerca** come pillola, che si espande dal suo centro (verificato da test). **Lezioni ed Esercizi** si aggiornano subito se cambia la scuola del profilo (prima restavano sulla vecchia).
+- **Home rifatta**: «Continua», «Esercizio del giorno», «Il tuo percorso» (il carosello con la barra del progresso) e «Lo sapevi?». Via «Jump Back In», la missione con le scorciatoie e `JumpBackInCard`; il banner «Sblocca tutto» non c'è perché non c'è niente a pagamento. **I punti deboli non hanno più un ingresso** (restano nel codice). `ResumeTarget` in `lib/data`.
+- **Bordino** lilla da 2 su tutte le `AppCard`; `bordered: false` per la card della lezione e i riquadri multifunzione.
+- **Le rette** (2ª superiore, nel piano cartesiano), lezione «Introduzione»: tolto il vecchio argomento di terza (`hs-year3-rettes.json`, `retta.png`) e inserito `hs-year2-rette.json` con le cinque card dalle bozze: equazione della retta (forma esplicita e implicita), nel piano cartesiano (grafico con $P$, $q$, $m$), casi particolari (orizzontali/verticali e bisettrici), come disegnarla (tabella dei punti e grafico) e «Prova tu» con cinque grafici da riconoscere. Le immagini del quiz sono `assets/images/rette-quiz-N.png`, generate da `tool/capture_rette_quiz_test.dart` con lo stesso `GraphView`.
 - Via `YearTabs`, `TopicRow`, `TopicImageCard` e i loro test; `MainHeaderAppBar.bottom` resta ma oggi non lo usa nessuno.
 - **Cambio scuola dal profilo**: ora si sceglie anche l'anno per medie e superiori (`YearTile` estratto dalla registrazione, `updateSchool(courseId:)`).
 - Le immagini della guida «argomenti» ed «esercizi» sono state rigenerate con il nuovo aspetto.

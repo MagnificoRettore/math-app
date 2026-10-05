@@ -12,18 +12,16 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
+import 'package:math_app/screens/exercise_detail_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
-import 'package:math_app/screens/mission_screen.dart';
-import 'package:math_app/screens/profile_screen.dart';
-import 'package:math_app/screens/welcome_screen.dart';
-import 'package:math_app/screens/weak_points_screen.dart';
 import 'package:math_app/theme/app_colors.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/argomento_carousel.dart';
 import 'package:math_app/widgets/section_header.dart';
-import 'package:math_app/widgets/jump_back_in_card.dart';
+import 'package:math_app/widgets/daily_exercise_card.dart';
+import 'package:math_app/widgets/home_continue_card.dart';
 
 /// Rapporto di contrasto WCAG fra due colori opachi.
 double _contrasto(Color a, Color b) {
@@ -58,18 +56,6 @@ Future<void> _pumpHome(WidgetTester tester) async {
   );
   await tester.pumpAndSettle();
 }
-
-/// Le scorciatoie dentro la card missione.
-///
-/// La ricerca senza ambito non basta: la pillola in basso ha le icone delle
-/// sezioni e il tap finirebbe su quella.
-Finder _scorciatoia(IconData icon) => find.descendant(
-  of: find.ancestor(
-    of: find.text('La nostra missione'),
-    matching: find.byType(AppCard),
-  ),
-  matching: find.byIcon(icon),
-);
 
 Future<void> _scrollaA(WidgetTester tester, Finder target) async {
   await tester.dragUntilVisible(
@@ -143,12 +129,12 @@ void main() {
   });
 
   group('testate', () {
-    testWidgets('il titolo degli argomenti è a filo della prima card', (
+    testWidgets('il titolo del percorso è a filo della prima card', (
       tester,
     ) async {
       await _registra();
       await _pumpHome(tester);
-      final testata = find.text('Argomenti');
+      final testata = find.text('Il tuo percorso');
       await _scrollaA(tester, testata);
 
       // I 20 px orizzontali della testata, sommati a quelli della pagina,
@@ -170,14 +156,14 @@ void main() {
     ) async {
       await _registra();
       await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
+      await _scrollaA(tester, find.text('Esercizio del giorno'));
 
       final box = tester.widget<Container>(
         find
             .descendant(
               of: find
                   .ancestor(
-                    of: find.text('La nostra missione'),
+                    of: find.text('Esercizio del giorno'),
                     matching: find.byType(AppCard),
                   )
                   .first,
@@ -218,27 +204,30 @@ void main() {
       addTearDown(tester.view.reset);
     }
 
-    testWidgets('Jump Back In, argomenti, missione, curiosità', (tester) async {
+    testWidgets('Continua, esercizio del giorno, percorso, curiosità', (
+      tester,
+    ) async {
       schermoAlto(tester);
       await _registra();
       await _pumpHome(tester);
 
       double y(Finder f) => tester.getTopLeft(f).dy;
       final ordine = [
-        y(find.text('Jump Back In')),
-        y(find.text('Argomenti')),
-        y(find.text('La nostra missione')),
+        y(find.byType(HomeContinueCard)),
+        y(find.byKey(const Key('daily-exercise-card'))),
+        y(find.text('Il tuo percorso')),
         y(find.byKey(const Key('math-fact-card'))),
       ];
       expect(ordine, [...ordine]..sort());
       // Le sezioni tolte non tornano: la serie sta nell'header.
       expect(find.byKey(const Key('streak-card')), findsNothing);
+      expect(find.text('La nostra missione'), findsNothing);
+      expect(find.text('Jump Back In'), findsNothing);
       expect(find.textContaining('Per te'), findsNothing);
-      expect(find.text('I tuoi punti deboli'), findsNothing);
     });
   });
 
-  group('Jump Back In', () {
+  group('Continua', () {
     void schermoAlto(WidgetTester tester) {
       tester.view.physicalSize = const Size(400, 2800);
       tester.view.devicePixelRatio = 1.0;
@@ -249,23 +238,28 @@ void main() {
       schermoAlto(tester);
       await _pumpHome(tester);
 
-      expect(find.text('Jump Back In'), findsOneWidget);
-      expect(find.byKey(const Key('jump-back-in-guest')), findsOneWidget);
-      expect(find.text('Accedi per riprendere'), findsOneWidget);
+      expect(find.byKey(const Key('continue-guest')), findsOneWidget);
+      expect(find.text('Accedi per continuare'), findsOneWidget);
     });
 
-    testWidgets('con un profilo ma senza lezioni aperte lo dice', (
+    testWidgets('con un profilo e niente a metà propone la prima lezione', (
       tester,
     ) async {
       schermoAlto(tester);
       await _registra();
       await _pumpHome(tester);
 
-      expect(find.byKey(const Key('jump-back-in-empty')), findsOneWidget);
-      expect(find.text('Niente da riprendere'), findsOneWidget);
+      expect(find.byKey(const Key('continue-next')), findsOneWidget);
+      expect(find.text('Inizia'), findsOneWidget);
+      expect(find.text('0%'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('continue-next')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(LessonScreen), findsOneWidget);
     });
 
-    testWidgets('con una lezione a metà propone di riprenderla', (
+    testWidgets('con una lezione a metà la riprende, con la percentuale', (
       tester,
     ) async {
       schermoAlto(tester);
@@ -274,18 +268,64 @@ void main() {
         const LessonResume(
           levelId: 'high-school',
           lessonId: 'eq1-intro',
-          step: 0,
+          step: 1,
         ),
       );
       await _pumpHome(tester);
 
-      expect(find.byKey(const Key('jump-back-in-card')), findsOneWidget);
-      expect(find.textContaining('Card 1 di'), findsOneWidget);
+      expect(find.byKey(const Key('continue-card')), findsOneWidget);
+      expect(find.text('Continua'), findsOneWidget);
+      // Un passo su N: la percentuale non è zero.
+      final percent = tester.widget<Text>(
+        find.byKey(const Key('continue-percent')),
+      );
+      expect(percent.data, isNot('0%'));
 
-      await tester.tap(find.byKey(const Key('jump-back-in-button')));
+      await tester.tap(find.byKey(const Key('continue-card')));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(LessonScreen), findsOneWidget);
+    });
+  });
+
+  group('Esercizio del giorno', () {
+    void schermoAlto(WidgetTester tester) {
+      tester.view.physicalSize = const Size(400, 2800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+    }
+
+    test(
+      'lo stesso giorno dà lo stesso esercizio, il giorno dopo un altro',
+      () {
+        final oggi = DateTime(2026, 10, 5);
+        final a = DailyExercise.of(oggi)!;
+        expect(DailyExercise.of(oggi)!.exercise.id, a.exercise.id);
+        expect(
+          DailyExercise.of(oggi.add(const Duration(days: 1)))!.exercise.id,
+          isNot(a.exercise.id),
+        );
+      },
+    );
+
+    test('con un profilo pesca solo dalla sua scuola', () async {
+      await _registra(levelId: 'university');
+      for (var giorno = 0; giorno < 5; giorno++) {
+        final daily = DailyExercise.of(DateTime(2026, 1, 1 + giorno))!;
+        expect(daily.level.id, 'university');
+      }
+    });
+
+    testWidgets('«Provalo» apre l\'esercizio', (tester) async {
+      schermoAlto(tester);
+      await _registra();
+      await _pumpHome(tester);
+
+      expect(find.text('Esercizio del giorno'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('daily-exercise-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ExerciseDetailScreen), findsOneWidget);
     });
   });
 
@@ -344,13 +384,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 150));
 
       // La prima sezione è più avanti della seconda, che parte 60 ms dopo.
-      final prima = opacita(tester, find.byType(JumpBackInCard));
+      final prima = opacita(tester, find.byType(HomeContinueCard));
       final seconda = opacita(tester, find.byType(ArgomentoCarousel));
       expect(prima, greaterThan(seconda));
       expect(prima, lessThan(1));
 
       await tester.pumpAndSettle();
-      expect(opacita(tester, find.byType(JumpBackInCard)), 1);
+      expect(opacita(tester, find.byType(HomeContinueCard)), 1);
       expect(opacita(tester, find.byType(ArgomentoCarousel)), 1);
     });
 
@@ -365,11 +405,11 @@ void main() {
       final lista = find.byType(ListView).first;
       await tester.drag(lista, const Offset(0, -2000));
       await tester.pumpAndSettle();
-      expect(find.byType(JumpBackInCard), findsNothing);
+      expect(find.byType(HomeContinueCard), findsNothing);
       await tester.drag(lista, const Offset(0, 2000));
       await tester.pump();
 
-      expect(opacita(tester, find.byType(JumpBackInCard)), 1);
+      expect(opacita(tester, find.byType(HomeContinueCard)), 1);
       // Lo scroll ha ancora i suoi timer brevi: si lasciano finire.
       await tester.pumpAndSettle();
     });
@@ -381,7 +421,7 @@ void main() {
 
       expect(
         find.ancestor(
-          of: find.byType(JumpBackInCard),
+          of: find.byType(HomeContinueCard),
           matching: find.byType(Animate),
         ),
         findsNothing,
@@ -562,112 +602,6 @@ void main() {
       expect(find.text('Record: 1 giorno'), findsOneWidget);
       // Oggi è fatto: un giorno della settimana è della serie.
       expect(find.byKey(const Key('streak-day-done')), findsOneWidget);
-    });
-  });
-
-  group('missione', () {
-    testWidgets('da collegato ci sono le quattro scorciatoie', (tester) async {
-      await _registra();
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('Profilo'));
-
-      expect(find.text('Lezioni'), findsWidgets);
-      expect(find.text('Esercizi'), findsWidgets);
-      expect(find.text('Punti deboli'), findsWidgets);
-      expect(find.text('Profilo'), findsWidgets);
-    });
-
-    testWidgets('da ospite ci sono le stesse quattro scorciatoie', (
-      tester,
-    ) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      // La Home è una pagina sola: le scorciatoie non dipendono dall'accesso.
-      expect(find.text('La nostra missione'), findsOneWidget);
-      expect(_scorciatoia(Icons.school_outlined), findsOneWidget);
-      expect(_scorciatoia(Icons.calculate_outlined), findsOneWidget);
-      expect(_scorciatoia(Icons.healing_outlined), findsOneWidget);
-      expect(find.text('Profilo'), findsOneWidget);
-    });
-
-    testWidgets('da ospite lezioni ed esercizi chiedono la scuola', (
-      tester,
-    ) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(_scorciatoia(Icons.school_outlined));
-      await tester.pumpAndSettle();
-      expect(find.text('Lezioni per scuola'), findsOneWidget);
-
-      // Il foglio è un bottom sheet: si chiude toccando la barriera, non c'è
-      // una freccia indietro.
-      await tester.tapAt(const Offset(10, 10));
-      await tester.pumpAndSettle();
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(_scorciatoia(Icons.calculate_outlined));
-      await tester.pumpAndSettle();
-      expect(find.text('Esercizi per scuola'), findsOneWidget);
-    });
-
-    testWidgets('da ospite la scorciatoia del profilo apre l\'accesso', (
-      tester,
-    ) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(find.text('Profilo'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ProfileScreen), findsOneWidget);
-      expect(find.text('Accedi'), findsOneWidget);
-    });
-
-    testWidgets('la scorciatoia del profilo apre il profilo', (tester) async {
-      await _registra();
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(find.text('Profilo'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ProfileScreen), findsOneWidget);
-    });
-
-    testWidgets('sulla pagina missione le scorciatoie non ci sono', (
-      tester,
-    ) async {
-      await _registra();
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(find.text('La nostra missione'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(MissionScreen), findsOneWidget);
-      expect(find.text('Profilo'), findsNothing);
-    });
-  });
-
-  group('punti deboli', () {
-    testWidgets('da ospite non gli dice che ha assimilato tutto', (
-      tester,
-    ) async {
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.text('La nostra missione'));
-
-      await tester.tap(_scorciatoia(Icons.healing_outlined));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(WeakPointsScreen), findsOneWidget);
-      expect(find.text('Ancora niente da ripassare'), findsOneWidget);
-      expect(find.text('Tutto assimilato!'), findsNothing);
-
-      await tester.tap(find.byKey(const Key('weak-points-guest-cta')));
-      await tester.pumpAndSettle();
-      expect(find.byType(WelcomeScreen), findsOneWidget);
     });
   });
 }

@@ -165,6 +165,16 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
                             color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
+                        // Il progresso dell'argomento, in bianco sul colore.
+                        if (count > 0) ...[
+                          const SizedBox(height: 8),
+                          _PathProgress(
+                            done: ProgressStore.instance.completedLessonCount(
+                              argomento,
+                            ),
+                            total: count,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -198,7 +208,7 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SectionHeader('Argomenti'),
+            const SectionHeader('Il tuo percorso'),
             // La lista della Home dà 20 di margine per lato: la striscia li
             // scavalca e prende tutto lo schermo, così le card scorrono fino
             // al bordo invece di sparire a 20 px da esso.
@@ -223,6 +233,50 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
           ],
         );
       },
+    );
+  }
+}
+
+/// La barra del percorso sulla card colorata: fondo e riempimento bianchi, con
+/// «x/y» a destra. Il riempimento si anima come ogni `ProgressBar`.
+class _PathProgress extends StatelessWidget {
+  final int done;
+  final int total;
+
+  const _PathProgress({required this.done, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: SizedBox(
+              height: 6,
+              child: Stack(
+                children: [
+                  Container(color: Colors.white.withValues(alpha: 0.3)),
+                  FractionallySizedBox(
+                    widthFactor: done / total,
+                    child: Container(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$done/$total',
+          key: const Key('path-progress'),
+          style: TextStyle(
+            fontSize: AppText.caption,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+      ],
     );
   }
 }

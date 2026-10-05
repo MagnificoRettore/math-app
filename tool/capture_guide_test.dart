@@ -33,9 +33,9 @@ void main() {
 
   // I test non caricano i font da soli: senza, ogni lettera è un quadrato.
   setUpAll(() async {
-    final manifest =
-        jsonDecode(await rootBundle.loadString('FontManifest.json'))
-            as List<dynamic>;
+    final manifest = jsonDecode(
+      await rootBundle.loadString('FontManifest.json'),
+    ) as List<dynamic>;
     for (final family in manifest) {
       final loader = FontLoader(family['family'] as String);
       for (final font in family['fonts'] as List<dynamic>) {
@@ -87,9 +87,8 @@ void main() {
     await tester.runAsync(() async {
       final image = await boundary.toImage(pixelRatio: 1);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      File('assets/guide/$name.png').writeAsBytesSync(
-        bytes!.buffer.asUint8List(),
-      );
+      File('assets/guide/$name.png')
+          .writeAsBytesSync(bytes!.buffer.asUint8List());
     });
   }
 

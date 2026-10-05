@@ -629,6 +629,7 @@ class _StepCard extends StatelessWidget {
     final scale = step.fontSizeMultiplier;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     return AppCard(
+      bordered: false,
       padding: const EdgeInsets.all(_kCardPadding),
       child: SizedBox.expand(
         child: SingleChildScrollView(

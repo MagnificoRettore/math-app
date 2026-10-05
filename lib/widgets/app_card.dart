@@ -11,9 +11,14 @@ class AppCard extends StatelessWidget {
   final Color? color;
   final Color? borderColor;
 
-  /// Spessore del bordo, quando c'è: 3 per una card scelta, come i controlli
+  /// Spessore del bordo: 2 di base, 3 per una card scelta, come i controlli
   /// del design.
   final double borderWidth;
+
+  /// `false` toglie il bordino: lo fanno le card dentro le lezioni, che stanno
+  /// già dentro la card della lezione e con un secondo bordo sarebbero una
+  /// scatola dentro una scatola.
+  final bool bordered;
   final double radius;
 
   /// Alone colorato nell'angolo in alto a destra, sotto il contenuto.
@@ -26,7 +31,8 @@ class AppCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(18),
     this.color,
     this.borderColor,
-    this.borderWidth = 1,
+    this.borderWidth = 2,
+    this.bordered = true,
     this.radius = kCardRadius,
     this.glow,
   });
@@ -39,11 +45,11 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color ?? c.surface,
         borderRadius: shape,
-        // Il design non ha bordi sulle card: il bordo c'è solo quando chi
-        // chiama lo chiede, per colorarla.
-        border: borderColor == null
+        // Il bordino lilla (`border`) stacca la card dal crema; chi la sceglie
+        // lo colora con [borderColor]. Le card delle lezioni non ce l'hanno.
+        border: !bordered && borderColor == null
             ? null
-            : Border.all(color: borderColor!, width: borderWidth),
+            : Border.all(color: borderColor ?? c.border, width: borderWidth),
         // Un'ombra fine e bassa, che stacca la card dal crema senza farla
         // galleggiare. Il gradino pieno resta solo dei bottoni.
         boxShadow: cardShadow(c),

@@ -1,0 +1,366 @@
+{
+    "level": "high-school",
+    "year": "year2",
+    "section": "year2-rette",
+    "topic": "year2-rette",
+    "title": "Le rette",
+    "subtitle": "Nel piano cartesiano",
+    "icon": "show_chart",
+    "lessons": [
+        {
+            "id": "rette-intro",
+            "title": "Introduzione",
+            "subtitle": "",
+            "minutes": 6,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Equazione della retta",
+                    "content": [
+                        "L'equazione della retta è la seguente:",
+                        {
+                            "id": "rette-explicit",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "y = mx + q",
+                                "fontSizeMultiplier": 1.4,
+                                "hidden": true
+                            }
+                        },
+                        "Questa è la sua **forma esplicita**: il parametro $y$ è esplicitato e la retta ha la sua forma in funzione $y = f(x)$.",
+                        "In alternativa abbiamo la **forma implicita**:",
+                        {
+                            "id": "rette-implicit",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "ax + by + c = 0",
+                                "fontSizeMultiplier": 1.3,
+                                "hidden": true
+                            }
+                        },
+                        "NOTA: $m$ e $q$ possono essere ricavati dalla forma implicita:",
+                        {
+                            "id": "rette-mq",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "m = -\\frac{a}{b} \\qquad q = -\\frac{c}{b}",
+                                "fontSizeMultiplier": 1.2,
+                                "hidden": true
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Nel piano cartesiano",
+                    "content": [
+                        "Tenendo in considerazione $y = mx + q$:",
+                        {
+                            "id": "rette-plane",
+                            "box_type": "graph",
+                            "title": "Una retta r nel piano",
+                            "payload": {
+                                "plane": "cartesian",
+                                "aspect": "equal",
+                                "x": [
+                                    -3,
+                                    5
+                                ],
+                                "y": [
+                                    -3,
+                                    3
+                                ],
+                                "grid": 1,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "2*x - 2",
+                                        "label": "r",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            1,
+                                            0
+                                        ],
+                                        "label": "P",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            0,
+                                            -2
+                                        ],
+                                        "label": "q",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            2,
+                                            2
+                                        ],
+                                        "label": "m",
+                                        "guides": true,
+                                        "color": "teal"
+                                    }
+                                ]
+                            }
+                        },
+                        "- **$m$ = coefficiente angolare**",
+                        "- rappresenta l'inclinazione della retta;",
+                        "- equivale all'ordinata del punto che ha distanza 1 dal punto d'intersezione $P$ con l'asse $x$.",
+                        "- **$q$ = termine noto**",
+                        "- è l'ordinata d'intersezione con l'asse $y$."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Casi particolari",
+                    "content": [
+                        "## Rette orizzontali e verticali",
+                        {
+                            "id": "rette-hv",
+                            "box_type": "graph",
+                            "title": "y = n e x = m",
+                            "payload": {
+                                "plane": "cartesian",
+                                "aspect": "equal",
+                                "x": [
+                                    -3,
+                                    5
+                                ],
+                                "y": [
+                                    -2,
+                                    3
+                                ],
+                                "grid": 1,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "items": [
+                                    {
+                                        "type": "line",
+                                        "y": 2,
+                                        "label": "y = n",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "line",
+                                        "x": 3,
+                                        "label": "x = m",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            0,
+                                            2
+                                        ],
+                                        "label": "n",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            3,
+                                            0
+                                        ],
+                                        "label": "m",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        },
+                        "NOTA: la retta orizzontale ha $m = 0$; la retta verticale non ha coefficiente angolare e non si scrive in forma esplicita.",
+                        "## Bisettrici ($q = 0$, $m = \\pm 1$)",
+                        {
+                            "id": "rette-bisectors",
+                            "box_type": "graph",
+                            "title": "y = x e y = -x",
+                            "payload": {
+                                "plane": "cartesian",
+                                "aspect": "equal",
+                                "x": [
+                                    -4,
+                                    4
+                                ],
+                                "y": [
+                                    -3,
+                                    3
+                                ],
+                                "grid": 1,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "x",
+                                        "label": "y = +x",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "function",
+                                        "expr": "-x",
+                                        "label": "y = -x",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        },
+                        "NOTA: se $m > 0$ la retta è crescente, se $m < 0$ è decrescente."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Come disegnarla",
+                    "content": [
+                        "Per esempio, disegniamo:",
+                        {
+                            "id": "rette-example",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "y = 2x - 1",
+                                "fontSizeMultiplier": 1.4,
+                                "hidden": true
+                            }
+                        },
+                        "Per disegnare una retta basta conoscere **2 suoi punti di passaggio**. Li si può identificare mediante la **tabella dei punti**: si assegna un valore a piacimento a $x$ (o a $y$) e si trova il rispettivo valore dell'incognita che risolve l'equazione.",
+                        "$x = 0 \\to y = 2 \\cdot 0 - 1 = -1$",
+                        "$x = 1 \\to y = 2 \\cdot 1 - 1 = 1$",
+                        {
+                            "id": "rette-table",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "\\begin{array}{c|c} x & y \\\\ \\hline 0 & -1 \\\\ 1 & 1 \\end{array}",
+                                "fontSizeMultiplier": 1.2,
+                                "hidden": true
+                            }
+                        },
+                        {
+                            "id": "rette-draw",
+                            "box_type": "graph",
+                            "title": "y = 2x - 1",
+                            "payload": {
+                                "plane": "cartesian",
+                                "aspect": "equal",
+                                "x": [
+                                    -3,
+                                    4
+                                ],
+                                "y": [
+                                    -3,
+                                    3
+                                ],
+                                "grid": 1,
+                                "xLabel": "x",
+                                "yLabel": "y",
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "2*x - 1",
+                                        "label": "y = 2x - 1",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            0,
+                                            -1
+                                        ],
+                                        "label": "(0,\\,-1)",
+                                        "color": "orange"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            1,
+                                            1
+                                        ],
+                                        "label": "(1,\\,1)",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "practice_quiz",
+                    "title": "Prova tu",
+                    "content": [],
+                    "exercises": [
+                        {
+                            "prompt": "assets/images/rette-quiz-1.png",
+                            "text": "Identifica l'espressione della retta mostrata.",
+                            "options": [
+                                "$$y = 2x + 1$$",
+                                "$$y = x + 2$$",
+                                "$$y = -2x + 1$$",
+                                "$$y = 2x - 1$$"
+                            ],
+                            "correctIndex": 0,
+                            "explanation": "La retta sale, quindi $m > 0$, e incrocia l'asse $y$ in $1$, quindi $q > 0$. Un passo a destra di $P$ sale di $2$: $m = 2$."
+                        },
+                        {
+                            "prompt": "assets/images/rette-quiz-2.png",
+                            "text": "Identifica l'espressione della retta mostrata.",
+                            "options": [
+                                "$$y = x + 2$$",
+                                "$$y = -x - 2$$",
+                                "$$y = -x + 2$$",
+                                "$$y = 2x - 1$$"
+                            ],
+                            "correctIndex": 2,
+                            "explanation": "La retta scende, quindi $m < 0$ (qui $m = -1$), e incrocia l'asse $y$ in $2$, quindi $q > 0$."
+                        },
+                        {
+                            "prompt": "assets/images/rette-quiz-3.png",
+                            "text": "Identifica l'espressione della retta mostrata.",
+                            "options": [
+                                "$$x = 3$$",
+                                "$$y = 3x$$",
+                                "$$y = 3$$",
+                                "$$y = x + 3$$"
+                            ],
+                            "correctIndex": 2,
+                            "explanation": "È una retta orizzontale: $m = 0$. Incrocia l'asse $y$ in $3$, quindi $q > 0$ e l'equazione è $y = 3$."
+                        },
+                        {
+                            "prompt": "assets/images/rette-quiz-4.png",
+                            "text": "Identifica l'espressione della retta mostrata.",
+                            "options": [
+                                "$$y = -x$$",
+                                "$$y = x + 1$$",
+                                "$$y = 2x$$",
+                                "$$y = x$$"
+                            ],
+                            "correctIndex": 3,
+                            "explanation": "La retta passa per l'origine, quindi $q = 0$, e sale, quindi $m > 0$: è la bisettrice $y = x$."
+                        },
+                        {
+                            "prompt": "assets/images/rette-quiz-5.png",
+                            "text": "Identifica l'espressione della retta mostrata.",
+                            "options": [
+                                "$$y = -2x + 1$$",
+                                "$$y = 2x - 1$$",
+                                "$$y = -2x - 1$$",
+                                "$$y = -x - 1$$"
+                            ],
+                            "correctIndex": 2,
+                            "explanation": "La retta scende, quindi $m < 0$ (qui $m = -2$), e incrocia l'asse $y$ sotto lo zero, in $-1$: $q < 0$."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

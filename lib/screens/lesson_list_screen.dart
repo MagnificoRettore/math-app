@@ -5,13 +5,13 @@ import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../data/lesson_repository.dart';
 import '../data/progress_store.dart';
+import '../data/resume_target.dart';
 import '../models/argomento.dart';
 import '../models/course.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/topic_style.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/jump_back_in_card.dart';
 import '../widgets/list_filter_bar.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
@@ -267,7 +267,7 @@ class _YearArgumenti extends StatelessWidget {
 
   /// La lezione lasciata a metà, se è di questa scuola.
   Widget? _resume() {
-    final target = JumpBackInCard.target();
+    final target = ResumeTarget.find();
     if (target == null || target.resume.levelId != levelId) return null;
     final total = target.lesson.steps.length;
     final step = target.resume.step.clamp(0, total == 0 ? 0 : total - 1);

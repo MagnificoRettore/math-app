@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,9 +10,6 @@ import 'package:math_app/data/lesson_repository.dart';
 import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/models/lesson.dart';
 import 'package:math_app/models/lesson_step.dart';
-import 'package:math_app/models/multifunction_box/box_payload.dart';
-import 'package:math_app/models/multifunction_box/box_type.dart';
-import 'package:math_app/models/multifunction_box/multifunction_box.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/app_button.dart';
 import 'package:math_app/widgets/app_card.dart';
@@ -110,8 +107,12 @@ void main() {
     );
     // Le equazioni (1) e l'argomento d'esempio dei grafici (4).
     expect(lessons, hasLength(5));
+    // Moduli (2) e Le rette (1).
     expect(LessonRepository.instance.lessonsInYear('high-school', 'year2'), [
       ...moduli.lessons,
+      ...LessonRepository.instance.argomenti
+          .firstWhere((a) => a.title == 'Le rette')
+          .lessons,
     ]);
     expect(
       LessonRepository.instance.lessonsInYear('scuola-media', 'year1'),
@@ -119,42 +120,46 @@ void main() {
     );
   });
 
-  test(
-    'le rette sono il primo argomento di terza con l\'immagine iniziale',
-    () {
-      final rettes = LessonRepository.instance.argomenti.firstWhere(
-        (a) => a.title == 'Le rette',
-      );
-      expect(rettes.levelId, 'high-school');
-      expect(rettes.yearId, 'year3');
-      expect(rettes.topicId, 'year3-rettes');
-      expect(rettes.lessons, hasLength(1));
+  test('le rette sono un argomento di seconda con cinque card', () {
+    final rette = LessonRepository.instance.argomenti.firstWhere(
+      (a) => a.title == 'Le rette',
+    );
+    expect(rette.levelId, 'high-school');
+    expect(rette.yearId, 'year2');
+    expect(rette.topicId, 'year2-rette');
+    expect(rette.lessons, hasLength(1));
 
-      final lezione = rettes.lessons.single;
-      expect(lezione.title, 'Introduzione');
-      expect(lezione.steps, hasLength(2));
-      final step = lezione.steps.first;
-      expect(step.title, 'Definizione');
-      expect(step.type, LessonStepType.info);
-      final box = MultifunctionBox.fromJson(
-        jsonDecode(
-          RegExp(
-            r'::box\n(.*?)\n::endbox',
-            dotAll: true,
-          ).firstMatch(step.content)!.group(1)!,
-        ) as Map<String, dynamic>,
-      );
-      expect(box.boxType, BoxType.image);
-      expect(
-        (box.payload as ImageBoxPayload).source,
-        'assets/images/retta.png',
-      );
+    final lezione = rette.lessons.single;
+    expect(lezione.title, 'Introduzione');
+    expect(lezione.steps.map((s) => s.title), [
+      'Equazione della retta',
+      'Nel piano cartesiano',
+      'Casi particolari',
+      'Come disegnarla',
+      'Prova tu',
+    ]);
+    // Le quattro card di spiegazione e, ultima, la verifica.
+    expect(
+      lezione.steps.take(4).map((s) => s.type),
+      everyElement(LessonStepType.info),
+    );
+    final prova = lezione.steps.last;
+    expect(prova.type, LessonStepType.practiceQuiz);
+    expect(prova.exercises, hasLength(5));
+    for (final esercizio in prova.exercises) {
+      expect(esercizio.hasAnswer, isTrue);
+      expect(esercizio.options, hasLength(4));
+      // L'immagine della retta c'è davvero fra gli asset.
+      expect(File(esercizio.prompt).existsSync(), isTrue);
+    }
+    // La seconda card ha il grafico del piano.
+    expect(lezione.steps[1].content, contains('"box_type":"graph"'));
 
-      expect(LessonRepository.instance.lessonsInYear('high-school', 'year3'), [
-        lezione,
-      ]);
-    },
-  );
+    expect(
+      LessonRepository.instance.lessonsInYear('high-school', 'year3'),
+      isEmpty,
+    );
+  });
 
   test('la lezione parsifica passaggi info e mcq', () {
     final lesson = LessonRepository.instance.argomenti

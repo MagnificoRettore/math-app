@@ -25,6 +25,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
 
     if (box.payload is GraphPayload) {
       return AppCard(
+        bordered: false,
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,6 +52,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
 
     final hasTitle = box.title.isNotEmpty;
     return AppCard(
+      bordered: false,
       padding: hasTitle
           ? const EdgeInsets.all(16)
           : const EdgeInsets.fromLTRB(16, 8, 16, 8),
