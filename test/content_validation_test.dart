@@ -1,4 +1,5 @@
-// Valida i contenuti delle lezioni (`assets/data/lessons/*.json`).
+// Valida i contenuti delle lezioni (`assets/data/lessons/*.json`, generati dai
+// `content/*.md`: la loro corrispondenza la controlla `content_markdown_test.dart`).
 //
 // Due parti:
 //  1. controlli sui dati: struttura, id, risposte, asset, formule LaTeX,
@@ -24,25 +25,14 @@ import 'package:math_app/models/lesson.dart';
 import 'package:math_app/models/multifunction_box/box_payload.dart';
 import 'package:math_app/models/multifunction_box/box_type.dart';
 import 'package:math_app/models/multifunction_box/multifunction_box.dart';
+import 'package:math_app/screens/lesson_preview_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/expression_evaluator.dart';
+import 'package:math_app/widgets/graph/graph_params.dart';
 import 'package:math_app/widgets/prompt_view.dart';
 
 const _lessonsDir = 'assets/data/lessons';
-
-/// I telefoni su cui ogni card deve stare: dal più stretto supportato (320)
-/// al tablet. Larghezze e altezze in punti logici.
-const _screens = <(String, Size)>[
-  ('320×640', Size(320, 640)),
-  ('360×800', Size(360, 800)),
-  ('393×852', Size(393, 852)),
-  ('412×915', Size(412, 915)),
-  ('600×960 tablet', Size(600, 960)),
-];
-
-/// Il testo del sistema: normale e ingrandito (impostazione di accessibilità).
-const _textScales = [1.0, 1.3];
 
 const _stepTypes = {
   'info',
@@ -131,24 +121,6 @@ void main() {
       expect(problems, isEmpty, reason: problems.join('\n'));
     });
 
-    test('i file sono formattati come da JSON_GUIDELINES.md', () async {
-      final ProcessResult result;
-      try {
-        result = await Process.run('python3', [
-          'tool/format_json.py',
-          '--check',
-        ]);
-      } on ProcessException {
-        markTestSkipped('python3 non c\'è: formattazione non controllata');
-        return;
-      }
-      expect(
-        result.exitCode,
-        0,
-        reason: '${result.stdout}\nLancia: python3 tool/format_json.py',
-      );
-    });
-
     for (final name in names) {
       test('$name: struttura, risposte, asset, formule e grafici', () {
         final problems = <String>[];
@@ -203,8 +175,8 @@ void main() {
       final problems = <String>[];
       try {
         for (final (levelId, lesson) in lessons) {
-          for (final (label, size) in _screens) {
-            for (final scale in _textScales) {
+          for (final (label, size) in kPreviewDevices) {
+            for (final scale in kPreviewTextScales) {
               await _renderLesson(
                 tester,
                 levelId,
@@ -440,16 +412,43 @@ void _validateGraph(
   String where,
   List<String> problems,
 ) {
-  // Un elemento che non si capisce viene saltato in silenzio a runtime: qui è
-  // un errore, altrimenti il grafico mostra meno di quello che hai scritto.
-  final rawItems = (raw['items'] as List<dynamic>? ?? const []).length;
-  if (graph.items.length != rawItems) {
-    problems.add(
-      '$where: ${rawItems - graph.items.length} elementi su $rawItems del '
-      'grafico non si capiscono e verrebbero saltati',
-    );
+  final rawParams = raw['params'];
+  if (rawParams != null) {
+    _validateParams(graph, raw, rawParams, where, problems);
   }
-  if (graph.isEmpty) problems.add('$where: grafico vuoto');
+  // Con i parametri gli elementi si capiscono solo a valori messi: si controlla
+  // a ogni posizione notevole degli slider.
+  final states = graph.params.isEmpty
+      ? [const <String, double>{}]
+      : _paramStates(graph);
+  for (final values in states) {
+    final at = values.isEmpty ? where : '$where, con ${_describe(values)}';
+    final resolved = resolveGraph(graph, values);
+    // Un elemento che non si capisce viene saltato in silenzio a runtime: qui è
+    // un errore, altrimenti il grafico mostra meno di quello che hai scritto.
+    final rawItems = (raw['items'] as List<dynamic>? ?? const []).length;
+    if (resolved.items.length != rawItems) {
+      problems.add(
+        '$at: ${rawItems - resolved.items.length} elementi su $rawItems del '
+        'grafico non si capiscono e verrebbero saltati',
+      );
+    }
+    if (resolved.isEmpty) problems.add('$at: grafico vuoto');
+    for (final item in raw['items'] as List<dynamic>? ?? const []) {
+      if (item is! Map<String, dynamic>) continue;
+      final expr = item['expr'] as String?;
+      if (item['type'] == 'function' && expr != null) {
+        final substituted = substituteParams(expr, values);
+        final finite = [
+          for (var x = -10.0; x <= 10; x += 0.5)
+            ExpressionEvaluator.tryEvaluate(substituted, x: x),
+        ].any((v) => v != null);
+        if (!finite) {
+          problems.add('$at: la funzione "$expr" non dà mai un valore');
+        }
+      }
+    }
+  }
   for (final key in ['x', 'y']) {
     final range = raw[key];
     if (range != null &&
@@ -459,16 +458,6 @@ void _validateGraph(
   }
   for (final item in raw['items'] as List<dynamic>? ?? const []) {
     if (item is! Map<String, dynamic>) continue;
-    final expr = item['expr'] as String?;
-    if (item['type'] == 'function' && expr != null) {
-      final finite = [
-        for (var x = -10.0; x <= 10; x += 0.5)
-          ExpressionEvaluator.tryEvaluate(expr, x: x),
-      ].any((v) => v != null);
-      if (!finite) {
-        problems.add('$where: la funzione "$expr" non dà mai un valore');
-      }
-    }
     final label = item['label'] as String?;
     if (label != null) {
       final error = _texError(label);
@@ -478,3 +467,53 @@ void _validateGraph(
     }
   }
 }
+
+/// I controlli di un grafico con slider.
+void _validateParams(
+  GraphPayload graph,
+  Map<String, dynamic> raw,
+  Object rawParams,
+  String where,
+  List<String> problems,
+) {
+  if (rawParams is! Map<String, dynamic> || rawParams.isEmpty) {
+    problems.add('$where: "params" deve essere un oggetto nome → slider');
+    return;
+  }
+  if (graph.params.length != rawParams.length) {
+    final ok = graph.params.map((p) => p.name).toSet();
+    problems.add(
+      '$where: parametri non validi: '
+      '${rawParams.keys.where((k) => !ok.contains(k)).join(', ')} '
+      '(nome come [A-Za-z_][A-Za-z0-9_]*, non riservato, min < max)',
+    );
+  }
+  // Gli assi non si muovono con gli slider: i domini automatici seguirebbero la
+  // curva e la scena salterebbe a ogni scatto.
+  if (graph.x == null || graph.y == null) {
+    problems.add('$where: con "params" servono "x" e "y" espliciti');
+  }
+  for (final e in rawParams.entries) {
+    final p = e.value;
+    if (p is Map<String, dynamic> && p['value'] is num) {
+      final v = p['value'] as num;
+      if (p['min'] is num &&
+          p['max'] is num &&
+          (v < p['min'] || v > p['max'])) {
+        problems.add('$where: "${e.key}" ha value fuori da [min, max]');
+      }
+    }
+  }
+}
+
+/// Le posizioni degli slider da provare: i valori di partenza, tutti al minimo,
+/// tutti al massimo e a metà.
+List<Map<String, double>> _paramStates(GraphPayload graph) => [
+  defaultParamValues(graph),
+  {for (final p in graph.params) p.name: p.min},
+  {for (final p in graph.params) p.name: p.max},
+  {for (final p in graph.params) p.name: (p.min + p.max) / 2},
+];
+
+String _describe(Map<String, double> values) =>
+    values.entries.map((e) => '${e.key}=${e.value}').join(', ');

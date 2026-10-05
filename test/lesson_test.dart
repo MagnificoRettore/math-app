@@ -105,8 +105,9 @@ void main() {
       'high-school',
       'year1',
     );
-    // Le equazioni (1) e l'argomento d'esempio dei grafici (4).
-    expect(lessons, hasLength(5));
+    // Le equazioni (1) e l'argomento d'esempio dei grafici (6, con le due
+    // lezioni interattive).
+    expect(lessons, hasLength(7));
     // Moduli (2) e Le rette (1).
     expect(LessonRepository.instance.lessonsInYear('high-school', 'year2'), [
       ...moduli.lessons,

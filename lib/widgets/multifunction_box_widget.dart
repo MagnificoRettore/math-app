@@ -7,6 +7,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'app_card.dart';
 import 'graph/graph_view.dart';
+import 'graph/interactive_graph.dart';
 import 'image_source.dart';
 import 'math_text.dart';
 
@@ -29,7 +30,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
       if (graph.hidden) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: GraphView(payload: graph),
+          child: _graph(graph),
         );
       }
       return AppCard(
@@ -49,7 +50,7 @@ class MultifunctionBoxWidget extends StatelessWidget {
               ),
               const SizedBox(height: 10),
             ],
-            GraphView(payload: box.payload as GraphPayload),
+            _graph(graph),
           ],
         ),
       );
@@ -121,6 +122,11 @@ class _ImageView extends StatelessWidget {
     );
   }
 }
+
+/// Il grafico: con i `params` ha i suoi slider, altrimenti è fermo.
+Widget _graph(GraphPayload graph) => graph.params.isEmpty
+    ? GraphView(payload: graph)
+    : InteractiveGraph(payload: graph);
 
 class _FormulaView extends StatelessWidget {
   final MathFormulaPayload payload;

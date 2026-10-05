@@ -409,6 +409,173 @@
                     ]
                 }
             ]
+        },
+        {
+            "id": "ex-arg-interattivi",
+            "title": "Grafici interattivi",
+            "subtitle": "Slider e animazioni sui parametri",
+            "minutes": 3,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Una retta con due slider",
+                    "content": [
+                        "Muovi gli slider: $m$ cambia l'inclinazione della retta, $q$ la sposta in alto o in basso.",
+                        {
+                            "id": "ex-int-retta",
+                            "box_type": "graph",
+                            "payload": {
+                                "plane": "cartesian",
+                                "aspect": "equal",
+                                "x": [-6, 6],
+                                "y": [-5, 5],
+                                "grid": 1,
+                                "params": {
+                                    "m": {
+                                        "min": -3,
+                                        "max": 3,
+                                        "step": 0.5,
+                                        "value": 1
+                                    },
+                                    "q": {
+                                        "min": -4,
+                                        "max": 4,
+                                        "step": 0.5,
+                                        "value": -1
+                                    }
+                                },
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "m*x + q",
+                                        "label": "y = mx + q",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            0,
+                                            "q"
+                                        ],
+                                        "label": "q",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il punto arancio sta sempre sull'asse $y$, all'altezza di $q$."
+                    ]
+                },
+                {
+                    "type": "info",
+                    "title": "Un'onda che si muove",
+                    "content": [
+                        "Con il tasto di riproduzione la fase scorre da sola; l'ampiezza si regola a mano.",
+                        {
+                            "id": "ex-int-onda",
+                            "box_type": "graph",
+                            "payload": {
+                                "plane": "cartesian",
+                                "x": [-7, 7],
+                                "y": [-4, 4],
+                                "grid": 1,
+                                "params": {
+                                    "a": {
+                                        "min": 0.5,
+                                        "max": 3,
+                                        "step": 0.25,
+                                        "value": 1.5
+                                    },
+                                    "p": {
+                                        "min": 0,
+                                        "max": 6.28,
+                                        "step": 0.1,
+                                        "value": 0,
+                                        "animate": true
+                                    }
+                                },
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "a*sin(x - p)",
+                                        "label": "y = a\\sin(x - p)",
+                                        "color": "teal"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ex-arg-parabola",
+            "title": "Una parabola con tre slider",
+            "subtitle": "Il vertice e l'asse di simmetria seguono i parametri",
+            "minutes": 3,
+            "steps": [
+                {
+                    "type": "info",
+                    "title": "Muovi i coefficienti",
+                    "content": [
+                        "La parabola $y = ax^2 + bx + c$: con $a$ cambia l'apertura, con $b$ e $c$ si sposta. Il punto arancio è il vertice e la retta tratteggiata l'asse di simmetria.",
+                        {
+                            "id": "ex-par-grafico",
+                            "box_type": "graph",
+                            "payload": {
+                                "plane": "cartesian",
+                                "x": [-6, 6],
+                                "y": [-6, 8],
+                                "grid": 1,
+                                "params": {
+                                    "a": {
+                                        "min": 0.25,
+                                        "max": 2,
+                                        "step": 0.25,
+                                        "value": 1
+                                    },
+                                    "b": {
+                                        "min": -4,
+                                        "max": 4,
+                                        "step": 0.5,
+                                        "value": 0
+                                    },
+                                    "c": {
+                                        "min": -4,
+                                        "max": 4,
+                                        "step": 0.5,
+                                        "value": -2
+                                    }
+                                },
+                                "items": [
+                                    {
+                                        "type": "function",
+                                        "expr": "a*x^2 + b*x + c",
+                                        "label": "y = ax^2 + bx + c",
+                                        "color": "accent"
+                                    },
+                                    {
+                                        "type": "line",
+                                        "x": "-b/(2*a)",
+                                        "style": "dashed",
+                                        "color": "teal"
+                                    },
+                                    {
+                                        "type": "point",
+                                        "at": [
+                                            "-b/(2*a)",
+                                            "c - b*b/(4*a)"
+                                        ],
+                                        "label": "V",
+                                        "color": "orange"
+                                    }
+                                ]
+                            }
+                        },
+                        "Il vertice sta sempre sull'asse di simmetria, in $x = -\\frac{b}{2a}$."
+                    ]
+                }
+            ]
         }
     ]
 }

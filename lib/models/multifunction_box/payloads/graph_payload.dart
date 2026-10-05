@@ -658,7 +658,79 @@ class GraphBarSeries {
   };
 }
 
-/// Il riquadro `graph`: un grafico non interattivo dal JSON della lezione.
+/// Un parametro che il lettore muove con uno slider (`params` del grafico).
+///
+/// Il [name] si usa nelle espressioni (`"m*x + q"`) e nelle coordinate dei
+/// punti; [label] è LaTeX (di base il nome); [step] è lo scatto dello slider.
+/// Con [animate] c'è anche un tasto che lo fa scorrere da solo avanti e
+/// indietro.
+class GraphParam {
+  /// I nomi che il motore delle espressioni usa già: non si possono dare a un
+  /// parametro.
+  static const reserved = {
+    'x', 't', 'pi', 'e', //
+    'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'ln', 'log', 'sqrt', 'abs',
+    'exp',
+  };
+
+  final String name;
+  final String label;
+  final double min;
+  final double max;
+  final double step;
+  final double value;
+  final bool animate;
+
+  const GraphParam({
+    required this.name,
+    required this.label,
+    required this.min,
+    required this.max,
+    required this.step,
+    required this.value,
+    this.animate = false,
+  });
+
+  /// Un parametro dal JSON, o `null` se non si capisce (nome non valido o già
+  /// preso, intervallo rovesciato): il grafico lo salta come ogni elemento che
+  /// non capisce.
+  static GraphParam? fromJson(String name, Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    if (!RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$').hasMatch(name) ||
+        reserved.contains(name)) {
+      return null;
+    }
+    final min = raw['min'], max = raw['max'];
+    if (min is! num || max is! num || !(max > min)) return null;
+    final span = max.toDouble() - min.toDouble();
+    final step = raw['step'];
+    final value = raw['value'];
+    return GraphParam(
+      name: name,
+      label: raw['label'] as String? ?? name,
+      min: min.toDouble(),
+      max: max.toDouble(),
+      step: step is num && step > 0 ? step.toDouble() : span / 100,
+      value: value is num
+          ? value.toDouble().clamp(min.toDouble(), max.toDouble())
+          : min.toDouble(),
+      animate: raw['animate'] == true,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'min': min,
+    'max': max,
+    'step': step,
+    'value': value,
+    if (label != name) 'label': label,
+    if (animate) 'animate': true,
+  };
+}
+
+/// Il riquadro `graph`: un grafico dal JSON della lezione.
+///
+/// Di base è fermo; con [params] ha degli slider che ne cambiano le espressioni.
 ///
 /// [x] e [y] sono i domini (`null` = automatici), [grid] il passo della
 /// griglia (`null` = automatico), [xLabel] e [yLabel] i nomi degli assi in
@@ -676,6 +748,13 @@ class GraphPayload extends BoxPayload {
   final List<String> categories;
   final List<GraphBarSeries> series;
 
+  /// Gli slider, nell'ordine del JSON. Vuoto = grafico fermo.
+  final List<GraphParam> params;
+
+  /// Il JSON da cui nasce, tenuto solo se ci sono [params]: a ogni scatto dello
+  /// slider si rilegge con i valori messi al posto dei nomi (`resolveGraph`).
+  final Map<String, dynamic>? source;
+
   /// Senza la card che lo avvolge e senza il titolo: il grafico sta da solo.
   /// **Di base è `true`**: la card si chiede con `"hidden": false`.
   final bool hidden;
@@ -691,12 +770,21 @@ class GraphPayload extends BoxPayload {
     this.items = const [],
     this.categories = const [],
     this.series = const [],
+    this.params = const [],
+    this.source,
     this.hidden = true,
   });
 
   factory GraphPayload.fromJson(Map<String, dynamic> json) {
     final grid = json['grid'];
+    final rawParams = json['params'];
+    final params = [
+      if (rawParams is Map<String, dynamic>)
+        for (final e in rawParams.entries) ?GraphParam.fromJson(e.key, e.value),
+    ];
     return GraphPayload(
+      params: params,
+      source: params.isEmpty ? null : json,
       plane: GraphPlane.fromString(json['plane'] as String? ?? ''),
       x: _range(json['x']),
       y: _range(json['y']),
@@ -737,6 +825,8 @@ class GraphPayload extends BoxPayload {
     if (items.isNotEmpty) 'items': [for (final i in items) i.toJson()],
     if (categories.isNotEmpty) 'categories': categories,
     if (series.isNotEmpty) 'series': [for (final s in series) s.toJson()],
+    if (params.isNotEmpty)
+      'params': {for (final p in params) p.name: p.toJson()},
     if (!hidden) 'hidden': hidden,
   };
 }

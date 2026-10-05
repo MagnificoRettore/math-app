@@ -168,7 +168,6 @@
                         {
                             "id": "mod-eq-formula",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "|ax + b| = k",
                                 "fontSizeMultiplier": 1.5
@@ -190,7 +189,6 @@
                         {
                             "id": "mod-eq-ex1",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "|x - 5| = 2",
                                 "fontSizeMultiplier": 1.5
@@ -283,6 +281,7 @@
                 {
                     "type": "practice_quiz",
                     "title": "Verifica",
+                    "content": [],
                     "exercises": [
                         {
                             "prompt": "$$|x - 5| = 4x$$",

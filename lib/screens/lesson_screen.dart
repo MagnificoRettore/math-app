@@ -301,36 +301,44 @@ class _LessonScreenState extends State<LessonScreen> {
                   children: [
                     // Lo spazio della toolbar, che sta qui sotto da sola.
                     const SizedBox(width: kToolsBarHeight + 8),
-                    const Spacer(),
-                    appear(
-                      'reload',
-                      showReload,
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: AppButton(
-                          icon: Icons.refresh_rounded,
-                          tooltip: 'Altro esercizio',
-                          variant: AppButtonVariant.outline,
-                          height: _kFooterControlHeight - AppButton.depth,
-                          onPressed: () =>
-                              _quizKeys[_page]?.currentState?.reload(),
-                        ),
-                      ),
-                    ),
-                    // `Flexible`: se lo spazio manca comunque (testo grande), il
-                    // bottone si stringe e il testo va in ellissi, invece di
-                    // sforare il bordo.
-                    Flexible(
-                      child: appear(
-                        'complete',
-                        showComplete,
-                        _completeButton(
-                          compact: _completeDoesNotFit(
-                            context,
-                            constraints.maxWidth - 2 * inner,
+                    // I bottoni stanno a destra. Il `Flexible` è il solo
+                    // flessibile della riga interna, quindi prende quello che
+                    // gli serve e non di più: se lo spazio manca comunque
+                    // (testo grande), si stringe e il testo va in ellissi,
+                    // invece di sforare il bordo.
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          appear(
+                            'reload',
                             showReload,
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: AppButton(
+                                icon: Icons.refresh_rounded,
+                                tooltip: 'Altro esercizio',
+                                variant: AppButtonVariant.outline,
+                                height: _kFooterControlHeight - AppButton.depth,
+                                onPressed: () =>
+                                    _quizKeys[_page]?.currentState?.reload(),
+                              ),
+                            ),
                           ),
-                        ),
+                          Flexible(
+                            child: appear(
+                              'complete',
+                              showComplete,
+                              _completeButton(
+                                compact: _completeDoesNotFit(
+                                  context,
+                                  constraints.maxWidth - 2 * inner,
+                                  showReload,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

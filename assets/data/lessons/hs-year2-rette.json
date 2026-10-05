@@ -21,7 +21,6 @@
                         {
                             "id": "rette-explicit",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "y = mx + q",
                                 "fontSizeMultiplier": 1.4
@@ -32,7 +31,6 @@
                         {
                             "id": "rette-implicit",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "ax + by + c = 0",
                                 "fontSizeMultiplier": 1.3
@@ -42,7 +40,6 @@
                         {
                             "id": "rette-mq",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "m = -\\frac{a}{b} \\quad q = -\\frac{c}{b}",
                                 "fontSizeMultiplier": 1.0
@@ -188,7 +185,6 @@
                         {
                             "id": "rette-example",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "y = 2x - 1",
                                 "fontSizeMultiplier": 1.4
@@ -198,7 +194,6 @@
                         {
                             "id": "rette-calc-0",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "x=0 \\to y=2\\cdot 0-1=-1",
                                 "fontSizeMultiplier": 1.0
@@ -207,7 +202,6 @@
                         {
                             "id": "rette-calc-1",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "x=1 \\to y=2\\cdot 1-1=1",
                                 "fontSizeMultiplier": 1.0
@@ -216,7 +210,6 @@
                         {
                             "id": "rette-table",
                             "box_type": "math_formula",
-                            "title": "",
                             "payload": {
                                 "tex": "\\begin{array}{c|c} x & y \\\\ \\hline 0 & -1 \\\\ 1 & 1 \\end{array}",
                                 "fontSizeMultiplier": 1.2

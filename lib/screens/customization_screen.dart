@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
+
 import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
 import 'feedback_screen.dart';
+import 'lesson_preview_screen.dart';
 import 'onboarding_screen.dart';
 
 const _hapticsSwitch = Key('haptics-switch');
@@ -35,6 +38,8 @@ class CustomizationScreen extends StatelessWidget {
                 _GuideCard(),
                 SizedBox(height: 12),
                 _FeedbackCard(),
+                // Strumento per chi scrive i contenuti: solo nelle build di debug.
+                if (kDebugMode) ...[_Label('Sviluppo'), _PreviewCard()],
               ],
             );
           },
@@ -123,6 +128,51 @@ class _FeedbackCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Un\'idea o un problema: raccontacelo.',
+                  style: TextStyle(
+                    fontSize: AppText.label,
+                    color: c.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: c.textSecondary),
+        ],
+      ),
+    );
+  }
+}
+
+/// Apre l'anteprima delle lezioni (solo in debug).
+class _PreviewCard extends StatelessWidget {
+  const _PreviewCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      key: const Key('open-lesson-preview'),
+      onTap: () => Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const LessonPreviewScreen())),
+      child: Row(
+        children: [
+          Icon(Icons.phone_android_rounded, color: c.indigo),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Anteprima lezioni',
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w500,
+                    color: c.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Una lezione su schermi e testi di varie misure.',
                   style: TextStyle(
                     fontSize: AppText.label,
                     color: c.textSecondary,

@@ -1,0 +1,192 @@
+---
+level: high-school
+year: year2
+section: year2-moduli
+topic: year2-moduli-definition
+title: Moduli
+subtitle: Variabile reale e valore assoluto
+icon: functions
+---
+
+# Definizione {id=mod-definition}
+
+## Definizione
+
+# Modulo e Equazioni con Modulo {id=mod-equations-intro subtitle="Distanza, espressioni letterali e studio del segno" minutes=6}
+
+## Che cos'è il Modulo?
+Il **modulo** (o **valore assoluto**) indica la **distanza** di un numero dallo zero sulla retta reale. La distanza è **sempre** $\ge 0$: il modulo non può mai essere negativo.
+\
+\
+```formula {id=mod-def-formula title=Definizione hidden=false size=1.2}
+|x| = \begin{cases} x & \text{se } x \ge 0 \\ -x & \text{se } x < 0 \end{cases}
+```
+
+## Esempi pratici
+- $|7| = 7$ — distanza **7** dallo zero
+- $|-7| = 7$ — toglie il segno negativo, la distanza è **7**
+\
+:::attenzione
+- **Il modulo non è mai negativo**: $|x| \ge 0$ per ogni numero $x$.
+- Due numeri opposti hanno la **stessa distanza** dallo zero.
+
+## Il modulo in un istogramma
+Il modulo di un numero è la sua **distanza dallo zero**, quindi è sempre positivo o nullo.
+Nelle barre sotto ogni altezza è un valore assoluto: i numeri negativi dal grafico sono comparsi, ma con il segno tolto.
+```graph {id=mod-chart-bars title="Valori assoluti da 0 a 5" hidden=false}
+{
+    "plane": "bars",
+    "xLabel": "x",
+    "yLabel": "|x|",
+    "categories": [
+        "-5",
+        "-4",
+        "-3",
+        "-2",
+        "-1",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+    ],
+    "series": [
+        {"label": "|x|", "color": "accent", "values": [5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5]}
+    ]
+}
+```
+Da $-5$ a $5$ le barre sono simmetriche: $-3$ e $3$ sono alla stessa distanza dallo zero.
+
+## Modulo ed Espressioni Letterali
+Quando dentro il modulo c'è un'espressione con l'incognita, il modulo dipende dal **segno dell'argomento**: se l'argomento è negativo, il modulo cambia segno.
+\
+```formula {id=mod-abs-ish title="Espressione letterale" hidden=false size=1.1}
+|x-3| = \begin{cases} x-3 & \text{se } x \ge 3 \\ -(x-3) & \text{se } x < 3 \end{cases}
+```
+```graph {id=mod-graph-reflection title="y = x - 3 e y = |x - 3|" hidden=false}
+{
+    "plane": "cartesian",
+    "x": [-2, 8],
+    "y": [-5, 6],
+    "grid": 1,
+    "items": [
+        {
+            "type": "function",
+            "expr": "x - 3",
+            "label": "y = x - 3",
+            "color": "orange",
+            "style": "dashed"
+        },
+        {"type": "function", "expr": "abs(x - 3)", "label": "y = |x - 3|", "color": "accent"},
+        {"type": "point", "at": [3, 0], "label": "V(3,\\,0)", "color": "accent"}
+    ]
+}
+```
+A sinistra di $3$ l'argomento $x - 3$ è **negativo**: la retta tratteggiata scende sotto l'asse $x$, e il modulo la **ribalta** sopra. A destra di $3$ le due coincidono. Il punto di svolta è il **vertice** $V(3, 0)$.
+
+## Esempi pratici
+- **$x = 5$**: $|5-3| = |2| = 2$ — l'argomento è **positivo**, il modulo non cambia nulla.
+- **$x = -10$**: $|-10-3| = |-13| = 13$ — l'argomento è **negativo**, il modulo toglie il segno.
+\
+:::takeaway
+- **Se $x \ge 3$**, l'argomento è già positivo: il modulo è **superfluo**.
+- **Se $x < 3$**, l'argomento è negativo: il modulo inverte il segno.
+
+## Equazioni con Modulo
+```formula {id=mod-eq-formula size=1.5}
+|ax + b| = k
+```
+\
+Per risolvere un'equazione di questo tipo il primo passo è lo **studio del segno dell'argomento** ($$ax+b$$).
+#### Procedura
+\
+- **Dividi** l'equazione nei due casi corrispondenti, **senza modulo**, e risolvi separatamente.
+
+## Esempio guidato
+#### Esempio guidato
+\
+```formula {id=mod-eq-ex1 size=1.5}
+|x - 5| = 2
+```
+Studio del modulo: $x - 5 \ge 0 \Rightarrow x \ge 5$
+- **Caso 1** ($x \ge 5$): $x - 5 = 2 \Rightarrow x = 7$ — valida perché $7 \ge 5$.
+- **Caso 2** ($x < 5$): $-(x - 5) = 2 \Rightarrow x = 3$ — valida perché $3 < 5$.
+#### - Soluzioni: $x = 7$ e $x = 3$.
+```graph {id=mod-line-solutions title="I numeri a distanza 2 da 5" hidden=false}
+{
+    "plane": "numberLine",
+    "x": [0, 10],
+    "grid": 1,
+    "items": [
+        {"type": "point", "at": 5, "label": "5", "color": "orange"},
+        {"type": "point", "at": 3, "label": "x = 3", "color": "accent"},
+        {"type": "point", "at": 7, "label": "x = 7", "color": "accent"}
+    ]
+}
+```
+$|x - 5| = 2$ chiede i numeri a **distanza 2 da 5**: sulla retta sono uno a sinistra e uno a destra di $5$.
+\
+\
+:::takeaway
+- **Verifica** che le soluzioni rispettino la condizione del caso.
+\
+
+## Prova tu
+Risolvi $|x - 5| = 4x$. Qui la costante $k$ è un'espressione con $x$: studia i due casi e **verifica** ogni soluzione.
+```graph {id=mod-chart-equation title="|x - 5| e 4x: dove si incontrano" hidden=false}
+{
+    "plane": "cartesian",
+    "x": [-2, 10],
+    "y": [-5, 10],
+    "grid": 1,
+    "items": [
+        {"type": "function", "expr": "abs(x - 5)", "label": "y = |x - 5|", "color": "accent"},
+        {"type": "function", "expr": "4 * x", "label": "y = 4x", "color": "orange"},
+        {"type": "point", "at": [1, 4], "label": "(1,\\,4)", "guides": true, "color": "accent"}
+    ]
+}
+```
+La curva $|x - 5|$ taglia l'asse $y$ in $5$ e ha il **vertice** in $(5, 0)$. Le due curve si incontrano in un solo punto, $(1, 4)$: la soluzione è $x = 1$. Il caso $x \ge 5$ darebbe $x = -\frac{5}{3}$, che non è $\ge 5$ e si scarta.
+
+## Verifica {type=practice_quiz}
+
+```quiz
+prompt: $$|x - 5| = 4x$$
+text: Qual è l'insieme delle soluzioni reali?
+- [x] $$x = 1$$
+- [ ] $$x = 5$$
+- [ ] $$x = \frac{4}{5}$$
+- [ ] $$x = -1$$
+explanation: Il secondo membro impone $4x \ge 0$, cioè $x \ge 0$. Il caso $x \ge 5$ porta a $x - 5 = 4x$, da cui $x = -5/3$, che contraddice $x \ge 5$. Resta $5 - x = 4x$, cioè $x = 1$.
+```
+
+```quiz
+prompt: $$|x - 3| = 5$$
+text: Quante soluzioni reali ha l'equazione?
+- [x] Due soluzioni
+- [ ] Una sola soluzione
+- [ ] Nessuna soluzione
+- [ ] Tre soluzioni
+explanation: Il secondo membro è positivo, quindi i due casi sono entrambi ammissibili: $x - 3 = 5$ dà $x = 8$ e $x - 3 = -5$ dà $x = -2$. Le soluzioni sono due: $8$ e $-2$.
+```
+
+```quiz
+prompt: $$|x| = x + 3$$
+text: Scegli l'affermazione corretta.
+- [x] Esiste una sola soluzione reale
+- [ ] Esistono due soluzioni reali
+- [ ] Non esistono soluzioni reali
+- [ ] Esistono infinite soluzioni reali
+explanation: Per $x \ge 0$ si ottiene $x = x + 3$, che è un assurdo. Per $x < 0$ invece $-x = x + 3$, da cui $x = -3/2$, che rispetta $x < 0$. Quindi una sola soluzione: $x = -3/2$.
+```
+
+```quiz
+prompt: $$|x + 2| = 2x - 4$$
+text: Scegli la soluzione che verifica l'equazione.
+- [x] $$x = 6$$
+- [ ] $$x = -6$$
+- [ ] $$x = 3$$
+- [ ] $$x = 2$$
+explanation: Il secondo membro non può essere negativo: $2x - 4 \ge 0 \Rightarrow x \ge 2$. In quel range $|x + 2| = x + 2$, quindi $x + 2 = 2x - 4 \Rightarrow x = 6$, che rispetta $x \ge 2$.
+```
