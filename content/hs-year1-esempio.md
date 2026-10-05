@@ -262,6 +262,31 @@ Con il tasto di riproduzione la fase scorre da sola; l'ampiezza si regola a mano
 }
 ```
 
+## Due punti da trascinare
+Trascina i punti $A$ e $B$ con il dito: la retta passa sempre per tutti e due. Il punto $M$ è a metà fra loro.
+```graph {id=ex-int-punti}
+{
+    "plane": "cartesian",
+    "aspect": "equal",
+    "x": [-6, 6],
+    "y": [-5, 5],
+    "grid": 1,
+    "params": {
+        "ax": {"min": -5, "max": 0, "step": 0.5, "value": -3, "slider": false},
+        "ay": {"min": -4, "max": 4, "step": 0.5, "value": -2, "slider": false},
+        "bx": {"min": 1, "max": 5, "step": 0.5, "value": 3, "slider": false},
+        "by": {"min": -4, "max": 4, "step": 0.5, "value": 2, "slider": false}
+    },
+    "items": [
+        {"type": "line", "through": [["ax", "ay"], ["bx", "by"]], "color": "accent"},
+        {"type": "point", "at": ["ax", "ay"], "draggable": true, "label": "A", "color": "orange"},
+        {"type": "point", "at": ["bx", "by"], "draggable": true, "label": "B", "color": "orange"},
+        {"type": "point", "at": ["(ax + bx)/2", "(ay + by)/2"], "label": "M", "color": "teal"}
+    ]
+}
+```
+Porta $A$ e $B$ alla stessa altezza: la retta diventa orizzontale.
+
 # Una parabola con tre slider {id=ex-arg-parabola subtitle="Il vertice e l'asse di simmetria seguono i parametri" minutes=3}
 
 ## Muovi i coefficienti

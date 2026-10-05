@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:math_app/widgets/graph/graph_params.dart';
 import 'package:math_app/models/multifunction_box/box_payload.dart';
 import 'package:math_app/models/multifunction_box/box_type.dart';
 import 'package:math_app/models/multifunction_box/multifunction_box.dart';
@@ -268,7 +269,9 @@ void main() {
       expect(boxes, isNotEmpty);
       for (final box in boxes) {
         final payload = MultifunctionBox.fromJson(box).payload as GraphPayload;
-        expect(payload.isEmpty, isFalse, reason: box['id'] as String);
+        // Con i parametri, i valori di partenza degli slider.
+        final shown = resolveGraph(payload, defaultParamValues(payload));
+        expect(shown.isEmpty, isFalse, reason: box['id'] as String);
       }
     });
   });

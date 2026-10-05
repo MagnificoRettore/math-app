@@ -416,6 +416,19 @@ void _validateGraph(
   if (rawParams != null) {
     _validateParams(graph, raw, rawParams, where, problems);
   }
+  // Un punto `draggable` deve avere almeno una coordinata che è il nome di un
+  // parametro: altrimenti non c'è niente da trascinare.
+  final draggable = [
+    for (final item in raw['items'] as List<dynamic>? ?? const [])
+      if (item is Map<String, dynamic> && item['draggable'] == true) item,
+  ];
+  if (draggable.length != dragHandles(graph).length) {
+    problems.add(
+      '$where: ${draggable.length - dragHandles(graph).length} punti '
+      '"draggable" non hanno coordinate che siano nomi di parametri '
+      '(es. "at": ["px", "py"])',
+    );
+  }
   // Con i parametri gli elementi si capiscono solo a valori messi: si controlla
   // a ogni posizione notevole degli slider.
   final states = graph.params.isEmpty

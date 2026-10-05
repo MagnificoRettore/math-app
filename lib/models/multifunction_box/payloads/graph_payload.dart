@@ -126,6 +126,7 @@ sealed class GraphItem {
         return GraphPoint(
           at: at,
           guides: json['guides'] == true,
+          draggable: json['draggable'] == true,
           label: label,
           colorKey: color,
         );
@@ -286,13 +287,17 @@ class GraphFunction extends GraphItem {
 }
 
 /// Un punto, con le proiezioni tratteggiate sugli assi se [guides].
+/// Con [draggable] il lettore lo trascina: le sue coordinate sono nomi di
+/// parametri (`"at": ["px", "py"]`) e il trascinamento li cambia.
 class GraphPoint extends GraphItem {
   final GraphXY at;
   final bool guides;
+  final bool draggable;
 
   const GraphPoint({
     required this.at,
     this.guides = false,
+    this.draggable = false,
     super.label,
     super.colorKey,
   });
@@ -302,6 +307,7 @@ class GraphPoint extends GraphItem {
     'type': 'point',
     'at': at.toJson(),
     if (guides) 'guides': true,
+    if (draggable) 'draggable': true,
     ..._common(),
   };
 }
@@ -681,6 +687,10 @@ class GraphParam {
   final double value;
   final bool animate;
 
+  /// `false` nasconde lo slider: il parametro si cambia solo trascinando un
+  /// punto (`draggable`) che lo usa.
+  final bool slider;
+
   const GraphParam({
     required this.name,
     required this.label,
@@ -689,6 +699,7 @@ class GraphParam {
     required this.step,
     required this.value,
     this.animate = false,
+    this.slider = true,
   });
 
   /// Un parametro dal JSON, o `null` se non si capisce (nome non valido o già
@@ -715,6 +726,7 @@ class GraphParam {
           ? value.toDouble().clamp(min.toDouble(), max.toDouble())
           : min.toDouble(),
       animate: raw['animate'] == true,
+      slider: raw['slider'] != false,
     );
   }
 
@@ -725,6 +737,7 @@ class GraphParam {
     'value': value,
     if (label != name) 'label': label,
     if (animate) 'animate': true,
+    if (!slider) 'slider': false,
   };
 }
 

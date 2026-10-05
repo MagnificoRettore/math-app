@@ -229,4 +229,152 @@ void main() {
       expect(find.byType(Slider), findsNWidgets(3));
     });
   });
+
+  group('punti trascinabili', () {
+    /// Un dito vero manda tanti piccoli movimenti, non un salto solo: dopo la
+    /// soglia del tocco (kPanSlop) ognuno arriva al gesto come trascinamento.
+    Future<void> trascina(
+      WidgetTester tester,
+      Finder finder,
+      Offset total,
+    ) async {
+      final gesture = await tester.startGesture(tester.getCenter(finder));
+      for (var i = 0; i < 20; i++) {
+        await gesture.moveBy(total / 20);
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pump();
+    }
+
+    const dragJson = '''
+{
+  "id": "d", "box_type": "graph",
+  "payload": {
+    "plane": "cartesian", "x": [-6, 6], "y": [-6, 6], "aspect": "equal",
+    "params": {
+      "px": {"min": -4, "max": 4, "step": 0.5, "value": 0, "slider": false},
+      "py": {"min": -4, "max": 4, "step": 0.5, "value": 0, "slider": false},
+      "s": {"min": 0, "max": 3, "step": 1, "value": 1}
+    },
+    "items": [
+      {"type": "point", "at": ["px", "py"], "draggable": true, "label": "A"},
+      {"type": "point", "at": ["px", "s"], "draggable": true, "label": "B"},
+      {"type": "point", "at": [1, 1], "draggable": true, "label": "fisso"},
+      {"type": "point", "at": ["px + 1", "py + 1"], "label": "M"}
+    ]
+  }
+}
+''';
+
+    GraphPayload payload() =>
+        MultifunctionBox.fromJson(jsonDecode(dragJson) as Map<String, dynamic>)
+                .payload
+            as GraphPayload;
+
+    Widget host() => MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: MultifunctionBoxWidget(
+            box: MultifunctionBox.fromJson(
+              jsonDecode(dragJson) as Map<String, dynamic>,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    test('quali punti si trascinano e quali parametri muovono', () {
+      final handles = dragHandles(payload());
+      // Il punto «fisso» non ha parametri fra le coordinate: niente da trascinare.
+      expect(handles.map((h) => h.itemIndex), [0, 1]);
+      expect((handles[0].xParam, handles[0].yParam), ('px', 'py'));
+      // B muove solo la x: la y è lo slider `s`, che qui resta un'altra cosa.
+      expect((handles[1].xParam, handles[1].yParam), ('px', 's'));
+      expect((payload().items.first as GraphPoint).draggable, isTrue);
+    });
+
+    test('lo scatto più vicino, dentro min e max', () {
+      final p = GraphParam.fromJson('a', {'min': -4, 'max': 4, 'step': 0.5})!;
+      expect(snapParam(p, 1.3), 1.5);
+      expect(snapParam(p, 1.2), 1);
+      expect(snapParam(p, 99), 4);
+      expect(snapParam(p, -99), -4);
+    });
+
+    test('slider: false nasconde lo slider e si riscrive', () {
+      final params = payload().params;
+      expect(params.map((p) => p.slider), [false, false, true]);
+      expect(
+        ((payload().toJson()['params'] as Map)['px'] as Map)['slider'],
+        isFalse,
+      );
+    });
+
+    testWidgets(
+      'ci sono gli anelli dei punti trascinabili e solo lo slider che serve',
+      (tester) async {
+        await tester.pumpWidget(host());
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byKey(const Key('drag-0')), findsOneWidget);
+        expect(find.byKey(const Key('drag-1')), findsOneWidget);
+        expect(find.byKey(const Key('drag-2')), findsNothing);
+        expect(find.byKey(const Key('drag-3')), findsNothing);
+        expect(find.byType(Slider), findsOneWidget);
+        expect(find.byKey(const Key('param-px')), findsNothing);
+      },
+    );
+
+    testWidgets('trascinare il punto cambia le sue coordinate, a scatti', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host());
+      await tester.pump(const Duration(seconds: 1));
+      GraphXY a() => (_drawn(tester).items[0] as GraphPoint).at;
+      expect((a().x, a().y), (0, 0));
+
+      await trascina(
+        tester,
+        find.byKey(const Key('drag-0')),
+        const Offset(120, -80),
+      );
+      // A destra e in alto: x e y aumentano, sempre su multipli dello scatto.
+      expect(a().x, greaterThan(0));
+      expect(a().y, greaterThan(0));
+      expect(a().x % 0.5, 0);
+      expect(a().y % 0.5, 0);
+      // M segue A (è un'espressione dei suoi parametri).
+      final m = (_drawn(tester).items[3] as GraphPoint).at;
+      expect((m.x, m.y), (a().x + 1, a().y + 1));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('non esce dai limiti dei parametri', (tester) async {
+      await tester.pumpWidget(host());
+      await tester.pump(const Duration(seconds: 1));
+      await trascina(
+        tester,
+        find.byKey(const Key('drag-0')),
+        const Offset(700, 0),
+      );
+      expect((_drawn(tester).items[0] as GraphPoint).at.x, 4);
+    });
+
+    testWidgets('un punto con una coordinata sola ne muove una', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host());
+      await tester.pump(const Duration(seconds: 1));
+      final before = (_drawn(tester).items[1] as GraphPoint).at;
+      await trascina(
+        tester,
+        find.byKey(const Key('drag-1')),
+        const Offset(120, 0),
+      );
+      final after = (_drawn(tester).items[1] as GraphPoint).at;
+      expect(after.x, greaterThan(before.x));
+      // Lo spostamento in verticale è zero: la y è `s`, non un trascinamento.
+      expect(after.y, before.y);
+    });
+  });
 }

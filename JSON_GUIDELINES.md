@@ -107,7 +107,14 @@ Un grafico con `params` ha uno slider per parametro e si ridisegna mentre si muo
 - **Il nome** è una lettera o parola (`m`, `q`, `ampiezza`), **non** `x`, `t`, `pi`, `e` né il nome di una funzione (`sin`, `abs`…). Un parametro non valido viene scartato e il test lo segnala.
 - **Dove si usano i nomi:** nelle espressioni (`expr`, `under`, `between`, `where`, le `x`/`y` di una `curve`) e come **coordinate** scritte come stringa (`"at": [0, "q"]`, `"radius": "r"`, i punti di un `segment`, `vector`, `polygon`, `line` per due punti…). Una coordinata può essere un'espressione dei parametri (`"m + q"`), non di `x`.
 - **`x` e `y` sono obbligatori**: gli assi non si muovono con gli slider.
-- Con il movimento ridotto il tasto di animazione non compare.
+- **Punti trascinabili:** un `point` con `"draggable": true` e le coordinate che sono **nomi di parametri** si trascina col dito e cambia quei parametri (portati sullo scatto più vicino, dentro `min`/`max`):
+  ```json
+  "params": {"px": {"min": -4, "max": 4, "step": 0.5, "value": 0, "slider": false}, ...},
+  "items": [{"type": "point", "at": ["px", "py"], "draggable": true, "label": "A"}]
+  ```
+  Una coordinata che non è un nome (un numero, un'espressione come `"px + 1"`) resta ferma o segue: un punto con una sola coordinata-parametro si muove su una direzione sola. Un `draggable` senza nessun parametro fra le coordinate è un errore. Il punto ha attorno un anello che dice che si tocca. **`"slider": false`** nel parametro nasconde il suo slider, se bastano i punti; gli slider rimasti si muovono insieme ai punti.
+- **Attenzione agli estremi:** il test prova i parametri al minimo, al massimo e a metà; se un elemento diventa non valido in uno di quei casi (due punti uguali per una retta, una divisione per zero) il test lo segnala. Dai ai punti intervalli che non si incrociano.
+- Con il movimento ridotto il tasto di animazione non compare (i punti si trascinano comunque).
 - Il test di validazione prova il grafico con gli slider ai valori di partenza, tutti al minimo, tutti al massimo e a metà: ogni elemento deve capirsi e ogni funzione dare un valore.
 
 ## Formattazione dei JSON generati

@@ -142,3 +142,44 @@ Map<String, dynamic> _resolveItem(
   }
   return out;
 }
+
+/// Un punto trascinabile: quale elemento è, e quali parametri muove (`null` =
+/// quella coordinata non dipende dal trascinamento).
+class DragHandle {
+  final int itemIndex;
+  final String? xParam;
+  final String? yParam;
+
+  const DragHandle(this.itemIndex, this.xParam, this.yParam);
+}
+
+/// I punti `draggable` del grafico. Una coordinata si trascina se è il nome di
+/// un parametro (`"at": ["px", "py"]`); le altre (numeri o espressioni) seguono.
+/// Un punto senza nessuna coordinata di questo tipo non ha niente da muovere.
+List<DragHandle> dragHandles(GraphPayload payload) {
+  final source = payload.source;
+  if (source == null) return const [];
+  final names = {for (final p in payload.params) p.name};
+  final out = <DragHandle>[];
+  final items = source['items'] as List<dynamic>? ?? const [];
+  for (final (i, item) in items.indexed) {
+    if (item is! Map<String, dynamic> ||
+        item['type'] != 'point' ||
+        item['draggable'] != true) {
+      continue;
+    }
+    final at = item['at'];
+    if (at is! List || at.length < 2) continue;
+    String? param(Object? v) =>
+        v is String && names.contains(v.trim()) ? v.trim() : null;
+    final x = param(at[0]), y = param(at[1]);
+    if (x != null || y != null) out.add(DragHandle(i, x, y));
+  }
+  return out;
+}
+
+/// [value] portato sullo scatto più vicino dello slider, dentro `[min, max]`.
+double snapParam(GraphParam p, double value) {
+  final steps = ((value - p.min) / p.step).round();
+  return (p.min + steps * p.step).clamp(p.min, p.max).toDouble();
+}

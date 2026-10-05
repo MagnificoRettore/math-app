@@ -303,6 +303,7 @@ Una riga per ogni modifica al design, la più recente in alto.
 |---|---|
 | 2026-10-05 | Bordino lilla da 2 (`border`) su tutte le card (`AppCard.bordered`), tranne quelle dentro le lezioni (la card della lezione e i riquadri formula/grafico/immagine). |
 | 2026-10-05 | Home rifatta: card grande «Continua» (play indaco, titolo, barra con la percentuale), card media «Esercizio del giorno» (difficoltà e «Provalo» giallo), «Il tuo percorso» (le card colorate con la barra bianca `x/y`) e «Lo sapevi?». Via la missione. |
+| 2026-10-05 | Punti trascinabili: attorno al punto un anello da 26 (34 mentre lo si trascina) del colore del punto, con un'area di tocco da 48. |
 | 2026-10-05 | Grafici con slider: sotto il grafico, per parametro, l'etichetta LaTeX col valore («m = 1.5», larga fissa), lo slider indaco senza tacche e, se il parametro si anima, il tasto play/pausa; gli slider sono allineati anche quando solo alcuni hanno il tasto. |
 | 2026-10-05 | Barra dei filtri: la ricerca è una pillola come le altre; tutte le pillole hanno il gradino pieno e scendono premute (4), il filtro attivo resta giù. Nuova pagina di feedback (tipo come filtri, campo, «Invia», ringraziamento nel tondo giallo). |
 | 2026-10-05 | Serie nell'header (pillola con fiamma) al posto della card «Traguardo» in Home; La calcolatrice si trascina verso il basso seguendo il dito. |

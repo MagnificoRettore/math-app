@@ -133,6 +133,12 @@ class GraphScale {
 
   double yToPx(double value) =>
       rect.bottom - (value - minY) / spanY * rect.height;
+
+  /// L'inverso di [xToPx]: il valore sui dati di una posizione in pixel.
+  double xFromPx(double px) => minX + (px - rect.left) / rect.width * spanX;
+
+  /// L'inverso di [yToPx].
+  double yFromPx(double px) => minY + (rect.bottom - px) / rect.height * spanY;
 }
 
 /// Area di disegno in pixel, detta con numeri per non avere `Rect` (che viene da
