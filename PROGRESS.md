@@ -21,6 +21,7 @@ Stato della suite: **570 test in 47 file**, tutti verdi. I conteggi sparati nell
 - **Matematica in linea** (`mathSpan`): allineata alla linea di base del testo invece che al centro, quindi `$x$` non sembra più un apice. Card delle rette: formule più strette per i 320 px.
 - **`hidden` di base a `true`** per i box `math_formula` e `graph`: senza card né titolo; la card si chiede con `"hidden": false` (messo nei file di prima per non cambiare aspetto). Prima il grafico nemmeno aveva `hidden`.
 - **JSON dei contenuti**: `tool/format_json.py` li formatta tutti allo stesso modo (4 spazi, array di numeri su una riga: `"y": [-3, 3]`), e `JSON_GUIDELINES.md` raccoglie le regole, da aggiornare man mano.
+- **Validazione dei contenuti** (`test/content_validation_test.dart`): struttura, risposte, asset, LaTeX, grafici, formattazione, e la resa di ogni card su 5 schermi (320…tablet) con testo ×1.0 e ×1.3, con i font veri; circa 15 secondi. Verificato che segnali davvero gli overflow (su 200 px fallisce).
 - Via `YearTabs`, `TopicRow`, `TopicImageCard` e i loro test; `MainHeaderAppBar.bottom` resta ma oggi non lo usa nessuno.
 - **Cambio scuola dal profilo**: ora si sceglie anche l'anno per medie e superiori (`YearTile` estratto dalla registrazione, `updateSchool(courseId:)`).
 - Le immagini della guida «argomenti» ed «esercizi» sono state rigenerate con il nuovo aspetto.
