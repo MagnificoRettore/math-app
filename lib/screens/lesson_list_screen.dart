@@ -38,7 +38,21 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
   /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
   /// ne ha aperta un'altra, altrimenti quello con cui la pagina è nata.
-  String? get _levelId => BrowseStore.instance.levelId ?? widget.levelId;
+  ///
+  /// La scuola del profilo viene prima di quella con cui la pagina è nata:
+  /// cambiandola dal profilo mentre questa pagina è sotto, deve seguirla.
+  String? get _levelId =>
+      BrowseStore.instance.levelId ?? _profileLevelId ?? widget.levelId;
+
+  static String? get _profileLevelId {
+    final id = AuthStore.instance.currentUser?.schoolLevelId;
+    return id == null || id.isEmpty ? null : id;
+  }
+
+  /// Scuola e anno del profilo all'ultimo controllo, per accorgersi che sono
+  /// cambiati.
+  String? _seenLevelId;
+  String? _seenCourseId;
 
   @override
   void initState() {
@@ -50,12 +64,16 @@ class _LessonListScreenState extends State<LessonListScreen> {
         level.courses,
       );
     }
+    _seenLevelId = _profileLevelId;
+    _seenCourseId = AuthStore.instance.currentUser?.courseId;
     BrowseStore.instance.addListener(_onBrowseChanged);
+    AuthStore.instance.addListener(_onProfileChanged);
   }
 
   @override
   void dispose() {
     BrowseStore.instance.removeListener(_onBrowseChanged);
+    AuthStore.instance.removeListener(_onProfileChanged);
     super.dispose();
   }
 
@@ -64,6 +82,23 @@ class _LessonListScreenState extends State<LessonListScreen> {
   void _onBrowseChanged() {
     if (!mounted) return;
     setState(() => _selectedIndex = 0);
+  }
+
+  /// Se dal profilo cambia la scuola o l'anno, la pagina si aggiorna subito: si
+  /// riparte dall'anno del profilo (o dal primo) sulla scuola nuova.
+  void _onProfileChanged() {
+    final levelId = _profileLevelId;
+    final courseId = AuthStore.instance.currentUser?.courseId;
+    if (levelId == _seenLevelId && courseId == _seenCourseId) return;
+    _seenLevelId = levelId;
+    _seenCourseId = courseId;
+    if (!mounted || BrowseStore.instance.levelId != null) return;
+    final level = ContentRepository.instance.levelById(_levelId ?? '');
+    setState(() {
+      _selectedIndex = level == null
+          ? 0
+          : AuthStore.instance.preferredCourseIndex(level.id, level.courses);
+    });
   }
 
   void _selectYear(int index) => setState(() => _selectedIndex = index);

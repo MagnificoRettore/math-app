@@ -5,6 +5,7 @@ import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
+import 'feedback_screen.dart';
 import 'onboarding_screen.dart';
 
 const _hapticsSwitch = Key('haptics-switch');
@@ -32,6 +33,8 @@ class CustomizationScreen extends StatelessWidget {
                 _HapticsCard(),
                 _Label('Aiuto'),
                 _GuideCard(),
+                SizedBox(height: 12),
+                _FeedbackCard(),
               ],
             );
           },
@@ -74,6 +77,52 @@ class _GuideCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Come sono fatti argomenti, lezioni ed esercizi.',
+                  style: TextStyle(
+                    fontSize: AppText.label,
+                    color: c.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: c.textSecondary),
+        ],
+      ),
+    );
+  }
+}
+
+/// Apre la pagina di feedback.
+class _FeedbackCard extends StatelessWidget {
+  const _FeedbackCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      key: const Key('open-feedback'),
+      onTap: () =>
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const FeedbackScreen())),
+      child: Row(
+        children: [
+          Icon(Icons.chat_bubble_outline_rounded, color: c.indigo),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Feedback',
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w500,
+                    color: c.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Un\'idea o un problema: raccontacelo.',
                   style: TextStyle(
                     fontSize: AppText.label,
                     color: c.textSecondary,

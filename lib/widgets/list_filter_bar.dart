@@ -5,7 +5,7 @@ import '../models/course.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
-import 'main_header.dart';
+import 'search_overlay.dart';
 import 'year_tile.dart';
 
 /// Quali voci mostrano Lezioni ed Esercizi: tutte, o solo quelle iniziate e
@@ -37,7 +37,7 @@ class ListFilterBar extends StatelessWidget {
     // La ricerca sta fissa a destra; le pillole scorrono nello spazio che resta
     // se non ci stanno (schermi stretti, testo grande).
     return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4, right: 8),
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Row(
         children: [
           Expanded(
@@ -69,7 +69,9 @@ class ListFilterBar extends StatelessWidget {
               ),
             ),
           ),
-          const HeaderSearchButton(),
+          const SizedBox(width: 4),
+          const SearchPill(),
+          const SizedBox(width: 12),
         ],
       ),
     );
@@ -192,7 +194,15 @@ TextStyle _pillStyle(AppPalette c) => TextStyle(
   color: c.textPrimary,
 );
 
-class _Pill extends StatelessWidget {
+/// La pillola dei controlli della barra, sollevata da un gradino pieno come i
+/// bottoni (`AppButton`): premuta scende di tutto il gradino e il gradino va a
+/// zero, al rilascio torna su. Il filtro attivo resta giù, come un interruttore
+/// premuto. Il tocco si legge con un `Listener`, che non toglie niente ai
+/// gesti del figlio (il menu dell'anno ha il suo).
+class _Pill extends StatefulWidget {
+  /// Altezza del gradino sotto la faccia.
+  static const double depth = 4;
+
   final bool selected;
   final Color? borderColor;
   final Widget child;
@@ -200,23 +210,87 @@ class _Pill extends StatelessWidget {
   const _Pill({required this.selected, required this.child, this.borderColor});
 
   @override
+  State<_Pill> createState() => _PillState();
+}
+
+class _PillState extends State<_Pill> {
+  bool _pressed = false;
+
+  void _press(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    return AnimatedContainer(
-      duration: AppMotion.duration(context, AppMotion.medium),
-      curve: AppMotion.standard,
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: selected ? c.yellow : c.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: borderColor ?? (selected ? c.yellowDeep : c.border),
-          width: 2,
+    final down = widget.selected || _pressed;
+    final border =
+        widget.borderColor ?? (widget.selected ? c.yellowDeep : c.border);
+    return Listener(
+      onPointerDown: (_) => _press(true),
+      onPointerUp: (_) => _press(false),
+      onPointerCancel: (_) => _press(false),
+      child: Padding(
+        // Lo spazio del gradino: l'altezza totale non cambia mai.
+        padding: const EdgeInsets.only(bottom: _Pill.depth),
+        child: AnimatedContainer(
+          duration: AppMotion.duration(context, AppMotion.fast),
+          curve: AppMotion.standard,
+          transform: Matrix4.translationValues(0, down ? _Pill.depth : 0, 0),
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: widget.selected ? c.yellow : c.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: border, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: border,
+                offset: Offset(0, down ? 0 : _Pill.depth),
+              ),
+            ],
+          ),
+          child: widget.child,
         ),
       ),
-      child: child,
+    );
+  }
+}
+
+/// La ricerca, con il suo pulsante come gli altri controlli della barra. Apre
+/// `showSearchOverlay` con il `context` del pulsante, che dà il punto da cui
+/// l'overlay si espande.
+class SearchPill extends StatelessWidget {
+  const SearchPill({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      label: 'Cerca',
+      onTap: () => showSearchOverlay(context),
+      child: Tooltip(
+        message: 'Cerca',
+        // Il `Builder` dà il contesto del solo pulsante: è il suo centro, non
+        // quello della barra, l'origine dell'espansione.
+        child: Builder(
+          builder: (buttonContext) => GestureDetector(
+            key: const Key('header-search'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              AppHaptics.selectionClick();
+              showSearchOverlay(buttonContext);
+            },
+            child: _Pill(
+              selected: false,
+              child: Icon(Icons.search_rounded, size: 22, color: c.textPrimary),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

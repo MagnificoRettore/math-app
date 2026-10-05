@@ -2,7 +2,7 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **565 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **574 test in 47 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
 ## 2026-10-05 — Lezioni ed Esercizi, nuova impaginazione
 
@@ -12,6 +12,7 @@ Stato della suite: **565 test in 46 file**, tutti verdi. I conteggi sparati nell
 - **Toolbar** degli strumenti più grande (62, `M3EToolbarSize.large`); i bottoni del piede della lezione restano a 49.
 - **Calcolatrice trascinabile**: il trascinamento verso il basso non si muoveva (un `AnimationController` non può tenere pixel, il suo valore si ferma a 1). Ora segue il dito, solo verso il basso, e lasciata oltre il 35% dell'altezza (o con uno strattone) si chiude, altrimenti torna su. `calculator_drag_test.dart`.
 - **Ricerca** tolta dall'header della Home: resta solo nella barra dei filtri di Lezioni ed Esercizi.
+- **Feedback** nelle impostazioni (`FeedbackScreen`, `FeedbackStore`): salvato solo sul dispositivo, la pagina lo dice. **Pillole** della barra con gradino e pressione simulata; **ricerca** come pillola, che si espande dal suo centro (verificato da test). **Lezioni ed Esercizi** si aggiornano subito se cambia la scuola del profilo (prima restavano sulla vecchia).
 - Via `YearTabs`, `TopicRow`, `TopicImageCard` e i loro test; `MainHeaderAppBar.bottom` resta ma oggi non lo usa nessuno.
 - **Cambio scuola dal profilo**: ora si sceglie anche l'anno per medie e superiori (`YearTile` estratto dalla registrazione, `updateSchool(courseId:)`).
 - Le immagini della guida «argomenti» ed «esercizi» sono state rigenerate con il nuovo aspetto.

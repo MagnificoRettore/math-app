@@ -301,6 +301,7 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-05 | Barra dei filtri: la ricerca è una pillola come le altre; tutte le pillole hanno il gradino pieno e scendono premute (4), il filtro attivo resta giù. Nuova pagina di feedback (tipo come filtri, campo, «Invia», ringraziamento nel tondo giallo). |
 | 2026-10-05 | Serie nell'header (pillola con fiamma) al posto della card «Traguardo» in Home; toolbar degli strumenti più grande (62, icone large). La calcolatrice si trascina verso il basso seguendo il dito. |
 | 2026-10-05 | Foglio di scelta della scuola: fondo crema con bordo lilla da 3 e angoli da 28, tondo giallo con il cappello accanto al titolo, scuole come card bianche; entra in `slow`. La ricerca di Lezioni ed Esercizi passa dall'header alla barra dei filtri, fissa a destra. |
 | 2026-10-05 | Lezioni ed Esercizi con una nuova impaginazione (il menu dell'anno è un foglio bianco col bordo lilla da 3 e angoli da 20, voci a pillola, la scelta gialla col bordo oro): menu dell'anno e filtri in cima (via gli `YearTabs`), card «Riprendi», griglia a due colonne al posto delle liste di card e delle immagini dei topic. |
