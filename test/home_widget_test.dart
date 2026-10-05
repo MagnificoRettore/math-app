@@ -23,7 +23,7 @@ import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/argomento_carousel.dart';
 import 'package:math_app/widgets/section_header.dart';
-import 'package:math_app/widgets/streak_card.dart';
+import 'package:math_app/widgets/jump_back_in_card.dart';
 
 /// Rapporto di contrasto WCAG fra due colori opachi.
 double _contrasto(Color a, Color b) {
@@ -218,23 +218,21 @@ void main() {
       addTearDown(tester.view.reset);
     }
 
-    testWidgets('serie, Jump Back In, argomenti, missione, curiosità', (
-      tester,
-    ) async {
+    testWidgets('Jump Back In, argomenti, missione, curiosità', (tester) async {
       schermoAlto(tester);
       await _registra();
       await _pumpHome(tester);
 
       double y(Finder f) => tester.getTopLeft(f).dy;
       final ordine = [
-        y(find.byType(StreakCard)),
         y(find.text('Jump Back In')),
         y(find.text('Argomenti')),
         y(find.text('La nostra missione')),
         y(find.byKey(const Key('math-fact-card'))),
       ];
       expect(ordine, [...ordine]..sort());
-      // Le sezioni tolte non tornano.
+      // Le sezioni tolte non tornano: la serie sta nell'header.
+      expect(find.byKey(const Key('streak-card')), findsNothing);
       expect(find.textContaining('Per te'), findsNothing);
       expect(find.text('I tuoi punti deboli'), findsNothing);
     });
@@ -346,13 +344,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 150));
 
       // La prima sezione è più avanti della seconda, che parte 60 ms dopo.
-      final prima = opacita(tester, find.byType(StreakCard));
+      final prima = opacita(tester, find.byType(JumpBackInCard));
       final seconda = opacita(tester, find.byType(ArgomentoCarousel));
       expect(prima, greaterThan(seconda));
       expect(prima, lessThan(1));
 
       await tester.pumpAndSettle();
-      expect(opacita(tester, find.byType(StreakCard)), 1);
+      expect(opacita(tester, find.byType(JumpBackInCard)), 1);
       expect(opacita(tester, find.byType(ArgomentoCarousel)), 1);
     });
 
@@ -367,11 +365,11 @@ void main() {
       final lista = find.byType(ListView).first;
       await tester.drag(lista, const Offset(0, -2000));
       await tester.pumpAndSettle();
-      expect(find.byType(StreakCard), findsNothing);
+      expect(find.byType(JumpBackInCard), findsNothing);
       await tester.drag(lista, const Offset(0, 2000));
       await tester.pump();
 
-      expect(opacita(tester, find.byType(StreakCard)), 1);
+      expect(opacita(tester, find.byType(JumpBackInCard)), 1);
       // Lo scroll ha ancora i suoi timer brevi: si lasciano finire.
       await tester.pumpAndSettle();
     });
@@ -383,7 +381,7 @@ void main() {
 
       expect(
         find.ancestor(
-          of: find.byType(StreakCard),
+          of: find.byType(JumpBackInCard),
           matching: find.byType(Animate),
         ),
         findsNothing,
@@ -510,39 +508,60 @@ void main() {
   });
 
   group('serie di giorni', () {
-    testWidgets('la card è il traguardo arancio del design', (tester) async {
-      await _registra();
-      await _pumpHome(tester);
-      await _scrollaA(tester, find.byType(StreakCard));
-
-      final card = tester.widget<Container>(
-        find.byKey(const Key('streak-card')),
-      );
-      final box = card.decoration! as BoxDecoration;
-      expect(box.color, AppPalette.light.orange);
-      // La stessa ombra fine delle altre card.
-      expect(box.boxShadow, cardShadow(AppPalette.light));
-      expect(find.text('TRAGUARDO'), findsOneWidget);
-      expect(find.textContaining('Serie di'), findsOneWidget);
-    });
-
-    testWidgets('la card è bassa: serie, record e settimana, niente barre', (
+    testWidgets('sta nell\'header, a sinistra dell\'ingranaggio', (
       tester,
     ) async {
       await _registra();
       await _pumpHome(tester);
 
-      final card = find.byKey(const Key('streak-card'));
-      expect(find.textContaining('Record:'), findsOneWidget);
+      final chip = tester.getRect(find.byKey(const Key('header-streak')));
+      final gear = tester.getRect(
+        find.byKey(const Key('header-customization')),
+      );
+      expect(chip.right, lessThanOrEqualTo(gear.left));
+      expect((chip.center.dy - gear.center.dy).abs(), lessThan(1));
+      expect(find.text('0'), findsWidgets);
+      // Non c'è altro testo: né «giorni» né il vecchio traguardo.
+      expect(find.text('TRAGUARDO'), findsNothing);
+    });
+
+    testWidgets('la fiamma è grigia senza attività e arancio dopo', (
+      tester,
+    ) async {
+      await _registra();
+      await _pumpHome(tester);
+      Color fiamma() =>
+          tester.widget<Icon>(find.byKey(const Key('streak-flame'))).color!;
+
+      expect(fiamma(), isNot(AppPalette.light.orange));
+
+      await StudyStore.instance.addMinutes(1);
+      await tester.pumpAndSettle();
+      expect(fiamma(), AppPalette.light.orange);
       expect(
         find.descendant(
-          of: card,
-          matching: find.byType(LinearProgressIndicator),
+          of: find.byKey(const Key('header-streak')),
+          matching: find.text('1'),
         ),
-        findsNothing,
+        findsOneWidget,
       );
-      // Era alta circa 280: ora la metà.
-      expect(tester.getSize(card).height, lessThan(150));
+    });
+
+    testWidgets('il tocco apre il foglio con la settimana e il record', (
+      tester,
+    ) async {
+      await _registra();
+      await StudyStore.instance.addMinutes(1);
+      await _pumpHome(tester);
+
+      await tester.tap(find.byKey(const Key('header-streak')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('streak-sheet')), findsOneWidget);
+      expect(find.text('Serie di 1 giorno'), findsOneWidget);
+      expect(find.text('Record: 1 giorno'), findsOneWidget);
+      // Oggi è fatto: un giorno della settimana è della serie.
+      expect(find.byKey(const Key('streak-day-done')), findsOneWidget);
     });
   });
 

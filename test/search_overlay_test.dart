@@ -10,14 +10,15 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
+import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/search_overlay.dart';
 
 const _lente = Key('header-search');
 const _campo = Key('search-overlay-field');
 
-/// Un testo dentro l'overlay: sotto c'è la Home, e il suo carosello ha le
-/// slide con gli stessi titoli degli argomenti.
+/// Un testo dentro l'overlay: sotto c'è l'elenco delle lezioni, con gli stessi
+/// titoli degli argomenti.
 Finder _nellOverlay(String testo) =>
     find.descendant(of: find.byType(SearchOverlay), matching: find.text(testo));
 
@@ -38,11 +39,14 @@ Future<void> _register() => AuthStore.instance.registerManual(
 );
 
 Future<void> _pumpHome(WidgetTester tester) async {
-  await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+  // La ricerca sta nella barra dei filtri di Lezioni (non più in Home).
+  await tester.pumpWidget(
+    const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
+  );
   await tester.pumpAndSettle();
 }
 
-/// Apre l'overlay dalla Home e aspetta che il campo sia pronto.
+/// Apre l'overlay da Lezioni e aspetta che il campo sia pronto.
 Future<void> _apriDaHome(WidgetTester tester) async {
   await _pumpHome(tester);
   await tester.tap(find.byKey(_lente));
@@ -72,13 +76,15 @@ void main() {
       // un gesto, non due
       expect(tester.widget<TextField>(find.byKey(_campo)).autofocus, isTrue);
       // e sotto Home resta Home
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(find.byType(LessonListScreen), findsOneWidget);
     },
   );
 
-  testWidgets('la lente c\'è anche nelle altre due pagine', (tester) async {
+  testWidgets('la lente è in Lezioni ed Esercizi, non in Home', (tester) async {
     await _register();
-    await _pumpHome(tester);
+    await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_lente), findsNothing);
 
     await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
@@ -112,7 +118,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byType(SearchOverlay), findsNothing);
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(LessonListScreen), findsOneWidget);
   });
 
   testWidgets('una lettera sola non cerca niente', (tester) async {

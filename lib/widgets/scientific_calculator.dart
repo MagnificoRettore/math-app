@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../haptics.dart';
+import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
 import 'expression_evaluator.dart';
 
@@ -21,7 +22,9 @@ class ScientificCalculatorSheet extends StatefulWidget {
 
 class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     with TickerProviderStateMixin {
-  static const _dismissFraction = 0.5;
+  /// Oltre questa frazione dell'altezza, lasciata, la calcolatrice si chiude;
+  /// prima, torna su.
+  static const _dismissFraction = 0.35;
   static const _dismissVelocity = 700.0;
 
   final GlobalKey _sheetKey = GlobalKey();
@@ -35,10 +38,12 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     begin: const Offset(0, 1),
     end: Offset.zero,
   ).animate(CurvedAnimation(parent: _entrance, curve: Curves.easeOutCubic));
-  late final AnimationController _dragCtrl = AnimationController(
+  // 0..1, solo per il ritorno: lo spostamento in pixel sta in [_dragOffset]
+  // (un `AnimationController` non può tenerlo, il suo valore si ferma a 1).
+  late final AnimationController _snapBack = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 220),
-  )..addListener(() => setState(() {}));
+    duration: AppMotion.medium,
+  );
 
   double _dragOffset = 0;
   bool _interactive = false;
@@ -85,14 +90,17 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
   @override
   void dispose() {
     _entrance.dispose();
-    _dragCtrl.dispose();
+    _snapBack.dispose();
     super.dispose();
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
     if (!_interactive || _dismissing) return;
-    _dragOffset += details.delta.dy;
-    _dragCtrl.value = _dragOffset;
+    _snapBack.stop();
+    // Solo verso il basso: sopra la posizione di riposo non va.
+    setState(
+      () => _dragOffset = (_dragOffset + details.delta.dy).clamp(0, 2000),
+    );
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -106,11 +114,24 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
     if (fast || beyondThreshold) {
       _dismiss();
     } else if (_dragOffset > 0) {
-      _dragCtrl
-        ..value = _dragOffset
-        ..animateBack(0);
+      final from = _dragOffset;
+      _snapBack
+        ..removeListener(_onSnap)
+        ..addListener(_onSnap)
+        ..value = 0
+        ..animateTo(
+          1,
+          duration: AppMotion.duration(context, AppMotion.medium),
+          curve: AppMotion.standard,
+        );
+      _snapFrom = from;
     }
   }
+
+  double _snapFrom = 0;
+
+  void _onSnap() =>
+      setState(() => _dragOffset = _snapFrom * (1 - _snapBack.value));
 
   void _dismiss() {
     if (_dismissing) return;
@@ -401,9 +422,9 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
             child: SlideTransition(
               position: _slide,
               child: AnimatedBuilder(
-                animation: _dragCtrl,
+                animation: _snapBack,
                 builder: (context, child) => Transform.translate(
-                  offset: Offset(0, _dragCtrl.value),
+                  offset: Offset(0, _dragOffset),
                   child: child,
                 ),
                 child: _buildSheet(context, c),
@@ -510,16 +531,21 @@ class _ScientificCalculatorSheetState extends State<ScientificCalculatorSheet>
               ],
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  _expr.isEmpty ? '0' : _expr,
-                  key: const ValueKey('calc-expr'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: AppText.titleMedium,
-                    color: c.textSecondary,
-                    fontFamily: 'monospace',
+                // Un'espressione lunga scorre dal fondo invece di tagliarsi con i
+                // puntini: l'ellissi mostrerebbe `sin(90…` per `sin(900)`.
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: Text(
+                    _expr.isEmpty ? '0' : _expr,
+                    key: const ValueKey('calc-expr'),
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: AppText.titleMedium,
+                      color: c.textSecondary,
+                      fontFamily: 'monospace',
+                    ),
                   ),
                 ),
               ),

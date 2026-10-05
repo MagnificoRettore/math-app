@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/argomento.dart';
 import '../models/lesson_resume.dart';
 import '../models/progress.dart';
+import 'auth_store.dart';
 
 class ProgressStore extends ChangeNotifier {
   static final ProgressStore instance = ProgressStore._();
@@ -20,6 +21,21 @@ class ProgressStore extends ChangeNotifier {
   LessonResume? _resume;
   bool _loaded = false;
   Object? _loadError;
+  String _lastOwner = ExerciseProgress.guestOwner;
+  bool _listening = false;
+
+  /// Di chi sono i progressi che si vedono: l'account della sessione, o
+  /// l'ospite. Cambiando utente cambiano i progressi, senza toccare quelli
+  /// dell'altro.
+  String get ownerId =>
+      AuthStore.instance.currentUser?.accountId ?? ExerciseProgress.guestOwner;
+
+  void _onAuthChanged() {
+    final owner = ownerId;
+    if (owner == _lastOwner) return;
+    _lastOwner = owner;
+    notifyListeners();
+  }
 
   bool get loaded => _loaded;
   Object? get loadError => _loadError;
@@ -27,6 +43,11 @@ class ProgressStore extends ChangeNotifier {
   Future<void> load() async {
     if (_loaded) return;
     _loadError = null;
+    if (!_listening) {
+      _listening = true;
+      AuthStore.instance.addListener(_onAuthChanged);
+    }
+    _lastOwner = ownerId;
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_progressKey);
@@ -39,7 +60,15 @@ class ProgressStore extends ChangeNotifier {
       }
       final done = prefs.getStringList(_lessonsKey);
       if (done != null) {
-        _completedLessons.addAll(done);
+        // Una chiave di prima ha due parti (`livello::lezione`): era dell'uso
+        // senza account, e diventa dell'ospite.
+        _completedLessons.addAll(
+          done.map(
+            (key) => '::'.allMatches(key).length == 1
+                ? '${ExerciseProgress.guestOwner}::$key'
+                : key,
+          ),
+        );
       }
       final rawResume = prefs.getString(_resumeKey);
       if (rawResume != null) {
@@ -83,7 +112,12 @@ class ProgressStore extends ChangeNotifier {
     final key = scopedKey(levelId, exerciseId);
     final current =
         _progress[key] ??
-        ExerciseProgress(exerciseId: exerciseId, status: ExerciseStatus.none);
+        ExerciseProgress(
+          ownerId: ownerId,
+          levelId: levelId,
+          exerciseId: exerciseId,
+          status: ExerciseStatus.none,
+        );
     _progress[key] = current.copyWith(status: status);
     notifyListeners();
     await _persist();
@@ -117,12 +151,19 @@ class ProgressStore extends ChangeNotifier {
 
   /// La lezione lasciata aperta, se l'utente ne ha abbandonata una senza
   /// completarla. È il punto da cui ripartire la sezione «Jump Back In».
-  LessonResume? get lessonResume => _resume;
+  LessonResume? get lessonResume =>
+      _resume?.ownerId == ownerId ? _resume : null;
 
   /// Ricorda la lezione aperta e il passo raggiunto: scritta a ogni cambio di
   /// card, così un kill dell'app non perde il punto di ripresa.
   Future<void> saveLessonResume(LessonResume resume) async {
-    _resume = resume;
+    // Il punto è dell'utente di adesso, chiunque costruisca il `LessonResume`.
+    _resume = LessonResume(
+      ownerId: ownerId,
+      levelId: resume.levelId,
+      lessonId: resume.lessonId,
+      step: resume.step,
+    );
     notifyListeners();
     await _persistResume();
   }
@@ -130,7 +171,7 @@ class ProgressStore extends ChangeNotifier {
   /// Chiamata quando la lezione è completata: non c'è più niente da
   /// riprendere, quindi la sezione deve tornare a puntare alla prossima.
   Future<void> clearLessonResume() async {
-    if (_resume == null) return;
+    if (lessonResume == null) return;
     _resume = null;
     notifyListeners();
     await _persistResume();
@@ -158,7 +199,7 @@ class ProgressStore extends ChangeNotifier {
     await _persistLessons();
   }
 
-  static String scopedKey(String levelId, String id) => '$levelId::$id';
+  String scopedKey(String levelId, String id) => '$ownerId::$levelId::$id';
 
   Future<void> _persistLessons() async {
     final prefs = await SharedPreferences.getInstance();

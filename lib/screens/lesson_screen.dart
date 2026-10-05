@@ -24,7 +24,9 @@ import '../widgets/scientific_calculator.dart';
 import '../widgets/tools_bar.dart';
 
 /// Altezza di «Completa la lezione» e della toolbar compatta: la stessa.
-const double _kFooterControlHeight = kToolsBarHeight;
+/// L'altezza dei bottoni del piede della lezione (con il gradino). La toolbar
+/// è più grande (`kToolsBarHeight`) e cresce in alto dallo stesso spigolo.
+const double _kFooterControlHeight = 49;
 
 /// La `PageView` mostra il 92% della larghezza: si intravedono le card vicine.
 const double _kViewportFraction = 0.92;
@@ -300,7 +302,7 @@ class _LessonScreenState extends State<LessonScreen> {
                 child: Row(
                   children: [
                     // Lo spazio della toolbar, che sta qui sotto da sola.
-                    const SizedBox(width: _kFooterControlHeight + 8),
+                    const SizedBox(width: kToolsBarHeight + 8),
                     const Spacer(),
                     appear(
                       'reload',
@@ -350,7 +352,7 @@ class _LessonScreenState extends State<LessonScreen> {
     // Larghezza già occupata a sinistra: la toolbar dipinta, il reload (44
     // più 8 di scarto) quando c'è, più un piccolo scarto perché il bottone
     // non tocchi il FAB.
-    final taken = _kFooterControlHeight + (reload ? 52 : 0) + 8;
+    final taken = kToolsBarHeight + (reload ? 52 : 0) + 8;
     // «Completa la lezione» per intero: 20 di padding per lato, icona da 20,
     // 8 di scarto, più il testo misurato.
     final painter = TextPainter(
@@ -632,9 +634,7 @@ class _StepCard extends StatelessWidget {
         child: SingleChildScrollView(
           // I bottoni galleggiano sul fondo della card: il testo può
           // scorrere fin sopra di loro, non finire sotto.
-          padding: EdgeInsets.only(
-            bottom: 16 + _kFooterControlHeight + bottomInset,
-          ),
+          padding: EdgeInsets.only(bottom: 16 + kToolsBarHeight + bottomInset),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

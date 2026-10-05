@@ -108,7 +108,7 @@ Due famiglie, **in locale** in `assets/fonts/` (statiche, un file per peso, lice
 | Bottone (`AppButton`) | pillola | contorno: 3 `accent` | 5 px pieno, colore `…Deep` |
 | Card (`AppCard`) | 20 (`kCardRadius`) | nessuno; 3 `accent` se scelta | nessuno; ombra fine (`cardShadow`) |
 | Campo di testo | 14 | 3 `border`, 3 `accent` col fuoco, 3 `hard` in errore | — |
-| Anno (`YearTabs`) | 12 | 3 `border`; scelto 3 `yellowDeep` su `yellow` | — |
+| Menu dell'anno e filtri (`ListFilterBar`) | 20 (pillola da 40) | 2 `accent` il menu, 2 `border` i filtri; attivo 2 `yellowDeep` su `yellow` | — |
 | Opzione di risposta | 14 | 3 `border`, poi il colore dello stato | — |
 | Barra di avanzamento alta | 4 | 2 `yellowDeep` | — |
 | Card «Traguardo» | 18 | — | nessuno; ombra fine (`cardShadow`) |
@@ -152,7 +152,7 @@ Nelle schermate non si usano `FilledButton` né `OutlinedButton`.
 
 ### Card — `AppCard` (`lib/widgets/app_card.dart`)
 Bianca, raggio 20, **senza gradino e con l'ombra fine** `cardShadow`, comprese quelle del carosello. Varianti fatte nelle schermate:
-- **Traguardo** (`StreakCard`): arancio, con l'ombra fine, quattro tagliandi bianchi a sinistra, striscia chiara a destra. È **bassa** (circa 136): un riquadro bianco con «TRAGUARDO» e il record sulla stessa riga e la serie in Outfit sotto, poi i sette blocchi della settimana alti 26. Niente barre degli obiettivi.
+- **Serie** (`HeaderStreakChip`): pillola da 36 nell'header, a sinistra dell'ingranaggio, con una fiamma da 20 e il numero in Outfit 600; fiamma e bordo arancio se oggi si è studiato, grigi altrimenti. Il foglio è come quello delle scuole (crema, bordo lilla da 3, angoli da 28): la serie, sette tondi da 38 per la settimana (arancio con fiamma i giorni della serie, oggi col bordo indaco) e il record. La vecchia card «Traguardo» è tolta.
 - **Scelta** (`SchoolLevelTile`): bordo indaco da 3.
 
 ### Campi — `AppTheme.fieldDecoration`
@@ -162,7 +162,7 @@ Fondo bianco, bordo da 3 lilla, indaco col fuoco, rosso nell'errore; l'etichetta
 Da 10 px in su: fondo `yellowSoft`, bordo `yellowDeep`, riempimento giallo a strisce verticali (2 px ogni 12). Sotto i 10 px: piena e arrotondata, nel colore che si passa.
 
 ### Selezioni
-- **Anni** (`YearTabs`): quadrati da 44, la «Classe» del canvas. Scelto: giallo con bordo oro, **senza spunta**: lo stato lo dice solo l'evidenziazione.
+- **Anno e filtri** (`ListFilterBar`): in cima a Lezioni ed Esercizi, una riga di pillole da 40: il menu dell'anno (bianco, bordo indaco, freccia) e «Tutti»/«In corso» (gialla col bordo oro quando è attiva, bianca col bordo lilla altrimenti), **senza spunta**. Sotto, la card «Riprendi da dove eri rimasto» (`ResumeCard`) e la griglia a due colonne (`TopicGrid`): icona colorata, titolo in Outfit 600 e «N lezioni · P%».
 - **Avatar** (`AvatarPicker`): cerchi colorati a turno (giallo, turchese, arancio, lilla) con l'icona inchiostro; scelto con bordo indaco e due anelli, bianco e giallo.
 - **Opzioni di risposta** (`McqOptionTile`): bordo da 3, verde giusta, rosso sbagliata, indaco scelta.
 
@@ -177,6 +177,8 @@ Un'illustrazione (l'albero, o il razzo per i meriti), il titolo in Outfit e una 
 
 ### Testata ondulata — `WaveBottomClipper` (`lib/widgets/wave_clipper.dart`)
 Il bordo in basso della testata di «Creazione profilo», scalato sul riquadro: nel benvenuto (con gli angoli in alto arrotondati) e nella registrazione a passi (a filo dello schermo).
+
+**Nella registrazione il bordo ondeggia**: con `phase` (un `AnimationController` da 6 s che si ripete, `reclip` del clipper) i punti del bordo oscillano di ±7 unità della tavola con sfasamenti diversi, e il tracciato torna uguale a ogni giro. Solo il tracciato del ritaglio si rifà a ogni frame: il contenuto sta in un `RepaintBoundary`. Col movimento ridotto il bordo sta fermo. Il contenuto del passo parte 28 px sotto la testata, lontano dalla punta dell'onda.
 
 ### Bottoni della lezione (`LessonScreen`)
 **Galleggiano sopra le card e restano fermi** mentre le card scorrono, sul fondo della card e a filo della sua colonna di testo: la toolbar degli strumenti a sinistra, il reload della verifica (`AppButton` `outline` solo icona) e «Completa la lezione» a destra, tutti alti 49 col gradino. Ognuno c'è solo dove serve per la card corrente, e compare o sparisce con una dissolvenza e una scala da 0.8 in `medium`. Il testo della card scorre fin sopra di loro.
@@ -299,6 +301,12 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-05 | Serie nell'header (pillola con fiamma) al posto della card «Traguardo» in Home; toolbar degli strumenti più grande (62, icone large). La calcolatrice si trascina verso il basso seguendo il dito. |
+| 2026-10-05 | Foglio di scelta della scuola: fondo crema con bordo lilla da 3 e angoli da 28, tondo giallo con il cappello accanto al titolo, scuole come card bianche; entra in `slow`. La ricerca di Lezioni ed Esercizi passa dall'header alla barra dei filtri, fissa a destra. |
+| 2026-10-05 | Lezioni ed Esercizi con una nuova impaginazione (il menu dell'anno è un foglio bianco col bordo lilla da 3 e angoli da 20, voci a pillola, la scelta gialla col bordo oro): menu dell'anno e filtri in cima (via gli `YearTabs`), card «Riprendi», griglia a due colonne al posto delle liste di card e delle immagini dei topic. |
+| 2026-10-05 | Le schede della guida mostrano una schermata vera dell'app (390×844, angoli `kCardRadius`, ombra fine) al posto dell'icona nel tondo giallo. |
+| 2026-10-05 | Bordo della testata di registrazione che ondeggia (leggero, fermo col movimento ridotto) e contenuto più staccato; curiosità «Lo sapevi?» che si scrive a macchina al tocco; cambio fra le sezioni con uno scorrimento laterale del 20% più dissolvenza; icona della personalizzazione sostituita da un ingranaggio; guida all'app a cinque schede con un tondo giallo e un'icona. |
+| 2026-10-05 | Icona dell'app (segnaposto): una «π» gialla in Plus Jakarta Sans 500 con il gradino `yellowDeep` sotto, su `headerBand` a angoli arrotondati; la versione «maskable» ha il simbolo nell'80% centrale. Solo web (`web/icons`, `favicon.png`); colori del manifest e titolo «Math App». |
 | 2026-10-05 | Pagina dell'esercizio: soluzione guidata passo dopo passo (una domanda a scelta multipla alla volta, il passaggio si appende quando si indovina) per gli esercizi che hanno le domande; il percorso in alto va a capo. |
 | 2026-10-05 | Esercizi: topic senza immagine di sfondo (solo il colore sfumato); toolbar degli strumenti identica a quella delle lezioni (`AppToolsBar`) su elenco e pagina dell'esercizio, con la calcolatrice funzionante al posto delle azioni vuote. |
 | 2026-10-05 | Argomenti: card del carosello più alte (1,15 × la larghezza, tutte uguali); barra di progresso nelle card degli argomenti; card delle lezioni senza alone; pulsante «Vai agli esercizi» in basso a destra della pagina dell'argomento; formule sole nei quiz delle lezioni alla stessa altezza del testo. |

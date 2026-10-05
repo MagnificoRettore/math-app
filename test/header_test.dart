@@ -134,26 +134,23 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
-  testWidgets('home: la lente sta in alto a destra, prima delle impostazioni', (
+  testWidgets('home: nell\'header non c\'è la lente, c\'è la serie', (
     tester,
   ) async {
     await _register();
     await _pumpHome(tester);
 
-    final lens = tester.getRect(find.byKey(const Key('header-search')));
+    expect(find.byKey(const Key('header-search')), findsNothing);
+    final serie = tester.getRect(find.byKey(const Key('header-streak')));
     final tune = tester.getRect(_customizzazione);
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
-
-    // a destra della riga dell'avatar, e nella stessa riga: l'AppBar centra
-    // verticalmente title e actions nello stesso toolbar
-    expect(lens.left, greaterThan(avatar.right));
-    expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
-    // e la lente sta prima dell'icona delle impostazioni
-    expect(lens.right, lessThanOrEqualTo(tune.left));
+    expect(serie.left, greaterThan(avatar.right));
+    expect((serie.center.dy - avatar.center.dy).abs(), lessThan(1));
+    expect(serie.right, lessThanOrEqualTo(tune.left));
     expect(_schermo(tester) - tune.right, lessThanOrEqualTo(12));
   });
 
-  testWidgets('lezioni: le icone stanno sulla stessa riga dell\'avatar', (
+  testWidgets('lezioni: la ricerca sta a destra nella barra dei filtri', (
     tester,
   ) async {
     await _register();
@@ -165,18 +162,26 @@ void main() {
     final lens = tester.getRect(find.byKey(const Key('header-search')));
     final tune = tester.getRect(_customizzazione);
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
+    final tutti = tester.getRect(find.byKey(const Key('filter-all')));
 
-    expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
-    // La banda parte dal bordo dello schermo, quindi l'avatar è a filo del
-    // margine dell'header e non c'è aria interna che lo spinga dentro.
+    // La lente non è più nella banda: sta sulla riga dei filtri, in fondo a
+    // destra, e nell'header restano le impostazioni.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const Key('header-search')),
+      ),
+      findsNothing,
+    );
+    expect(lens.top, greaterThanOrEqualTo(avatar.bottom));
+    expect((lens.center.dy - tutti.center.dy).abs(), lessThan(1));
+    expect(lens.left, greaterThan(tutti.right));
+    expect(_schermo(tester) - lens.right, lessThanOrEqualTo(16));
     expect(avatar.left, closeTo(kHeaderHorizontalMargin, 1));
-    // la lente non è più l'ultima a destra: le impostazioni le stanno accanto,
-    // ed è l'icona delle impostazioni a finire al bordo.
-    expect(lens.right, lessThanOrEqualTo(tune.left));
     expect(_schermo(tester) - tune.right, lessThanOrEqualTo(12));
   });
 
-  testWidgets('esercizi: le icone stanno sulla stessa riga dell\'avatar', (
+  testWidgets('esercizi: la ricerca sta a destra nella barra dei filtri', (
     tester,
   ) async {
     await _register();
@@ -188,12 +193,22 @@ void main() {
     final lens = tester.getRect(find.byKey(const Key('header-search')));
     final tune = tester.getRect(_customizzazione);
     final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
+    final tutti = tester.getRect(find.byKey(const Key('filter-all')));
 
-    expect((lens.center.dy - avatar.center.dy).abs(), lessThan(1));
-    // La banda parte dal bordo dello schermo, quindi l'avatar è a filo del
-    // margine dell'header e non c'è aria interna che lo spinga dentro.
+    // La lente non è più nella banda: sta sulla riga dei filtri, in fondo a
+    // destra, e nell'header restano le impostazioni.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byKey(const Key('header-search')),
+      ),
+      findsNothing,
+    );
+    expect(lens.top, greaterThanOrEqualTo(avatar.bottom));
+    expect((lens.center.dy - tutti.center.dy).abs(), lessThan(1));
+    expect(lens.left, greaterThan(tutti.right));
+    expect(_schermo(tester) - lens.right, lessThanOrEqualTo(16));
     expect(avatar.left, closeTo(kHeaderHorizontalMargin, 1));
-    expect(lens.right, lessThanOrEqualTo(tune.left));
     expect(_schermo(tester) - tune.right, lessThanOrEqualTo(12));
   });
 
@@ -317,7 +332,11 @@ void main() {
     });
 
     testWidgets('la ricerca si apre dalla lente e si chiude', (tester) async {
-      await _pumpHome(tester);
+      // La ricerca sta nella barra dei filtri di Lezioni.
+      await tester.pumpWidget(
+        const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('header-search')));
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byKey(const Key('search-overlay-close')), findsOneWidget);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../haptics.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_motion.dart';
 import 'profile_avatar.dart';
@@ -35,6 +36,7 @@ class _AvatarPickerState extends State<AvatarPicker> {
   }
 
   void _pick(String name) {
+    AppHaptics.selectionClick();
     setState(() => _selected = name);
     widget.onChanged(name);
   }

@@ -15,7 +15,7 @@ import 'package:math_app/theme/app_colors.dart';
 import 'package:math_app/theme/app_theme.dart';
 import 'package:math_app/widgets/main_header.dart';
 import 'package:math_app/widgets/profile_button.dart';
-import 'package:math_app/widgets/year_tabs.dart';
+import 'package:math_app/widgets/list_filter_bar.dart';
 
 const _identitaKey = Key('header-identity');
 const _nomeKey = Key('header-name');
@@ -125,7 +125,7 @@ void main() {
     expect(fuoriDallaBanda, isEmpty);
   });
 
-  testWidgets('in Lezioni gli anni stanno sotto la banda, non dentro', (
+  testWidgets('in Lezioni il menu dell\'anno sta sotto la banda, non dentro', (
     tester,
   ) async {
     await AuthStore.instance.registerManual(
@@ -142,7 +142,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final tabs = find.byType(YearTabs);
+    final tabs = find.byType(ListFilterBar);
     expect(tabs, findsOneWidget);
     // Fuori dall'`AppBar`.
     expect(
@@ -158,7 +158,7 @@ void main() {
   ) async {
     await _register(tester);
 
-    for (final icona in const [Icons.search_rounded, Icons.tune_rounded]) {
+    for (final icona in const [Icons.settings_rounded]) {
       final widget = tester.widget<Icon>(find.byIcon(icona).first);
       expect(
         widget.color,
@@ -314,10 +314,10 @@ void main() {
     expect(nome.overflow, TextOverflow.ellipsis);
     expect(tester.takeException(), isNull);
 
-    // Il nome resta dentro schermo e non arriva alla lente: nessuno dei due
+    // Il nome resta dentro schermo e non arriva alla serie: nessuno dei due
     // spinge l'altro fuori, e la banda non cresce.
     final testo = tester.getRect(find.byKey(_nomeKey));
-    final lente = tester.getRect(find.byKey(const Key('header-search')));
+    final lente = tester.getRect(find.byKey(const Key('header-streak')));
     expect(testo.right, lessThan(lente.left));
     expect(testo.height, lessThanOrEqualTo(kProfileAvatarSize));
     expect(

@@ -5,6 +5,7 @@ import '../data/settings_store.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../widgets/app_card.dart';
+import 'onboarding_screen.dart';
 
 const _hapticsSwitch = Key('haptics-switch');
 
@@ -26,10 +27,63 @@ class CustomizationScreen extends StatelessWidget {
           builder: (context, _) {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              children: const [_Label('Risposta'), _HapticsCard()],
+              children: const [
+                _Label('Risposta'),
+                _HapticsCard(),
+                _Label('Aiuto'),
+                _GuideCard(),
+              ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Riapre la guida del primo avvio.
+class _GuideCard extends StatelessWidget {
+  const _GuideCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AppCard(
+      key: const Key('open-guide'),
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const OnboardingScreen(fromSettings: true),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.menu_book_outlined, color: c.indigo),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Guida all\'app',
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w500,
+                    color: c.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Come sono fatti argomenti, lezioni ed esercizi.',
+                  style: TextStyle(
+                    fontSize: AppText.label,
+                    color: c.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right, color: c.textSecondary),
+        ],
       ),
     );
   }

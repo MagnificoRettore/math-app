@@ -123,23 +123,28 @@ void main() {
     expect(find.textContaining('non ti verrà più richiesta'), findsOneWidget);
   });
 
-  testWidgets('da collegato il bottone c\'è e sta a sinistra della lente', (
-    tester,
-  ) async {
-    await _registra();
-    await _pumpHome(tester);
-    await _vaiAllezioni(tester);
+  testWidgets(
+    'da collegato il bottone c\'è e sta a sinistra delle impostazioni',
+    (tester) async {
+      await _registra();
+      await _pumpHome(tester);
+      await _vaiAllezioni(tester);
 
-    expect(_bottoneScuola(), findsOneWidget);
+      expect(_bottoneScuola(), findsOneWidget);
 
-    final scuola = tester.getRect(_bottoneScuola());
-    final lente = tester.getRect(find.byKey(const Key('header-search')));
-    final avatar = tester.getRect(find.byKey(const Key('home-profile-avatar')));
+      final scuola = tester.getRect(_bottoneScuola());
+      final lente = tester.getRect(
+        find.byKey(const Key('header-customization')),
+      );
+      final avatar = tester.getRect(
+        find.byKey(const Key('home-profile-avatar')),
+      );
 
-    expect(scuola.left, greaterThan(avatar.right));
-    expect(scuola.right, lessThanOrEqualTo(lente.left));
-    expect((scuola.center.dy - lente.center.dy).abs(), lessThan(1));
-  });
+      expect(scuola.left, greaterThan(avatar.right));
+      expect(scuola.right, lessThanOrEqualTo(lente.left));
+      expect((scuola.center.dy - lente.center.dy).abs(), lessThan(1));
+    },
+  );
 
   testWidgets('il tap apre il foglio delle altre scuole', (tester) async {
     await _registra();
@@ -282,7 +287,9 @@ void main() {
 
     // «quarta» è il quarto di cinque: sui tre corsi dell'università quell'indice
     // sarebbe fuori range e la pagina resterebbe quella precedente.
-    await tester.tap(find.text('quarta'));
+    await tester.tap(find.byKey(const Key('year-dropdown')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('year-option-year4')));
     await tester.pumpAndSettle();
 
     await _scegliScuola(tester, 'Università');

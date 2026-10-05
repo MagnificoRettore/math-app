@@ -5,9 +5,18 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'home_screen.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_card.dart';
 
+/// La guida all'app: si apre al primo avvio e poi dalle impostazioni
+/// (Personalizzazione → «Guida all'app»).
+///
+/// Al primo avvio ([fromSettings] falso) finire o saltare segna la guida come
+/// vista e porta alla Home; dalle impostazioni si torna solo indietro e non si
+/// tocca niente.
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final bool fromSettings;
+
+  const OnboardingScreen({super.key, this.fromSettings = false});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -17,24 +26,50 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const List<({String title, String body})> _slides = [
+  static const List<({String image, String title, String body})> _slides = [
     (
-      title: 'Esercizi risolti passo passo',
+      image: 'assets/guide/home.png',
+      title: 'Tre sezioni',
       body:
-          'Ogni esercizio mostra le formule chiave, i suggerimenti e la '
-          'soluzione completa per imparare davvero.',
+          'In basso trovi Lezioni, Home ed Esercizi. Ci passi toccando la '
+          'barra o scorrendo a destra e a sinistra. Con la lente cerchi un '
+          'argomento o una lezione, con l\'ingranaggio cambi le impostazioni.',
     ),
     (
-      title: 'Studia per la tua scuola',
+      image: 'assets/guide/argomenti.png',
+      title: 'Argomenti e lezioni',
       body:
-          'Scegli Scuola Media, Superiore o Università: ricevi lezioni ed '
-          'esercizi consigliati su misura per te.',
+          'Ogni anno di scuola ha i suoi argomenti, per esempio «Equazioni '
+          'di primo grado». Un argomento raccoglie più lezioni da seguire in '
+          'ordine, e un\'altra scuola puoi sempre visitarla senza cambiare '
+          'il tuo profilo.',
     ),
     (
-      title: 'Costruisci una serie',
+      image: 'assets/guide/lezione.png',
+      title: 'Come è fatta una lezione',
       body:
-          'Allenati ogni giorno: raggiungi gli obiettivi di 5 esercizi e '
-          '10 minuti e mantieni viva la tua serie.',
+          'Una lezione è una fila di card da scorrere: spiegazione con '
+          'formule e grafici, domande a risposta multipla e la card «Prova '
+          'tu» con esercizi da risolvere. Se sbagli più volte ti consigliamo '
+          'di rileggere. Sull\'ultima card tocca «Completa la lezione».',
+    ),
+    (
+      image: 'assets/guide/lezioni.png',
+      title: 'I tuoi progressi',
+      body:
+          'Le lezioni completate si segnano con una spunta verde, e un '
+          'argomento è completato quando lo sono tutte le sue lezioni. I '
+          'progressi sono legati al tuo profilo, o all\'ospite se non hai '
+          'un account.',
+    ),
+    (
+      image: 'assets/guide/esercizi.png',
+      title: 'Esercizi e strumenti',
+      body:
+          'Gli esercizi sono risolti passo passo, alcuni a domande guidate: '
+          'segnali come padroneggiati o da ripassare e ritrovi i punti deboli '
+          'dalla Home. In lezione e negli esercizi hai a portata di mano la '
+          'calcolatrice scientifica.',
     ),
   ];
 
@@ -45,6 +80,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finish() async {
+    if (widget.fromSettings) {
+      Navigator.of(context).pop();
+      return;
+    }
     await SettingsStore.instance.completeOnboarding();
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
@@ -89,7 +128,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   TextButton(
                     onPressed: _skip,
                     child: Text(
-                      isLast ? '' : 'Salta',
+                      isLast ? '' : (widget.fromSettings ? 'Chiudi' : 'Salta'),
                       style: TextStyle(
                         color: c.textSecondary,
                         fontSize: AppText.bodyMedium,
@@ -122,7 +161,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: AppButton(
-                label: isLast ? 'Inizia' : 'Avanti',
+                label: isLast
+                    ? (widget.fromSettings ? 'Ho capito' : 'Inizia')
+                    : 'Avanti',
                 onPressed: _next,
                 expand: true,
               ),
@@ -133,7 +174,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildSlide(({String title, String body}) slide) {
+  Widget _buildSlide(({String image, String title, String body}) slide) {
     final c = AppColors.of(context);
     return Center(
       child: SingleChildScrollView(
@@ -141,6 +182,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Una schermata vera dell'app, istantanea del momento: non si
+            // aggiorna da sola (vedi `tool/capture_guide_test.dart`).
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(kCardRadius),
+                boxShadow: cardShadow(c),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(kCardRadius),
+                child: Image.asset(
+                  slide.image,
+                  height: MediaQuery.sizeOf(context).height * 0.4,
+                  excludeFromSemantics: true,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
             Text(
               slide.title,
               textAlign: TextAlign.center,

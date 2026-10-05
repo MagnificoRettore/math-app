@@ -1,0 +1,250 @@
+import 'package:flutter/material.dart';
+
+import '../haptics.dart';
+import '../models/course.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_motion.dart';
+import '../theme/app_text.dart';
+import 'main_header.dart';
+import 'year_tile.dart';
+
+/// Quali voci mostrano Lezioni ed Esercizi: tutte, o solo quelle iniziate e
+/// non ancora finite.
+enum ListFilter { all, inProgress }
+
+/// La riga in cima a Lezioni ed Esercizi: il menu dell'anno e i filtri.
+///
+/// Scorre in orizzontale se lo spazio non basta (schermi stretti, testo
+/// grande), invece di andare a capo.
+class ListFilterBar extends StatelessWidget {
+  final List<Course> courses;
+  final int selectedIndex;
+  final ValueChanged<int> onYear;
+  final ListFilter filter;
+  final ValueChanged<ListFilter> onFilter;
+
+  const ListFilterBar({
+    super.key,
+    required this.courses,
+    required this.selectedIndex,
+    required this.onYear,
+    required this.filter,
+    required this.onFilter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // La ricerca sta fissa a destra; le pillole scorrono nello spazio che resta
+    // se non ci stanno (schermi stretti, testo grande).
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4, right: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(left: 20, right: 8),
+              child: Row(
+                children: [
+                  YearDropdown(
+                    courses: courses,
+                    selectedIndex: selectedIndex,
+                    onSelected: onYear,
+                  ),
+                  const SizedBox(width: 8),
+                  FilterPill(
+                    key: const Key('filter-all'),
+                    label: 'Tutti',
+                    selected: filter == ListFilter.all,
+                    onTap: () => onFilter(ListFilter.all),
+                  ),
+                  const SizedBox(width: 8),
+                  FilterPill(
+                    key: const Key('filter-in-progress'),
+                    label: 'In corso',
+                    selected: filter == ListFilter.inProgress,
+                    onTap: () => onFilter(ListFilter.inProgress),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const HeaderSearchButton(),
+        ],
+      ),
+    );
+  }
+}
+
+/// L'anno scelto, con un menu per cambiarlo. Bianco col bordo indaco, per non
+/// confondersi con i filtri, che sono gialli quando attivi.
+class YearDropdown extends StatelessWidget {
+  final List<Course> courses;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  const YearDropdown({
+    super.key,
+    required this.courses,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    final current = courses[selectedIndex.clamp(0, courses.length - 1)];
+    return PopupMenuButton<int>(
+      key: const Key('year-dropdown'),
+      tooltip: 'Cambia anno',
+      position: PopupMenuPosition.under,
+      // Un po' staccato dal menu: attaccato sembrerebbe in linea con i filtri.
+      offset: const Offset(0, 8),
+      onOpened: AppHaptics.selectionClick,
+      onSelected: (index) {
+        AppHaptics.selectionClick();
+        onSelected(index);
+      },
+      // Il foglio del menu nello stile delle card: fondo bianco, bordo lilla da
+      // 3, angoli da 20 e l'ombra fine; le voci sono pillole come i filtri.
+      color: c.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 1,
+      shadowColor: c.shadow.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: c.border, width: 3),
+      ),
+      menuPadding: const EdgeInsets.symmetric(vertical: 6),
+      constraints: const BoxConstraints(minWidth: 168),
+      itemBuilder: (_) => [
+        for (final (index, course) in courses.indexed)
+          PopupMenuItem<int>(
+            key: Key('year-option-${course.id}'),
+            value: index,
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            child: _YearOption(
+              label: yearLabel(course),
+              selected: course == current,
+            ),
+          ),
+      ],
+      child: _Pill(
+        selected: false,
+        borderColor: c.accent,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(yearLabel(current), style: _pillStyle(c)),
+            const SizedBox(width: 4),
+            Icon(Icons.expand_more_rounded, size: 20, color: c.textPrimary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Un filtro: giallo con il bordo scuro quando è attivo, bianco col bordo
+/// lilla altrimenti, come gli altri controlli scelti.
+class FilterPill extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const FilterPill({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      excludeSemantics: true,
+      label: label,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (selected) return;
+          AppHaptics.selectionClick();
+          onTap();
+        },
+        child: _Pill(
+          selected: selected,
+          child: Text(label, style: _pillStyle(c)),
+        ),
+      ),
+    );
+  }
+}
+
+TextStyle _pillStyle(AppPalette c) => TextStyle(
+  fontFamily: AppText.bodyFont,
+  fontSize: AppText.bodyMedium,
+  fontWeight: FontWeight.w500,
+  color: c.textPrimary,
+);
+
+class _Pill extends StatelessWidget {
+  final bool selected;
+  final Color? borderColor;
+  final Widget child;
+
+  const _Pill({required this.selected, required this.child, this.borderColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return AnimatedContainer(
+      duration: AppMotion.duration(context, AppMotion.medium),
+      curve: AppMotion.standard,
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: selected ? c.yellow : c.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: borderColor ?? (selected ? c.yellowDeep : c.border),
+          width: 2,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Una voce del menu dell'anno: la scelta è gialla col bordo oro, le altre
+/// sono trasparenti. Niente spunta: lo dice l'evidenziazione.
+class _YearOption extends StatelessWidget {
+  final String label;
+  final bool selected;
+
+  const _YearOption({required this.label, required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    return Container(
+      height: 40,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: selected ? c.yellow : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: selected ? c.yellowDeep : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: Text(label, style: _pillStyle(c)),
+    );
+  }
+}

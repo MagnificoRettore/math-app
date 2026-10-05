@@ -6,16 +6,19 @@ import '../data/content_repository.dart';
 import '../data/progress_store.dart';
 import '../models/course.dart';
 import '../models/level.dart';
+import '../models/exercise.dart';
 import '../models/topic.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text.dart';
-import '../widgets/app_card.dart';
+import '../theme/topic_style.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
-import '../widgets/progress_bar.dart';
+import '../widgets/empty_state.dart';
+import '../widgets/list_filter_bar.dart';
+import '../widgets/resume_card.dart';
 import '../widgets/school_choice_sheet.dart';
-import '../widgets/topic_row.dart';
-import '../widgets/year_tabs.dart';
+import '../widgets/streak_chip.dart';
+import '../widgets/section_header.dart';
+import '../widgets/topic_grid.dart';
 import 'exercise_feed_screen.dart';
 import 'year_exercises_screen.dart';
 
@@ -40,6 +43,7 @@ class CourseScreen extends StatefulWidget {
 
 class _CourseScreenState extends State<CourseScreen> {
   int _selectedIndex = 0;
+  ListFilter _filter = ListFilter.all;
 
   /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
   /// ne ha aperta un'altra, altrimenti quello con cui la pagina è nata.
@@ -88,18 +92,10 @@ class _CourseScreenState extends State<CourseScreen> {
 
     return Scaffold(
       appBar: MainHeaderAppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(88),
-          child: YearTabs(
-            courses: courses,
-            selectedIndex: _selectedIndex,
-            onSelected: _selectYear,
-          ),
-        ),
         title: MainHeaderTitle(levelId: level.id),
         actions: const [
           SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
-          HeaderSearchButton(),
+          HeaderStreakChip(),
           HeaderCustomizationButton(),
         ],
       ),
@@ -109,13 +105,27 @@ class _CourseScreenState extends State<CourseScreen> {
 
   Widget _buildPages(Level level, List<Course> courses) {
     if (courses.isEmpty) return const SizedBox.shrink();
-    // L'anno si cambia dagli `YearTabs`: lo swipe orizzontale è della
+    // L'anno si cambia dal menu in cima: lo swipe orizzontale è della
     // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
     final course = courses[_selectedIndex.clamp(0, courses.length - 1)];
-    final page = _CourseSectionsView(
-      key: ValueKey(course.id),
-      level: level,
-      course: course,
+    final page = Column(
+      children: [
+        ListFilterBar(
+          courses: courses,
+          selectedIndex: _selectedIndex,
+          onYear: _selectYear,
+          filter: _filter,
+          onFilter: (filter) => setState(() => _filter = filter),
+        ),
+        Expanded(
+          child: _CourseSectionsView(
+            key: ValueKey(course.id),
+            level: level,
+            course: course,
+            filter: _filter,
+          ),
+        ),
+      ],
     );
     if (!widget.showPill) return SafeArea(child: page);
     return PillNavOverlay(selected: PillTab.exercises, child: page);
@@ -125,101 +135,101 @@ class _CourseScreenState extends State<CourseScreen> {
 class _CourseSectionsView extends StatelessWidget {
   final Level level;
   final Course course;
+  final ListFilter filter;
 
   const _CourseSectionsView({
     super.key,
     required this.level,
     required this.course,
+    required this.filter,
   });
+
+  /// Quanti esercizi del topic sono fatti (padroneggiati o da ripassare).
+  double _completion(Iterable<Exercise> exercises) => ProgressStore.instance
+      .completionFor(level.id, [for (final e in exercises) e.id]);
 
   @override
   Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    final topics = course.topics;
-    final allExerciseIds = <String>[
-      for (final topic in topics)
-        for (final exercise in topic.exercises) exercise.id,
-    ];
-    final allProgress = ProgressStore.instance.completionFor(
-      level.id,
-      allExerciseIds,
-    );
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      children: [
-        if (course.subtitle.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              course.subtitle,
-              style: TextStyle(
-                fontSize: AppText.bodyMedium,
-                color: c.textSecondary,
+    return ListenableBuilder(
+      listenable: ProgressStore.instance,
+      builder: (context, _) {
+        final c = AppColors.of(context);
+        final topics = course.topics;
+        final all = [for (final topic in topics) ...topic.exercises];
+        // «In corso»: almeno un esercizio fatto, ma non tutti.
+        final shown = [
+          for (final topic in topics)
+            if (filter == ListFilter.all ||
+                (_completion(topic.exercises) > 0 &&
+                    _completion(topic.exercises) < 1))
+              topic,
+        ];
+        final resume = _resume(context, topics);
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: [
+            if (resume != null) ...[const SizedBox(height: 8), resume],
+            const SectionHeader('Tutti gli argomenti', top: 16),
+            if (filter == ListFilter.inProgress && shown.isEmpty)
+              const EmptyState(
+                key: Key('nessun-topic-in-corso'),
+                title: 'Nessun argomento in corso',
+                subtitle:
+                    'Qui trovi gli argomenti di cui hai iniziato gli esercizi '
+                    'e non ancora finito.',
+              )
+            else
+              TopicGrid(
+                entries: [
+                  if (filter == ListFilter.all)
+                    TopicGridEntry(
+                      key: const Key('tutti-esercizi'),
+                      icon: Icons.all_inclusive,
+                      color: c.teal,
+                      title: 'Tutti gli esercizi',
+                      caption: _caption(all.length, _completion(all)),
+                      onTap: () => _openAll(context),
+                    ),
+                  for (final topic in shown)
+                    TopicGridEntry(
+                      key: Key('topic-${topic.id}'),
+                      icon: topicIcon(topic.icon),
+                      color: topicColor(c, topic.icon),
+                      title: topic.title,
+                      caption: _caption(
+                        topic.exercises.length,
+                        _completion(topic.exercises),
+                      ),
+                      onTap: () => _openTopic(context, topic),
+                    ),
+                ],
               ),
-            ),
-          ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: AppCard(
-            key: const Key('tutti-esercizi'),
-            onTap: () => _openAll(context),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: c.teal.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(Icons.all_inclusive, size: 22, color: c.teal),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tutti gli esercizi',
-                        style: TextStyle(
-                          fontSize: AppText.titleSmall,
-                          fontWeight: FontWeight.w500,
-                          color: c.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Tutti gli esercizi del corso',
-                        style: TextStyle(
-                          fontSize: AppText.label,
-                          color: c.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      ProgressBar(
-                        progress: allProgress,
-                        height: 8,
-                        color: c.teal,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        for (final topic in topics)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: TopicRow(
-              key: Key('topic-${topic.id}'),
-              topic: topic,
-              onTap: () => _openTopic(context, topic),
-            ),
-          ),
-      ],
+          ],
+        );
+      },
     );
+  }
+
+  String _caption(int count, double completion) =>
+      '${count == 1 ? '1 esercizio' : '$count esercizi'} · '
+      '${(completion * 100).round()}%';
+
+  /// Il primo topic iniziato e non finito, da cui ripartire. Gli esercizi non
+  /// salvano «l'ultimo aperto»: si parte da quello che è a metà.
+  Widget? _resume(BuildContext context, List<Topic> topics) {
+    for (final topic in topics) {
+      final completion = _completion(topic.exercises);
+      if (completion <= 0 || completion >= 1) continue;
+      final total = topic.exercises.length;
+      final done = (completion * total).round();
+      return ResumeCard(
+        title: topic.title,
+        caption: 'Esercizio $done di $total',
+        progress: completion,
+        onTap: () => _openTopic(context, topic),
+      );
+    }
+    return null;
   }
 
   void _openAll(BuildContext context) {

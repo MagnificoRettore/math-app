@@ -12,6 +12,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
+    registrationWaveEnabled = false;
     SharedPreferences.setMockInitialValues({});
     await AuthStore.instance.resetForTest();
     await ContentRepository.instance.resetForTest();

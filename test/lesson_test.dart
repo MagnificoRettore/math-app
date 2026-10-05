@@ -19,6 +19,7 @@ import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/mcq_option_tile.dart';
 import 'package:math_app/widgets/practice_quiz_view.dart';
 import 'package:math_app/widgets/scientific_calculator.dart';
+import 'package:math_app/widgets/tools_bar.dart';
 
 Future<void> _swipeNext(WidgetTester tester) async {
   await tester.drag(find.byType(PageView), const Offset(-500, 0));
@@ -521,7 +522,7 @@ void main() {
     final complete = tester.getRect(
       find.widgetWithText(AppButton, 'Completa la lezione'),
     );
-    expect(toolbar.width, closeTo(complete.height, 1));
+    expect(toolbar.width, closeTo(kToolsBarHeight, 1));
     expect(toolbar.bottom, closeTo(complete.bottom, 0.5));
     // ancorata a sinistra: il FAB dipinto è a filo della colonna di testo
     final textLeft = tester.getTopLeft(find.text('Verifica')).dx;

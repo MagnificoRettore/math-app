@@ -244,14 +244,16 @@ class AuthStore extends ChangeNotifier {
     return index < 0 ? 0 : index;
   }
 
-  Future<void> updateSchool(String schoolLevelId) async {
+  Future<void> updateSchool(String schoolLevelId, {String? courseId}) async {
     final user = _currentUser;
     if (user == null) return;
     // L'anno vale dentro la sua scuola: cambiando scuola non ha più senso.
     _replaceSessionProfile(
       user.copyWith(
         schoolLevelId: schoolLevelId,
-        courseId: schoolLevelId == user.schoolLevelId ? user.courseId : '',
+        courseId:
+            courseId ??
+            (schoolLevelId == user.schoolLevelId ? user.courseId : ''),
       ),
     );
     await _persistAll();

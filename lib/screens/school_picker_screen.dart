@@ -4,7 +4,10 @@ import '../data/auth_store.dart';
 import '../data/content_repository.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import '../models/course.dart';
+import '../models/level.dart';
 import '../widgets/school_level_tile.dart';
+import '../widgets/year_tile.dart';
 import '../widgets/app_button.dart';
 
 class SchoolPickerScreen extends StatefulWidget {
@@ -30,12 +33,29 @@ class SchoolPickerScreen extends StatefulWidget {
 
 class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
   late String _selectedId;
+  String _courseId = '';
 
   @override
   void initState() {
     super.initState();
     _selectedId = widget.initialLevelId;
+    // L'anno di prima vale finché la scuola resta quella.
+    _courseId = AuthStore.instance.currentUser?.courseId ?? '';
   }
+
+  /// Medie e superiori chiedono anche l'anno; l'università no.
+  Level? get _selectedLevel =>
+      ContentRepository.instance.levelById(_selectedId);
+
+  bool get _needsYear {
+    final level = _selectedLevel;
+    return level != null &&
+        level.id != 'university' &&
+        level.courses.isNotEmpty;
+  }
+
+  bool get _yearChosen =>
+      _selectedLevel?.courses.any((course) => course.id == _courseId) ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +93,41 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
                 child: SchoolLevelTile(
                   level: item,
                   selected: _selectedId == item.id,
-                  onTap: () => setState(() => _selectedId = item.id),
+                  onTap: () => setState(() {
+                    if (item.id != _selectedId) _courseId = '';
+                    _selectedId = item.id;
+                  }),
                 ),
               ),
+            if (_needsYear) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Che anno frequenti?',
+                style: TextStyle(
+                  fontFamily: AppText.headingFont,
+                  fontSize: AppText.titleMedium,
+                  fontWeight: FontWeight.w600,
+                  color: c.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final course in _selectedLevel?.courses ?? const <Course>[])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: YearTile(
+                    key: Key('year-${course.id}'),
+                    course: course,
+                    selected: _courseId == course.id,
+                    onTap: () => setState(() => _courseId = course.id),
+                  ),
+                ),
+            ],
             const SizedBox(height: 8),
             AppButton(
               label: onboarding ? 'Crea il mio profilo' : 'Salva',
-              onPressed: _selectedId.isEmpty ? null : _save,
+              onPressed: _selectedId.isEmpty || (_needsYear && !_yearChosen)
+                  ? null
+                  : _save,
               expand: true,
             ),
           ],
@@ -89,7 +137,10 @@ class _SchoolPickerScreenState extends State<SchoolPickerScreen> {
   }
 
   Future<void> _save() async {
-    await AuthStore.instance.updateSchool(_selectedId);
+    await AuthStore.instance.updateSchool(
+      _selectedId,
+      courseId: _needsYear ? _courseId : '',
+    );
     if (!mounted) return;
     final navigator = Navigator.of(context);
     if (widget.onboarding) {

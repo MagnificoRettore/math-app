@@ -138,7 +138,10 @@ void main() {
 
       expect(find.byType(ExerciseStepCard), findsNWidgets(2));
       expect(find.text('Corretto!'), findsOneWidget);
-      expect(find.textContaining('passo dopo passo', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining('passo dopo passo', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.byType(McqOptionTile), findsNothing);
     });
 
@@ -227,7 +230,10 @@ void main() {
         await tester.pumpAndSettle(const Duration(milliseconds: 800));
       }
       expect(find.byType(ExerciseStepCard), findsNWidgets(3));
-      expect(find.textContaining('passo dopo passo', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining('passo dopo passo', findRichText: true),
+        findsOneWidget,
+      );
     });
   });
 }

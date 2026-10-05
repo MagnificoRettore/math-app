@@ -80,6 +80,16 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
     }
   }
 
+  /// Con almeno due risposte sbagliate nello stesso esercizio l'argomento
+  /// probabilmente non è chiaro: si consiglia di rileggerlo.
+  static const _rereadAfter = 2;
+  static const _rereadTip =
+      'Hai sbagliato più volte: rileggi le card precedenti della lezione, poi riprova.';
+
+  String _withTip(String message) => _wrong.length >= _rereadAfter
+      ? [if (message.isNotEmpty) message, _rereadTip].join('\n\n')
+      : message;
+
   McqOptionState _stateFor(PracticeExercise exercise, int index) {
     if (_solved && index == exercise.correctIndex) {
       return McqOptionState.correct;
@@ -139,7 +149,7 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
                 ? McqFeedbackCard(
                     key: const ValueKey('correct'),
                     correct: true,
-                    message: exercise.explanation,
+                    message: _withTip(exercise.explanation),
                     scale: scale,
                   )
                 : _wrong.isNotEmpty
@@ -147,7 +157,7 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
                     key: ValueKey('wrong-$_attemptId'),
                     child: McqFeedbackCard(
                       correct: false,
-                      message: 'Non è corretto. Riprova!',
+                      message: _withTip('Non è corretto. Riprova!'),
                       scale: scale,
                     ),
                   )

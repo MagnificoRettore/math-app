@@ -30,6 +30,30 @@ class StudyStore extends ChangeNotifier {
   int get todayExercises => _todayExercises;
   int get todayMinutes => _todayMinutes;
 
+  /// `true` se oggi si è già fatto qualcosa (un esercizio o dei minuti).
+  bool get activeToday => _lastActiveDate == _dateOnly(_dateNow());
+
+  /// La serie com'è davvero oggi: se ieri non si è studiato e oggi neanche, la
+  /// serie salvata è finita (`currentStreak` si azzera solo alla prossima
+  /// attività).
+  int get liveStreak {
+    final last = _lastActiveDate;
+    if (last == null) return 0;
+    final today = _dateOnly(_dateNow());
+    final gap = today.difference(last).inDays;
+    return gap <= 1 ? _currentStreak : 0;
+  }
+
+  /// Se il giorno [day] fa parte della serie in corso: gli ultimi `liveStreak`
+  /// giorni che finiscono con l'ultimo giorno attivo.
+  bool inStreak(DateTime day) {
+    final last = _lastActiveDate;
+    final streak = liveStreak;
+    if (last == null || streak == 0) return false;
+    final d = _dateOnly(day);
+    return !d.isAfter(last) && d.isAfter(last.subtract(Duration(days: streak)));
+  }
+
   bool get exerciseGoalReached => _todayExercises >= exerciseGoal;
   bool get minutesGoalReached => _todayMinutes >= minutesGoal;
   bool get allGoalsReached => exerciseGoalReached && minutesGoalReached;

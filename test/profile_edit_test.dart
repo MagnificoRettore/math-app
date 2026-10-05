@@ -67,72 +67,83 @@ void main() {
     expect(find.textContaining('Foto profilo:'), findsNothing);
   });
 
-  testWidgets('salva è spento finché non si tocca qualcosa', (tester) async {
+  /// Il profilo su una rotta vera: il salvataggio parte quando si torna
+  /// indietro, quindi serve qualcosa sotto da cui tornare.
+  Future<void> pumpPushedProfile(WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+              child: const Text('apri'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('apri'));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> goBack(WidgetTester tester) async {
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('non c\'è «Salva modifiche»', (tester) async {
     await registerAccount();
     await pumpProfile(tester);
 
-    AppButton save() =>
-        tester.widget<AppButton>(find.byKey(const Key('profile-save')));
-    expect(save().onPressed, isNull);
-
-    await tester.enterText(find.byType(TextFormField).first, 'Anna Maria');
-    await tester.pumpAndSettle();
-
-    expect(save().onPressed, isNotNull);
+    expect(find.text('Salva modifiche'), findsNothing);
+    expect(find.byKey(const Key('profile-save')), findsNothing);
   });
 
-  testWidgets('il nome nuovo si salva e si vede subito', (tester) async {
+  testWidgets('il nome nuovo si salva tornando indietro', (tester) async {
     await registerAccount();
-    await pumpProfile(tester);
+    await pumpPushedProfile(tester);
 
     await tester.enterText(
       find.byType(TextFormField).first,
       'Anna Maria Rossi',
     );
-    await scrollTo(tester, find.byKey(const Key('profile-save')));
-    await tester.tap(find.byKey(const Key('profile-save')));
     await tester.pumpAndSettle();
+    // Finché si è nella pagina niente è salvato.
+    expect(AuthStore.instance.currentUser!.name, 'Anna');
 
-    expect(find.text('Modifiche salvate'), findsOneWidget);
+    await goBack(tester);
+
     expect(AuthStore.instance.currentUser!.name, 'Anna Maria Rossi');
-    expect(find.text('Anna Maria Rossi'), findsWidgets);
   });
 
-  testWidgets('un ID account di un altro viene rifiutato nel campo', (
+  testWidgets('un nome non valido non si salva', (tester) async {
+    await registerAccount();
+    await pumpPushedProfile(tester);
+
+    await tester.enterText(find.byType(TextFormField).first, '');
+    await tester.pumpAndSettle();
+    await goBack(tester);
+
+    expect(AuthStore.instance.currentUser!.name, 'Anna');
+  });
+
+  testWidgets('l\'ID account non si modifica', (tester) async {
+    await registerAccount();
+    await pumpProfile(tester);
+
+    // Un solo campo di testo (il nome): ID ed email sono in sola lettura.
+    expect(find.byType(TextFormField), findsOneWidget);
+    expect(find.text('Il tuo nickname, non si modifica'), findsOneWidget);
+    expect(AuthStore.instance.currentUser!.accountId, 'anna');
+  });
+
+  testWidgets('l\'avatar scelto si vede subito e si salva tornando indietro', (
     tester,
   ) async {
     await registerAccount();
-    await AuthStore.instance.signOut();
-    await AuthStore.instance.registerManual(
-      name: 'Mario',
-      email: 'mario@example.com',
-      accountId: 'mario',
-      password: 'Segreta1',
-    );
-    await pumpProfile(tester);
-
-    await tester.enterText(find.byType(TextFormField).at(1), 'anna');
-    await scrollTo(tester, find.byKey(const Key('profile-save')));
-    await tester.tap(find.byKey(const Key('profile-save')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Questo ID account è già in uso'), findsOneWidget);
-    expect(AuthStore.instance.currentUser!.accountId, 'mario');
-  });
-
-  testWidgets('il proprio ID account non è un conflitto', (tester) async {
-    await registerAccount();
-    await pumpProfile(tester);
-
-    await tester.enterText(find.byType(TextFormField).at(1), 'anna');
-    await tester.pumpAndSettle();
-
-    expect(find.text('Questo ID account è già in uso'), findsNothing);
-  });
-
-  testWidgets('l\'avatar scelto si vede subito e si salva', (tester) async {
-    await registerAccount();
-    await pumpProfile(tester);
+    await pumpPushedProfile(tester);
 
     await scrollTo(tester, find.byKey(const Key('profile-change-avatar')));
     await tester.tap(find.byKey(const Key('profile-change-avatar')));
@@ -147,11 +158,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Scegli la foto profilo'), findsNothing);
 
-    await scrollTo(tester, find.byKey(const Key('profile-save')));
-    await tester.tap(find.byKey(const Key('profile-save')));
-    await tester.pumpAndSettle();
+    await goBack(tester);
 
-    expect(find.text('Modifiche salvate'), findsOneWidget);
     expect(AuthStore.instance.currentUser!.avatarId, 'rocket_launch_rounded');
   });
 
@@ -181,10 +189,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // Dal profilo non è onboarding: il bottone dice «Salva» e torna indietro.
+    await scrollTo(tester, find.text('Salva'));
     expect(find.text('Salva'), findsOneWidget);
     expect(find.text('Crea il mio profilo'), findsNothing);
 
+    await tester.ensureVisible(find.text('Università'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Università'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.widgetWithText(AppButton, 'Salva'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(AppButton, 'Salva'));
     await tester.pumpAndSettle();
@@ -193,5 +206,47 @@ void main() {
     expect(find.byType(SchoolPickerScreen), findsNothing);
     expect(find.byType(ProfileScreen), findsOneWidget);
     expect(AuthStore.instance.currentUser!.schoolLevelId, 'university');
+  });
+
+  testWidgets('cambiando scuola alle superiori si sceglie anche l\'anno', (
+    tester,
+  ) async {
+    await AuthStore.instance.load();
+    await AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      accountId: 'anna',
+      password: 'Segreta1',
+      schoolLevelId: 'university',
+    );
+    await pumpProfile(tester);
+
+    await scrollTo(tester, find.text('Cambia la tua scuola'));
+    await tester.tap(find.text('Cambia la tua scuola'));
+    await tester.pumpAndSettle();
+    // All'università l'anno non c'è.
+    expect(find.text('Che anno frequenti?'), findsNothing);
+
+    await tester.tap(find.text('Scuola Superiore'));
+    await tester.pumpAndSettle();
+    expect(find.text('Che anno frequenti?'), findsOneWidget);
+
+    // Senza l'anno il bottone è spento.
+    await scrollTo(tester, find.widgetWithText(AppButton, 'Salva'));
+    expect(
+      tester
+          .widget<AppButton>(find.widgetWithText(AppButton, 'Salva'))
+          .onPressed,
+      isNull,
+    );
+
+    await tester.tap(find.byKey(const Key('year-year2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(AppButton, 'Salva'));
+    await tester.pumpAndSettle();
+
+    final user = AuthStore.instance.currentUser!;
+    expect(user.schoolLevelId, 'high-school');
+    expect(user.courseId, 'year2');
   });
 }

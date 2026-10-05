@@ -2,7 +2,35 @@
 
 Changelog e roadmap del progetto.
 
-Stato della suite: **553 test in 44 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+Stato della suite: **565 test in 46 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
+
+## 2026-10-05 — Lezioni ed Esercizi, nuova impaginazione
+
+- **Impaginazione da un riferimento** (solo il layout, non il design): menu a tendina dell'anno al posto degli `YearTabs`, filtri «Tutti» / «In corso» (iniziati e non finiti), card «Riprendi da dove eri rimasto» e griglia a due colonne con «N lezioni · P%». Widget nuovi: `ListFilterBar`, `ResumeCard`, `TopicGrid`.
+- **Ricerca** di Lezioni ed Esercizi spostata dall'header alla barra dei filtri (a destra, fissa; le pillole scorrono). Nei loro stati vuoti non c'è più. Sulla Home resta nell'header. **Foglio delle scuole** nello stile dell'app.
+- **Serie nell'header**: `HeaderStreakChip` (fiamma + numero, tocco → foglio con settimana e record) a sinistra dell'ingranaggio nelle tre pagine; via `StreakCard` dalla Home, che ora ha quattro sezioni. `StudyStore.activeToday`, `liveStreak`, `inStreak`.
+- **Toolbar** degli strumenti più grande (62, `M3EToolbarSize.large`); i bottoni del piede della lezione restano a 49.
+- **Calcolatrice trascinabile**: il trascinamento verso il basso non si muoveva (un `AnimationController` non può tenere pixel, il suo valore si ferma a 1). Ora segue il dito, solo verso il basso, e lasciata oltre il 35% dell'altezza (o con uno strattone) si chiude, altrimenti torna su. `calculator_drag_test.dart`.
+- **Ricerca** tolta dall'header della Home: resta solo nella barra dei filtri di Lezioni ed Esercizi.
+- Via `YearTabs`, `TopicRow`, `TopicImageCard` e i loro test; `MainHeaderAppBar.bottom` resta ma oggi non lo usa nessuno.
+- **Cambio scuola dal profilo**: ora si sceglie anche l'anno per medie e superiori (`YearTile` estratto dalla registrazione, `updateSchool(courseId:)`).
+- Le immagini della guida «argomenti» ed «esercizi» sono state rigenerate con il nuovo aspetto.
+- Test: `list_layout_test.dart`; adattati quelli che toccavano gli anni.
+
+## 2026-10-05 — Miglioramenti da `future_improvement.md`
+
+- **Curiosità** che si scrive a macchina al tocco (`_TypedText`, lo spazio è già riservato). **Slide** fra Lezioni, Home ed Esercizi (`_slideRoute`). **Registrazione**: bordo della testata che ondeggia (`WaveBottomClipper.phase`) e contenuto più staccato.
+- **Profilo**: via «Salva modifiche», nome e avatar si salvano tornando indietro (`PopScope`); l'ID account non si modifica più.
+- **Progressi per utente**: lezioni, esercizi e ripresa sono per `accountId` (o `guest`); le chiavi di prima passano all'ospite. Lo streak (`StudyStore`) resta del dispositivo.
+- **Header**: ingranaggio al posto di `tune`. **Vibrazioni**: anche su anni, avatar, curiosità e fine registrazione (già dietro l'interruttore).
+- **Calcolatrice**: `sin(180°)` dà 0 e non 1.2e-16, `tan(90°)` è un errore, e l'espressione lunga scorre dal fondo invece di tagliarsi con i puntini (`sin(900)` appariva `sin(90…`).
+- **Guida all'app** (`OnboardingScreen`, ora 5 schede su struttura, argomenti, lezioni, progressi, strumenti) riapribile da Personalizzazione → «Guida all'app». **Prova tu**: dopo due risposte sbagliate nello stesso esercizio si consiglia di rileggere.
+- **La guida ha immagini vere**: ogni scheda mostra una schermata dell'app (`assets/guide/*.png`, 390×844), generata da `tool/capture_guide_test.dart` (`flutter test tool/capture_guide_test.dart`, fuori dalla suite). Sono istantanee: non si aggiornano da sole e per ora non vanno rifatte a ogni cambio.
+- Test: `miglioramenti_test.dart`; `profile_edit_test.dart` riscritto per il salvataggio all'uscita; i test della registrazione spengono l'onda (`registrationWaveEnabled`). `flutter analyze` pulito.
+
+## 2026-10-05 — Icona dell'app
+
+- Icone web segnaposto (192 e 512, anche «maskable», e il favicon): «π» gialla col gradino su indaco. Manifest con nome «Math App», sfondo crema e tema indaco; titolo della pagina «Math App». Android, iOS e desktop non sono toccati: solo il web è confermato.
 
 ## 2026-10-05 — Esercizi
 

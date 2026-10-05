@@ -9,16 +9,18 @@ import '../models/argomento.dart';
 import '../models/course.dart';
 import '../screens/argomento_lessons_screen.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
-import '../widgets/app_card.dart';
-import '../widgets/progress_bar.dart';
-import '../widgets/completed_badge.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/jump_back_in_card.dart';
+import '../widgets/list_filter_bar.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
+import '../widgets/resume_card.dart';
 import '../widgets/school_choice_sheet.dart';
-import '../widgets/year_tabs.dart';
+import '../widgets/streak_chip.dart';
+import '../widgets/section_header.dart';
+import '../widgets/topic_grid.dart';
+import 'lesson_screen.dart';
 
 class LessonListScreen extends StatefulWidget {
   final String? levelId;
@@ -32,6 +34,7 @@ class LessonListScreen extends StatefulWidget {
 
 class _LessonListScreenState extends State<LessonListScreen> {
   int _selectedIndex = 0;
+  ListFilter _filter = ListFilter.all;
 
   /// Il livello su cui la pagina sta guardando: quello in visita se l'utente
   /// ne ha aperta un'altra, altrimenti quello con cui la pagina è nata.
@@ -114,27 +117,33 @@ class _LessonListScreenState extends State<LessonListScreen> {
 
     return Scaffold(
       appBar: MainHeaderAppBar(
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(88),
-          child: YearTabs(
-            courses: courses,
-            selectedIndex: _selectedIndex,
-            onSelected: _selectYear,
-          ),
-        ),
         title: MainHeaderTitle(levelId: _levelId),
         actions: _actions(),
       ),
       body: _wrapBody(
-        // L'anno si cambia dagli `YearTabs`: lo swipe orizzontale è della
+        // L'anno si cambia dal menu in cima: lo swipe orizzontale è della
         // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
-        _YearArgumenti(
-          key: ValueKey(
-            courses[_selectedIndex.clamp(0, courses.length - 1)].id,
-          ),
-          levelId: levelId,
-          course: courses[_selectedIndex.clamp(0, courses.length - 1)],
-          onTapArgomento: _openArgomento,
+        Column(
+          children: [
+            ListFilterBar(
+              courses: courses,
+              selectedIndex: _selectedIndex,
+              onYear: _selectYear,
+              filter: _filter,
+              onFilter: (filter) => setState(() => _filter = filter),
+            ),
+            Expanded(
+              child: _YearArgumenti(
+                key: ValueKey(
+                  courses[_selectedIndex.clamp(0, courses.length - 1)].id,
+                ),
+                levelId: levelId,
+                course: courses[_selectedIndex.clamp(0, courses.length - 1)],
+                filter: _filter,
+                onTapArgomento: _openArgomento,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -146,7 +155,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
   /// un'altra scuola quando questa non ha lezioni.
   List<Widget> _actions() => const [
     SchoolBrowseButton(destination: SchoolChoiceDestination.lessons),
-    HeaderSearchButton(),
+    HeaderStreakChip(),
     HeaderCustomizationButton(),
   ];
 
@@ -159,12 +168,14 @@ class _LessonListScreenState extends State<LessonListScreen> {
 class _YearArgumenti extends StatelessWidget {
   final String levelId;
   final Course course;
+  final ListFilter filter;
   final ValueChanged<Argomento> onTapArgomento;
 
   const _YearArgumenti({
     super.key,
     required this.levelId,
     required this.course,
+    required this.filter,
     required this.onTapArgomento,
   });
 
@@ -183,145 +194,87 @@ class _YearArgumenti extends StatelessWidget {
 
     return ListenableBuilder(
       listenable: ProgressStore.instance,
-      builder: (context, _) => ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
+      builder: (context, _) {
+        final store = ProgressStore.instance;
+        // «In corso»: almeno una lezione fatta, ma non tutte.
+        final shown = [
           for (final argomento in argomenti)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: _ArgomentoCard(
-                argomento: argomento,
-                completed: ProgressStore.instance.isArgomentoCompleted(
-                  argomento,
-                ),
-                onTap: () => onTapArgomento(argomento),
+            if (filter == ListFilter.all ||
+                (store.completedLessonCount(argomento) > 0 &&
+                    !store.isArgomentoCompleted(argomento)))
+              argomento,
+        ];
+        final resume = _resume();
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: [
+            if (resume != null) ...[const SizedBox(height: 8), resume],
+            const SectionHeader('Tutti gli argomenti', top: 16),
+            if (shown.isEmpty)
+              const EmptyState(
+                key: Key('nessun-argomento-in-corso'),
+                title: 'Nessun argomento in corso',
+                subtitle:
+                    'Qui trovi gli argomenti che hai iniziato e non ancora '
+                    'finito.',
+              )
+            else
+              TopicGrid(
+                entries: [
+                  for (final argomento in shown) _entry(context, argomento),
+                ],
               ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// La lezione lasciata a metà, se è di questa scuola.
+  Widget? _resume() {
+    final target = JumpBackInCard.target();
+    if (target == null || target.resume.levelId != levelId) return null;
+    final total = target.lesson.steps.length;
+    final step = target.resume.step.clamp(0, total == 0 ? 0 : total - 1);
+    return Builder(
+      builder: (context) => ResumeCard(
+        title: '${target.argomento.title} · ${target.lesson.title}',
+        caption: 'Card ${step + 1} di $total',
+        progress: total == 0 ? 0 : step / total,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => LessonScreen(
+              lesson: target.lesson,
+              levelId: levelId,
+              initialStep: step,
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
-}
 
-class _ArgomentoCard extends StatelessWidget {
-  final Argomento argomento;
-  final bool completed;
-  final VoidCallback onTap;
-
-  const _ArgomentoCard({
-    required this.argomento,
-    required this.completed,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  TopicGridEntry _entry(BuildContext context, Argomento argomento) {
     final c = AppColors.of(context);
-    final color = topicColor(c, argomento.icon);
     final lessonCount = argomento.lessons.length;
-
-    final card = AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(_iconFor(argomento.icon), color: color, size: 26),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  argomento.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: AppText.titleMedium,
-                    fontWeight: FontWeight.w500,
-                    color: c.textPrimary,
-                  ),
-                ),
-                if (argomento.subtitle.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Text(
-                    argomento.subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.label,
-                      color: c.textSecondary,
-                    ),
-                  ),
-                ],
-                if (lessonCount > 0) ...[
-                  const SizedBox(height: 8),
-                  ProgressBar(
-                    progress:
-                        ProgressStore.instance.completedLessonCount(argomento) /
-                        lessonCount,
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.menu_book_outlined,
-                      size: 14,
-                      color: c.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      lessonCount == 1 ? '1 lezione' : '$lessonCount lezioni',
-                      style: TextStyle(
-                        fontSize: AppText.caption,
-                        color: c.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Icon(Icons.chevron_right, color: c.textSecondary),
-        ],
+    final percent = lessonCount == 0
+        ? 0
+        : (ProgressStore.instance.completedLessonCount(argomento) *
+                  100 /
+                  lessonCount)
+              .round();
+    return TopicGridEntry(
+      key: Key(
+        'argomento-${argomento.topicId.isEmpty ? argomento.title : argomento.topicId}',
       ),
+      icon: topicIcon(argomento.icon),
+      color: topicColor(c, argomento.icon),
+      title: argomento.title,
+      caption:
+          '${lessonCount == 1 ? '1 lezione' : '$lessonCount lezioni'} · '
+          '$percent%',
+      completed: ProgressStore.instance.isArgomentoCompleted(argomento),
+      onTap: () => onTapArgomento(argomento),
     );
-    if (!completed) return card;
-    // Il segno «completata» nell'angolo in alto a destra, sopra la card.
-    return Stack(children: [card, CompletedBadge.corner()]);
-  }
-
-  IconData _iconFor(String name) {
-    switch (name) {
-      case 'functions':
-        return Icons.functions;
-      case 'pie_chart':
-        return Icons.pie_chart;
-      case 'tag':
-        return Icons.tag;
-      case 'trending_up':
-        return Icons.trending_up;
-      case 'show_chart':
-        return Icons.show_chart;
-      case 'calculate':
-        return Icons.calculate;
-      case 'grid_on':
-        return Icons.grid_on;
-      case 'casino':
-        return Icons.casino;
-      case 'account_tree':
-        return Icons.account_tree;
-      default:
-        return Icons.menu_book;
-    }
   }
 }

@@ -32,7 +32,7 @@ class JumpBackInCard extends StatelessWidget {
       ]),
       builder: (context, _) {
         final user = AuthStore.instance.currentUser;
-        final target = user == null ? null : _target();
+        final target = user == null ? null : JumpBackInCard.target();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -62,14 +62,14 @@ class JumpBackInCard extends StatelessWidget {
   }
 
   /// La lezione lasciata a metà, se esiste ancora nei contenuti.
-  static _Target? _target() {
+  static ResumeTarget? target() {
     final resume = ProgressStore.instance.lessonResume;
     if (resume == null) return null;
     for (final argomento in LessonRepository.instance.argomenti) {
       if (argomento.levelId != resume.levelId) continue;
       for (final lesson in argomento.lessons) {
         if (lesson.id == resume.lessonId) {
-          return _Target(argomento, lesson, resume);
+          return ResumeTarget(argomento, lesson, resume);
         }
       }
     }
@@ -77,12 +77,13 @@ class JumpBackInCard extends StatelessWidget {
   }
 }
 
-class _Target {
+/// La lezione da riprendere con il suo argomento e il punto di ripresa.
+class ResumeTarget {
   final Argomento argomento;
   final Lesson lesson;
   final LessonResume resume;
 
-  const _Target(this.argomento, this.lesson, this.resume);
+  const ResumeTarget(this.argomento, this.lesson, this.resume);
 }
 
 /// La card senza niente da riprendere: dice perché.
@@ -142,7 +143,7 @@ class _Message extends StatelessWidget {
 
 /// La lezione da riprendere, con il punto in cui ci si era fermati.
 class _Resume extends StatelessWidget {
-  final _Target target;
+  final ResumeTarget target;
 
   const _Resume({required this.target});
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../data/auth_store.dart';
-import '../data/auth_validators.dart';
 import '../data/browse_store.dart';
 import '../data/content_repository.dart';
 import '../models/user_profile.dart';
@@ -136,8 +135,10 @@ class _GuestProfile extends StatelessWidget {
 /// Profilo dell'utente connesso: intestazione, modifica dei campi, scuola e
 /// uscita.
 ///
-/// I campi si salvano con «Salva modifiche» e non a ogni lettera: lo store
-/// scrive in memoria locale e una scrittura per keystroke non serve a niente.
+/// Non c'è «Salva modifiche»: nome e avatar si salvano **quando si torna
+/// indietro** (`PopScope`), non a ogni lettera, perché una scrittura per
+/// keystroke non serve a niente. Se l'app si chiude prima, le modifiche non
+/// si applicano. L'ID account non si cambia: è il nickname con cui si entra.
 class _ProfileContent extends StatefulWidget {
   final UserProfile user;
 
@@ -150,17 +151,14 @@ class _ProfileContent extends StatefulWidget {
 class _ProfileContentState extends State<_ProfileContent> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _accountIdController;
   final _shakes = FieldShakes();
   late String _avatarId;
   bool _dirty = false;
-  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.user.name);
-    _accountIdController = TextEditingController(text: widget.user.accountId);
     _avatarId = widget.user.avatarId;
   }
 
@@ -172,14 +170,12 @@ class _ProfileContentState extends State<_ProfileContent> {
     // scritto.
     if (_dirty) return;
     _nameController.text = widget.user.name;
-    _accountIdController.text = widget.user.accountId;
     _avatarId = widget.user.avatarId;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _accountIdController.dispose();
     super.dispose();
   }
 
@@ -193,179 +189,168 @@ class _ProfileContentState extends State<_ProfileContent> {
       name: _nameController.text.trim().isEmpty
           ? user.name
           : _nameController.text.trim(),
-      accountId: _accountIdController.text.trim(),
       avatarId: _avatarId,
     );
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-      children: [
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Semantics(
-              button: true,
-              label: 'Cambia foto profilo',
-              child: GestureDetector(
-                key: const Key('profile-change-avatar'),
-                behavior: HitTestBehavior.opaque,
-                onTap: _saving ? null : _pickAvatar,
-                child: ProfileAvatar(
-                  user: preview,
-                  size: 68,
-                  color: levelColor,
-                  plateColor: levelColor.withValues(alpha: 0.14),
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _save();
+      },
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        children: [
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Semantics(
+                button: true,
+                label: 'Cambia foto profilo',
+                child: GestureDetector(
+                  key: const Key('profile-change-avatar'),
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _pickAvatar,
+                  child: ProfileAvatar(
+                    user: preview,
+                    size: 68,
+                    color: levelColor,
+                    plateColor: levelColor.withValues(alpha: 0.14),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      preview.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: AppText.headingFont,
+                        fontSize: AppText.title,
+                        fontWeight: FontWeight.w600,
+                        color: c.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '@${preview.accountId}',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppText.bodyMedium,
+                        color: c.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      user.email,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: AppText.bodyMedium,
+                        color: c.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          AppCard(
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    preview.name,
-                    overflow: TextOverflow.ellipsis,
+                    'Modifica profilo',
                     style: TextStyle(
-                      fontFamily: AppText.headingFont,
-                      fontSize: AppText.title,
-                      fontWeight: FontWeight.w600,
+                      fontSize: AppText.titleSmall,
+                      fontWeight: FontWeight.w500,
                       color: c.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '@${preview.accountId}',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.bodyMedium,
-                      color: c.textSecondary,
+                  const SizedBox(height: 14),
+                  ShakeWidget(
+                    trigger: _shakes.of(_nameController),
+                    child: _field(
+                      controller: _nameController,
+                      label: 'Nome e cognome',
+                      onChanged: _markDirty,
+                      validator: (value) {
+                        final v = value?.trim() ?? '';
+                        if (v.isEmpty) return 'Inserisci il tuo nome';
+                        if (v.length < 2) {
+                          return 'Il nome deve avere almeno 2 caratteri';
+                        }
+                        return null;
+                      },
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    user.email,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.bodyMedium,
-                      color: c.textSecondary,
-                    ),
+                  const SizedBox(height: 12),
+                  _ReadOnlyField(
+                    label: 'ID account',
+                    value: user.accountId,
+                    helper: 'Il tuo nickname, non si modifica',
+                  ),
+                  const SizedBox(height: 12),
+                  _ReadOnlyField(
+                    label: 'Email',
+                    value: user.email,
+                    helper: 'Identifica l’account, non si modifica',
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        AppCard(
-          child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          ),
+          const SizedBox(height: 12),
+          AppCard(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    SchoolPickerScreen(initialLevelId: user.schoolLevelId),
+              ),
+            ),
+            child: Row(
               children: [
-                Text(
-                  'Modifica profilo',
-                  style: TextStyle(
-                    fontSize: AppText.titleSmall,
-                    fontWeight: FontWeight.w500,
-                    color: c.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                ShakeWidget(
-                  trigger: _shakes.of(_nameController),
-                  child: _field(
-                    controller: _nameController,
-                    label: 'Nome e cognome',
-                    onChanged: _markDirty,
-                    validator: (value) {
-                      final v = value?.trim() ?? '';
-                      if (v.isEmpty) return 'Inserisci il tuo nome';
-                      if (v.length < 2) {
-                        return 'Il nome deve avere almeno 2 caratteri';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ShakeWidget(
-                  trigger: _shakes.of(_accountIdController),
-                  child: _field(
-                    controller: _accountIdController,
-                    label: 'ID account',
-                    autocorrect: false,
-                    helperText: 'Come ti trovano gli altri: 3-20 caratteri',
-                    onChanged: _markDirty,
-                    validator: (value) => AuthValidators.accountIdError(
-                      value,
-                      taken: AuthStore.instance.accountIdsInUse(
-                        exceptAccountId: widget.user.accountId,
-                      ),
+                Icon(Icons.school_outlined, color: c.indigo),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Cambia la tua scuola',
+                    style: TextStyle(
+                      fontSize: AppText.bodyLarge,
+                      fontWeight: FontWeight.w500,
+                      color: c.textPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                _ReadOnlyField(label: 'Email', value: user.email),
-                const SizedBox(height: 16),
-                AppButton(
-                  key: const Key('profile-save'),
-                  label: 'Salva modifiche',
-                  onPressed: _dirty ? _save : null,
-                  busy: _saving,
-                  expand: true,
+                Icon(Icons.chevron_right, color: c.textSecondary),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          AppCard(
+            onTap: () => _signOut(context),
+            color: c.surface,
+            child: Row(
+              children: [
+                Icon(Icons.logout, color: c.hard),
+                const SizedBox(width: 12),
+                Text(
+                  'Esci',
+                  style: TextStyle(
+                    fontSize: AppText.bodyLarge,
+                    fontWeight: FontWeight.w500,
+                    color: c.hard,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        AppCard(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) =>
-                  SchoolPickerScreen(initialLevelId: user.schoolLevelId),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.school_outlined, color: c.indigo),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Cambia la tua scuola',
-                  style: TextStyle(
-                    fontSize: AppText.bodyLarge,
-                    fontWeight: FontWeight.w500,
-                    color: c.textPrimary,
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right, color: c.textSecondary),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        AppCard(
-          onTap: () => _signOut(context),
-          color: c.surface,
-          child: Row(
-            children: [
-              Icon(Icons.logout, color: c.hard),
-              const SizedBox(width: 12),
-              Text(
-                'Esci',
-                style: TextStyle(
-                  fontSize: AppText.bodyLarge,
-                  fontWeight: FontWeight.w500,
-                  color: c.hard,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -437,32 +422,13 @@ class _ProfileContentState extends State<_ProfileContent> {
     });
   }
 
-  Future<void> _save() async {
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      setState(
-        () => _shakes.shakeEmpty([_nameController, _accountIdController]),
-      );
-      return;
-    }
-    setState(() => _saving = true);
-    try {
-      await AuthStore.instance.updateProfile(
-        name: _nameController.text,
-        accountId: _accountIdController.text,
-        avatarId: _avatarId,
-      );
-    } on AuthException catch (error) {
-      if (!mounted) return;
-      setState(() => _saving = false);
-      _tell(error.message, error: true);
-      return;
-    }
-    if (!mounted) return;
-    setState(() {
-      _saving = false;
-      _dirty = false;
-    });
-    _tell('Modifiche salvate');
+  /// Chiamato all'uscita dalla pagina. Un nome non valido non si salva: la
+  /// pagina si chiude e resta quello di prima.
+  void _save() {
+    if (!_dirty) return;
+    final name = _nameController.text.trim();
+    if (name.length < 2) return;
+    AuthStore.instance.updateProfile(name: name, avatarId: _avatarId);
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -470,19 +436,6 @@ class _ProfileContentState extends State<_ProfileContent> {
     // La scuola in visita era di quest'utente: chi entra dopo deve trovare la
     // propria, non quella che il precedente stava sfogliando.
     BrowseStore.instance.reset();
-  }
-
-  void _tell(String message, {bool error = false}) {
-    final c = AppColors.of(context);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: error ? c.hard : null,
-        ),
-      );
   }
 
   Color _colorFor(AppPalette c, String name) {
@@ -502,17 +455,20 @@ class _ProfileContentState extends State<_ProfileContent> {
 class _ReadOnlyField extends StatelessWidget {
   final String label;
   final String value;
+  final String helper;
 
-  const _ReadOnlyField({required this.label, required this.value});
+  const _ReadOnlyField({
+    required this.label,
+    required this.value,
+    required this.helper,
+  });
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return InputDecorator(
-      decoration: AppTheme.fieldDecoration(c).copyWith(
-        labelText: label,
-        helperText: 'Identifica l’account, non si modifica',
-      ),
+      decoration: AppTheme.fieldDecoration(c)
+          .copyWith(labelText: label, helperText: helper),
       child: Text(
         value,
         overflow: TextOverflow.ellipsis,

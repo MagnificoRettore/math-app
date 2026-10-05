@@ -170,7 +170,10 @@ class HeaderCustomizationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       key: const Key('header-customization'),
-      icon: Icon(Icons.tune_rounded, color: AppColors.of(context).textPrimary),
+      icon: Icon(
+        Icons.settings_rounded,
+        color: AppColors.of(context).textPrimary,
+      ),
       tooltip: 'Personalizzazione',
       onPressed: () =>
           pushRevealed(context, (_) => const CustomizationScreen()),

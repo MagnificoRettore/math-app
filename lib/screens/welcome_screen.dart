@@ -130,7 +130,7 @@ class _WelcomeHero extends StatelessWidget {
     final c = AppColors.of(context);
     return ClipPath(
       key: const Key('welcome-hero'),
-      clipper: const WaveBottomClipper(topRadius: 22),
+      clipper: WaveBottomClipper(topRadius: 22),
       child: Container(
         color: c.headerBand,
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 56),

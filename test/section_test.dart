@@ -10,7 +10,6 @@ import 'package:math_app/models/course.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/exercise_feed_screen.dart';
 import 'package:math_app/screens/year_exercises_screen.dart';
-import 'package:math_app/widgets/year_tabs.dart';
 
 Future<void> _prepare() async {
   SharedPreferences.setMockInitialValues({});
@@ -62,14 +61,6 @@ void main() {
     ]);
   });
 
-  test('yearCircleText mappa gli anni ordinali ai numeri romani', () {
-    expect(yearCircleText('prima'), 'I');
-    expect(yearCircleText('seconda'), 'II');
-    expect(yearCircleText('terza'), 'III');
-    expect(yearCircleText('quarta'), 'IV');
-    expect(yearCircleText('quinta'), 'V');
-  });
-
   test("Course.fromJson ignora la chiave 'image' legacy senza rompersi", () {
     final course = Course.fromJson({
       'id': 'x',
@@ -113,7 +104,9 @@ void main() {
   ) async {
     await _pumpHighSchool(tester);
 
-    await tester.tap(find.text('seconda'));
+    await tester.tap(find.byKey(const Key('year-dropdown')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('year-option-year2')));
     await tester.pumpAndSettle();
 
     expect(find.text('Equazioni di secondo grado'), findsOneWidget);

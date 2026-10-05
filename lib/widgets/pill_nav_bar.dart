@@ -37,21 +37,39 @@ const double _kHomeStep = 5;
 /// Il rientro delle tre colonne dai bordi, che avvicina i lati a Home.
 const double _kSideInset = 28;
 
-/// Transizione sobria per il cambio sezione: la pagina nuova sfuma sopra
-/// quella attuale, così la pillola resta visivamente in sovraimpressione
-/// mentre il contenuto cambia sotto di essa.
+/// Quanto la pagina scorre di lato entrando, in frazione della larghezza: poco,
+/// perché la barra sta nella pagina e scorre con lei.
+const double _kSlideShift = 0.2;
+
+/// Il cambio sezione: la pagina nuova sfuma sopra quella attuale e scorre di
+/// lato nel verso del cambio. [direction] è +1 se la sezione è a destra di
+/// quella di partenza (Lezioni · Home · Esercizi), −1 se è a sinistra. Sulla
+/// via del ritorno alla Home la rotta esce dallo stesso lato da cui è entrata,
+/// cioè verso la Home, perché le tre sezioni stanno su una riga.
 ///
 /// La rotta è opaca: durante la sfumatura le schermate sotto non vengono
 /// nemmeno costruite, quindi il passaggio non può mostrarne una per sbaglio.
-Route<T> _fadeRoute<T>(Widget page) {
+/// Col movimento ridotto la pagina cambia e basta.
+Route<T> _slideRoute<T>(Widget page, int direction) {
   return PageRouteBuilder<T>(
-    transitionDuration: const Duration(milliseconds: 280),
-    reverseTransitionDuration: const Duration(milliseconds: 220),
+    transitionDuration: AppMotion.slow,
+    reverseTransitionDuration: AppMotion.medium,
     pageBuilder: (_, _, _) => page,
-    transitionsBuilder: (_, animation, _, child) {
+    transitionsBuilder: (context, animation, _, child) {
+      if (AppMotion.reduced(context)) return child;
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: AppMotion.standard,
+      );
       return FadeTransition(
-        opacity: CurvedAnimation(parent: animation, curve: Curves.easeInOut),
-        child: child,
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween(
+            begin: Offset(direction.sign * _kSlideShift, 0),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
       );
     },
   );
@@ -192,7 +210,7 @@ class _PillNavBarState extends State<PillNavBar> {
         ? null
         : ContentRepository.instance.levelById(levelId);
     if (level != null) {
-      _resetTo(navigator, _screenFor(tab, level));
+      _resetTo(navigator, tab, _screenFor(tab, level));
       return;
     }
 
@@ -208,13 +226,16 @@ class _PillNavBarState extends State<PillNavBar> {
   /// resterebbe dipinta a pieno per qualche decimo di secondo. Con un'unica
   /// operazione la rotta nuova entra nello stesso aggiornamento che rimuove
   /// le precedenti, quindi la home non viene mai riportata in cima.
-  void _resetTo(NavigatorState navigator, Widget page) {
+  void _resetTo(NavigatorState navigator, PillTab tab, Widget page) {
     // La schermata che chiama sparisce subito, ma la home resta viva: senza
     // azzerare qui la barra della root mostrerebbe la sezione appena
     // richiesta quando il back riporta in vista quella schermata.
     _clearPending();
     navigator.pushAndRemoveUntil<void>(
-      _fadeRoute<void>(page),
+      _slideRoute<void>(
+        page,
+        PillTab.values.indexOf(tab) - PillTab.values.indexOf(widget.selected),
+      ),
       (route) => route.isFirst,
     );
   }
@@ -234,7 +255,7 @@ class _PillNavBarState extends State<PillNavBar> {
       _clearPending();
       return;
     }
-    _resetTo(Navigator.of(context), _screenFor(tab, chosen));
+    _resetTo(Navigator.of(context), tab, _screenFor(tab, chosen));
   }
 
   Widget _screenFor(PillTab tab, Level level) {

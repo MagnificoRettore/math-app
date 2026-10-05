@@ -107,9 +107,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(LessonListScreen), findsOneWidget);
-      expect(find.text('prima'), findsWidgets);
-      expect(find.text('seconda'), findsWidgets);
-      expect(find.text('terza'), findsWidgets);
+      expect(find.byKey(const Key('year-dropdown')), findsOneWidget);
+      expect(find.text('Prima'), findsWidgets);
       expect(find.text('Nessuna lezione in prima'), findsOneWidget);
     },
   );
@@ -126,19 +125,22 @@ void main() {
 
       // Step anno: barra anni in alto (come ESERCIZI), Anno 1 già attivo
       expect(find.byType(LessonListScreen), findsOneWidget);
-      expect(find.text('prima'), findsWidgets);
-      expect(find.text('seconda'), findsWidgets);
-      expect(find.text('terza'), findsWidgets);
+      expect(find.byKey(const Key('year-dropdown')), findsOneWidget);
+      expect(find.text('Prima'), findsWidgets);
       expect(find.text('Nessuna lezione in prima'), findsOneWidget);
 
       // Anno 2: nessuna lezione, placeholder
-      await tester.tap(find.text('seconda'));
+      await tester.tap(find.byKey(const Key('year-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('year-option-ms-year2')));
       await tester.pumpAndSettle();
 
       expect(find.text('Nessuna lezione in seconda'), findsOneWidget);
 
       // Anno 3: nessuna lezione, placeholder
-      await tester.tap(find.text('terza'));
+      await tester.tap(find.byKey(const Key('year-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('year-option-ms-year3')));
       await tester.pumpAndSettle();
 
       expect(find.text('Nessuna lezione in terza'), findsOneWidget);
@@ -161,7 +163,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CourseScreen), findsOneWidget);
-      expect(find.text('prima'), findsWidgets);
+      expect(find.text('Prima'), findsWidgets);
       expect(find.text('Lezioni per scuola'), findsNothing);
     },
   );
@@ -283,7 +285,7 @@ void main() {
 
     expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(CourseScreen), findsOneWidget);
-    expect(find.text('prima'), findsWidgets);
+    expect(find.text('Prima'), findsWidgets);
     // il foglio di scelta è chiuso e la pagina delle lezioni non c'è più
     expect(find.text('Esercizi per scuola'), findsNothing);
     expect(find.byType(LessonListScreen), findsNothing);
@@ -510,8 +512,11 @@ void main() {
 
     Future<void> swipe(WidgetTester tester, {required bool verso}) async {
       // `verso` true: verso sinistra, la pagina successiva.
-      await tester.fling(
-        find.byKey(const Key('pill-swipe')),
+      // In alto, sopra le liste orizzontali (il carosello della Home vincerebbe
+      // l'arena e scorrerebbe da sé).
+      await tester.flingFrom(
+        tester.getTopLeft(find.byKey(const Key('pill-swipe'))) +
+            const Offset(200, 20),
         Offset(verso ? -300 : 300, 0),
         1000,
       );

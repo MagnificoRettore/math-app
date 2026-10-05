@@ -9,7 +9,7 @@ import '../widgets/math_fact_card.dart';
 import '../widgets/main_header.dart';
 import '../widgets/mission_hero.dart';
 import '../widgets/pill_nav_bar.dart';
-import '../widgets/streak_card.dart';
+import '../widgets/streak_chip.dart';
 import 'mission_screen.dart';
 
 /// La Home. Al primo caricamento le sezioni entrano in sequenza (stagger):
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: MainHeaderAppBar(
         title: const MainHeaderTitle(),
-        actions: const [HeaderSearchButton(), HeaderCustomizationButton()],
+        actions: const [HeaderStreakChip(), HeaderCustomizationButton()],
       ),
       body: PillNavOverlay(selected: PillTab.home, child: _buildHomeTab()),
     );
@@ -94,13 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
       // ha già i 24 sopra: senza argomenti sparisce con lei.
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
-        _enter(context, 0, const StreakCard()),
-        _enter(context, 1, const JumpBackInCard()),
-        _enter(context, 2, const ArgomentoCarousel()),
+        _enter(context, 0, const JumpBackInCard()),
+        _enter(context, 1, const ArgomentoCarousel()),
         const SizedBox(height: 24),
         _enter(
           context,
-          3,
+          2,
           MissionHero(
             showShortcuts: true,
             onTap: () => Navigator.of(context)
@@ -108,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        _enter(context, 4, const MathFactCard()),
+        _enter(context, 3, const MathFactCard()),
       ],
     );
   }

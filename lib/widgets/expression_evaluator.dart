@@ -265,10 +265,13 @@ class _Parser {
   static double _applyFunction(String name, double arg, double trigFactor) {
     switch (name) {
       case 'sin':
-        return math.sin(arg * trigFactor);
+        return _snap(math.sin(arg * trigFactor));
       case 'cos':
-        return math.cos(arg * trigFactor);
+        return _snap(math.cos(arg * trigFactor));
       case 'tan':
+        // Dove il coseno è zero la tangente non esiste: senza questo, `tan(90)`
+        // in gradi darebbe 1.6e16 invece dell'errore.
+        if (_snap(math.cos(arg * trigFactor)) == 0) return double.nan;
         return math.tan(arg * trigFactor);
       case 'asin':
         return math.asin(arg) / trigFactor;
@@ -290,6 +293,10 @@ class _Parser {
         throw FormatException('funzione ignota: $name');
     }
   }
+
+  /// Il rumore del double (`sin(180°)` è 1.2e-16) vale zero: è un'imprecisione
+  /// del calcolo, non un valore.
+  static double _snap(double v) => v.abs() < 1e-14 ? 0 : v;
 
   /// Un risultato non finito resta tale, così [tryEvaluate] lo dà come
   /// errore: `0^-1` non è zero.

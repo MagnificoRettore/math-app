@@ -14,8 +14,7 @@ import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/app_card.dart';
 import 'package:math_app/widgets/completed_badge.dart';
 import 'package:math_app/widgets/main_header.dart';
-import 'package:math_app/widgets/progress_bar.dart';
-import 'package:math_app/widgets/year_tabs.dart';
+import 'package:math_app/widgets/list_filter_bar.dart';
 
 final _segno = find.byKey(const Key('completed-badge'));
 
@@ -110,32 +109,23 @@ void main() {
     _nellAngolo(tester, find.text('Equazioni di primo grado'));
   });
 
-  testWidgets('la card dell\'argomento ha la barra delle lezioni completate', (
+  testWidgets('la card dell\'argomento dice quante lezioni e a che punto', (
     tester,
   ) async {
-    Future<double> barra() async {
+    Future<void> apri() async {
       await tester.pumpWidget(
         const MaterialApp(
           home: LessonListScreen(levelId: 'high-school', showPill: false),
         ),
       );
       await tester.pumpAndSettle();
-      final card = find
-          .ancestor(
-            of: find.text('Equazioni di primo grado'),
-            matching: find.byType(AppCard),
-          )
-          .first;
-      return tester
-          .widget<ProgressBar>(
-            find.descendant(of: card, matching: find.byType(ProgressBar)),
-          )
-          .progress;
     }
 
-    expect(await barra(), 0);
+    await apri();
+    expect(find.text('1 lezione · 0%'), findsOneWidget);
     await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
-    expect(await barra(), 1);
+    await apri();
+    expect(find.text('1 lezione · 100%'), findsOneWidget);
   });
 
   testWidgets('Lezioni si apre sull\'anno scelto alla registrazione', (
@@ -157,8 +147,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final tabs = tester.widget<YearTabs>(find.byType(YearTabs));
-    expect(tabs.selectedIndex, 1);
+    final menu = tester.widget<YearDropdown>(find.byType(YearDropdown));
+    expect(menu.selectedIndex, 1);
   });
 
   testWidgets('Moduli mostra le lezioni Definizione e Modulo e Equazioni', (

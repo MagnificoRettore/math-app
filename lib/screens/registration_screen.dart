@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import '../data/auth_store.dart';
 import '../data/auth_validators.dart';
 import '../data/content_repository.dart';
+import '../haptics.dart';
 import '../models/course.dart';
 import '../models/level.dart';
 import '../theme/app_colors.dart';
@@ -17,6 +18,7 @@ import '../widgets/avatar_picker.dart';
 import '../widgets/password_field.dart';
 import '../widgets/profile_avatar.dart';
 import '../widgets/school_level_tile.dart';
+import '../widgets/year_tile.dart';
 import '../widgets/shake.dart';
 import '../widgets/strength_meter.dart';
 import '../widgets/wave_clipper.dart';
@@ -198,7 +200,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             _StepHeader(title: _titles[_step]),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
                 children: [content],
               ),
             ),
@@ -427,7 +429,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         for (final course in _level?.courses ?? const <Course>[])
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
-            child: _YearTile(
+            child: YearTile(
               course: course,
               selected: _courseId == course.id,
               onTap: () => setState(() => _courseId = course.id),
@@ -488,6 +490,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
     if (!mounted) return;
     FocusScope.of(context).unfocus();
+    AppHaptics.mediumImpact();
     setState(() {
       _busy = false;
       _done = true;
@@ -507,7 +510,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       (Icons.tag, 'ID account', _accountIdController.text.trim()),
       if (level != null) (Icons.school_outlined, 'Scuola', level.title),
       if (course != null && _needsYear)
-        (Icons.event_outlined, 'Anno', _yearLabel(course)),
+        (Icons.event_outlined, 'Anno', yearLabel(course)),
     ];
 
     Widget enter(int index, Widget child) {
@@ -733,11 +736,6 @@ class _TermsRow extends StatelessWidget {
       'resta solo una derivata crittografica.';
 }
 
-/// «prima» → «Prima»: i titoli degli anni nei dati sono in minuscolo.
-String _yearLabel(Course course) => course.title.isEmpty
-    ? course.title
-    : course.title[0].toUpperCase() + course.title.substring(1);
-
 /// L'avatar scelto, o le iniziali del nome, o la persona se non c'è niente.
 class _AvatarCircle extends StatelessWidget {
   final String avatarId;
@@ -894,100 +892,99 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-/// Un anno della scuola scelta, nello stile della scelta della scuola.
-class _YearTile extends StatelessWidget {
-  final Course course;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _YearTile({
-    required this.course,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final c = AppColors.of(context);
-    return AppCard(
-      onTap: onTap,
-      borderColor: selected ? c.accent : null,
-      borderWidth: 3,
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              _yearLabel(course),
-              style: TextStyle(
-                fontSize: AppText.titleSmall,
-                fontWeight: FontWeight.w500,
-                color: c.textPrimary,
-              ),
-            ),
-          ),
-          Icon(
-            selected ? Icons.radio_button_checked : Icons.radio_button_off,
-            color: selected ? c.accent : c.textSecondary,
-          ),
-        ],
-      ),
-    );
-  }
-}
+/// Spento nei test che aspettano `pumpAndSettle`: un'animazione che si ripete
+/// per sempre non si esaurisce mai.
+@visibleForTesting
+bool registrationWaveEnabled = true;
 
 /// La testata indaco di «Creazione profilo»: il bordo in basso ondulato, la
 /// freccia per uscire e il titolo del passo al centro, che cambia in
 /// dissolvenza.
-class _StepHeader extends StatelessWidget {
+///
+/// Il bordo ondeggia piano (`WaveBottomClipper.phase`): si rifà solo il
+/// tracciato del ritaglio, il contenuto sta in un `RepaintBoundary` e non si
+/// ridisegna. Col movimento ridotto il bordo sta fermo.
+class _StepHeader extends StatefulWidget {
   final String title;
 
   const _StepHeader({required this.title});
 
   @override
+  State<_StepHeader> createState() => _StepHeaderState();
+}
+
+class _StepHeaderState extends State<_StepHeader>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _wave = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 6),
+  );
+  late final WaveBottomClipper _clipper = WaveBottomClipper(phase: _wave);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (AppMotion.reduced(context) || !registrationWaveEnabled) {
+      _wave.stop();
+    } else if (!_wave.isAnimating) {
+      _wave.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _wave.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final title = widget.title;
     final c = AppColors.of(context);
     return ClipPath(
       key: const Key('registration-header'),
-      clipper: const WaveBottomClipper(),
-      child: Container(
-        width: double.infinity,
-        color: c.headerBand,
-        padding: const EdgeInsets.only(bottom: 52),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: BackButton(color: c.onHeaderBand),
-                ),
-                const SizedBox(height: 4),
-                AnimatedSwitcher(
-                  duration: AppMotion.duration(context, AppMotion.medium),
-                  switchInCurve: AppMotion.standard,
-                  switchOutCurve: AppMotion.standard,
-                  layoutBuilder: (current, previous) => Stack(
-                    alignment: Alignment.center,
-                    children: [...previous, ?current],
+      clipper: _clipper,
+      child: RepaintBoundary(
+        child: Container(
+          width: double.infinity,
+          color: c.headerBand,
+          padding: const EdgeInsets.only(bottom: 52),
+          child: SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: BackButton(color: c.onHeaderBand),
                   ),
-                  child: Semantics(
-                    key: ValueKey(title),
-                    header: true,
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: AppText.headingFont,
-                        fontSize: AppText.display,
-                        fontWeight: FontWeight.w600,
-                        color: c.onHeaderBand,
+                  const SizedBox(height: 4),
+                  AnimatedSwitcher(
+                    duration: AppMotion.duration(context, AppMotion.medium),
+                    switchInCurve: AppMotion.standard,
+                    switchOutCurve: AppMotion.standard,
+                    layoutBuilder: (current, previous) => Stack(
+                      alignment: Alignment.center,
+                      children: [...previous, ?current],
+                    ),
+                    child: Semantics(
+                      key: ValueKey(title),
+                      header: true,
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: AppText.headingFont,
+                          fontSize: AppText.display,
+                          fontWeight: FontWeight.w600,
+                          color: c.onHeaderBand,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

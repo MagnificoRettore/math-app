@@ -71,6 +71,7 @@ flutter:
    - assets/images/
    - assets/animations/
    - assets/illustrations/
+   - assets/guide/
 
   # Fredoka per titoli e bottoni, Nunito per il testo: i font del design
   # (canvas «Illustrazioni App Educativa»). Statici e in locale, perché l'app
