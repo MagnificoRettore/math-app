@@ -5,12 +5,11 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'scientific_calculator.dart';
 
-/// Altezza della toolbar compatta: più grande dei bottoni accanto
-/// («Completa la lezione», 49), perché è il comando che si cerca con il pollice
-/// e le sue icone devono leggersi. Sta a filo del loro spigolo inferiore e
-/// cresce in alto. Il FAB collassato è `M3EToolbarTokens.fabMedium`, cioè 80, e
-/// si scala fin qui (da espanso scende a `fabBaseline`, 56).
-const double kToolsBarHeight = 62;
+/// Altezza della toolbar compatta: quella di un bottone da 44 più il suo
+/// gradino, così sta alla pari con i bottoni accanto («Completa la lezione»).
+/// Il FAB collassato è `M3EToolbarTokens.fabMedium`, cioè 80, e si scala fin
+/// qui (da espanso scende a `fabBaseline`, 56).
+const double kToolsBarHeight = 49;
 
 /// La toolbar degli strumenti, la stessa delle lezioni e degli esercizi: il FAB
 /// compatto con la pila che si apre in alto.
@@ -54,7 +53,6 @@ class AppToolsBar extends StatelessWidget {
           foregroundColor: Colors.white,
           key: toolbarKey,
           axis: Axis.vertical,
-          size: M3EToolbarSize.large,
           fabPosition: M3EToolbarFabPosition.bottom,
           expanded: expanded,
           onExpandedChanged: onExpandedChanged,

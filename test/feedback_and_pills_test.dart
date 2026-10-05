@@ -123,6 +123,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(scesa(tester, key), 4, reason: '$key premuta');
         await gesture.cancel();
+        // Resta giù almeno un istante, poi torna su.
+        await tester.pump(const Duration(milliseconds: 200));
         await tester.pumpAndSettle();
         expect(scesa(tester, key), 0, reason: '$key rilasciata');
       }

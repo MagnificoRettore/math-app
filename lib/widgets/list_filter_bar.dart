@@ -5,6 +5,7 @@ import '../models/course.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
+import 'press_tracker.dart';
 import 'search_overlay.dart';
 import 'year_tile.dart';
 
@@ -216,20 +217,28 @@ class _Pill extends StatefulWidget {
 class _PillState extends State<_Pill> {
   bool _pressed = false;
 
-  void _press(bool value) {
-    if (_pressed != value) setState(() => _pressed = value);
+  // Resta giù almeno un istante anche per un tocco rapido (`PressTracker`).
+  late final PressTracker _press = PressTracker(
+    (value) => setState(() => _pressed = value),
+  );
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
+    _press.hold = AppMotion.duration(context, AppMotion.fast);
     final down = widget.selected || _pressed;
     final border =
         widget.borderColor ?? (widget.selected ? c.yellowDeep : c.border);
     return Listener(
-      onPointerDown: (_) => _press(true),
-      onPointerUp: (_) => _press(false),
-      onPointerCancel: (_) => _press(false),
+      onPointerDown: (_) => _press.down(),
+      onPointerUp: (_) => _press.up(),
+      onPointerCancel: (_) => _press.up(),
       child: Padding(
         // Lo spazio del gradino: l'altezza totale non cambia mai.
         padding: const EdgeInsets.only(bottom: _Pill.depth),

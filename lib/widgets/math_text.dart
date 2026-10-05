@@ -79,7 +79,10 @@ InlineSpan mathSpan(
 }) {
   final cleaned = stripMathDelimiters(tex);
   return WidgetSpan(
-    alignment: PlaceholderAlignment.middle,
+    // Sulla linea di base del testo: con `middle` la formula si centra sulla
+    // riga e le lettere (`$x$`) restano più in alto del testo accanto.
+    alignment: PlaceholderAlignment.baseline,
+    baseline: TextBaseline.alphabetic,
     child: Math.tex(
       cleaned,
       textStyle: TextStyle(

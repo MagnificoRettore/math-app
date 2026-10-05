@@ -12,7 +12,7 @@ import 'math_text.dart';
 
 /// Card che mostra un [MultifunctionBox] in base a `box_type`: l'immagine sta
 /// nuda nella colonna di testo, la formula e il grafico vanno in card e
-/// `hidden` lascia la formula da sola.
+/// `hidden` lascia la formula (o il grafico) da sola.
 class MultifunctionBoxWidget extends StatelessWidget {
   final MultifunctionBox box;
 
@@ -24,6 +24,14 @@ class MultifunctionBoxWidget extends StatelessWidget {
     if (box.payload is ImageBoxPayload) return _ImageView(box: box);
 
     if (box.payload is GraphPayload) {
+      final graph = box.payload as GraphPayload;
+      // `hidden`: il grafico da solo, senza card e senza titolo.
+      if (graph.hidden) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: GraphView(payload: graph),
+        );
+      }
       return AppCard(
         bordered: false,
         padding: const EdgeInsets.all(16),

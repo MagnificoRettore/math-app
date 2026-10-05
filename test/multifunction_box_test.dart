@@ -67,27 +67,46 @@ void main() {
       expect(json['fontSizeMultiplier'], 1.4);
     });
 
-    test('hidden di default è false e round-trip', () {
+    test('hidden di default è true e round-trip', () {
       final box = MultifunctionBox.fromJson({
         'id': 'formula-3',
         'box_type': 'math_formula',
         'payload': {'tex': 'x + 1'},
       });
       final payload = box.payload as MathFormulaPayload;
-      expect(payload.hidden, isFalse);
+      expect(payload.hidden, isTrue);
       expect(box.toJson()['payload'].containsKey('hidden'), isFalse);
 
       final box2 = MultifunctionBox.fromJson({
         'id': 'formula-4',
         'box_type': 'math_formula',
-        'payload': {'tex': 'x + 1', 'hidden': true},
+        'payload': {'tex': 'x + 1', 'hidden': false},
       });
       final payload2 = box2.payload as MathFormulaPayload;
-      expect(payload2.hidden, isTrue);
+      expect(payload2.hidden, isFalse);
       expect(
         (box2.toJson()['payload'] as Map<String, dynamic>)['hidden'],
-        isTrue,
+        isFalse,
       );
+    });
+
+    test('anche il grafico è hidden di default', () {
+      final box = MultifunctionBox.fromJson({
+        'id': 'g',
+        'box_type': 'graph',
+        'payload': {
+          'items': [
+            {'type': 'function', 'expr': 'x'},
+          ],
+        },
+      });
+      expect((box.payload as GraphPayload).hidden, isTrue);
+      final card = MultifunctionBox.fromJson({
+        'id': 'g',
+        'box_type': 'graph',
+        'payload': {'hidden': false},
+      });
+      expect((card.payload as GraphPayload).hidden, isFalse);
     });
   });
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
+import 'press_tracker.dart';
 
 enum AppButtonVariant {
   /// Indaco pieno, testo bianco: l'azione principale della schermata.
@@ -67,6 +68,18 @@ class AppButton extends StatefulWidget {
 class _AppButtonState extends State<AppButton> {
   bool _pressed = false;
 
+  // La pressione parte col dito, non quando l'`InkWell` decide che è un tocco:
+  // vedi `PressTracker`.
+  late final PressTracker _press = PressTracker(
+    (value) => setState(() => _pressed = value),
+  );
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
+
   bool get _enabled => widget.onPressed != null && !widget.busy;
 
   @override
@@ -83,6 +96,7 @@ class _AppButtonState extends State<AppButton> {
             ),
             AppButtonVariant.outline => (c.surface, c.accent, c.accent),
           };
+    _press.hold = AppMotion.duration(context, AppMotion.fast);
     final raised = _enabled || widget.busy;
     // Giù quando è premuto, e da disabilitato: senza gradino, schiacciato.
     final down = !raised || _pressed;
@@ -167,15 +181,17 @@ class _AppButtonState extends State<AppButton> {
                 ),
             ],
           ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              borderRadius: shape,
-              onTap: _enabled ? widget.onPressed : null,
-              onHighlightChanged: _enabled
-                  ? (value) => setState(() => _pressed = value)
-                  : null,
-              child: content,
+          child: Listener(
+            onPointerDown: _enabled ? (_) => _press.down() : null,
+            onPointerUp: _enabled ? (_) => _press.up() : null,
+            onPointerCancel: _enabled ? (_) => _press.up() : null,
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: shape,
+                onTap: _enabled ? widget.onPressed : null,
+                child: content,
+              ),
             ),
           ),
         ),

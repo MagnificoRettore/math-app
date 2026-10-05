@@ -24,8 +24,7 @@
                             "title": "",
                             "payload": {
                                 "tex": "y = mx + q",
-                                "fontSizeMultiplier": 1.4,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.4
                             }
                         },
                         "Questa è la sua **forma esplicita**: il parametro $y$ è esplicitato e la retta ha la sua forma in funzione $y = f(x)$.",
@@ -36,8 +35,7 @@
                             "title": "",
                             "payload": {
                                 "tex": "ax + by + c = 0",
-                                "fontSizeMultiplier": 1.3,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.3
                             }
                         },
                         "NOTA: $m$ e $q$ possono essere ricavati dalla forma implicita:",
@@ -46,9 +44,8 @@
                             "box_type": "math_formula",
                             "title": "",
                             "payload": {
-                                "tex": "m = -\\frac{a}{b} \\qquad q = -\\frac{c}{b}",
-                                "fontSizeMultiplier": 1.2,
-                                "hidden": true
+                                "tex": "m = -\\frac{a}{b} \\quad q = -\\frac{c}{b}",
+                                "fontSizeMultiplier": 1.0
                             }
                         }
                     ]
@@ -61,18 +58,11 @@
                         {
                             "id": "rette-plane",
                             "box_type": "graph",
-                            "title": "Una retta r nel piano",
                             "payload": {
                                 "plane": "cartesian",
                                 "aspect": "equal",
-                                "x": [
-                                    -3,
-                                    5
-                                ],
-                                "y": [
-                                    -3,
-                                    3
-                                ],
+                                "x": [-3, 5],
+                                "y": [-3, 3],
                                 "grid": 1,
                                 "xLabel": "x",
                                 "yLabel": "y",
@@ -80,33 +70,23 @@
                                     {
                                         "type": "function",
                                         "expr": "2*x - 2",
-                                        "label": "r",
                                         "color": "accent"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            1,
-                                            0
-                                        ],
+                                        "at": [1, 0],
                                         "label": "P",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            0,
-                                            -2
-                                        ],
+                                        "at": [0, -2],
                                         "label": "q",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            2,
-                                            2
-                                        ],
+                                        "at": [2, 2],
                                         "label": "m",
                                         "guides": true,
                                         "color": "teal"
@@ -133,14 +113,8 @@
                             "payload": {
                                 "plane": "cartesian",
                                 "aspect": "equal",
-                                "x": [
-                                    -3,
-                                    5
-                                ],
-                                "y": [
-                                    -2,
-                                    3
-                                ],
+                                "x": [-3, 5],
+                                "y": [-2, 3],
                                 "grid": 1,
                                 "xLabel": "x",
                                 "yLabel": "y",
@@ -159,19 +133,13 @@
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            0,
-                                            2
-                                        ],
+                                        "at": [0, 2],
                                         "label": "n",
                                         "color": "accent"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            3,
-                                            0
-                                        ],
+                                        "at": [3, 0],
                                         "label": "m",
                                         "color": "orange"
                                     }
@@ -179,7 +147,8 @@
                             }
                         },
                         "NOTA: la retta orizzontale ha $m = 0$; la retta verticale non ha coefficiente angolare e non si scrive in forma esplicita.",
-                        "## Bisettrici ($q = 0$, $m = \\pm 1$)",
+                        "## Bisettrici",
+                        "Sono le rette con $q = 0$ e $m = \\pm 1$.",
                         {
                             "id": "rette-bisectors",
                             "box_type": "graph",
@@ -187,14 +156,8 @@
                             "payload": {
                                 "plane": "cartesian",
                                 "aspect": "equal",
-                                "x": [
-                                    -4,
-                                    4
-                                ],
-                                "y": [
-                                    -3,
-                                    3
-                                ],
+                                "x": [-4, 4],
+                                "y": [-3, 3],
                                 "grid": 1,
                                 "xLabel": "x",
                                 "yLabel": "y",
@@ -228,21 +191,35 @@
                             "title": "",
                             "payload": {
                                 "tex": "y = 2x - 1",
-                                "fontSizeMultiplier": 1.4,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.4
                             }
                         },
                         "Per disegnare una retta basta conoscere **2 suoi punti di passaggio**. Li si può identificare mediante la **tabella dei punti**: si assegna un valore a piacimento a $x$ (o a $y$) e si trova il rispettivo valore dell'incognita che risolve l'equazione.",
-                        "$x = 0 \\to y = 2 \\cdot 0 - 1 = -1$",
-                        "$x = 1 \\to y = 2 \\cdot 1 - 1 = 1$",
+                        {
+                            "id": "rette-calc-0",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "x=0 \\to y=2\\cdot 0-1=-1",
+                                "fontSizeMultiplier": 1.0
+                            }
+                        },
+                        {
+                            "id": "rette-calc-1",
+                            "box_type": "math_formula",
+                            "title": "",
+                            "payload": {
+                                "tex": "x=1 \\to y=2\\cdot 1-1=1",
+                                "fontSizeMultiplier": 1.0
+                            }
+                        },
                         {
                             "id": "rette-table",
                             "box_type": "math_formula",
                             "title": "",
                             "payload": {
                                 "tex": "\\begin{array}{c|c} x & y \\\\ \\hline 0 & -1 \\\\ 1 & 1 \\end{array}",
-                                "fontSizeMultiplier": 1.2,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.2
                             }
                         },
                         {
@@ -252,14 +229,8 @@
                             "payload": {
                                 "plane": "cartesian",
                                 "aspect": "equal",
-                                "x": [
-                                    -3,
-                                    4
-                                ],
-                                "y": [
-                                    -3,
-                                    3
-                                ],
+                                "x": [-3, 4],
+                                "y": [-3, 3],
                                 "grid": 1,
                                 "xLabel": "x",
                                 "yLabel": "y",
@@ -272,19 +243,13 @@
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            0,
-                                            -1
-                                        ],
+                                        "at": [0, -1],
                                         "label": "(0,\\,-1)",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            1,
-                                            1
-                                        ],
+                                        "at": [1, 1],
                                         "label": "(1,\\,1)",
                                         "color": "orange"
                                     }

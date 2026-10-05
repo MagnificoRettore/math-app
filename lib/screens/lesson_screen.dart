@@ -24,9 +24,7 @@ import '../widgets/scientific_calculator.dart';
 import '../widgets/tools_bar.dart';
 
 /// Altezza di «Completa la lezione» e della toolbar compatta: la stessa.
-/// L'altezza dei bottoni del piede della lezione (con il gradino). La toolbar
-/// è più grande (`kToolsBarHeight`) e cresce in alto dallo stesso spigolo.
-const double _kFooterControlHeight = 49;
+const double _kFooterControlHeight = kToolsBarHeight;
 
 /// La `PageView` mostra il 92% della larghezza: si intravedono le card vicine.
 const double _kViewportFraction = 0.92;
@@ -319,14 +317,19 @@ class _LessonScreenState extends State<LessonScreen> {
                         ),
                       ),
                     ),
-                    appear(
-                      'complete',
-                      showComplete,
-                      _completeButton(
-                        compact: _completeDoesNotFit(
-                          context,
-                          constraints.maxWidth - 2 * inner,
-                          showReload,
+                    // `Flexible`: se lo spazio manca comunque (testo grande), il
+                    // bottone si stringe e il testo va in ellissi, invece di
+                    // sforare il bordo.
+                    Flexible(
+                      child: appear(
+                        'complete',
+                        showComplete,
+                        _completeButton(
+                          compact: _completeDoesNotFit(
+                            context,
+                            constraints.maxWidth - 2 * inner,
+                            showReload,
+                          ),
                         ),
                       ),
                     ),
@@ -349,24 +352,27 @@ class _LessonScreenState extends State<LessonScreen> {
   /// Se «Completa la lezione» per intero non ci sta in [width] accanto alla
   /// toolbar e, quando c'è, al reload: allora resta solo l'icona.
   bool _completeDoesNotFit(BuildContext context, double width, bool reload) {
-    // Larghezza già occupata a sinistra: la toolbar dipinta, il reload (44
-    // più 8 di scarto) quando c'è, più un piccolo scarto perché il bottone
-    // non tocchi il FAB.
-    final taken = kToolsBarHeight + (reload ? 52 : 0) + 8;
-    // «Completa la lezione» per intero: 20 di padding per lato, icona da 20,
-    // 8 di scarto, più il testo misurato.
+    // Larghezza già occupata a sinistra: la toolbar dipinta più un piccolo
+    // scarto perché il bottone non la tocchi, e il reload quando c'è (la sua
+    // faccia, 14 di padding per lato e l'icona da 22, più gli 8 di scarto a
+    // destra).
+    final taken = kToolsBarHeight + 8 + (reload ? 14 * 2 + 22 + 8 : 0);
+    // «Completa la lezione» per intero, come lo disegna `AppButton`: 24 di
+    // padding per lato, icona da 22, 8 di scarto e il testo, in Outfit 600 a
+    // `titleMedium` (la faccia è sotto i 50), misurato con la scala del testo.
     final painter = TextPainter(
       text: const TextSpan(
         text: 'Completa la lezione',
         style: TextStyle(
-          fontSize: AppText.bodyLarge,
-          fontWeight: FontWeight.w500,
+          fontFamily: AppText.headingFont,
+          fontSize: AppText.titleMedium,
+          fontWeight: FontWeight.w600,
         ),
       ),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
     )..layout();
-    final full = 40 + 20 + 8 + painter.width;
+    final full = 24 * 2 + 22 + 8 + painter.width;
     painter.dispose();
     return width - taken < full;
   }

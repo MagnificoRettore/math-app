@@ -23,14 +23,8 @@
                             "box_type": "graph",
                             "title": "y = x² − 2x − 3",
                             "payload": {
-                                "x": [
-                                    -3,
-                                    5
-                                ],
-                                "y": [
-                                    -5,
-                                    6
-                                ],
+                                "x": [-3, 5],
+                                "y": [-5, 6],
                                 "grid": 1,
                                 "items": [
                                     {
@@ -41,33 +35,25 @@
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            -1,
-                                            0
-                                        ],
+                                        "at": [-1, 0],
                                         "label": "A(-1,\\,0)",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            3,
-                                            0
-                                        ],
+                                        "at": [3, 0],
                                         "label": "B(3,\\,0)",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            1,
-                                            -4
-                                        ],
+                                        "at": [1, -4],
                                         "label": "V(1,\\,-4)",
                                         "guides": true,
                                         "color": "teal"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Il **vertice** $V(1, -4)$ sta a metà fra le due intersezioni: le guide tratteggiate ne leggono le coordinate sugli assi."
@@ -83,14 +69,8 @@
                             "box_type": "graph",
                             "title": "y = 1/(x − 2) + 1",
                             "payload": {
-                                "x": [
-                                    -4,
-                                    8
-                                ],
-                                "y": [
-                                    -5,
-                                    7
-                                ],
+                                "x": [-4, 8],
+                                "y": [-5, 7],
                                 "grid": 1,
                                 "items": [
                                     {
@@ -113,7 +93,8 @@
                                         "label": "y = 1",
                                         "color": "orange"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Le rette tratteggiate sono gli **asintoti**: la curva si avvicina sempre di più, senza toccarle."
@@ -137,23 +118,14 @@
                             "box_type": "graph",
                             "title": "Centro C(1, 1), raggio 3",
                             "payload": {
-                                "x": [
-                                    -4,
-                                    6
-                                ],
-                                "y": [
-                                    -4,
-                                    6
-                                ],
+                                "x": [-4, 6],
+                                "y": [-4, 6],
                                 "aspect": "equal",
                                 "grid": 1,
                                 "items": [
                                     {
                                         "type": "circle",
-                                        "center": [
-                                            1,
-                                            1
-                                        ],
+                                        "center": [1, 1],
                                         "radius": 3,
                                         "fill": true,
                                         "label": "\\mathcal{C}",
@@ -161,27 +133,19 @@
                                     },
                                     {
                                         "type": "segment",
-                                        "from": [
-                                            1,
-                                            1
-                                        ],
-                                        "to": [
-                                            1,
-                                            4
-                                        ],
+                                        "from": [1, 1],
+                                        "to": [1, 4],
                                         "label": "r = 3",
                                         "color": "orange"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            1,
-                                            1
-                                        ],
+                                        "at": [1, 1],
                                         "label": "C",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Sui due assi l'unità è la stessa: per questo la circonferenza è rotonda e non schiacciata."
@@ -196,77 +160,44 @@
                             "box_type": "graph",
                             "title": "Triangolo ABC e vettore v",
                             "payload": {
-                                "x": [
-                                    -1,
-                                    7
-                                ],
-                                "y": [
-                                    -1,
-                                    5
-                                ],
+                                "x": [-1, 7],
+                                "y": [-1, 5],
                                 "aspect": "equal",
                                 "grid": 1,
                                 "items": [
                                     {
                                         "type": "polygon",
-                                        "points": [
-                                            [
-                                                0,
-                                                0
-                                            ],
-                                            [
-                                                4,
-                                                0
-                                            ],
-                                            [
-                                                1,
-                                                3
-                                            ]
-                                        ],
+                                        "points": [[0, 0], [4, 0], [1, 3]],
                                         "label": "T",
                                         "color": "teal"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            0,
-                                            0
-                                        ],
+                                        "at": [0, 0],
                                         "label": "A",
                                         "color": "teal"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            4,
-                                            0
-                                        ],
+                                        "at": [4, 0],
                                         "label": "B",
                                         "color": "teal"
                                     },
                                     {
                                         "type": "point",
-                                        "at": [
-                                            1,
-                                            3
-                                        ],
+                                        "at": [1, 3],
                                         "label": "C",
                                         "color": "teal"
                                     },
                                     {
                                         "type": "vector",
-                                        "from": [
-                                            4,
-                                            0
-                                        ],
-                                        "to": [
-                                            6,
-                                            3
-                                        ],
+                                        "from": [4, 0],
+                                        "to": [6, 3],
                                         "label": "\\vec v",
                                         "color": "pink"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Il vettore $\\vec v$ va da $(4, 0)$ a $(6, 3)$: le sue componenti sono $(2, 3)$."
@@ -282,14 +213,8 @@
                             "box_type": "graph",
                             "title": "Ellisse di semiassi 3 e 2",
                             "payload": {
-                                "x": [
-                                    -4,
-                                    4
-                                ],
-                                "y": [
-                                    -3,
-                                    3
-                                ],
+                                "x": [-4, 4],
+                                "y": [-3, 3],
                                 "aspect": "equal",
                                 "grid": 1,
                                 "items": [
@@ -297,14 +222,12 @@
                                         "type": "curve",
                                         "x": "3*cos(t)",
                                         "y": "2*sin(t)",
-                                        "t": [
-                                            0,
-                                            6.2832
-                                        ],
+                                        "t": [0, 6.2832],
                                         "label": "x = 3\\cos t,\\ y = 2\\sin t",
                                         "color": "purple"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         }
                     ]
@@ -327,14 +250,8 @@
                             "box_type": "graph",
                             "title": "Area fra y = x + 2 e y = x²",
                             "payload": {
-                                "x": [
-                                    -3,
-                                    4
-                                ],
-                                "y": [
-                                    -1,
-                                    6
-                                ],
+                                "x": [-3, 4],
+                                "y": [-1, 6],
                                 "grid": 1,
                                 "items": [
                                     {
@@ -360,7 +277,8 @@
                                         "label": "y = x^2",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         }
                     ]
@@ -375,14 +293,8 @@
                             "box_type": "graph",
                             "title": "y ≥ x² − 4 e y < 2 − x",
                             "payload": {
-                                "x": [
-                                    -5,
-                                    4
-                                ],
-                                "y": [
-                                    -5,
-                                    7
-                                ],
+                                "x": [-5, 4],
+                                "y": [-5, 7],
                                 "grid": 1,
                                 "items": [
                                     {
@@ -394,7 +306,8 @@
                                         "label": "R",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Il bordo della parabola è **continuo** perché il $\\ge$ lo include; quello della retta è **tratteggiato** perché il $<$ lo esclude."
@@ -430,7 +343,8 @@
                                         "label": "S",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Il pallino **pieno** in $-1$ dice che l'estremo è incluso, quello **vuoto** in $\\frac{5}{3}$ che è escluso."
@@ -480,26 +394,15 @@
                                     {
                                         "label": "\\text{Settimana 1}",
                                         "color": "accent",
-                                        "values": [
-                                            20,
-                                            35,
-                                            15,
-                                            40,
-                                            25
-                                        ]
+                                        "values": [20, 35, 15, 40, 25]
                                     },
                                     {
                                         "label": "\\text{Settimana 2}",
                                         "color": "orange",
-                                        "values": [
-                                            30,
-                                            25,
-                                            45,
-                                            35,
-                                            50
-                                        ]
+                                        "values": [30, 25, 45, 35, 50]
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Nella seconda settimana lo studio è cresciuto in quattro giorni su cinque."

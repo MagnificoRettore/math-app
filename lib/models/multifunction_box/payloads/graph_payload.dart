@@ -676,6 +676,10 @@ class GraphPayload extends BoxPayload {
   final List<String> categories;
   final List<GraphBarSeries> series;
 
+  /// Senza la card che lo avvolge e senza il titolo: il grafico sta da solo.
+  /// **Di base è `true`**: la card si chiede con `"hidden": false`.
+  final bool hidden;
+
   const GraphPayload({
     this.plane = GraphPlane.cartesian,
     this.x,
@@ -687,6 +691,7 @@ class GraphPayload extends BoxPayload {
     this.items = const [],
     this.categories = const [],
     this.series = const [],
+    this.hidden = true,
   });
 
   factory GraphPayload.fromJson(Map<String, dynamic> json) {
@@ -710,6 +715,7 @@ class GraphPayload extends BoxPayload {
         for (final e in json['series'] as List<dynamic>? ?? const [])
           if (e is Map<String, dynamic>) GraphBarSeries.fromJson(e),
       ],
+      hidden: json['hidden'] as bool? ?? true,
     );
   }
 
@@ -731,5 +737,6 @@ class GraphPayload extends BoxPayload {
     if (items.isNotEmpty) 'items': [for (final i in items) i.toJson()],
     if (categories.isNotEmpty) 'categories': categories,
     if (series.isNotEmpty) 'series': [for (final s in series) s.toJson()],
+    if (!hidden) 'hidden': hidden,
   };
 }

@@ -39,7 +39,8 @@
                             "title": "Definizione",
                             "payload": {
                                 "tex": "|x| = \\begin{cases} x & \\text{se } x \\ge 0 \\\\ -x & \\text{se } x < 0 \\end{cases}",
-                                "fontSizeMultiplier": 1.2
+                                "fontSizeMultiplier": 1.2,
+                                "hidden": false
                             }
                         }
                     ]
@@ -70,14 +71,27 @@
                                 "plane": "bars",
                                 "xLabel": "x",
                                 "yLabel": "|x|",
-                                "categories": ["-5", "-4", "-3", "-2", "-1", "0", "1", "2", "3", "4", "5"],
+                                "categories": [
+                                    "-5",
+                                    "-4",
+                                    "-3",
+                                    "-2",
+                                    "-1",
+                                    "0",
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5"
+                                ],
                                 "series": [
                                     {
                                         "label": "|x|",
                                         "color": "accent",
                                         "values": [5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5]
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "Da $-5$ a $5$ le barre sono simmetriche: $-3$ e $3$ sono alla stessa distanza dallo zero."
@@ -95,7 +109,8 @@
                             "title": "Espressione letterale",
                             "payload": {
                                 "tex": "|x-3| = \\begin{cases} x-3 & \\text{se } x \\ge 3 \\\\ -(x-3) & \\text{se } x < 3 \\end{cases}",
-                                "fontSizeMultiplier": 1.1
+                                "fontSizeMultiplier": 1.1,
+                                "hidden": false
                             }
                         },
                         {
@@ -127,7 +142,8 @@
                                         "label": "V(3,\\,0)",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "A sinistra di $3$ l'argomento $x - 3$ è **negativo**: la retta tratteggiata scende sotto l'asse $x$, e il modulo la **ribalta** sopra. A destra di $3$ le due coincidono. Il punto di svolta è il **vertice** $V(3, 0)$."
@@ -155,8 +171,7 @@
                             "title": "",
                             "payload": {
                                 "tex": "|ax + b| = k",
-                                "fontSizeMultiplier": 1.5,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.5
                             }
                         },
                         "",
@@ -178,8 +193,7 @@
                             "title": "",
                             "payload": {
                                 "tex": "|x - 5| = 2",
-                                "fontSizeMultiplier": 1.5,
-                                "hidden": true
+                                "fontSizeMultiplier": 1.5
                             }
                         },
                         "Studio del modulo: $x - 5 \\ge 0 \\Rightarrow x \\ge 5$",
@@ -213,7 +227,8 @@
                                         "label": "x = 7",
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "$|x - 5| = 2$ chiede i numeri a **distanza 2 da 5**: sulla retta sono uno a sinistra e uno a destra di $5$.",
@@ -258,7 +273,8 @@
                                         "guides": true,
                                         "color": "accent"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         },
                         "La curva $|x - 5|$ taglia l'asse $y$ in $5$ e ha il **vertice** in $(5, 0)$. Le due curve si incontrano in un solo punto, $(1, 4)$: la soluzione è $x = 1$. Il caso $x \\ge 5$ darebbe $x = -\\frac{5}{3}$, che non è $\\ge 5$ e si scarta."

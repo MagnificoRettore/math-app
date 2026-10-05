@@ -67,7 +67,8 @@
                             "title": "Soluzione generale",
                             "payload": {
                                 "tex": "ax + b = 0 \\quad\\Rightarrow\\quad x = -\\frac{b}{a}",
-                                "fontSizeMultiplier": 1.2
+                                "fontSizeMultiplier": 1.2,
+                                "hidden": false
                             }
                         }
                     ]
@@ -100,7 +101,8 @@
                                         "label": "(2,\\,0)",
                                         "color": "orange"
                                     }
-                                ]
+                                ],
+                                "hidden": false
                             }
                         }
                     ]

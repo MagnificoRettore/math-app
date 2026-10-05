@@ -39,13 +39,13 @@ void main() {
       '"payload":{"source":"assets/images/missing.png"}}';
   const formulaJson =
       '{"id":"f1","box_type":"math_formula","title":"Formula",'
-      '"payload":{"tex":"\\\\frac{a}{b}"}}';
+      '"payload":{"tex":"\\\\frac{a}{b}","hidden":false}}';
   const hiddenFormulaJson =
       '{"id":"f2","box_type":"math_formula","title":"Formula",'
       '"payload":{"tex":"\\\\frac{a}{b}","hidden":true}}';
   const untitledFormulaJson =
       '{"id":"f3","box_type":"math_formula",'
-      '"payload":{"tex":"x + 1"}}';
+      '"payload":{"tex":"x + 1","hidden":false}}';
 
   testWidgets('box immagine mostra il titolo', (tester) async {
     await _pump(tester, imageJson);
@@ -68,6 +68,24 @@ void main() {
     expect(find.byType(AppCard), findsOneWidget);
   });
 
+  testWidgets(
+    'box grafico: di base senza card né titolo, la card con hidden false',
+    (tester) async {
+      const base =
+          '{"id":"g1","box_type":"graph","title":"Il mio grafico","payload":'
+          '{"plane":"cartesian","x":[-2,2],"y":[-2,2],'
+          '"items":[{"type":"function","expr":"x"}]%s}}';
+      await _pump(tester, base.replaceFirst('%s', ''));
+      expect(find.byType(GraphView), findsOneWidget);
+      expect(find.byType(AppCard), findsNothing);
+      expect(find.text('Il mio grafico'), findsNothing);
+
+      await _pump(tester, base.replaceFirst('%s', ',"hidden":false'));
+      expect(find.byType(AppCard), findsOneWidget);
+      expect(find.text('Il mio grafico'), findsOneWidget);
+    },
+  );
+
   testWidgets('box formula hidden mostra formula senza card', (tester) async {
     await _pump(tester, hiddenFormulaJson);
     expect(tester.takeException(), isNull);
@@ -88,16 +106,16 @@ void main() {
 
   const functionGraphJson =
       '{"id":"g1","box_type":"graph","title":"La retta",'
-      '"payload":{"x":[-4,8],"y":[-10,10],'
+      '"payload":{"hidden":false,"x":[-4,8],"y":[-10,10],'
       '"items":[{"type":"function","expr":"2 * x - 4","label":"y = 2x - 4"},'
       '{"type":"point","at":[2,0],"label":"(2, 0)"}]}}';
   const barGraphJson =
       '{"id":"g2","box_type":"graph","title":"Valori assoluti",'
-      '"payload":{"plane":"bars","categories":["-5","0","5"],'
+      '"payload":{"hidden":false,"plane":"bars","categories":["-5","0","5"],'
       '"series":[{"label":"|x|","values":[5,0,5]}]}}';
   const emptyGraphJson =
       '{"id":"g3","box_type":"graph","title":"Vuoto",'
-      '"payload":{"items":[{"type":"sconosciuto"}]}}';
+      '"payload":{"hidden":false,"items":[{"type":"sconosciuto"}]}}';
 
   testWidgets('box graph disegna il piano in card con titolo', (tester) async {
     await _pump(tester, functionGraphJson);
