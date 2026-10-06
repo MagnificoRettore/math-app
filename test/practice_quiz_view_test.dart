@@ -47,6 +47,10 @@ final _oneExercise = _step([
   _exercise(r'$$a + b$$', text: 'Unico esercizio', options: ['Opzione F']),
 ]);
 
+final _oneExercise2 = _step([
+  _exercise(r'$$a + b$$', options: ['Giusta', 'Errata 1', 'Errata 2']),
+]);
+
 List<PracticeExercise> _parse(Map<String, dynamic> stepJson) =>
     LessonStep.fromJson(stepJson).exercises;
 
@@ -283,6 +287,41 @@ void main() {
             .state,
         McqOptionState.idle,
       );
+    });
+  });
+
+  group('esiti per il badge', () {
+    Future<List<(int, bool)>> provaRisposte(
+      WidgetTester tester,
+      List<int> tocchi,
+    ) async {
+      final esiti = <(int, bool)>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: PracticeQuizView(
+              exercises: _parse(_oneExercise2),
+              onAnswered: (exercise, correct) => esiti.add((exercise, correct)),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      for (final i in tocchi) {
+        await tester.tap(find.byKey(ValueKey('quiz_option_$i')));
+        await tester.pump(const Duration(milliseconds: 400));
+      }
+      return esiti;
+    }
+
+    testWidgets('giusta al primo colpo: un esito giusto', (tester) async {
+      expect(await provaRisposte(tester, [0]), [(0, true)]);
+    });
+
+    testWidgets('sbagliata e poi giusta: solo l\'errore, una volta sola', (
+      tester,
+    ) async {
+      expect(await provaRisposte(tester, [1, 2, 0]), [(0, false)]);
     });
   });
 }

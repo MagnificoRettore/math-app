@@ -7,7 +7,7 @@ import '../models/level.dart';
 import '../models/topic.dart';
 import '../models/lesson.dart';
 import '../data/progress_store.dart';
-import '../screens/course_screen.dart';
+import '../data/shell_navigator.dart';
 import '../screens/exercise_feed_screen.dart';
 import '../screens/lesson_screen.dart';
 import '../theme/app_colors.dart';
@@ -18,6 +18,7 @@ import '../widgets/app_card.dart';
 import '../widgets/completed_badge.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/main_header.dart';
+import '../widgets/pill_nav_bar.dart';
 
 /// Elenco delle lezioni di un argomento (capitolo).
 /// Passo intermedio fra il livello anno e il player a passi [LessonScreen].
@@ -88,21 +89,17 @@ class ArgomentoLessonsScreen extends StatelessWidget {
 
   /// Porta alla sezione Esercizi, sull'anno dell'argomento, e apre gli esercizi
   /// del suo topic: da lì il back torna all'elenco dell'anno. La Home resta la
-  /// radice, come per la barra di navigazione.
+  /// radice: si torna a lei e le si chiede di mostrare Esercizi.
   void _openExercises(
     BuildContext context,
     ({Level level, Course course, Topic topic}) target,
   ) {
     final navigator = Navigator.of(context);
-    navigator.pushAndRemoveUntil<void>(
-      MaterialPageRoute(
-        builder: (_) => CourseScreen(
-          level: target.level,
-          showPill: true,
-          initialCourseId: target.course.id,
-        ),
-      ),
-      (route) => route.isFirst,
+    navigator.popUntil((route) => route.isFirst);
+    ShellNavigator.instance.show(
+      PillTab.exercises,
+      levelId: target.level.id,
+      courseId: target.course.id,
     );
     navigator.push<void>(
       MaterialPageRoute(

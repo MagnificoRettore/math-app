@@ -21,6 +21,16 @@ class Argomento {
     required this.lessons,
   });
 
+  /// Quanti esercizi di «Prova tu» ha l'argomento, in tutte le sue lezioni.
+  int get practiceExerciseCount => lessons.fold(
+    0,
+    (sum, lesson) =>
+        sum +
+        lesson.steps
+            .where((step) => step.isPracticeQuiz)
+            .fold(0, (n, step) => n + step.exercises.length),
+  );
+
   factory Argomento.fromJson(Map<String, dynamic> json) {
     return Argomento(
       levelId: json['level'] as String,

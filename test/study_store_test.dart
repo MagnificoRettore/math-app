@@ -35,8 +35,22 @@ void main() {
 
     expect(reached, [false, false, false, false, true]);
     expect(StudyStore.instance.exerciseGoalReached, isTrue);
+  });
+
+  test('esercizi e minuti da soli non fanno avanzare la serie', () async {
+    StudyStore.instance.debugSetNow(day1);
+    await StudyStore.instance.resetForTest();
+
+    await StudyStore.instance.recordExerciseCompleted('ex1');
+    await StudyStore.instance.addMinutes(15);
+
+    expect(StudyStore.instance.currentStreak, 0);
+    expect(StudyStore.instance.activeToday, isFalse);
+
+    await StudyStore.instance.recordLessonCompleted();
+
     expect(StudyStore.instance.currentStreak, 1);
-    expect(StudyStore.instance.bestStreak, 1);
+    expect(StudyStore.instance.activeToday, isTrue);
   });
 
   test('lo stesso esercizio conta una sola volta al giorno', () async {
@@ -55,16 +69,16 @@ void main() {
     () async {
       StudyStore.instance.debugSetNow(day1);
       await StudyStore.instance.resetForTest();
-      await StudyStore.instance.recordExerciseCompleted('ex1');
+      await StudyStore.instance.recordLessonCompleted();
       expect(StudyStore.instance.currentStreak, 1);
 
       StudyStore.instance.debugSetNow(day2);
-      await StudyStore.instance.recordExerciseCompleted('ex2');
+      await StudyStore.instance.recordLessonCompleted();
       expect(StudyStore.instance.currentStreak, 2);
       expect(StudyStore.instance.bestStreak, 2);
 
       StudyStore.instance.debugSetNow(day4);
-      await StudyStore.instance.recordExerciseCompleted('ex3');
+      await StudyStore.instance.recordLessonCompleted();
       expect(StudyStore.instance.currentStreak, 1);
       expect(StudyStore.instance.bestStreak, 2);
     },
@@ -106,6 +120,7 @@ void main() {
       await StudyStore.instance.recordExerciseCompleted('exA');
       await StudyStore.instance.recordExerciseCompleted('exB');
       await StudyStore.instance.addMinutes(10);
+      await StudyStore.instance.recordLessonCompleted();
 
       StudyStore.instance.debugSetNow(day1);
       await StudyStore.instance.resetForTest();

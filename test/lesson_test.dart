@@ -336,6 +336,51 @@ void main() {
     );
   });
 
+  testWidgets(
+    'un drag deciso sulla penultima card arriva all\'ultima senza completarla',
+    (tester) async {
+      // Tre card `info`: l'ultima si completa con lo swipe, quindi è il caso in
+      // cui un gesto iniziato sulla penultima poteva saltarla.
+      final lesson = LessonRepository.instance.argomenti
+          .expand((a) => a.lessons)
+          .firstWhere((l) => l.id == 'ex-arg-geometria');
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: SizedBox())),
+      );
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            MaterialPageRoute(
+              builder: (_) =>
+                  LessonScreen(lesson: lesson, levelId: 'high-school'),
+            ),
+          );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await _swipeNext(tester);
+      expect(find.text('2 di 3'), findsOneWidget);
+
+      // Il dito si muove a scatti piccoli, come davvero: la `PageView` cambia
+      // pagina a metà gesto e il resto dello spostamento arriva già sull'ultima.
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(PageView)),
+      );
+      for (var i = 0; i < 40; i++) {
+        await gesture.moveBy(const Offset(-12, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('3 di 3'), findsOneWidget);
+      expect(find.byType(Lottie), findsNothing);
+      expect(
+        ProgressStore.instance.isLessonCompleted('high-school', lesson.id),
+        isFalse,
+      );
+    },
+  );
+
   testWidgets('lo swipe non completa una verifica non risolta', (tester) async {
     final lesson = await _apriPrimaLezione(tester);
     await _swipeNext(tester);

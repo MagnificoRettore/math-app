@@ -19,10 +19,16 @@ class PracticeQuizView extends StatefulWidget {
   /// Stessa scala di `fontSizeMultiplier` degli altri step.
   final double scale;
 
+  /// Chiamata con l'indice dell'esercizio e l'esito della sua prima risposta:
+  /// `true` se è giusta al primo colpo, `false` al primo errore. Gli errori
+  /// successivi sullo stesso tentativo non la richiamano.
+  final void Function(int exercise, bool correct)? onAnswered;
+
   const PracticeQuizView({
     super.key,
     required this.exercises,
     this.scale = 1.0,
+    this.onAnswered,
   });
 
   /// `true` se c'è più di un esercizio da cui pescare.
@@ -67,12 +73,14 @@ class PracticeQuizViewState extends State<PracticeQuizView> {
     if (_solved || !exercise.hasAnswer) return;
     if (index == exercise.correctIndex) {
       AppHaptics.lightImpact();
+      if (_wrong.isEmpty) widget.onAnswered?.call(_current, true);
       setState(() {
         _selected = index;
         _solved = true;
       });
     } else {
       AppHaptics.heavyImpact();
+      if (_wrong.isEmpty) widget.onAnswered?.call(_current, false);
       setState(() {
         _wrong.add(index);
         _attemptId++;

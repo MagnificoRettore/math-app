@@ -6,6 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 import '../data/auth_store.dart';
 import '../data/progress_store.dart';
+import '../data/study_store.dart';
 import '../haptics.dart';
 import '../models/lesson.dart';
 import '../models/lesson_resume.dart';
@@ -39,8 +40,13 @@ const double _kCardGapBottom = 12;
 const double _kCardPadding = 24;
 
 /// Dal fondo dello schermo al fondo dei bottoni galleggianti: dove stava il
-/// piede della card, cioè i due 12 sotto la card più il suo padding.
-const double _kCardControlsBottom = 2 * _kCardGapBottom + _kCardPadding;
+/// piede della card, cioè i due 12 sotto la card più il suo padding, meno
+/// [_kCardControlsDrop].
+const double _kCardControlsBottom =
+    2 * _kCardGapBottom + _kCardPadding - _kCardControlsDrop;
+
+/// Di quanto i bottoni stanno più in basso del piede della card.
+const double _kCardControlsDrop = 8;
 
 /// Quanto dura la celebrazione a schermo intero: i 71 frame del trofeo a
 /// 30fps durano 2.37s, quindi si chiude poco dopo l'ultimo fotogramma.
@@ -93,6 +99,10 @@ class _LessonScreenState extends State<LessonScreen> {
   final ValueNotifier<double> _swipeProgress = ValueNotifier<double>(0);
   late final Listenable _pageAnimations;
   Offset? _swipeStart;
+
+  /// La card su cui è iniziato il gesto: uno swipe cominciato sulla penultima
+  /// non deve completare la lezione quando la `PageView` arriva all'ultima.
+  int _swipeStartPage = 0;
 
   /// Una chiave per step quiz: il bottone di reload galleggia sopra le card,
   /// fuori dal widget che possiede lo stato degli esercizi.
@@ -190,7 +200,9 @@ class _LessonScreenState extends State<LessonScreen> {
   /// dei gesture, quindi un recognizer esterno non riceverebbe mai il gesto.
   void _trackSwipe(PointerMoveEvent event) {
     final start = _swipeStart;
-    if (start == null || _page != _total - 1) return;
+    if (start == null || _page != _total - 1 || _swipeStartPage != _page) {
+      return;
+    }
     final dx = event.position.dx - start.dx;
     // scorrimento del testo o della card: non è il gesto che completa
     if ((event.position.dy - start.dy).abs() > dx.abs()) return;
@@ -212,6 +224,7 @@ class _LessonScreenState extends State<LessonScreen> {
   Future<void> _complete() async {
     if (_celebrating) return;
     final levelId = widget.levelId;
+    await StudyStore.instance.recordLessonCompleted();
     if (levelId != null &&
         !ProgressStore.instance.isLessonCompleted(levelId, widget.lesson.id)) {
       // Il completamento si registra anche per una scuola in visita: la
@@ -237,6 +250,20 @@ class _LessonScreenState extends State<LessonScreen> {
     _celebrationTimer = null;
     if (!mounted) return;
     Navigator.of(context).pop();
+  }
+
+  /// Registra l'esito di «Prova tu» per il badge dell'argomento. Vale anche per
+  /// una scuola in visita: gli esiti sono per livello come il resto.
+  void _recordQuiz(int step, int exercise, bool correct) {
+    final levelId = widget.levelId;
+    if (levelId == null) return;
+    ProgressStore.instance.recordQuizAnswer(
+      levelId,
+      widget.lesson.id,
+      step: step,
+      exercise: exercise,
+      correct: correct,
+    );
   }
 
   void _resetStep() {
@@ -421,56 +448,42 @@ class _LessonScreenState extends State<LessonScreen> {
     final c = AppColors.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.lesson.title)),
+      // Niente titolo: la barra di avanzamento sta nell'header, a destra della
+      // freccia, e lo spazio guadagnato va alle card.
+      appBar: AppBar(
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: M3EProgressIndicator.linearWavy(
+                  value: (_page + 1) / _total,
+                  color: c.accent,
+                  trackColor: c.border,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${_page + 1} di $_total',
+                style: TextStyle(
+                  fontSize: AppText.label,
+                  color: c.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          '${_page + 1} di $_total',
-                          style: TextStyle(
-                            fontSize: AppText.label,
-                            color: c.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        // Il titolo lungo cede spazio invece di sforare.
-                        Expanded(
-                          child: Text(
-                            widget.lesson.title,
-                            textAlign: TextAlign.end,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: AppText.label,
-                              color: c.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    M3EProgressIndicator.linearWavy(
-                      value: (_page + 1) / _total,
-                      color: c.accent,
-                      trackColor: c.border,
-                    ),
-                  ],
-                ),
-              ),
               Expanded(
                 child: Listener(
                   onPointerDown: (event) {
                     _swipeStart = event.position;
+                    _swipeStartPage = _page;
                     _swipeProgress.value = 0;
                   },
                   onPointerMove: _trackSwipe,
@@ -499,6 +512,8 @@ class _LessonScreenState extends State<LessonScreen> {
                           wrongOptions: _wrongOptions,
                           selectedOption: _selectedOption,
                           onSelectOption: _selectOption,
+                          onQuizAnswered: (exercise, correct) =>
+                              _recordQuiz(index, exercise, correct),
                           practiceQuizKey: step.isPracticeQuiz
                               ? _quizKeys.putIfAbsent(
                                   index,
@@ -625,6 +640,7 @@ class _StepCard extends StatelessWidget {
   final int? selectedOption;
   final ValueChanged<int> onSelectOption;
   final GlobalKey<PracticeQuizViewState>? practiceQuizKey;
+  final void Function(int exercise, bool correct)? onQuizAnswered;
 
   const _StepCard({
     required this.step,
@@ -635,6 +651,7 @@ class _StepCard extends StatelessWidget {
     required this.selectedOption,
     required this.onSelectOption,
     this.practiceQuizKey,
+    this.onQuizAnswered,
   });
 
   @override
@@ -670,6 +687,7 @@ class _StepCard extends StatelessWidget {
                   key: practiceQuizKey,
                   exercises: step.exercises,
                   scale: scale,
+                  onAnswered: onQuizAnswered,
                 )
               else ...[
                 NotesText(step.content, fontScale: scale),

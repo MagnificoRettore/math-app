@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/argomento.dart';
+import '../models/argomento_status.dart';
 import '../models/lesson_resume.dart';
 import '../models/progress.dart';
 import 'auth_store.dart';
@@ -15,9 +16,18 @@ class ProgressStore extends ChangeNotifier {
   static const _progressKey = 'exercise_progress_v1';
   static const _lessonsKey = 'lessons_completed_v1';
   static const _resumeKey = 'lessons_in_progress_v1';
+  static const _quizKey = 'quiz_results_v1';
+
+  /// Quanti esercizi di «Prova tu» giusti al primo colpo superano un argomento
+  /// (meno, se l'argomento ne ha meno).
+  static const quizPassCount = 3;
 
   final Map<String, ExerciseProgress> _progress = {};
   final Set<String> _completedLessons = {};
+
+  /// Gli esiti di «Prova tu» per lezione (`scopedKey`): gli esercizi giusti al
+  /// primo colpo e se almeno uno è stato sbagliato.
+  final Map<String, _QuizRecord> _quizResults = {};
   LessonResume? _resume;
   bool _loaded = false;
   Object? _loadError;
@@ -70,6 +80,15 @@ class ProgressStore extends ChangeNotifier {
           ),
         );
       }
+      final rawQuiz = prefs.getString(_quizKey);
+      if (rawQuiz != null) {
+        final map = jsonDecode(rawQuiz) as Map<String, dynamic>;
+        map.forEach((key, value) {
+          _quizResults[key] = _QuizRecord.fromJson(
+            value as Map<String, dynamic>,
+          );
+        });
+      }
       final rawResume = prefs.getString(_resumeKey);
       if (rawResume != null) {
         _resume = LessonResume.fromJson(
@@ -87,6 +106,7 @@ class ProgressStore extends ChangeNotifier {
     _loaded = false;
     _progress.clear();
     _completedLessons.clear();
+    _quizResults.clear();
     _resume = null;
     await load();
   }
@@ -96,6 +116,7 @@ class ProgressStore extends ChangeNotifier {
     _loaded = false;
     _progress.clear();
     _completedLessons.clear();
+    _quizResults.clear();
     _resume = null;
     _loadError = null;
     await load();
@@ -193,6 +214,63 @@ class ProgressStore extends ChangeNotifier {
         (lesson) => isLessonCompleted(argomento.levelId, lesson.id),
       );
 
+  /// Registra la prima risposta a un esercizio di «Prova tu»: [correct] se è
+  /// giusta al primo colpo, altrimenti è un errore. Gli errori dopo la prima
+  /// risposta sbagliata dello stesso esercizio non si ripetono: lo chiama
+  /// `PracticeQuizView` una volta per tentativo.
+  Future<void> recordQuizAnswer(
+    String levelId,
+    String lessonId, {
+    required int step,
+    required int exercise,
+    required bool correct,
+  }) async {
+    final record = _quizResults.putIfAbsent(
+      scopedKey(levelId, lessonId),
+      _QuizRecord.new,
+    );
+    if (correct) {
+      if (!record.correct.add('$step#$exercise')) return;
+    } else {
+      if (record.failed) return;
+      record.failed = true;
+    }
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _quizKey,
+      jsonEncode(_quizResults.map((k, v) => MapEntry(k, v.toJson()))),
+    );
+  }
+
+  /// Lo stato dell'argomento per il badge. «Superato» è aver risposto giusto
+  /// al primo colpo a 3 esercizi diversi di «Prova tu» (meno se l'argomento ne
+  /// ha meno); senza esercizi basta aver finito le lezioni. «Non superato» è
+  /// un errore nella prova non ancora rimediato.
+  ArgomentoStatus statusOfArgomento(Argomento argomento) {
+    final records = [
+      for (final lesson in argomento.lessons)
+        ?_quizResults[scopedKey(argomento.levelId, lesson.id)],
+    ];
+    final total = argomento.practiceExerciseCount;
+    if (total > 0) {
+      final need = total < quizPassCount ? total : quizPassCount;
+      final correct = records.fold(0, (sum, r) => sum + r.correct.length);
+      if (correct >= need) return ArgomentoStatus.passed;
+      if (records.any((r) => r.failed)) return ArgomentoStatus.failed;
+    } else if (isArgomentoCompleted(argomento)) {
+      return ArgomentoStatus.passed;
+    }
+    final resume = lessonResume;
+    final started =
+        completedLessonCount(argomento) > 0 ||
+        records.isNotEmpty ||
+        (resume != null &&
+            resume.levelId == argomento.levelId &&
+            argomento.lessons.any((l) => l.id == resume.lessonId));
+    return started ? ArgomentoStatus.started : ArgomentoStatus.notStarted;
+  }
+
   Future<void> completeLesson(String levelId, String lessonId) async {
     if (!_completedLessons.add(scopedKey(levelId, lessonId))) return;
     notifyListeners();
@@ -221,4 +299,24 @@ class ProgressStore extends ChangeNotifier {
     final list = _progress.values.map((p) => p.toJson()).toList();
     await prefs.setString(_progressKey, jsonEncode(list));
   }
+}
+
+class _QuizRecord {
+  final Set<String> correct;
+  bool failed;
+
+  _QuizRecord({Set<String>? correct, this.failed = false})
+    : correct = correct ?? {};
+
+  factory _QuizRecord.fromJson(Map<String, dynamic> json) => _QuizRecord(
+    correct: {
+      ...(json['correct'] as List<dynamic>? ?? const []).cast<String>(),
+    },
+    failed: json['failed'] as bool? ?? false,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'correct': correct.toList(),
+    'failed': failed,
+  };
 }

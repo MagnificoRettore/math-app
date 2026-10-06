@@ -9,6 +9,7 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
 import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/exercise_feed_screen.dart';
+import 'package:math_app/screens/home_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/widgets/app_card.dart';
@@ -97,9 +98,7 @@ void main() {
   ) async {
     await ProgressStore.instance.completeLesson('high-school', 'eq1-intro');
     await tester.pumpWidget(
-      const MaterialApp(
-        home: LessonListScreen(levelId: 'high-school', showPill: false),
-      ),
+      const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
     );
     await tester.pumpAndSettle();
 
@@ -114,9 +113,7 @@ void main() {
   ) async {
     Future<void> apri() async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: LessonListScreen(levelId: 'high-school', showPill: false),
-        ),
+        const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
       );
       await tester.pumpAndSettle();
     }
@@ -141,9 +138,7 @@ void main() {
       courseId: corsi[1].id,
     );
     await tester.pumpWidget(
-      const MaterialApp(
-        home: LessonListScreen(levelId: 'high-school', showPill: false),
-      ),
+      const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
     );
     await tester.pumpAndSettle();
 
@@ -231,29 +226,25 @@ void main() {
   group('Vai agli esercizi', () {
     final vai = find.byKey(const Key('vai-agli-esercizi'));
 
-    /// L'argomento aperto da una radice vera: «Vai agli esercizi» azzera lo
-    /// stack tranne la radice.
-    Widget hostArgomento(String titolo) {
+    /// L'argomento aperto sopra la radice vera, la `HomeScreen`: «Vai agli
+    /// esercizi» torna a lei e le chiede di mostrare Esercizi.
+    Future<void> apriArgomento(WidgetTester tester, String titolo) async {
       final argomento = LessonRepository.instance.argomenti.firstWhere(
         (a) => a.title == titolo,
       );
-      return MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => ArgomentoLessonsScreen(
-                    argomento: argomento,
-                    levelId: 'high-school',
-                  ),
-                ),
+      await tester.pumpWidget(const MaterialApp(home: HomeScreen()));
+      await tester.pumpAndSettle();
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            MaterialPageRoute<void>(
+              builder: (_) => ArgomentoLessonsScreen(
+                argomento: argomento,
+                levelId: 'high-school',
               ),
-              child: const Text('radice'),
             ),
-          ),
-        ),
-      );
+          );
+      await tester.pumpAndSettle();
     }
 
     testWidgets('c\'è in basso a destra se l\'argomento ha esercizi', (
@@ -288,9 +279,7 @@ void main() {
     testWidgets('porta agli esercizi di quell\'anno e di quell\'argomento', (
       tester,
     ) async {
-      await tester.pumpWidget(hostArgomento('Equazioni di primo grado'));
-      await tester.tap(find.text('radice'));
-      await tester.pumpAndSettle();
+      await apriArgomento(tester, 'Equazioni di primo grado');
 
       await tester.tap(vai);
       await tester.pumpAndSettle();
@@ -301,14 +290,14 @@ void main() {
         find.byType(CourseScreen, skipOffstage: false),
       );
       expect(corso.initialCourseId, 'year1');
-      expect(corso.showPill, isTrue);
-      expect(find.text('radice', skipOffstage: false), findsOneWidget);
+      expect(corso.embedded, isTrue);
 
       // Il back torna all'elenco dell'anno, non all'argomento.
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.byType(CourseScreen), findsOneWidget);
       expect(find.byType(ArgomentoLessonsScreen), findsNothing);
+      expect(find.byType(ExerciseFeedScreen), findsNothing);
     });
   });
 }

@@ -30,7 +30,8 @@ class StudyStore extends ChangeNotifier {
   int get todayExercises => _todayExercises;
   int get todayMinutes => _todayMinutes;
 
-  /// `true` se oggi si è già fatto qualcosa (un esercizio o dei minuti).
+  /// `true` se oggi si è completata una lezione: è l'unica cosa che fa
+  /// avanzare la serie.
   bool get activeToday => _lastActiveDate == _dateOnly(_dateNow());
 
   /// La serie com'è davvero oggi: se ieri non si è studiato e oggi neanche, la
@@ -98,7 +99,7 @@ class StudyStore extends ChangeNotifier {
 
   Future<bool> recordExerciseCompleted(String exerciseId) async {
     await _ensureLoaded();
-    _recordActivity();
+    _rollover();
     if (_todayExerciseIds.contains(exerciseId)) return false;
     _todayExerciseIds.add(exerciseId);
     final was = exerciseGoalReached;
@@ -109,9 +110,18 @@ class StudyStore extends ChangeNotifier {
     return reached;
   }
 
-  Future<bool> addMinutes(int minutes) async {
+  /// Completare una lezione fa avanzare la serie: esercizi e minuti da soli
+  /// no. Rifare una lezione già fatta vale come completarla.
+  Future<void> recordLessonCompleted() async {
     await _ensureLoaded();
     _recordActivity();
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<bool> addMinutes(int minutes) async {
+    await _ensureLoaded();
+    _rollover();
     final was = minutesGoalReached;
     _todayMinutes += minutes;
     final reached = minutesGoalReached && !was;

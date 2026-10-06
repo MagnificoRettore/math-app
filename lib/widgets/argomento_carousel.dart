@@ -12,7 +12,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import '../theme/topic_style.dart';
 import 'app_card.dart';
-import 'completed_badge.dart';
+import 'argomento_status_badge.dart';
 import 'section_header.dart';
 import 'topic_background.dart';
 
@@ -125,8 +125,9 @@ class _ArgomentoCarouselState extends State<ArgomentoCarousel> {
                 fit: StackFit.expand,
                 children: [
                   TopicBackground(color: color),
-                  if (ProgressStore.instance.isArgomentoCompleted(argomento))
-                    CompletedBadge.corner(),
+                  ArgomentoStatusBadge.corner(
+                    ProgressStore.instance.statusOfArgomento(argomento),
+                  ),
                   Positioned(
                     left: 14,
                     right: 14,

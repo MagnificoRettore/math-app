@@ -575,7 +575,7 @@ void main() {
 
       expect(fiamma(), isNot(AppPalette.light.orange));
 
-      await StudyStore.instance.addMinutes(1);
+      await StudyStore.instance.recordLessonCompleted();
       await tester.pumpAndSettle();
       expect(fiamma(), AppPalette.light.orange);
       expect(
@@ -591,7 +591,7 @@ void main() {
       tester,
     ) async {
       await _registra();
-      await StudyStore.instance.addMinutes(1);
+      await StudyStore.instance.recordLessonCompleted();
       await _pumpHome(tester);
 
       await tester.tap(find.byKey(const Key('header-streak')));
