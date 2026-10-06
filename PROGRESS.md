@@ -4,6 +4,17 @@ Changelog e roadmap del progetto.
 
 Stato della suite: **570 test in 47 file**, tutti verdi. I conteggi sparati nelle voci sotto sono lo snapshot del momento in cui quella voce è stata scritta e non vanno aggiornati a mano.
 
+## 2026-10-06 — Correzioni da `future_improvement.md`
+
+- **Serie**: avanza solo se si completa una lezione (`StudyStore.recordLessonCompleted`); esercizi e minuti contano ancora ma non la fanno avanzare.
+- **Stato dell'argomento** (`ArgomentoStatus`, `ProgressStore.statusOfArgomento`, `quiz_results_v1`): non iniziato, iniziato, non superato, superato. Si supera rispondendo giusto al primo colpo a 3 esercizi **diversi** di «Prova tu» (meno se l'argomento ne ha meno; non servono di fila); un errore dà «non superato» finché non si arriva a 3. Senza «Prova tu» (Equazioni di primo grado, Esempio) basta aver finito le lezioni. `PracticeQuizView.onAnswered`.
+- **Swipe di completamento**: un drag cominciato sulla penultima card non completa più la lezione quando la `PageView` arriva all'ultima (`_swipeStartPage`).
+- **Header della lezione** con la barra di avanzamento al posto del titolo; **bottoni** della lezione 8 px più in basso; **ricerca** con icona di tipo; **altre scuole** con l'iniziale in pedice (il nome in header mandava la riga in overflow) e foglio senza sottotitoli; **filtri e lente** che si riducono invece di scorrere.
+- **Icona dell'app** su Android (anche adattiva), iOS (senza alpha) e macOS: `flutter test tool/generate_app_icons_test.dart` la rigenera dalla «π» del web. Non provata su un dispositivo (qui c'è solo il web); Windows e Linux restano con quella di Flutter.
+- **Swipe fra le pagine principali con header e barra fermi**: `HomeScreen` è ora la radice con un `PageView` (Lezioni · Home · Esercizi); `PillNavBar` non naviga più (`onSelect`), via `PillNavOverlay` e le rotte `_slideRoute`/`_resetTo`. `LessonListScreen`/`CourseScreen` hanno `embedded`; `ShellNavigator` per «Vai agli esercizi»; back di sistema da Lezioni/Esercizi a Home. L'ospite sceglie la scuola una volta per pagina. `pill_navigation_test.dart` riscritto (+ header/barra fermi, evidenziato a metà strada, foglio allo swipe).
+- Non fatti: timer di studio (rimandato), giochi con classifica (rimandati), verifica personalizzata e formulario (ancora da fare), moltiplicatore del diagramma e swipe coi grafici interattivi (valutati, vedi la risposta).
+- Il test «Esercizio del giorno «Provalo» apre l'esercizio» fallisce già prima di queste modifiche: una formula dell'esercizio del giorno va in overflow di 72 px a 320.
+
 ## 2026-10-05 — Lezioni ed Esercizi, nuova impaginazione
 
 - **Impaginazione da un riferimento** (solo il layout, non il design): menu a tendina dell'anno al posto degli `YearTabs`, filtri «Tutti» / «In corso» (iniziati e non finiti), card «Riprendi da dove eri rimasto» e griglia a due colonne con «N lezioni · P%». Widget nuovi: `ListFilterBar`, `ResumeCard`, `TopicGrid`.

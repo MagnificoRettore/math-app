@@ -169,6 +169,9 @@ Da 10 px in su: fondo `yellowSoft`, bordo `yellowDeep`, riempimento giallo a str
 ### Segno «completata» — `CompletedBadge` (`lib/widgets/completed_badge.dart`)
 Una spunta bianca in un tondino `easy` da 26, con il bordo bianco da 2 perché si legga anche sui fondi colorati. Sta **nell'angolo in alto a destra**, a 10 dai bordi, di ogni card completata: gli argomenti nella pagina Lezioni e nel carosello della Home (completato = tutte le sue lezioni) e le lezioni nella pagina dell'argomento. La freccia a destra resta. Allo screen reader dice «Completata».
 
+### Stato dell'argomento — `ArgomentoStatusBadge` (`lib/widgets/argomento_status_badge.dart`)
+Nelle card degli argomenti (Lezioni e carosello della Home) il tondino da 26 ha **quattro stati**, ognuno con la sua icona: non iniziato (cerchio vuoto grigio su bianco), iniziato (clessidra, tondo `yellow`), non superato (croce bianca su `hard`), superato (la spunta verde di `CompletedBadge`). Sta sempre nell'angolo in alto a destra, a 10 dai bordi, dentro un `Positioned`: non entra nel layout e la card non cambia dimensione con lo stato. Le lezioni nella pagina dell'argomento hanno ancora il solo segno «completata».
+
 ### Badge
 Pillola gialla con l'inchiostro Medium 500. I badge di stato e di tipo usano il colore del ruolo su un fondo dello stesso colore al 12–14%.
 
@@ -301,6 +304,9 @@ Una riga per ogni modifica al design, la più recente in alto.
 
 | Data | Modifica |
 |---|---|
+| 2026-10-06 | Lo swipe fra Lezioni, Home ed Esercizi fa scorrere il solo contenuto: header e barra di navigazione restano fermi e l'evidenziato della barra segue la pagina in vista; sparisce la dissolvenza-scorrimento dell'intera pagina. |
+| 2026-10-06 | Icona dell'app anche su Android (mipmap e icona adattiva), iOS (quadrati senza alpha) e macOS: la stessa «π» del web, generata da `tool/generate_app_icons_test.dart`. |
+| 2026-10-06 | Badge dell'argomento a quattro stati (non iniziato, iniziato, non superato, superato) con un'icona ciascuno, dentro la card e senza ridimensionarla. Header della lezione: via il titolo, la barra di avanzamento sta a destra della freccia con il contatore «n di N». Ricerca: il tipo del risultato è un'icona a sinistra (quadrato per l'argomento, cerchio per la lezione), non più la pillola con la scritta. Altre scuole: stessa icona del cappello con l'iniziale (M, S, U) in pedice, senza il nome; il foglio non ha più i sottotitoli degli anni. Filtri e lente: le pillole si rimpiccioliscono invece di scorrere. Bottoni della lezione 8 px più in basso. |
 | 2026-10-05 | Bordino lilla da 2 (`border`) su tutte le card (`AppCard.bordered`), tranne quelle dentro le lezioni (la card della lezione e i riquadri formula/grafico/immagine). |
 | 2026-10-05 | Home rifatta: card grande «Continua» (play indaco, titolo, barra con la percentuale), card media «Esercizio del giorno» (difficoltà e «Provalo» giallo), «Il tuo percorso» (le card colorate con la barra bianca `x/y`) e «Lo sapevi?». Via la missione. |
 | 2026-10-05 | Punti trascinabili: attorno al punto un anello da 26 (34 mentre lo si trascina) del colore del punto, con un'area di tocco da 48. |
