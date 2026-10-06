@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
 import 'app_card.dart';
+import '../models/argomento_status.dart';
+import 'argomento_status_badge.dart';
 import 'completed_badge.dart';
 
 /// Una voce della griglia di Lezioni ed Esercizi.
@@ -15,6 +17,10 @@ class TopicGridEntry {
   /// La riga sotto il titolo: «8 lezioni · 100%».
   final String caption;
   final bool completed;
+
+  /// Lo stato dell'argomento: se c'è, il badge è quello a quattro stati e
+  /// [completed] non conta.
+  final ArgomentoStatus? status;
   final VoidCallback onTap;
 
   const TopicGridEntry({
@@ -25,6 +31,7 @@ class TopicGridEntry {
     required this.caption,
     required this.onTap,
     this.completed = false,
+    this.status,
   });
 }
 
@@ -101,8 +108,13 @@ class _Tile extends StatelessWidget {
         ],
       ),
     );
+    // Il badge nell'angolo in alto a destra, sopra la card: non entra nel
+    // layout, quindi la card non cambia dimensione.
+    final status = entry.status;
+    if (status != null) {
+      return Stack(children: [card, ArgomentoStatusBadge.corner(status)]);
+    }
     if (!entry.completed) return card;
-    // Il segno «completata» nell'angolo in alto a destra, sopra la card.
     return Stack(children: [card, CompletedBadge.corner()]);
   }
 }

@@ -22,9 +22,7 @@ void main() {
 
   Future<void> pumpLezioni(WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: LessonListScreen(levelId: 'high-school', showPill: false),
-      ),
+      const MaterialApp(home: LessonListScreen(levelId: 'high-school')),
     );
     await tester.pumpAndSettle();
   }
@@ -44,6 +42,35 @@ void main() {
     await tester.tap(find.byKey(const Key('filter-in-progress')));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('schermo stretto e testo grande: filtri e lente ci stanno', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.6)),
+          child: child!,
+        ),
+        home: const LessonListScreen(levelId: 'high-school'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final lente = tester.getRect(find.byKey(const Key('header-search')));
+    expect(lente.right, lessThanOrEqualTo(320));
+    // Le pillole si riducono invece di scorrere: l'ultima finisce prima della
+    // lente e non si sovrappongono.
+    final inCorso = tester.getRect(find.byKey(const Key('filter-in-progress')));
+    expect(inCorso.right, lessThanOrEqualTo(lente.left));
+    expect(find.byType(SingleChildScrollView), findsNothing);
+  });
 
   group('Lezioni', () {
     testWidgets('gli argomenti sono una griglia a due colonne', (tester) async {

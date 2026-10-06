@@ -7,11 +7,13 @@ import '../haptics.dart';
 import '../screens/customization_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'pill_nav_bar.dart';
 import 'profile_button.dart';
 import 'profile_summary.dart';
 import 'reveal.dart';
 import 'school_choice_sheet.dart';
 import 'search_overlay.dart';
+import 'streak_chip.dart';
 
 /// Margine laterale della riga dell'header: 30px a sinistra, il lato destro lo
 /// dà `actionsPadding`. Un solo numero per i tre header principali.
@@ -187,17 +189,12 @@ class HeaderCustomizationButton extends StatelessWidget {
 /// Sta solo dove c'è un profilo. L'ospite ha già il foglio dalla pillola, con
 /// un altro testo, quindi qui non aggiungerebbe niente.
 ///
-/// Se si guarda una scuola diversa da quella del profilo, l'icona cambia e
-/// compare il nome: senza, la pagina sembrerebbe quella di sempre e i progressi
-/// mostrati sarebbero quelli di un'altra scuola senza che lo si dica. Icona e
-/// nome sono bianchi come tutto il resto dell'header, perché stanno sulla banda
-/// indaco: in `accent` sull'indaco non si leggerebbero.
-///
-/// Il `Flexible` sta in cima, non attorno al nome: le `actions` dell'AppBar sono
-/// una `Row` che dà larghezza illimitata ai figli, quindi è la riga dei bottoni
-/// a dover cedere spazio, e solo lei può farlo. Serve quando la pagina porta
-/// tre icone più il nome della scuola in visita: su un telefono stretto, senza,
-/// la `Row` sborda a destra invece di troncare il nome.
+/// Se si guarda una scuola diversa da quella del profilo, l'icona resta la
+/// stessa e prende in pedice l'iniziale della scuola (M, S, U): senza, la
+/// pagina sembrerebbe quella di sempre e i progressi mostrati sarebbero quelli
+/// di un'altra scuola senza che lo si dica. Il nome per esteso non c'è più,
+/// perché con tre icone mandava la riga in overflow: l'icona ha sempre la
+/// stessa larghezza.
 class SchoolBrowseButton extends StatelessWidget {
   final SchoolChoiceDestination destination;
 
@@ -205,54 +202,59 @@ class SchoolBrowseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: ListenableBuilder(
-        listenable: Listenable.merge([
-          AuthStore.instance,
-          BrowseStore.instance,
-        ]),
-        builder: (context, _) {
-          if (AuthStore.instance.currentUser == null) {
-            return const SizedBox.shrink();
-          }
-          final other = BrowseStore.instance.isBrowsingOtherSchool;
-          final title =
-              ContentRepository.instance
-                  .levelById(BrowseStore.instance.levelId ?? '')
-                  ?.title ??
-              '';
+    return ListenableBuilder(
+      listenable: Listenable.merge([AuthStore.instance, BrowseStore.instance]),
+      builder: (context, _) {
+        if (AuthStore.instance.currentUser == null) {
+          return const SizedBox.shrink();
+        }
+        final other = BrowseStore.instance.isBrowsingOtherSchool;
+        final title =
+            ContentRepository.instance
+                .levelById(BrowseStore.instance.levelId ?? '')
+                ?.title ??
+            '';
+        final c = AppColors.of(context);
+        final initial = other ? schoolInitial(title) : '';
 
-          return Row(
-            mainAxisSize: MainAxisSize.min,
+        return IconButton(
+          key: const Key('header-school-browse'),
+          icon: Stack(
+            clipBehavior: Clip.none,
             children: [
-              IconButton(
-                key: const Key('header-school-browse'),
-                icon: Icon(
-                  other ? Icons.visibility_outlined : Icons.school_outlined,
-                  color: AppColors.of(context).textPrimary,
-                ),
-                tooltip: other ? 'Guardi $title' : 'Altre scuole',
-                onPressed: () => _pick(context),
-              ),
-              if (other && title.isNotEmpty) ...[
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: AppText.label,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.of(context).textPrimary,
+              Icon(Icons.school_outlined, color: c.textPrimary),
+              if (initial.isNotEmpty)
+                Positioned(
+                  right: -5,
+                  bottom: -5,
+                  child: Container(
+                    key: const Key('school-browse-initial'),
+                    width: 14,
+                    height: 14,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: c.accent,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.background, width: 1.5),
+                    ),
+                    child: Text(
+                      initial,
+                      style: TextStyle(
+                        fontFamily: AppText.bodyFont,
+                        fontSize: 9,
+                        height: 1,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ],
             ],
-          );
-        },
-      ),
+          ),
+          tooltip: other ? 'Guardi $title' : 'Altre scuole',
+          onPressed: () => _pick(context),
+        );
+      },
     );
   }
 
@@ -275,4 +277,41 @@ class SchoolBrowseButton extends StatelessWidget {
       BrowseStore.instance.browse(chosen.id);
     }
   }
+}
+
+/// L'iniziale della scuola dal suo titolo: l'ultima parola, quindi «Scuola
+/// Media» è M, «Scuola Superiore» S e «Università» U.
+@visibleForTesting
+String schoolInitial(String title) {
+  final words = title.trim().split(RegExp(r'\s+'));
+  final last = words.last;
+  return last.isEmpty ? '' : last[0].toUpperCase();
+}
+
+/// L'header di una delle tre pagine principali: la stessa banda, con le azioni
+/// di quella pagina. Lezioni ed Esercizi hanno anche le altre scuole, e il loro
+/// titolo dice il livello che mostrano ([levelId]); la Home no.
+MainHeaderAppBar mainHeaderFor(PillTab tab, {String? levelId}) {
+  return switch (tab) {
+    PillTab.home => const MainHeaderAppBar(
+      title: MainHeaderTitle(),
+      actions: [HeaderStreakChip(), HeaderCustomizationButton()],
+    ),
+    PillTab.lessons => MainHeaderAppBar(
+      title: MainHeaderTitle(levelId: levelId),
+      actions: const [
+        SchoolBrowseButton(destination: SchoolChoiceDestination.lessons),
+        HeaderStreakChip(),
+        HeaderCustomizationButton(),
+      ],
+    ),
+    PillTab.exercises => MainHeaderAppBar(
+      title: MainHeaderTitle(levelId: levelId),
+      actions: const [
+        SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
+        HeaderStreakChip(),
+        HeaderCustomizationButton(),
+      ],
+    ),
+  };
 }

@@ -15,8 +15,6 @@ import '../widgets/pill_nav_bar.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/list_filter_bar.dart';
 import '../widgets/resume_card.dart';
-import '../widgets/school_choice_sheet.dart';
-import '../widgets/streak_chip.dart';
 import '../widgets/section_header.dart';
 import '../widgets/topic_grid.dart';
 import 'exercise_feed_screen.dart';
@@ -24,7 +22,11 @@ import 'year_exercises_screen.dart';
 
 class CourseScreen extends StatefulWidget {
   final Level level;
-  final bool showPill;
+
+  /// `true` dentro la `HomeScreen`: solo il contenuto, perché header e barra
+  /// sono suoi e restano fermi mentre le pagine scorrono. `false` è una pagina
+  /// a sé, con il suo header.
+  final bool embedded;
 
   /// L'anno (`Course.id`) con cui aprire la pagina; senza, quello scelto alla
   /// registrazione o il primo.
@@ -33,7 +35,7 @@ class CourseScreen extends StatefulWidget {
   const CourseScreen({
     super.key,
     required this.level,
-    this.showPill = false,
+    this.embedded = false,
     this.initialCourseId,
   });
 
@@ -87,6 +89,16 @@ class _CourseScreenState extends State<CourseScreen> {
   }
 
   @override
+  void didUpdateWidget(CourseScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Un'altra pagina chiede un anno preciso (da un argomento): ci si porta.
+    final id = widget.initialCourseId;
+    if (id == null || id == oldWidget.initialCourseId) return;
+    final index = _level.courses.indexWhere((course) => course.id == id);
+    if (index >= 0) setState(() => _selectedIndex = index);
+  }
+
+  @override
   void dispose() {
     BrowseStore.instance.removeListener(_onBrowseChanged);
     AuthStore.instance.removeListener(_onProfileChanged);
@@ -125,16 +137,11 @@ class _CourseScreenState extends State<CourseScreen> {
     final level = _level;
     final courses = level.courses;
 
+    final pages = _buildPages(level, courses);
+    if (widget.embedded) return pages;
     return Scaffold(
-      appBar: MainHeaderAppBar(
-        title: MainHeaderTitle(levelId: level.id),
-        actions: const [
-          SchoolBrowseButton(destination: SchoolChoiceDestination.exercises),
-          HeaderStreakChip(),
-          HeaderCustomizationButton(),
-        ],
-      ),
-      body: _buildPages(level, courses),
+      appBar: mainHeaderFor(PillTab.exercises, levelId: level.id),
+      body: SafeArea(child: pages),
     );
   }
 
@@ -143,7 +150,7 @@ class _CourseScreenState extends State<CourseScreen> {
     // L'anno si cambia dal menu in cima: lo swipe orizzontale è della
     // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
     final course = courses[_selectedIndex.clamp(0, courses.length - 1)];
-    final page = Column(
+    return Column(
       children: [
         ListFilterBar(
           courses: courses,
@@ -162,8 +169,6 @@ class _CourseScreenState extends State<CourseScreen> {
         ),
       ],
     );
-    if (!widget.showPill) return SafeArea(child: page);
-    return PillNavOverlay(selected: PillTab.exercises, child: page);
   }
 }
 

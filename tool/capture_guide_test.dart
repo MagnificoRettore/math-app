@@ -20,9 +20,7 @@ import 'package:math_app/data/progress_store.dart';
 import 'package:math_app/data/search_index.dart';
 import 'package:math_app/data/study_store.dart';
 import 'package:math_app/screens/argomento_lessons_screen.dart';
-import 'package:math_app/screens/course_screen.dart';
 import 'package:math_app/screens/home_screen.dart';
-import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/lesson_screen.dart';
 import 'package:math_app/theme/app_theme.dart';
 
@@ -62,7 +60,14 @@ void main() {
     );
   });
 
-  Future<void> shot(WidgetTester tester, String name, Widget screen) async {
+  /// [pill] è il tab da toccare nella barra prima dello scatto: Lezioni ed
+  /// Esercizi stanno dentro la `HomeScreen`.
+  Future<void> shot(
+    WidgetTester tester,
+    String name,
+    Widget screen, {
+    String? pill,
+  }) async {
     tester.view
       ..physicalSize = const Size(780, 1688)
       ..devicePixelRatio = 2;
@@ -78,6 +83,10 @@ void main() {
       ),
     );
     await tester.pump();
+    if (pill != null) {
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.byKey(ValueKey(pill)));
+    }
     for (var i = 0; i < 20; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -96,14 +105,9 @@ void main() {
     final argomento = LessonRepository.instance.argomenti.firstWhere(
       (a) => a.title == 'Equazioni di primo grado',
     );
-    final level = ContentRepository.instance.levelById('high-school')!;
 
     await shot(tester, 'home', const HomeScreen());
-    await shot(
-      tester,
-      'argomenti',
-      const LessonListScreen(levelId: 'high-school', showPill: true),
-    );
+    await shot(tester, 'argomenti', const HomeScreen(), pill: 'pill-lessons');
     await ProgressStore.instance.completeLesson(
       'high-school',
       argomento.lessons.first.id,
@@ -118,6 +122,6 @@ void main() {
       'lezione',
       LessonScreen(lesson: argomento.lessons.first, levelId: 'high-school'),
     );
-    await shot(tester, 'esercizi', CourseScreen(level: level, showPill: true));
+    await shot(tester, 'esercizi', const HomeScreen(), pill: 'pill-exercises');
   });
 }

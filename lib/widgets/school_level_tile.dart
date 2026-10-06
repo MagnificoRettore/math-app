@@ -10,11 +10,16 @@ class SchoolLevelTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  /// La riga sotto il titolo («Anni 1–3»): il foglio di scelta la toglie per
+  /// stare tutto in una pagina.
+  final bool showSubtitle;
+
   const SchoolLevelTile({
     super.key,
     required this.level,
     required this.selected,
     required this.onTap,
+    this.showSubtitle = true,
   });
 
   @override
@@ -50,7 +55,7 @@ class SchoolLevelTile extends StatelessWidget {
                     color: c.textPrimary,
                   ),
                 ),
-                if (level.subtitle.isNotEmpty) ...[
+                if (showSubtitle && level.subtitle.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     level.subtitle,

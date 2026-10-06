@@ -13,6 +13,7 @@ import 'package:math_app/screens/login_screen.dart';
 import 'package:math_app/screens/lesson_list_screen.dart';
 import 'package:math_app/screens/profile_screen.dart';
 import 'package:math_app/theme/app_colors.dart';
+import 'package:math_app/widgets/home_continue_card.dart';
 import 'package:math_app/widgets/pill_nav_bar.dart';
 
 Future<void> _prepare() async {
@@ -58,9 +59,6 @@ String? _attiva(WidgetTester tester, [Finder? pill]) {
   expect(accese, hasLength(1));
   return accese.single;
 }
-
-Finder _pillIn(Finder screen) =>
-    find.descendant(of: screen, matching: find.byType(PillNavBar));
 
 /// Registra gli eventi di navigazione: serve a distinguere un ritorno
 /// animato alla home (`didPop`) dalla sostituzione atomica dello stack
@@ -169,7 +167,7 @@ void main() {
   );
 
   testWidgets(
-    'ospite: ESERCIZI da una pagina di profondità non torna alla home',
+    'ospite: ESERCIZI dopo LEZIONI chiede ancora la scuola, e le lezioni restano',
     (tester) async {
       await _pumpHome(tester);
 
@@ -184,7 +182,6 @@ void main() {
 
       expect(find.text('Esercizi per scuola'), findsOneWidget);
       expect(find.byType(LessonListScreen), findsOneWidget);
-      expect(find.byType(HomeScreen), findsNothing);
     },
   );
 
@@ -213,9 +210,7 @@ void main() {
     expect(find.byType(ProfileScreen), findsNothing);
   });
 
-  testWidgets('loggato: cambiare sezione non torna animando alla home', (
-    tester,
-  ) async {
+  testWidgets('loggato: cambiare sezione non tocca le rotte', (tester) async {
     final rec = _NavRecorder();
     await AuthStore.instance.registerManual(
       name: 'Anna',
@@ -227,39 +222,33 @@ void main() {
       MaterialApp(navigatorObservers: [rec], home: const HomeScreen()),
     );
     await tester.pumpAndSettle();
+    rec.events.clear();
 
     await tester.tap(find.byKey(const ValueKey('pill-lessons')));
     await tester.pumpAndSettle();
     expect(find.byType(LessonListScreen), findsOneWidget);
+    expect(_attiva(tester), 'Lezioni');
 
-    rec.events.clear();
     await tester.tap(find.byKey(const ValueKey('pill-exercises')));
     await tester.pumpAndSettle();
-
-    // La sezione nuova prende il posto delle precedenti in un colpo solo:
-    // nessun ritorno alla home nel mezzo, altrimenti la home lampeggerebbe.
-    expect(rec.events, contains('remove'));
-    expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(CourseScreen), findsOneWidget);
-    expect(find.byType(LessonListScreen), findsNothing);
-    // la home resta la radice dello stack ma non è dipinta
-    expect(find.byType(HomeScreen), findsNothing);
+    expect(_attiva(tester), 'Esercizi');
+
+    // Le pagine scorrono dentro la radice: nessuna rotta spinta o tolta.
+    expect(rec.events, isEmpty);
 
     // il profilo è una sotto-pagina spinta sopra la sezione corrente
-    rec.events.clear();
     await tester.tap(find.byKey(const Key('home-profile-avatar')));
     await tester.pumpAndSettle();
-    expect(rec.events.where((e) => e == 'pop'), isEmpty);
     expect(find.byType(ProfileScreen), findsOneWidget);
-    expect(find.byType(CourseScreen), findsNothing);
 
     await _systemBack(tester);
-    expect(find.byType(CourseScreen), findsOneWidget);
-    expect(find.byType(HomeScreen), findsNothing);
+    expect(find.byType(ProfileScreen), findsNothing);
+    expect(_attiva(tester), 'Esercizi');
 
     await tester.tap(find.byKey(const ValueKey('pill-home')));
     await tester.pumpAndSettle();
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(_attiva(tester), 'Home');
   });
 
   testWidgets('ospite: la scelta della scuola non torna animando alla home', (
@@ -291,33 +280,28 @@ void main() {
     expect(find.byType(LessonListScreen), findsNothing);
   });
 
-  testWidgets('la pillola resta su HOME durante il ritorno animato', (
+  testWidgets('toccando Home la barra è subito su Home, senza tappe', (
     tester,
   ) async {
+    await AuthStore.instance.registerManual(
+      name: 'Anna',
+      email: 'anna@example.com',
+      password: 'segreta1',
+      schoolLevelId: 'high-school',
+    );
     await _pumpHome(tester);
+    await tester.tap(find.byKey(const ValueKey('pill-exercises')));
+    await tester.pumpAndSettle();
+    expect(_attiva(tester), 'Esercizi');
+
     await tester.tap(find.byKey(const ValueKey('pill-lessons')));
+    // Da Esercizi a Lezioni la pagina passa da Home: la barra non ci si ferma.
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(_attiva(tester), 'Lezioni');
+    }
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Scuola Media').last);
-    await tester.pumpAndSettle();
-    expect(find.byType(LessonListScreen), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('pill-home')));
-    // Il pop tiene le lezioni in vista per altri 220ms: i pump campano dentro
-    // il ritorno.
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 60));
-    await tester.pump(const Duration(milliseconds: 60));
-
-    // Le lezioni sono ancora in vista, ma la barra deve essere già su Home:
-    // tornare indietro su Lezioni per un istante è il difetto. La barra va
-    // cercata dentro le lezioni: durante il pop anche quella della home è in
-    // albero.
-    expect(find.byType(LessonListScreen), findsOneWidget);
-    expect(_attiva(tester, _pillIn(find.byType(LessonListScreen))), 'Home');
-
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeScreen), findsOneWidget);
-    expect(_attiva(tester), 'Home');
+    expect(_attiva(tester), 'Lezioni');
   });
 
   testWidgets('ospite: la pillola resta su LEZIONI col foglio scuola aperto', (
@@ -515,7 +499,7 @@ void main() {
       // In alto, sopra le liste orizzontali (il carosello della Home vincerebbe
       // l'arena e scorrerebbe da sé).
       await tester.flingFrom(
-        tester.getTopLeft(find.byKey(const Key('pill-swipe'))) +
+        tester.getTopLeft(find.byKey(const Key('main-pages'))) +
             const Offset(200, 20),
         Offset(verso ? -300 : 300, 0),
         1000,
@@ -548,8 +532,7 @@ void main() {
       expect(find.byType(LessonListScreen), findsOneWidget);
 
       await swipe(tester, verso: true);
-      expect(find.byType(HomeScreen), findsOneWidget);
-      expect(find.byType(LessonListScreen), findsNothing);
+      expect(_attiva(tester), 'Home');
     });
 
     testWidgets('da Esercizi: verso destra torna alla Home', (tester) async {
@@ -559,7 +542,7 @@ void main() {
       expect(find.byType(CourseScreen), findsOneWidget);
 
       await swipe(tester, verso: false);
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(_attiva(tester), 'Home');
     });
 
     testWidgets('trascinare il carosello degli argomenti scorre e basta', (
@@ -574,7 +557,7 @@ void main() {
       final lista = find.byKey(const Key('argomento-carousel-list'));
       await tester.fling(lista, const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
-      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(_attiva(tester), 'Home');
       expect(find.byType(CourseScreen), findsNothing);
     });
 
@@ -591,7 +574,74 @@ void main() {
       await _pumpHome(tester);
       await tester.tap(find.byKey(const ValueKey('pill-lessons')));
       await tester.pumpAndSettle();
-      expect(find.byType(PageView), findsNothing);
+      // Il solo `PageView` è quello delle pagine principali.
+      expect(find.byType(PageView), findsOneWidget);
+    });
+
+    testWidgets('header e barra restano fermi mentre le pagine scorrono', (
+      tester,
+    ) async {
+      await registra();
+      await _pumpHome(tester);
+      final header = tester.getRect(find.byKey(const Key('header-identity')));
+      final barra = tester.getRect(_pillSurface());
+      final contenuto = tester.getTopLeft(find.byType(HomeContinueCard));
+
+      final dito = await tester.startGesture(
+        tester.getTopLeft(find.byKey(const Key('main-pages'))) +
+            const Offset(300, 20),
+      );
+      for (var i = 0; i < 10; i++) {
+        await dito.moveBy(const Offset(-12, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+
+      // Il contenuto si è mosso, header e barra no.
+      expect(
+        tester.getTopLeft(find.byType(HomeContinueCard)).dx,
+        lessThan(contenuto.dx),
+      );
+      expect(tester.getRect(find.byKey(const Key('header-identity'))), header);
+      expect(tester.getRect(_pillSurface()), barra);
+
+      await dito.up();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('l\'evidenziato della barra segue la pagina a metà strada', (
+      tester,
+    ) async {
+      await registra();
+      await _pumpHome(tester);
+      expect(_attiva(tester), 'Home');
+
+      final dito = await tester.startGesture(
+        tester.getTopLeft(find.byKey(const Key('main-pages'))) +
+            const Offset(300, 20),
+      );
+      for (var i = 0; i < 40; i++) {
+        await dito.moveBy(const Offset(-12, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      // Oltre metà schermo: la pagina in vista è Esercizi.
+      expect(_attiva(tester), 'Esercizi');
+      await dito.up();
+      await tester.pumpAndSettle();
+      expect(_attiva(tester), 'Esercizi');
+    });
+
+    testWidgets('ospite: swipe su una pagina senza scuola apre il foglio', (
+      tester,
+    ) async {
+      await _pumpHome(tester);
+
+      await swipe(tester, verso: false);
+      expect(find.text('Lezioni per scuola'), findsOneWidget);
+
+      // Annullato, si torna a Home.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(_attiva(tester), 'Home');
     });
   });
 }

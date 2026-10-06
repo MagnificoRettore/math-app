@@ -173,16 +173,26 @@ void main() {
     expect(find.text('Altre scuole, esercizi'), findsOneWidget);
   });
 
-  testWidgets('la scuola in visita è scritta nell\'header', (tester) async {
+  testWidgets('la scuola in visita è l\'icona con l\'iniziale in pedice', (
+    tester,
+  ) async {
     await _registra(school: 'high-school');
     await _pumpHome(tester);
     await _vaiAllezioni(tester);
-    expect(_titoloNelBottone('Scuola Media'), findsNothing);
+    expect(find.byKey(const Key('school-browse-initial')), findsNothing);
 
     await _scegliScuola(tester, 'Scuola Media');
 
-    expect(_titoloNelBottone('Scuola Media'), findsOneWidget);
-    expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+    // Stessa icona di prima, con la «M» in pedice e senza il nome.
+    expect(find.byIcon(Icons.school_outlined), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('school-browse-initial')),
+        matching: find.text('M'),
+      ),
+      findsOneWidget,
+    );
+    expect(_titoloNelBottone('Scuola Media'), findsNothing);
     // E la pilla dice la stessa scuola: nome e titolo non si contraddicono.
     final scuola = tester.widget<Text>(find.byKey(const Key('header-school')));
     expect(scuola.data, 'Scuola Media');
@@ -191,9 +201,8 @@ void main() {
   testWidgets('schermo stretto: scuola in visita e icone ci stanno tutte', (
     tester,
   ) async {
-    // L'header in visita tiene tre icone più il nome della scuola: è la riga
-    // più affollata dell'app, e su un telefono stretto il nome è la parte che
-    // deve cedere, non le icone.
+    // L'header in visita tiene tre icone: l'iniziale in pedice non allarga la
+    // riga, quindi niente overflow nemmeno su un telefono stretto.
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -205,9 +214,13 @@ void main() {
     await _scegliScuola(tester, 'Scuola Superiore');
 
     expect(tester.takeException(), isNull);
-    // Le tre icone ci sono tutte e restano dentro schermo: l'AppBar mette le
-    // `actions` in una riga che non tronca, quindi una fourth icona
-    // semplicemente uscirebbe dal bordo.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('school-browse-initial')),
+        matching: find.text('S'),
+      ),
+      findsOneWidget,
+    );
     for (final chiave in const [
       Key('header-school-browse'),
       Key('header-search'),
@@ -220,14 +233,32 @@ void main() {
         reason: '$chiave esce da schermo',
       );
     }
-    // Il nome della scuola si tronca invece di spingere fuori le icone, e non
-    // va a capo perché l'header è alto 80.
-    final nome = tester.getRect(_titoloNelBottone('Scuola Superiore'));
-    final personalizzazione = tester.getRect(
-      find.byKey(const Key('header-customization')),
+  });
+
+  testWidgets('il foglio delle scuole sta in una pagina, senza sottotitoli', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await _registra(school: 'high-school');
+    await _pumpHome(tester);
+    await _vaiAllezioni(tester);
+
+    await tester.tap(_bottoneScuola());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SchoolLevelTile), findsNWidgets(3));
+    // «Anni 1–3» e simili non ci sono più: restano i soli titoli.
+    expect(find.textContaining('Anni '), findsNothing);
+    expect(find.text('Scuola Media'), findsOneWidget);
+    // E il foglio non esce dallo schermo.
+    expect(
+      tester.getRect(find.byType(SchoolLevelTile).last).bottom,
+      lessThan(640),
     );
-    expect(nome.width, lessThan(personalizzazione.left));
-    expect(nome.height, lessThanOrEqualTo(80));
   });
 
   testWidgets('scegliere un\'altra scuola cambia tab e contenuti', (

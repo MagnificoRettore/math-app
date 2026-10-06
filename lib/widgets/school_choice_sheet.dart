@@ -123,6 +123,7 @@ Future<Level?> showSchoolChoiceSheet(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: SchoolLevelTile(
                     level: level,
+                    showSubtitle: false,
                     selected: signedIn && level.id == currentLevelId,
                     onTap: () => Navigator.of(sheetContext).pop(level),
                   ),

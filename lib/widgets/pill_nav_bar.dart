@@ -1,19 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_motion.dart';
 import '../theme/app_text.dart';
-import '../data/auth_store.dart';
-import '../data/browse_store.dart';
-import '../data/content_repository.dart';
 import '../haptics.dart';
-import '../models/level.dart';
-import '../screens/course_screen.dart';
-import '../screens/lesson_list_screen.dart';
 import '../theme/app_colors.dart';
-import 'school_choice_sheet.dart';
 
 enum PillTab { lessons, home, exercises }
 
@@ -37,239 +28,31 @@ const double _kHomeStep = 5;
 /// Il rientro delle tre colonne dai bordi, che avvicina i lati a Home.
 const double _kSideInset = 28;
 
-/// Quanto la pagina scorre di lato entrando, in frazione della larghezza: poco,
-/// perché la barra sta nella pagina e scorre con lei.
-const double _kSlideShift = 0.2;
-
-/// Il cambio sezione: la pagina nuova sfuma sopra quella attuale e scorre di
-/// lato nel verso del cambio. [direction] è +1 se la sezione è a destra di
-/// quella di partenza (Lezioni · Home · Esercizi), −1 se è a sinistra. Sulla
-/// via del ritorno alla Home la rotta esce dallo stesso lato da cui è entrata,
-/// cioè verso la Home, perché le tre sezioni stanno su una riga.
-///
-/// La rotta è opaca: durante la sfumatura le schermate sotto non vengono
-/// nemmeno costruite, quindi il passaggio non può mostrarne una per sbaglio.
-/// Col movimento ridotto la pagina cambia e basta.
-Route<T> _slideRoute<T>(Widget page, int direction) {
-  return PageRouteBuilder<T>(
-    transitionDuration: AppMotion.slow,
-    reverseTransitionDuration: AppMotion.medium,
-    pageBuilder: (_, _, _) => page,
-    transitionsBuilder: (context, animation, _, child) {
-      if (AppMotion.reduced(context)) return child;
-      final curved = CurvedAnimation(
-        parent: animation,
-        curve: AppMotion.standard,
-      );
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween(
-            begin: Offset(direction.sign * _kSlideShift, 0),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
-  );
-}
-
-/// Velocità minima, in px/s, perché un trascinamento orizzontale valga come
-/// swipe fra le pagine principali.
-const double _kSwipeVelocity = 300;
-
-/// Inquadra il body con la barra di navigazione in basso: il contenuto sta
-/// sopra la barra, che sotto gli angoli smussati lascia vedere la pagina.
-///
-/// Fra le tre pagine principali si passa anche con lo swipe orizzontale, nello
-/// stesso ordine della barra (Lezioni, Home, Esercizi): scorrendo verso
-/// sinistra si va alla successiva, verso destra alla precedente. Lo swipe fa
-/// quello che farebbe il tocco sulla barra. È un `GestureDetector` fuori dal
-/// contenuto: una lista orizzontale dentro (il carosello, gli anni) vince
-/// l'arena con il suo trascinamento e scorre da sé, senza cambiare pagina.
-class PillNavOverlay extends StatefulWidget {
-  final PillTab selected;
-  final Widget child;
-
-  const PillNavOverlay({
-    super.key,
-    required this.selected,
-    required this.child,
-  });
-
-  @override
-  State<PillNavOverlay> createState() => _PillNavOverlayState();
-}
-
-class _PillNavOverlayState extends State<PillNavOverlay> {
-  final _bar = GlobalKey<_PillNavBarState>();
-
-  void _onSwipe(DragEndDetails details) {
-    final velocity = details.primaryVelocity ?? 0;
-    if (velocity.abs() < _kSwipeVelocity) return;
-    final tabs = PillTab.values;
-    // Verso sinistra (velocità negativa) la pagina successiva.
-    final next = tabs.indexOf(widget.selected) + (velocity < 0 ? 1 : -1);
-    if (next < 0 || next >= tabs.length) return;
-    _bar.currentState?._select(tabs[next]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Inset di sistema in basso: la fascia indaco ci scende sotto, i bottoni
-    // e il contenuto restano sopra.
-    final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            key: const Key('pill-swipe'),
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragEnd: _onSwipe,
-            child: Padding(
-              padding: EdgeInsets.only(
-                bottom: kPillBottomReserve + systemBottom,
-              ),
-              child: widget.child,
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: PillNavBar(key: _bar, selected: widget.selected),
-        ),
-      ],
-    );
-  }
-}
-
 /// La barra di navigazione del design: una fascia indaco a tutta larghezza
 /// con gli angoli in alto smussati a 28, Lezioni ed Esercizi ai lati (icona,
 /// nome e un trattino giallo sotto quella scelta) e Home al centro, un cerchio
 /// che sporge sopra la fascia con il bordo crema e il gradino pieno dei
 /// bottoni: giallo quando si è in Home, bianco altrimenti.
-class PillNavBar extends StatefulWidget {
+class PillNavBar extends StatelessWidget {
   final PillTab selected;
 
-  const PillNavBar({super.key, required this.selected});
+  /// Chiamata col tab toccato. La barra non naviga: la `HomeScreen` sposta le
+  /// pagine, header e barra restano fermi.
+  final ValueChanged<PillTab> onSelect;
 
-  @override
-  State<PillNavBar> createState() => _PillNavBarState();
-}
-
-class _PillNavBarState extends State<PillNavBar> {
-  // Sezione richiesta dall'utente, in carico alla barra finché la schermata
-  // da cui si parte non è sparita. [_performNavigation] può lasciare questa
-  // schermata in vista ancora un po' (il ritorno animato alla home, il foglio
-  // della scelta scuola) e in quel tratto la barra deve restare sulla sezione
-  // richiesta, altrimenti torna su quella di partenza e poi scatta avanti.
-  PillTab? _pending;
-
-  @override
-  void didUpdateWidget(covariant PillNavBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selected != widget.selected) _pending = null;
-  }
+  const PillNavBar({super.key, required this.selected, required this.onSelect});
 
   void _select(PillTab tab) {
-    if (_pending != null || tab == widget.selected) return;
+    if (tab == selected) return;
     AppHaptics.selectionClick();
-    setState(() => _pending = tab);
-    _performNavigation(tab);
-  }
-
-  void _clearPending() {
-    if (!mounted || _pending == null) return;
-    setState(() => _pending = null);
-  }
-
-  void _performNavigation(PillTab tab) {
-    final navigator = Navigator.of(context);
-
-    if (tab == PillTab.home) {
-      // Qui il ritorno alla home è voluto e deve restare animato. Il pending
-      // resta: la schermata uscente è ancora in vista per la durata del
-      // ritorno e deve mostrarsi con la barra già su Home. Non serve
-      // azzerarlo, la rotta che esce viene rimossa insieme alla barra.
-      navigator.popUntil((route) => route.isFirst);
-      return;
-    }
-
-    final user = AuthStore.instance.currentUser;
-    // La scuola in visita viene prima di quella del profilo: cambiando sezione
-    // non si deve ripartire da capo su un'altra scuola, altrimenti la visita
-    // finirebbe al primo tocco della barra.
-    final levelId =
-        BrowseStore.instance.levelId ??
-        ((user?.schoolLevelId ?? '').isNotEmpty ? user!.schoolLevelId : null);
-    final level = levelId == null
-        ? null
-        : ContentRepository.instance.levelById(levelId);
-    if (level != null) {
-      _resetTo(navigator, tab, _screenFor(tab, level));
-      return;
-    }
-
-    unawaited(_openSchoolChoice(tab));
-  }
-
-  /// Mette [page] in cima allo stack azzerando tutto quello che c'è sotto,
-  /// tranne la home (che resta la radice, così il back torna a casa).
-  ///
-  /// [`Navigator.pushAndRemoveUntil`] e non `popUntil` + `push`: le due
-  /// chiamate sarebbero due animazioni in sequenza — prima il ritorno
-  /// animato alla home, poi la sfumatura della pagina nuova — e la home
-  /// resterebbe dipinta a pieno per qualche decimo di secondo. Con un'unica
-  /// operazione la rotta nuova entra nello stesso aggiornamento che rimuove
-  /// le precedenti, quindi la home non viene mai riportata in cima.
-  void _resetTo(NavigatorState navigator, PillTab tab, Widget page) {
-    // La schermata che chiama sparisce subito, ma la home resta viva: senza
-    // azzerare qui la barra della root mostrerebbe la sezione appena
-    // richiesta quando il back riporta in vista quella schermata.
-    _clearPending();
-    navigator.pushAndRemoveUntil<void>(
-      _slideRoute<void>(
-        page,
-        PillTab.values.indexOf(tab) - PillTab.values.indexOf(widget.selected),
-      ),
-      (route) => route.isFirst,
-    );
-  }
-
-  Future<void> _openSchoolChoice(PillTab tab) async {
-    final destination = tab == PillTab.lessons
-        ? SchoolChoiceDestination.lessons
-        : SchoolChoiceDestination.exercises;
-
-    final chosen = await showSchoolChoiceSheet(
-      context,
-      destination: destination,
-    );
-    if (!mounted) return;
-    if (chosen == null) {
-      // Scelta annullata: la barra torna sulla sezione della schermata.
-      _clearPending();
-      return;
-    }
-    _resetTo(Navigator.of(context), tab, _screenFor(tab, chosen));
-  }
-
-  Widget _screenFor(PillTab tab, Level level) {
-    if (tab == PillTab.lessons) {
-      return LessonListScreen(levelId: level.id, showPill: true);
-    }
-    return CourseScreen(level: level, showPill: true);
+    onSelect(tab);
   }
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
-    final current = _pending ?? widget.selected;
+    final current = selected;
 
     return SizedBox(
       height: kPillBottomReserve + systemBottom,

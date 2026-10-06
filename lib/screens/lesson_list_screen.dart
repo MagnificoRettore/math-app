@@ -16,17 +16,19 @@ import '../widgets/list_filter_bar.dart';
 import '../widgets/main_header.dart';
 import '../widgets/pill_nav_bar.dart';
 import '../widgets/resume_card.dart';
-import '../widgets/school_choice_sheet.dart';
-import '../widgets/streak_chip.dart';
 import '../widgets/section_header.dart';
 import '../widgets/topic_grid.dart';
 import 'lesson_screen.dart';
 
 class LessonListScreen extends StatefulWidget {
   final String? levelId;
-  final bool showPill;
 
-  const LessonListScreen({super.key, this.levelId, this.showPill = false});
+  /// `true` dentro la `HomeScreen`: solo il contenuto, perché header e barra
+  /// sono suoi e restano fermi mentre le pagine scorrono. `false` è una pagina
+  /// a sé, con il suo header.
+  final bool embedded;
+
+  const LessonListScreen({super.key, this.levelId, this.embedded = false});
 
   @override
   State<LessonListScreen> createState() => _LessonListScreenState();
@@ -118,85 +120,49 @@ class _LessonListScreenState extends State<LessonListScreen> {
   @override
   Widget build(BuildContext context) {
     final levelId = _levelId;
-    if (levelId == null) {
-      return Scaffold(
-        appBar: MainHeaderAppBar(
-          title: MainHeaderTitle(levelId: _levelId),
-          actions: _actions(),
-        ),
-        body: _wrapBody(
-          const EmptyState(
-            title: 'Nessuna lezione disponibile',
-            subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
-          ),
-        ),
-      );
-    }
-    final level = ContentRepository.instance.levelById(levelId);
+    const vuoto = EmptyState(
+      title: 'Nessuna lezione disponibile',
+      subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
+    );
+    final level = levelId == null
+        ? null
+        : ContentRepository.instance.levelById(levelId);
     final courses = level?.courses ?? const <Course>[];
 
-    if (courses.isEmpty) {
-      return Scaffold(
-        appBar: MainHeaderAppBar(
-          title: MainHeaderTitle(levelId: _levelId),
-          actions: _actions(),
-        ),
-        body: _wrapBody(
-          const EmptyState(
-            title: 'Nessuna lezione disponibile',
-            subtitle: 'Le lezioni guidate per questo livello sono in arrivo.',
+    final Widget body;
+    if (levelId == null || courses.isEmpty) {
+      body = vuoto;
+    } else {
+      // L'anno si cambia dal menu in cima: lo swipe orizzontale è della
+      // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
+      body = Column(
+        children: [
+          ListFilterBar(
+            courses: courses,
+            selectedIndex: _selectedIndex,
+            onYear: _selectYear,
+            filter: _filter,
+            onFilter: (filter) => setState(() => _filter = filter),
           ),
-        ),
+          Expanded(
+            child: _YearArgumenti(
+              key: ValueKey(
+                courses[_selectedIndex.clamp(0, courses.length - 1)].id,
+              ),
+              levelId: levelId,
+              course: courses[_selectedIndex.clamp(0, courses.length - 1)],
+              filter: _filter,
+              onTapArgomento: _openArgomento,
+            ),
+          ),
+        ],
       );
     }
-
+    if (widget.embedded) return body;
     return Scaffold(
-      appBar: MainHeaderAppBar(
-        title: MainHeaderTitle(levelId: _levelId),
-        actions: _actions(),
-      ),
-      body: _wrapBody(
-        // L'anno si cambia dal menu in cima: lo swipe orizzontale è della
-        // navigazione fra le pagine principali. La chiave azzera lo scorrimento.
-        Column(
-          children: [
-            ListFilterBar(
-              courses: courses,
-              selectedIndex: _selectedIndex,
-              onYear: _selectYear,
-              filter: _filter,
-              onFilter: (filter) => setState(() => _filter = filter),
-            ),
-            Expanded(
-              child: _YearArgumenti(
-                key: ValueKey(
-                  courses[_selectedIndex.clamp(0, courses.length - 1)].id,
-                ),
-                levelId: levelId,
-                course: courses[_selectedIndex.clamp(0, courses.length - 1)],
-                filter: _filter,
-                onTapArgomento: _openArgomento,
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: mainHeaderFor(PillTab.lessons, levelId: _levelId),
+      body: SafeArea(child: body),
     );
-  }
-
-  /// Le azioni dell'header: le altre scuole per primo, poi la lente e la
-  /// personalizzazione, che è l'ultima a destra come sulla Home. Anche negli
-  /// stati vuoti i bottoni ci sono, perché è proprio da lì che si sceglie
-  /// un'altra scuola quando questa non ha lezioni.
-  List<Widget> _actions() => const [
-    SchoolBrowseButton(destination: SchoolChoiceDestination.lessons),
-    HeaderStreakChip(),
-    HeaderCustomizationButton(),
-  ];
-
-  Widget _wrapBody(Widget body) {
-    if (!widget.showPill) return SafeArea(child: body);
-    return PillNavOverlay(selected: PillTab.lessons, child: body);
   }
 }
 
@@ -308,7 +274,7 @@ class _YearArgumenti extends StatelessWidget {
       caption:
           '${lessonCount == 1 ? '1 lezione' : '$lessonCount lezioni'} · '
           '$percent%',
-      completed: ProgressStore.instance.isArgomentoCompleted(argomento),
+      status: ProgressStore.instance.statusOfArgomento(argomento),
       onTap: () => onTapArgomento(argomento),
     );
   }

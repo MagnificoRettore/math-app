@@ -219,11 +219,11 @@ class _SearchOverlayState extends State<SearchOverlay> {
   }
 }
 
-/// Riga di risultato: sopra il titolo la pillola che dice il tipo, poi il titolo
-/// in grassetto e sotto il contesto — da quale argomento arriva e a che livello.
-/// La pillola serve perché «Moduli» e «Modulo e Equazioni con Modulo» sono due
-/// titoli e senza etichetta non si sa quale dei due si sta aprendo; il contesto
-/// non basta, perché è informazione e non dichiarazione di tipo.
+/// Riga di risultato: a sinistra l'icona che dice il tipo, poi il titolo e
+/// sotto il contesto — da quale argomento arriva e a che livello. L'icona serve
+/// perché «Moduli» e «Modulo e Equazioni con Modulo» sono due titoli e senza
+/// non si sa quale dei due si sta aprendo; il contesto non basta, perché è
+/// informazione e non dichiarazione di tipo.
 class _ResultCard extends StatelessWidget {
   final SearchResult result;
   final VoidCallback onTap;
@@ -248,36 +248,46 @@ class _ResultCard extends StatelessWidget {
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TipoBadge(tipo: result.type),
-          const SizedBox(height: 8),
-          Text(
-            titolo,
-            style: TextStyle(
-              fontSize: AppText.titleSmall,
-              fontWeight: FontWeight.w500,
-              color: c.textPrimary,
+          _TipoIcon(tipo: result.type),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  titolo,
+                  style: TextStyle(
+                    fontSize: AppText.titleSmall,
+                    fontWeight: FontWeight.w500,
+                    color: c.textPrimary,
+                  ),
+                ),
+                if (contesto.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    contesto,
+                    style: TextStyle(
+                      fontSize: AppText.label,
+                      color: c.textSecondary,
+                    ),
+                  ),
+                ],
+                if (dettaglio.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    dettaglio,
+                    style: TextStyle(
+                      fontSize: AppText.caption,
+                      color: c.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          if (contesto.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              contesto,
-              style: TextStyle(fontSize: AppText.label, color: c.textSecondary),
-            ),
-          ],
-          if (dettaglio.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              dettaglio,
-              style: TextStyle(
-                fontSize: AppText.caption,
-                color: c.textSecondary,
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -291,46 +301,42 @@ class _ResultCard extends StatelessWidget {
   String _minuti(int minuti) => minuti > 0 ? '$minuti min' : '';
 }
 
-/// La dichiarazione di tipo del risultato, sopra il titolo.
+/// Il tipo del risultato, a sinistra del titolo, senza scriverlo: icona e forma
+/// cambiano insieme (quadrato arrotondato per l'argomento, cerchio per la
+/// lezione), così si distinguono anche senza il colore. Lo screen reader
+/// legge il tipo da [ResultType.label].
 ///
-/// Sta **sopra** e non accanto al titolo: il titolo va in ellissi e la riga è
-/// già alta, quindi un vicino nella stessa `Row` si mangerebbe la larghezza
-/// proprio dove il testo è più a rischio di troncarsi.
-///
-/// Due colori dalla palette, non uno, perché due tipi che si somigliano vengono
-/// letti come uno: `accent` per l'argomento e `indigo` per la lezione. Il teal
-/// sembrava la scelta giusta ed è la sbagliata: sul `surface` chiaro sta a
-/// 2.33:1 e una scritta a 12px sotto i 4.5:1 non si legge. `indigo` sta a 4.86:1
-/// in chiaro e 6.69:1 in scuro. Entrambi animano da soli con `AppPalette.lerp`,
-/// quindi seguono la transizione fra i temi senza altro codice.
-class _TipoBadge extends StatelessWidget {
+/// Colori: `accent` per l'argomento e `indigo` per la lezione, entrambi sopra
+/// 4.5:1 sul `surface`; il teal sul chiaro non ci arriva.
+class _TipoIcon extends StatelessWidget {
   final ResultType tipo;
 
-  const _TipoBadge({required this.tipo});
+  const _TipoIcon({required this.tipo});
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
-    final color = switch (tipo) {
-      ResultType.argomento => c.accent,
-      ResultType.lesson => c.indigo,
-      ResultType.topic => c.pink,
-      ResultType.exercise => c.medium,
+    final (color, icon) = switch (tipo) {
+      ResultType.argomento => (c.accent, Icons.folder_copy_rounded),
+      ResultType.lesson => (c.indigo, Icons.menu_book_rounded),
+      ResultType.topic => (c.pink, Icons.category_rounded),
+      ResultType.exercise => (c.medium, Icons.edit_note_rounded),
     };
+    final circle = tipo == ResultType.lesson;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        tipo.label,
-        style: TextStyle(
-          color: color,
-          fontSize: AppText.caption,
-          fontWeight: FontWeight.w500,
+    return Semantics(
+      label: tipo.label,
+      excludeSemantics: true,
+      child: Container(
+        key: ValueKey('search-type-${tipo.name}'),
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.12),
+          shape: circle ? BoxShape.circle : BoxShape.rectangle,
+          borderRadius: circle ? null : BorderRadius.circular(12),
         ),
+        child: Icon(icon, color: color, size: 22),
       ),
     );
   }

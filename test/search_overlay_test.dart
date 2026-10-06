@@ -146,10 +146,12 @@ void main() {
     // «Moduli» compare due volte: come titolo dell'argomento e come contesto
     // della lezione che gli appartiene
     expect(_nellOverlay('Moduli'), findsNWidgets(2));
-    // e ogni riga dice che tipo è: senza, «Moduli» e «Modulo e Equazioni con
-    // Modulo» sono due titoli e basta, e non si sa quale si apre
-    expect(find.text('Argomento'), findsOneWidget);
-    expect(find.text('Lezione'), findsOneWidget);
+    // ogni riga dice che tipo è con un'icona, non con una scritta: senza,
+    // «Moduli» e «Modulo e Equazioni con Modulo» sono due titoli e basta
+    expect(find.byKey(const ValueKey('search-type-argomento')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-type-lesson')), findsOneWidget);
+    expect(find.text('Argomento'), findsNothing);
+    expect(find.text('Lezione'), findsNothing);
   });
 
   testWidgets(

@@ -15,8 +15,9 @@ enum ListFilter { all, inProgress }
 
 /// La riga in cima a Lezioni ed Esercizi: il menu dell'anno e i filtri.
 ///
-/// Scorre in orizzontale se lo spazio non basta (schermi stretti, testo
-/// grande), invece di andare a capo.
+/// Filtri e lente stanno sempre insieme: se lo spazio non basta (schermi
+/// stretti, testo grande) le pillole si rimpiccioliscono, invece di scorrere o
+/// andare a capo.
 class ListFilterBar extends StatelessWidget {
   final List<Course> courses;
   final int selectedIndex;
@@ -35,38 +36,41 @@ class ListFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // La ricerca sta fissa a destra; le pillole scorrono nello spazio che resta
-    // se non ci stanno (schermi stretti, testo grande).
+    // La ricerca sta fissa a destra; le pillole si riducono nello spazio che
+    // resta se non ci stanno (schermi stretti, testo grande).
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: Row(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+            child: Padding(
               padding: const EdgeInsets.only(left: 20, right: 8),
-              child: Row(
-                children: [
-                  YearDropdown(
-                    courses: courses,
-                    selectedIndex: selectedIndex,
-                    onSelected: onYear,
-                  ),
-                  const SizedBox(width: 8),
-                  FilterPill(
-                    key: const Key('filter-all'),
-                    label: 'Tutti',
-                    selected: filter == ListFilter.all,
-                    onTap: () => onFilter(ListFilter.all),
-                  ),
-                  const SizedBox(width: 8),
-                  FilterPill(
-                    key: const Key('filter-in-progress'),
-                    label: 'In corso',
-                    selected: filter == ListFilter.inProgress,
-                    onTap: () => onFilter(ListFilter.inProgress),
-                  ),
-                ],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    YearDropdown(
+                      courses: courses,
+                      selectedIndex: selectedIndex,
+                      onSelected: onYear,
+                    ),
+                    const SizedBox(width: 8),
+                    FilterPill(
+                      key: const Key('filter-all'),
+                      label: 'Tutti',
+                      selected: filter == ListFilter.all,
+                      onTap: () => onFilter(ListFilter.all),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterPill(
+                      key: const Key('filter-in-progress'),
+                      label: 'In corso',
+                      selected: filter == ListFilter.inProgress,
+                      onTap: () => onFilter(ListFilter.inProgress),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
